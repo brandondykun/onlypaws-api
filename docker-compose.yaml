@@ -1,0 +1,40 @@
+version: "3.9"
+
+services:
+  only-paws-app:
+    container_name: onlypaws_django
+    build:
+      context: .
+      args:
+        - DEV=true
+    ports:
+      - 8000:8000
+    volumes:
+      - ./api:/api
+      - only-paws-dev-static-data:/vol/web
+      - ./django.log:/var/log/django.log
+    command: >
+      sh -c "python manage.py wait_for_db &&
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    environment:
+      - DB_HOST=db
+      - DB_NAME=onlypaws_devdb
+      - DB_USER=onlypaws_devuser
+      - DB_PASSWORD=changeme
+    depends_on:
+      - db
+
+  db:
+    container_name: onlypaws_db
+    image: postgres:16-alpine
+    volumes:
+      - only-paws-dev-db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=onlypaws_devdb
+      - POSTGRES_USER=onlypaws_devuser
+      - POSTGRES_PASSWORD=changeme
+
+volumes:
+  only-paws-dev-db-data:
+  only-paws-dev-static-data:
