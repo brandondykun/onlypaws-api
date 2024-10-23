@@ -178,7 +178,7 @@ LOGGING = {
         },
     },
     "loggers": {
-        "django": {"handlers": ["file"], "level": "INFO", "propagate": True},
+        "django": {"handlers": ["file"], "level": "INFO", "propagate": False},
     },
     "formatters": {
         "app": {
