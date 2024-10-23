@@ -146,6 +146,7 @@ class ProfileDetailsSerializer(serializers.ModelSerializer):
     following = serializers.SerializerMethodField()
     image = ProfileImageSerializer()
     is_following = serializers.SerializerMethodField()
+    posts_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
@@ -158,6 +159,7 @@ class ProfileDetailsSerializer(serializers.ModelSerializer):
             "posts",
             "image",
             "is_following",
+            "posts_count",
         ]
 
     def get_followers(self, obj):
@@ -179,6 +181,10 @@ class ProfileDetailsSerializer(serializers.ModelSerializer):
     def get_is_following(self, obj):
         requesting_profile = self.context.get("request").user.profile
         return obj.following.filter(followed_by=requesting_profile).exists()
+
+    def get_posts_count(self, obj):
+        posts = obj.posts.all()
+        return posts.count()
 
 
 class SearchProfileSerializer(serializers.ModelSerializer):
