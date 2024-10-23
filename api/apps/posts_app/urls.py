@@ -26,7 +26,11 @@ urlpatterns = [
         name="destroy_follow",
     ),
     # TODO this should be changed to post/ or profile/post??
-    path("profile/", views.ListProfilePostsView.as_view(), name="list_profile_posts"),
+    path(
+        "profile/posts/",
+        views.ListProfilePostsView.as_view(),
+        name="list_profile_posts",
+    ),
     path(
         "profile/<int:pk>",
         views.RetrieveProfileView.as_view(),
