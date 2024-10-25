@@ -36,6 +36,7 @@ class CreateUserView(generics.CreateAPIView):
         if not username or not email or not password:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
+        # TODO: Do this in a transaction
         # create User
         user_serializer = self.get_serializer(
             data={"email": email, "password": password}
