@@ -23,7 +23,11 @@ urlpatterns = [
         views.DestroyLikeView.as_view(),
         name="destroy_like",
     ),
-    path("post/comment/", views.CreateCommentView.as_view(), name="create_comment"),
+    path(
+        "post/<int:id>/comment/",
+        views.CreateCommentView.as_view(),
+        name="create_comment",
+    ),
     path(
         "post/<int:pk>/comments/",
         views.ListPostCommentsView.as_view(),

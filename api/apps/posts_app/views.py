@@ -200,8 +200,8 @@ class CreateCommentView(generics.CreateAPIView):
     queryset = Comment.objects.all()
 
     def create(self, request, *args, **kwargs):
+        post_id = self.kwargs.get("id")
         text = request.data["text"]
-        post = request.data["post"]
         profile_id = request.data["profileId"]
 
         # ensure that the profile sent belongs to the current authenticated user
@@ -211,7 +211,7 @@ class CreateCommentView(generics.CreateAPIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         serializer = self.get_serializer(
-            data={"text": text, "post": post, "profile": user_profile_match.id}
+            data={"text": text, "post": post_id, "profile": user_profile_match.id}
         )
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
