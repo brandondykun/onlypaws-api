@@ -58,7 +58,7 @@ class Profile(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profiles"
     )
-    name = models.CharField(max_length=64, default="")
+    name = models.CharField(max_length=64, default="", blank=True)
 
     def __str__(self):
         return self.username
