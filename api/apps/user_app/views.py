@@ -27,6 +27,7 @@ class CreateUserView(generics.CreateAPIView):
     serializer_class = UserSerializer
     permission_classes = []
     authentication_classes = []
+    allowed_methods = ["POST"]
 
     def create(self, request, *args, **kwargs):
         username = request.data.get("username", None)
@@ -49,6 +50,7 @@ class CreateUserView(generics.CreateAPIView):
                 "username": username,
                 "user": user_serializer.data["id"],
                 "about": None,
+                "name": "",
             }
         )
         profile_serializer.is_valid(raise_exception=True)
@@ -95,6 +97,16 @@ class SearchCreateProfileView(generics.ListCreateAPIView):
         serializer = self.serializer_class(profiles, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    def post(self, request, *args, **kwargs):
+        user = self.request.user
+        request.data["user"] = user.id
+        return self.create(request, *args, **kwargs)
+
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return ProfileCreateSerializer
+        return super().get_serializer_class()
+
 
 class RetrieveUpdateProfileView(generics.RetrieveUpdateAPIView):
     """Retrieve or update a Profile."""
@@ -104,11 +116,22 @@ class RetrieveUpdateProfileView(generics.RetrieveUpdateAPIView):
     queryset = Profile.objects.all()
     serializer_class = ProfileDetailedSerializer
     permission_classes = [permissions.IsAuthenticated]
+    allowed_methods = ["PATCH"]
 
     def get_serializer_class(self):
         if self.request.method == "GET":
             return ProfileDetailedSerializer
         return ProfileSerializer
+
+    def patch(self, request, *args, **kwargs):
+        profile_id = self.kwargs.get("pk")
+        # ensure that the profile sent belongs to the current authenticated user
+        user_profile_match = self.request.user.profiles.filter(id=profile_id).first()
+
+        if not user_profile_match:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        return self.partial_update(request, *args, **kwargs)
 
 
 class RetrieveUserInfoView(generics.RetrieveAPIView):
@@ -134,14 +157,17 @@ class CreateUpdateProfileImageView(generics.CreateAPIView, generics.UpdateAPIVie
     queryset = ProfileImage.objects.all()
 
     def create(self, request, *args, **kwargs):
-        profile = request.user.profile
+        profile_id = request.data.get("profileId", None)
         image = request.FILES.get("image")
 
-        if not image:
+        # ensure that the profile sent belongs to the current authenticated user
+        user_profile_match = self.request.user.profiles.filter(id=profile_id).first()
+
+        if not user_profile_match or not image:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         image_serializer = self.get_serializer(
-            data={"profile": profile.id, "image": image}
+            data={"profile": user_profile_match.id, "image": image}
         )
         image_serializer.is_valid(raise_exception=True)
         self.perform_create(image_serializer)
@@ -150,3 +176,13 @@ class CreateUpdateProfileImageView(generics.CreateAPIView, generics.UpdateAPIVie
         return Response(
             image_serializer.data, status=status.HTTP_201_CREATED, headers=headers
         )
+
+    def patch(self, request, *args, **kwargs):
+        profile_id = request.data.get("profileId", None)
+        # ensure that the profile sent belongs to the current authenticated user
+        user_profile_match = self.request.user.profiles.filter(id=profile_id).first()
+
+        if not user_profile_match:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        return self.partial_update(request, *args, **kwargs)

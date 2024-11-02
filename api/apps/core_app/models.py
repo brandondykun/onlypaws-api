@@ -53,11 +53,12 @@ class User(AbstractBaseUser, PermissionsMixin):
 class Profile(models.Model):
     """Profile for each user."""
 
-    username = models.CharField(max_length=32)
+    username = models.CharField(max_length=32, unique=True)
     about = models.CharField(max_length=1000, blank=True, null=True)
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile"
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profiles"
     )
+    name = models.CharField(max_length=64, default="")
 
     def __str__(self):
         return self.username

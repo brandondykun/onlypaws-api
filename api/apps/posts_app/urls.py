@@ -21,7 +21,7 @@ urlpatterns = [
     ),
     path("follow/", views.CreateDestroyFollowView.as_view(), name="create_follow"),
     path(
-        "follow/<int:pk>",
+        "follow/<int:pk>/<int:auth_profile_id>/",
         views.CreateDestroyFollowView.as_view(),
         name="destroy_follow",
     ),

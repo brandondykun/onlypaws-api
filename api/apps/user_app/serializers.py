@@ -47,8 +47,8 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ["id", "username", "about", "image"]
-        read_only_fields = ["image"]
+        fields = ["id", "username", "name", "about", "image"]
+        read_only_fields = ["id", "image"]
 
 
 class ProfileCreateSerializer(serializers.ModelSerializer):
@@ -56,7 +56,7 @@ class ProfileCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ["id", "username", "about", "user"]
+        fields = ["id", "username", "name", "about", "user"]
 
 
 class ProfileDetailedSerializer(serializers.ModelSerializer):
@@ -67,14 +67,22 @@ class ProfileDetailedSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ["id", "username", "about", "user", "image"]
+        fields = ["id", "username", "name", "about", "user", "image"]
+
+
+class ProfileOptionSerializer(serializers.ModelSerializer):
+    """Serializer for Profile option."""
+
+    class Meta:
+        model = Profile
+        fields = ["id", "username"]
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
     """Serializer for user and profile."""
 
-    profile = ProfileDetailedSerializer()
+    profiles = ProfileOptionSerializer(many=True)
 
     class Meta:
         model = get_user_model()
-        fields = ["id", "email", "profile"]
+        fields = ["id", "email", "profiles"]

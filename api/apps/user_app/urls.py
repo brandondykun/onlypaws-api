@@ -34,11 +34,6 @@ urlpatterns = [
         name="create_update_profile_image",
     ),
     path(
-        "profile-image/",
-        views.CreateUpdateProfileImageView.as_view(),
-        name="create_profile_image",
-    ),
-    path(
         "profile-image/<int:pk>/",
         views.CreateUpdateProfileImageView.as_view(),
         name="update_profile_image",
