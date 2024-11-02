@@ -17,7 +17,7 @@ urlpatterns = [
     ),
     path(
         "profile/",
-        views.SearchCreateProfileView.as_view(),
+        views.CreateProfileView.as_view(),
         name="search_create_profile",
     ),
     path(
@@ -30,12 +30,12 @@ urlpatterns = [
     path("my-info/", views.RetrieveUserInfoView.as_view(), name="my_info"),
     path(
         "profile-image/",
-        views.CreateUpdateProfileImageView.as_view(),
-        name="create_update_profile_image",
+        views.CreateProfileImageView.as_view(),
+        name="create_profile_image",
     ),
     path(
         "profile-image/<int:pk>/",
-        views.CreateUpdateProfileImageView.as_view(),
+        views.UpdateProfileImageView.as_view(),
         name="update_profile_image",
     ),
 ]

@@ -26,6 +26,12 @@ from .pagination import (
     ListProfilePostsPagination,
     ListSimilarPostsPagination,
 )
+from drf_spectacular.utils import (
+    extend_schema_view,
+    extend_schema,
+    OpenApiParameter,
+    OpenApiTypes,
+)
 
 
 class CreatePostView(generics.CreateAPIView):
@@ -78,7 +84,7 @@ class CreatePostView(generics.CreateAPIView):
             )
 
 
-class CreateDestroyLikeView(generics.CreateAPIView, generics.DestroyAPIView):
+class CreateLikeView(generics.CreateAPIView):
     """Create or delete a Like."""
 
     serializer_class = LikeSerializer
@@ -86,6 +92,7 @@ class CreateDestroyLikeView(generics.CreateAPIView, generics.DestroyAPIView):
     queryset = Like.objects.all()
 
     def create(self, request, *args, **kwargs):
+        post_id = self.kwargs.get("post_id", None)
         profile_id = request.data["profileId"]
         # ensure that the profile sent belongs to the current authenticated user
         user_profile_match = self.request.user.profiles.filter(id=profile_id).first()
@@ -94,12 +101,12 @@ class CreateDestroyLikeView(generics.CreateAPIView, generics.DestroyAPIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         # prevent profile from liking own post
-        post = get_object_or_404(Post, pk=request.data["postId"])
+        post = get_object_or_404(Post, pk=post_id)
         if post.profile.id == user_profile_match.id:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
         new_like_data = {
-            "post": request.data["postId"],
+            "post": post_id,
             "profile": user_profile_match.id,
         }
         serializer = self.get_serializer(data=new_like_data)
@@ -110,9 +117,17 @@ class CreateDestroyLikeView(generics.CreateAPIView, generics.DestroyAPIView):
             serializer.data, status=status.HTTP_201_CREATED, headers=headers
         )
 
+
+class DestroyLikeView(generics.DestroyAPIView):
+    """Delete a Like."""
+
+    serializer_class = LikeSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Like.objects.all()
+
     def destroy(self, request, *args, **kwargs):
-        post_id = self.kwargs.get("pk")
-        profile_id = self.request.query_params.get("profileId", None)
+        post_id = self.kwargs.get("pk", None)
+        profile_id = self.kwargs.get("profile_id", None)
 
         user_profile_match = self.request.user.profiles.filter(id=profile_id).first()
 
@@ -133,7 +148,7 @@ class ListProfilePostsView(generics.ListAPIView):
     pagination_class = ListProfilePostsPagination
 
     def get_queryset(self):
-        profile_id = self.request.query_params.get("profileId", None)
+        profile_id = self.kwargs.get("id", None)
         profile_posts = Post.objects.filter(profile__id=profile_id).order_by(
             "-created_at"
         )
@@ -160,8 +175,17 @@ class RetrieveFeedView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     queryset = Post.objects.all()
 
+    def get(self, request, *args, **kwargs):
+        profile_id = self.kwargs.get("id", None)
+        # ensure that the profile sent belongs to the current authenticated user
+        user_profile_match = self.request.user.profiles.filter(id=profile_id).first()
+        if not user_profile_match:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        return self.list(request, *args, **kwargs)
+
     def get_queryset(self):
-        requesting_profile_id = self.request.GET.get("profileId")
+        requesting_profile_id = self.kwargs.get("id", None)
         posts = Post.objects.filter(
             profile__following__followed_by=requesting_profile_id
         ).order_by("-created_at")
@@ -227,6 +251,17 @@ class RetrievePostView(generics.RetrieveAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+@extend_schema_view(
+    get=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "username",
+                OpenApiTypes.STR,
+                description="Username string or substring to search.",
+            ),
+        ]
+    )
+)
 class ListSearchedProfilesView(generics.ListAPIView):
     """List Profiles based on search text."""
 
@@ -238,7 +273,7 @@ class ListSearchedProfilesView(generics.ListAPIView):
     # TODO: This should use get_queryset and
     def get(self, request, *args, **kwargs):
         username = self.request.query_params.get("username", None)
-        profile_id = self.request.query_params.get("profileId", None)
+        profile_id = self.kwargs.get("id", None)
 
         if not username or not profile_id:
             return Response(
@@ -251,29 +286,30 @@ class ListSearchedProfilesView(generics.ListAPIView):
 
     def get_queryset(self):
         username = self.request.query_params.get("username", None)
-        profile_id = self.request.query_params.get("profileId", None)
+        profile_id = self.kwargs.get("id", None)
         profiles = Profile.objects.filter(
             Q(username__icontains=username) & ~Q(id=profile_id)
         ).order_by("username")
         return profiles
 
     def get_serializer_context(self):
+        profile_id = self.kwargs.get("id", None)
+
         return {
-            "profile_id": self.request.GET.get("profileId"),
+            "profile_id": profile_id,
             "request": self.request,
         }
 
 
-class CreateDestroyFollowView(generics.CreateAPIView, generics.DestroyAPIView):
-    """Create or delete a follow."""
+class CreateFollowView(generics.CreateAPIView):
+    """Create a follow."""
 
     serializer_class = FollowSerializer
     permission_classes = [permissions.IsAuthenticated]
     queryset = Follow.objects.all()
 
     def create(self, request, *args, **kwargs):
-        # prevent profile from following itself
-        auth_profile_id = request.data["authProfileId"]
+        auth_profile_id = self.kwargs.get("id")
 
         # ensure that the profile sent belongs to the current authenticated user
         user_profile_match = self.request.user.profiles.filter(
@@ -284,6 +320,7 @@ class CreateDestroyFollowView(generics.CreateAPIView, generics.DestroyAPIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         profile_to_follow = get_object_or_404(Profile, pk=request.data["profileId"])
+        # profile cannon follow itself
         if profile_to_follow.id == user_profile_match.id:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
@@ -298,6 +335,14 @@ class CreateDestroyFollowView(generics.CreateAPIView, generics.DestroyAPIView):
         return Response(
             serializer.data, status=status.HTTP_201_CREATED, headers=headers
         )
+
+
+class DestroyFollowView(generics.DestroyAPIView):
+    """Delete a follow."""
+
+    serializer_class = FollowSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Follow.objects.all()
 
     def destroy(self, request, *args, **kwargs):
         profile_id = self.kwargs.get("pk")  # profile id to unfollow
@@ -331,7 +376,8 @@ class ListExplorePostsView(generics.ListAPIView):
     pagination_class = ListExplorePostsPagination
 
     def get_queryset(self):
-        requesting_profile_id = self.request.GET.get("profileId")
+        requesting_profile_id = self.kwargs.get("id")
+
         posts = Post.objects.filter(
             ~Q(profile__following__followed_by=requesting_profile_id)
             & ~Q(profile__user=self.request.user)
@@ -339,6 +385,17 @@ class ListExplorePostsView(generics.ListAPIView):
         return posts
 
 
+@extend_schema_view(
+    get=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "profileId",
+                OpenApiTypes.STR,
+                description="Requesting profile id.",
+            ),
+        ]
+    )
+)
 class ListSimilarPostsView(generics.ListAPIView):
     """Get explore posts that are similar to the desired post."""
 

@@ -15,19 +15,33 @@ urlpatterns = [
         views.ListSimilarPostsView.as_view(),
         name="lists_similar_posts",
     ),
-    path("post/like/", views.CreateDestroyLikeView.as_view(), name="create_like"),
     path(
-        "post/like/<int:pk>", views.CreateDestroyLikeView.as_view(), name="destroy_like"
+        "post/<int:post_id>/like/", views.CreateLikeView.as_view(), name="create_like"
     ),
-    path("follow/", views.CreateDestroyFollowView.as_view(), name="create_follow"),
     path(
-        "follow/<int:pk>/<int:auth_profile_id>/",
-        views.CreateDestroyFollowView.as_view(),
+        "post/<int:pk>/like/<int:profile_id>",
+        views.DestroyLikeView.as_view(),
+        name="destroy_like",
+    ),
+    path("post/comment/", views.CreateCommentView.as_view(), name="create_comment"),
+    path(
+        "post/<int:pk>/comments/",
+        views.ListPostCommentsView.as_view(),
+        name="list_post_comments",
+    ),
+    path(
+        "profile/<int:id>/follow/",
+        views.CreateFollowView.as_view(),
+        name="create_follow",
+    ),
+    path(
+        "profile/<int:auth_profile_id>/follow/<int:pk>/",
+        views.DestroyFollowView.as_view(),
         name="destroy_follow",
     ),
     # TODO this should be changed to post/ or profile/post??
     path(
-        "profile/posts/",
+        "profile/<int:id>/posts/",
         views.ListProfilePostsView.as_view(),
         name="list_profile_posts",
     ),
@@ -36,20 +50,16 @@ urlpatterns = [
         views.RetrieveProfileView.as_view(),
         name="retrieve_profile",
     ),
-    path("feed/", views.RetrieveFeedView.as_view(), name="retrieve_feed"),
-    path("post/comment/", views.CreateCommentView.as_view(), name="create_comment"),
     path(
-        "post/<int:pk>/comments/",
-        views.ListPostCommentsView.as_view(),
-        name="list_post_comments",
+        "profile/<int:id>/feed/", views.RetrieveFeedView.as_view(), name="retrieve_feed"
     ),
     path(
-        "profile/search",
+        "profile/<int:id>/search",
         views.ListSearchedProfilesView.as_view(),
         name="search_profiles",
     ),
     path(
-        "explore/",
+        "profile/<int:id>/explore/",
         views.ListExplorePostsView.as_view(),
         name="list_explore",
     ),

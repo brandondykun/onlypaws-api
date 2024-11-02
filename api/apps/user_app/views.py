@@ -76,36 +76,17 @@ class RetrieveUpdateUserView(generics.RetrieveUpdateAPIView):
         return self.request.user
 
 
-class SearchCreateProfileView(generics.ListCreateAPIView):
-    """Create a new Profile in the system or search for a profile by username."""
+class CreateProfileView(generics.CreateAPIView):
+    """Create a new Profile in the system."""
 
-    serializer_class = ProfileSerializer
+    serializer_class = ProfileCreateSerializer
     queryset = Profile.objects.all()
     permission_classes = [permissions.IsAuthenticated]
-
-    def get(self, request, *args, **kwargs):
-
-        username = request.query_params.get("username", None)
-
-        if not username:
-            return Response(
-                {"message": "Must provide a username query param."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        profiles = Profile.objects.filter(username__icontains=username)
-        serializer = self.serializer_class(profiles, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
         user = self.request.user
         request.data["user"] = user.id
         return self.create(request, *args, **kwargs)
-
-    def get_serializer_class(self):
-        if self.request.method == "POST":
-            return ProfileCreateSerializer
-        return super().get_serializer_class()
 
 
 class RetrieveUpdateProfileView(generics.RetrieveUpdateAPIView):
@@ -148,12 +129,12 @@ class RetrieveUserInfoView(generics.RetrieveAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class CreateUpdateProfileImageView(generics.CreateAPIView, generics.UpdateAPIView):
+class CreateProfileImageView(generics.CreateAPIView):
     """Create a new profile image for a profile."""
 
     serializer_class = ProfileImageSerializer
     permission_classes = [permissions.IsAuthenticated]
-    allowed_methods = ["POST", "PATCH"]
+    allowed_methods = ["POST"]
     queryset = ProfileImage.objects.all()
 
     def create(self, request, *args, **kwargs):
@@ -176,6 +157,15 @@ class CreateUpdateProfileImageView(generics.CreateAPIView, generics.UpdateAPIVie
         return Response(
             image_serializer.data, status=status.HTTP_201_CREATED, headers=headers
         )
+
+
+class UpdateProfileImageView(generics.UpdateAPIView):
+    """Update profile image for a profile."""
+
+    serializer_class = ProfileImageSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    allowed_methods = ["PATCH"]
+    queryset = ProfileImage.objects.all()
 
     def patch(self, request, *args, **kwargs):
         profile_id = request.data.get("profileId", None)
