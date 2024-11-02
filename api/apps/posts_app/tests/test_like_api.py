@@ -12,7 +12,18 @@ from rest_framework import status
 from apps.core_app.models import Profile, Post, Like
 
 CREATE_POST_URL = reverse("posts_app:create_post")
-CREATE_DESTROY_LIKE_URL = reverse("posts_app:create_destroy_like")
+
+
+# post id to like
+def create_like_url(post_id):
+    """Create and return a create like post url."""
+    return reverse("posts_app:create_like", args=[post_id])
+
+
+# post to like pk and profile_id of profile liking the post
+def destroy_like_url(pk, profile_id):
+    """Create and return a destroy like url."""
+    return reverse("posts_app:destroy_like", args=[pk, profile_id])
 
 
 def create_user(**params):
@@ -77,8 +88,9 @@ class PrivateLikeApiTests(TestCase):
         all_likes = Like.objects.all()
         self.assertEqual(len(all_likes), 0)
 
-        new_like = {"post": self.post_2.id}
-        res = self.client.post(CREATE_DESTROY_LIKE_URL, data=new_like)
+        new_like = {"profileId": self.profile.id}
+        url = create_like_url(self.post_2.id)
+        res = self.client.post(url, data=new_like)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
 
         updated_likes = Like.objects.all()
@@ -88,8 +100,9 @@ class PrivateLikeApiTests(TestCase):
         all_likes = Like.objects.all()
         self.assertEqual(len(all_likes), 0)
 
-        new_like = {"post": self.post_1.id}
-        res = self.client.post(CREATE_DESTROY_LIKE_URL, data=new_like)
+        new_like = {"profileId": self.profile.id}
+        url = create_like_url(self.post_1.id)
+        res = self.client.post(url, data=new_like)
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
 
         updated_likes = Like.objects.all()

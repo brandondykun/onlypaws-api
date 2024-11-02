@@ -42,12 +42,8 @@ class PublicUserApiTests(TestCase):
         }
         res = self.client.post(CREATE_USER_URL, new_user)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        new_user_returned = {
-            "id": 1,
-            "email": "test@example.com",
-            "profile": {"id": 1, "username": "test_username", "about": None, "user": 1},
-        }
-        self.assertEqual(res.data, new_user_returned)
+        self.assertEqual(res.data["email"], new_user["email"])
+        self.assertEqual(res.data["profiles"][0]["username"], new_user["username"])
 
     def test_returns_error_if_no_username(self):
         """Returns error if username is not sent."""
@@ -100,16 +96,14 @@ class PrivateUserApiTests(TestCase):
         res = self.client.get(MY_INFO_URL)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(
-            res.data,
-            {
-                "id": self.user.id,
-                "email": self.user.email,
-                "profile": {
+        expected_info = {
+            "id": self.user.id,
+            "email": self.user.email,
+            "profiles": [
+                {
                     "id": self.profile.id,
                     "username": self.profile.username,
-                    "about": self.profile.about,
-                    "user": self.user.id,
-                },
-            },
-        )
+                }
+            ],
+        }
+        self.assertEqual(res.data, expected_info)

@@ -47,13 +47,20 @@ class PrivatePostsApiTests(TestCase):
 
         new_post = {
             "caption": "Test caption",
-            "profile": self.profile.id,
+            "profileId": self.profile.id,
             "images": [],
         }
 
         res = self.client.post(CREATE_POST_URL, data=new_post)
         self.assertEqual(res.data["caption"], new_post["caption"])
-        self.assertEqual(res.data["profile"], self.profile.id)
+        expected_profile = {
+            "id": self.profile.id,
+            "username": self.profile.username,
+            "about": self.profile.about,
+            "name": self.profile.name,
+            "image": None,
+        }
+        self.assertEqual(res.data["profile"], expected_profile)
 
         all_posts = Post.objects.all()
 
