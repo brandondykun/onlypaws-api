@@ -268,7 +268,6 @@ class ListSearchedProfilesView(generics.ListAPIView):
     queryset = Profile.objects.all()
     pagination_class = SearchedProfilesPagination
 
-    # TODO: This should use get_queryset and
     def get(self, request, *args, **kwargs):
         username = self.request.query_params.get("username", None)
 
