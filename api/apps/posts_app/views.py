@@ -271,12 +271,11 @@ class ListSearchedProfilesView(generics.ListAPIView):
     # TODO: This should use get_queryset and
     def get(self, request, *args, **kwargs):
         username = self.request.query_params.get("username", None)
-        profile_id = self.kwargs.get("id", None)
 
-        if not username or not profile_id:
+        if not username:
             return Response(
                 {
-                    "message": "Must include username (for searched profile) and profileId (for requesting profile) query param."
+                    "message": "Must include username (for searched profile) query param."
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
