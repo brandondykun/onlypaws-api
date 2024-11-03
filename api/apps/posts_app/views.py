@@ -132,11 +132,9 @@ class DestroyLikeView(generics.DestroyAPIView):
         user_profile_match = self.request.user.profiles.filter(id=profile_id).first()
 
         if post_id and user_profile_match:
-            like = Like.objects.get(profile=user_profile_match, post=post_id)
-            if like:
-                self.perform_destroy(like)
-                return Response(status=status.HTTP_204_NO_CONTENT)
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            like = get_object_or_404(Like, profile=user_profile_match, post=post_id)
+            self.perform_destroy(like)
+            return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -357,13 +355,11 @@ class DestroyFollowView(generics.DestroyAPIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         if profile_id and user_profile_match:
-            follow = Follow.objects.get(
-                followed_by=user_profile_match.id, followed=profile_id
+            follow = get_object_or_404(
+                Follow, followed_by=user_profile_match.id, followed=profile_id
             )
-            if follow:
-                self.perform_destroy(follow)
-                return Response(status=status.HTTP_204_NO_CONTENT)
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            self.perform_destroy(follow)
+            return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
