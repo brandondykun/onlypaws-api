@@ -84,15 +84,15 @@ class CreateProfileView(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        user = self.request.user
-        request.data["user"] = user.id
+        # make request data mutable
+        request.data._mutable = True
+        request.data["user"] = self.request.user.id
+        request.data._mutable = False
         return self.create(request, *args, **kwargs)
 
 
 class RetrieveUpdateProfileView(generics.RetrieveUpdateAPIView):
     """Retrieve or update a Profile."""
-
-    ## TODO: update can only be done by own profile
 
     queryset = Profile.objects.all()
     serializer_class = ProfileDetailedSerializer

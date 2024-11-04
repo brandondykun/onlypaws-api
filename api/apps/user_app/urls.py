@@ -18,7 +18,7 @@ urlpatterns = [
     path(
         "profile/",
         views.CreateProfileView.as_view(),
-        name="search_create_profile",
+        name="create_profile",
     ),
     path(
         "profile/<int:pk>/",
