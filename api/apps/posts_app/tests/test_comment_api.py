@@ -120,3 +120,89 @@ class PrivateCommentApiTests(TestCase):
         # The last comment created should be returned first in the list
         self.assertEqual(first_comment["text"], comment_2.text)
         self.assertEqual(second_comment["text"], comment_1.text)
+
+    def test_creating_comment_with_other_users_profile_returns_error(self):
+        """
+        Test creating a comment using a profile id that does not belong to the authenticated
+        user returns error and does not create a comment in the database.
+        """
+        new_comment = {
+            "profileId": self.profile_2.id,
+            "text": "This is a test comment.",
+        }
+
+        url = create_comment_url(self.post.id)
+        res = self.client.post(url, new_comment)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+        db_comments = Comment.objects.all()
+        self.assertEqual(len(db_comments), 0)
+
+
+class PublicCommentApiTests(TestCase):
+    """Test the public features of the Comment API."""
+
+    def setUp(self):
+        # create first user
+        user_details = {
+            "email": "test@example.com",
+            "password": "test-user-password-123",
+        }
+        self.user = create_user(**user_details)
+        profile_details = {
+            "username": "test_username",
+            "about": "Test about text.",
+            "user": self.user,
+        }
+        self.profile = create_profile(**profile_details)
+        # create second user
+        user_details = {
+            "email": "test2@example.com",
+            "password": "test-user-password-123",
+        }
+        self.user_2 = create_user(**user_details)
+        profile_details = {
+            "username": "test_username2",
+            "about": "Test about text 2.",
+            "user": self.user_2,
+        }
+        self.profile_2 = create_profile(**profile_details)
+        # create post for profile 2
+        post_data = {
+            "caption": "Test Caption 1",
+            "profile": self.profile_2,
+        }
+        self.post = create_post(**post_data)
+        self.client = APIClient()
+
+    def test_create_comment_without_authentication_returns_error(self):
+        """
+        Test creating a post comment without authentication returns error
+        and does not create a comment object in the database.
+        """
+        new_comment = {
+            "profileId": self.profile.id,
+            "text": "This is a test comment.",
+        }
+        comments = Comment.objects.all()
+        self.assertEqual(len(comments), 0)
+
+        url = create_comment_url(self.post.id)
+        res = self.client.post(url, new_comment)
+
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+        comments = Comment.objects.all()
+        self.assertEqual(len(comments), 0)
+
+    def test_listing_post_comments_without_authentication_returns_error(self):
+        """
+        Test listing a posts comments without authentication returns an error.
+        """
+        # create 2 comments
+        create_comment(profile=self.profile, text="Test Comment One", post=self.post)
+        create_comment(profile=self.profile, text="Test Comment Two", post=self.post)
+
+        url = list_post_comments_url(self.post.id)
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)

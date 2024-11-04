@@ -42,6 +42,23 @@ class PrivatePostsApiTests(TestCase):
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
 
+    def test_create_post_without_caption_returns_error(self):
+        """
+        Test creating a Post without a caption returns 400 error and
+        does not create a Post object in the database.
+        """
+        new_post = {
+            "caption": "",
+            "profileId": self.profile.id,
+            "images": [],
+        }
+
+        res = self.client.post(CREATE_POST_URL, data=new_post)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+        all_posts = Post.objects.all()
+        self.assertEqual(len(all_posts), 0)
+
     def test_create_post_success(self):
         """Test successfully creating a Post"""
 
