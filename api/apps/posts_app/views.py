@@ -318,7 +318,7 @@ class CreateFollowView(generics.CreateAPIView):
         profile_to_follow = get_object_or_404(Profile, pk=request.data["profileId"])
         # profile cannon follow itself
         if profile_to_follow.id == user_profile_match.id:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
         new_follow_data = {
             "followed": request.data["profileId"],
