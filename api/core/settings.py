@@ -27,7 +27,7 @@ SECRET_KEY = os.environ.get(
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
@@ -149,7 +149,6 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 3,
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
     ),
     "EXCEPTION_HANDLER": "apps.core_app.exceptions.exceptions.custom_exception_handler",
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
@@ -197,3 +196,16 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
     # OTHER SETTINGS
 }
+
+
+# Test Fixtures
+FIXTURE_DIRS = [BASE_DIR / "fixtures"]
+
+
+if os.environ.get("DJANGO_ENV") == "test":
+    from core.settings_test import *
+elif os.environ.get("DJANGO_ENV") == "dev":
+    from core.settings_dev import *
+
+
+print("DJANGO_ENV: ", os.getenv("DJANGO_ENV"))

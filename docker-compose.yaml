@@ -22,6 +22,7 @@ services:
       - DB_NAME=onlypaws_devdb
       - DB_USER=onlypaws_devuser
       - DB_PASSWORD=changeme
+      - DJANGO_ENV
     depends_on:
       - db
 
