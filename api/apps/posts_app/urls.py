@@ -39,6 +39,16 @@ urlpatterns = [
         name="create_follow",
     ),
     path(
+        "profile/<int:id>/followers/",
+        views.ListFollowersView.as_view(),
+        name="list_followers",
+    ),
+    path(
+        "profile/<int:id>/following/",
+        views.ListFollowingView.as_view(),
+        name="list_following",
+    ),
+    path(
         "profile/<int:auth_profile_id>/follow/<int:pk>/",
         views.DestroyFollowView.as_view(),
         name="destroy_follow",

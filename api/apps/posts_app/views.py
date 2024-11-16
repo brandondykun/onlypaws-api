@@ -15,6 +15,7 @@ from .serializers import (
     SearchProfileSerializer,
     FollowSerializer,
 )
+from ..user_app.serializers import ProfileSerializer
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import get_object_or_404
@@ -331,6 +332,36 @@ class CreateFollowView(generics.CreateAPIView):
         return Response(
             serializer.data, status=status.HTTP_201_CREATED, headers=headers
         )
+
+
+class ListFollowersView(generics.ListAPIView):
+    """List Profiles that follow a given Profile."""
+
+    serializer_class = ProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Profile.objects.all()
+
+    def get_queryset(self):
+        profile_id = self.kwargs.get("id", None)
+        profile = Profile.objects.get(id=profile_id)
+        followers_objs = profile.following.all()
+        followers = [obj.followed_by for obj in followers_objs]
+        return followers
+
+
+class ListFollowingView(generics.ListAPIView):
+    """List Profiles that a given Profile follows."""
+
+    serializer_class = ProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Profile.objects.all()
+
+    def get_queryset(self):
+        profile_id = self.kwargs.get("id", None)
+        profile = Profile.objects.get(id=profile_id)
+        following_objs = profile.followers.all()
+        following = [obj.followed for obj in following_objs]
+        return following
 
 
 class DestroyFollowView(generics.DestroyAPIView):
