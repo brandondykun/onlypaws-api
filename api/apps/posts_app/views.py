@@ -26,6 +26,7 @@ from .pagination import (
     ListExplorePostsPagination,
     ListProfilePostsPagination,
     ListSimilarPostsPagination,
+    FollowListPagination,
 )
 from drf_spectacular.utils import (
     extend_schema_view,
@@ -340,12 +341,14 @@ class ListFollowersView(generics.ListAPIView):
     serializer_class = ProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
     queryset = Profile.objects.all()
+    pagination_class = FollowListPagination
 
     def get_queryset(self):
         profile_id = self.kwargs.get("id", None)
         profile = Profile.objects.get(id=profile_id)
         followers_objs = profile.following.all()
-        followers = [obj.followed_by for obj in followers_objs]
+        sorted = followers_objs.order_by("followed_by__username")
+        followers = [obj.followed_by for obj in sorted]
         return followers
 
 
@@ -355,12 +358,14 @@ class ListFollowingView(generics.ListAPIView):
     serializer_class = ProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
     queryset = Profile.objects.all()
+    pagination_class = FollowListPagination
 
     def get_queryset(self):
         profile_id = self.kwargs.get("id", None)
         profile = Profile.objects.get(id=profile_id)
         following_objs = profile.followers.all()
-        following = [obj.followed for obj in following_objs]
+        sorted = following_objs.order_by("followed__username")
+        following = [obj.followed for obj in sorted]
         return following
 
 

@@ -15,3 +15,7 @@ class ListProfilePostsPagination(PageNumberPagination):
 
 class ListSimilarPostsPagination(PageNumberPagination):
     page_size = 5
+
+
+class FollowListPagination(PageNumberPagination):
+    page_size = 15
