@@ -141,9 +141,6 @@ class PostDetailedSerializer(serializers.ModelSerializer):
 class ProfileDetailsSerializer(serializers.ModelSerializer):
     """Detailed serializer for Profile."""
 
-    # posts = PostSerializer(many=True)
-    followers = serializers.SerializerMethodField()
-    following = serializers.SerializerMethodField()
     image = ProfileImageSerializer()
     is_following = serializers.SerializerMethodField()
     posts_count = serializers.SerializerMethodField()
@@ -157,31 +154,12 @@ class ProfileDetailsSerializer(serializers.ModelSerializer):
             "username",
             "name",
             "about",
-            "followers",
-            "following",
-            # "posts",
             "image",
             "is_following",
             "posts_count",
             "followers_count",
             "following_count",
         ]
-
-    def get_followers(self, obj):
-        followers = obj.following.all()
-        serializer = FollowersSerializer(
-            followers, many=True, context={"request": self.context["request"]}
-        )
-        data = [item["followed_by"] for item in serializer.data]
-        return data
-
-    def get_following(self, obj):
-        following = obj.followers.all()
-        serializer = FollowingSerializer(
-            following, many=True, context={"request": self.context["request"]}
-        )
-        data = [item["followed"] for item in serializer.data]
-        return data
 
     def get_is_following(self, obj):
         # boolean - is requesting profile following the profile being fetched
