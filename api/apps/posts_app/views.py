@@ -335,6 +335,17 @@ class CreateFollowView(generics.CreateAPIView):
         )
 
 
+@extend_schema_view(
+    get=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "username",
+                OpenApiTypes.STR,
+                description="Username string or substring to search.",
+            ),
+        ]
+    )
+)
 class ListFollowersView(generics.ListAPIView):
     """List Profiles that follow a given Profile."""
 
@@ -345,13 +356,30 @@ class ListFollowersView(generics.ListAPIView):
 
     def get_queryset(self):
         profile_id = self.kwargs.get("id", None)
+        username = self.request.query_params.get("username", None)
+
         profile = Profile.objects.get(id=profile_id)
         followers_objs = profile.following.all()
+        if username:
+            followers_objs = followers_objs.filter(
+                Q(followed_by__username__icontains=username)
+            )
         sorted = followers_objs.order_by("followed_by__username")
         followers = [obj.followed_by for obj in sorted]
         return followers
 
 
+@extend_schema_view(
+    get=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "username",
+                OpenApiTypes.STR,
+                description="Username string or substring to search.",
+            ),
+        ]
+    )
+)
 class ListFollowingView(generics.ListAPIView):
     """List Profiles that a given Profile follows."""
 
@@ -362,8 +390,14 @@ class ListFollowingView(generics.ListAPIView):
 
     def get_queryset(self):
         profile_id = self.kwargs.get("id", None)
+        username = self.request.query_params.get("username", None)
+
         profile = Profile.objects.get(id=profile_id)
         following_objs = profile.followers.all()
+        if username:
+            following_objs = following_objs.filter(
+                Q(followed__username__icontains=username)
+            )
         sorted = following_objs.order_by("followed__username")
         following = [obj.followed for obj in sorted]
         return following
