@@ -114,10 +114,11 @@ class PostDetailedSerializer(serializers.ModelSerializer):
     """Detailed serializer for Posts."""
 
     images = PostImageSerializer(many=True, read_only=True)
-    likes = LikeSerializer(many=True, read_only=True)
     comments = CommentDetailedSerializer(many=True, read_only=True)
     profile = ProfileSerializer()
     comments_count = serializers.SerializerMethodField()
+    likes_count = serializers.SerializerMethodField()
+    liked = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
@@ -128,14 +129,32 @@ class PostDetailedSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
             "images",
-            "likes",
             "comments",
             "comments_count",
+            "likes_count",
+            "liked",
         ]
-        read_only_fields = ["id", "created_at", "updated_at", "comments_count"]
+        read_only_fields = [
+            "id",
+            "created_at",
+            "updated_at",
+            "comments_count",
+            "likes_count",
+            "liked",
+        ]
 
     def get_comments_count(self, obj):
         return obj.comments.count()
+
+    def get_likes_count(self, obj):
+        return obj.likes.count()
+
+    def get_liked(self, obj):
+        # boolean - is requesting profile liked the post being fetched
+        auth_profile_id = self.context["request"].headers["auth-profile-id"]
+        if auth_profile_id:
+            return obj.likes.filter(profile=auth_profile_id).exists()
+        return False
 
 
 class ProfileDetailsSerializer(serializers.ModelSerializer):
