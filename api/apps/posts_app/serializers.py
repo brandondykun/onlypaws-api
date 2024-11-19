@@ -114,7 +114,6 @@ class PostDetailedSerializer(serializers.ModelSerializer):
     """Detailed serializer for Posts."""
 
     images = PostImageSerializer(many=True, read_only=True)
-    comments = CommentDetailedSerializer(many=True, read_only=True)
     profile = ProfileSerializer()
     comments_count = serializers.SerializerMethodField()
     likes_count = serializers.SerializerMethodField()
