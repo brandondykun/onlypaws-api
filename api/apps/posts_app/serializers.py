@@ -129,7 +129,6 @@ class PostDetailedSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
             "images",
-            "comments",
             "comments_count",
             "likes_count",
             "liked",
