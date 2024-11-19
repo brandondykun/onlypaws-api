@@ -19,3 +19,7 @@ class ListSimilarPostsPagination(PageNumberPagination):
 
 class FollowListPagination(PageNumberPagination):
     page_size = 15
+
+
+class PostCommentsPagination(PageNumberPagination):
+    page_size = 10

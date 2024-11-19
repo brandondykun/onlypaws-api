@@ -27,6 +27,7 @@ from .pagination import (
     ListProfilePostsPagination,
     ListSimilarPostsPagination,
     FollowListPagination,
+    PostCommentsPagination,
 )
 from drf_spectacular.utils import (
     extend_schema_view,
@@ -230,6 +231,7 @@ class ListPostCommentsView(generics.ListAPIView):
     serializer_class = CommentDetailedSerializer
     permission_classes = [permissions.IsAuthenticated]
     queryset = Comment.objects.all()
+    pagination_class = PostCommentsPagination
 
     def get_queryset(self):
         post_id = self.kwargs.get("pk")
