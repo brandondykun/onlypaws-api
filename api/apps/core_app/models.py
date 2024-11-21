@@ -174,3 +174,17 @@ class Follow(models.Model):
 
     class Meta:
         unique_together = (("followed", "followed_by"),)
+
+
+class CommentLike(models.Model):
+    profile = models.ForeignKey(
+        Profile, on_delete=models.CASCADE, related_name="comment_likes"
+    )
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name="likes")
+    liked_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.profile} likes {self.comment}"
+
+    class Meta:
+        unique_together = (("profile", "comment"),)

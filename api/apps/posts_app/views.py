@@ -4,7 +4,15 @@ Views for the posts api.
 
 from rest_framework import generics, permissions
 from rest_framework import status
-from apps.core_app.models import Post, PostImage, Profile, Like, Comment, Follow
+from apps.core_app.models import (
+    Post,
+    PostImage,
+    Profile,
+    Like,
+    Comment,
+    Follow,
+    CommentLike,
+)
 from .serializers import (
     PostSerializer,
     LikeSerializer,
@@ -14,6 +22,7 @@ from .serializers import (
     CommentDetailedSerializer,
     SearchProfileSerializer,
     FollowSerializer,
+    CommentLikeSerializer,
 )
 from ..user_app.serializers import ProfileSerializer
 from rest_framework.response import Response
@@ -212,13 +221,16 @@ class CreateCommentView(generics.CreateAPIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         serializer = self.get_serializer(
-            data={"text": text, "post": post_id, "profile": user_profile_match.id}
+            data={"text": text, "post": post_id, "profile": user_profile_match.id},
+            context={"request": request},
         )
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         comment = Comment.objects.get(id=serializer.data["id"])
 
-        res_serializer = CommentDetailedSerializer(comment)
+        res_serializer = CommentDetailedSerializer(
+            comment, context={"request": request}
+        )
         headers = self.get_success_headers(res_serializer.data)
         return Response(
             res_serializer.data, status=status.HTTP_201_CREATED, headers=headers
@@ -477,3 +489,56 @@ class ListSimilarPostsView(generics.ListAPIView):
             ~Q(profile=profile_id) & Q(id__gt=post_id)
         ).order_by("-created_at")
         return posts
+
+
+class CreateCommentLikeView(generics.CreateAPIView):
+    """Create or delete a Comment Like."""
+
+    serializer_class = CommentLikeSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = CommentLike.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        comment_id = self.kwargs.get("comment_id", None)
+        profile_id = request.data["profileId"]
+        # ensure that the profile sent belongs to the current authenticated user
+        user_profile_match = self.request.user.profiles.filter(id=profile_id).first()
+
+        if not user_profile_match:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        new_like_data = {
+            "comment": comment_id,
+            "profile": user_profile_match.id,
+        }
+        serializer = self.get_serializer(
+            data=new_like_data, context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
+
+
+class DestroyCommentLikeView(generics.DestroyAPIView):
+    """Delete a Comment Like."""
+
+    serializer_class = CommentLikeSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = CommentLike.objects.all()
+
+    def destroy(self, request, *args, **kwargs):
+        comment_id = self.kwargs.get("comment_id", None)
+        profile_id = self.kwargs.get("profile_id", None)
+
+        user_profile_match = self.request.user.profiles.filter(id=profile_id).first()
+
+        if comment_id and user_profile_match:
+            like = get_object_or_404(
+                CommentLike, profile=user_profile_match, comment=comment_id
+            )
+            self.perform_destroy(like)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_400_BAD_REQUEST)

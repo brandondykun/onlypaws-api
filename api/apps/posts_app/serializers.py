@@ -1,5 +1,13 @@
 from rest_framework import serializers
-from apps.core_app.models import Post, PostImage, Like, Comment, Profile, Follow
+from apps.core_app.models import (
+    Post,
+    PostImage,
+    Like,
+    Comment,
+    Profile,
+    Follow,
+    CommentLike,
+)
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import PermissionDenied
 from ..user_app.serializers import ProfileSerializer, ProfileImageSerializer
@@ -27,6 +35,20 @@ class LikeSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "liked_at"]
 
 
+class CommentLikeSerializer(serializers.ModelSerializer):
+    """Serializer for Comment Likes."""
+
+    class Meta:
+        model = CommentLike
+        fields = [
+            "id",
+            "comment",
+            "profile",
+            "liked_at",
+        ]
+        read_only_fields = ["id", "liked_at"]
+
+
 class CommentSerializer(serializers.ModelSerializer):
     """Serializer for Comments."""
 
@@ -39,12 +61,25 @@ class CommentSerializer(serializers.ModelSerializer):
 class CommentDetailedSerializer(serializers.ModelSerializer):
     """Detailed serializer for Comments."""
 
+    likes_count = serializers.SerializerMethodField()
+    liked = serializers.SerializerMethodField()
+
     profile = ProfileSerializer()
 
     class Meta:
         model = Comment
-        fields = "__all__"
-        read_only_fields = ["id", "created_at"]
+        fields = ["id", "text", "profile", "post", "created_at", "likes_count", "liked"]
+        read_only_fields = ["id", "created_at", "likes_count", "liked"]
+
+    def get_likes_count(self, obj):
+        return obj.likes.count()
+
+    def get_liked(self, obj):
+        # boolean - has requesting profile liked the comment being fetched
+        auth_profile_id = self.context["request"].headers["auth-profile-id"]
+        if auth_profile_id:
+            return obj.likes.filter(profile=auth_profile_id).exists()
+        return False
 
 
 class FollowersSerializer(serializers.ModelSerializer):
