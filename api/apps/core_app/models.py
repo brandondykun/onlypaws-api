@@ -77,16 +77,21 @@ class ProfileImage(models.Model):
         super().save(*args, **kwargs)
 
     def _resize_image(self, image):
-        ## TODO: need to rescale to make smaller - doesn't need to be big
         img = Image.open(image)
         img = ImageOps.exif_transpose(img)  # rotate the image
 
         width, height = img.size  # Get dimensions
 
-        left = 0
-        right = width
-        top = (height / 2) - (width / 2)
-        bottom = top + width
+        if height > width:
+            left = 0
+            right = width
+            top = (height / 2) - (width / 2)
+            bottom = top + width
+        else:
+            top = 0
+            bottom = height
+            left = (width / 2) - (height / 2)
+            right = left + height
 
         img = img.crop((left, top, right, bottom))
         output = BytesIO()
@@ -123,10 +128,16 @@ class PostImage(models.Model):
 
         width, height = img.size  # Get dimensions
 
-        left = 0
-        right = width
-        top = (height / 2) - (width / 2)
-        bottom = top + width
+        if height > width:
+            left = 0
+            right = width
+            top = (height / 2) - (width / 2)
+            bottom = top + width
+        else:
+            top = 0
+            bottom = height
+            left = (width / 2) - (height / 2)
+            right = left + height
 
         img = img.crop((left, top, right, bottom))
         output = BytesIO()
