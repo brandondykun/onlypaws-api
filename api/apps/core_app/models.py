@@ -94,8 +94,13 @@ class ProfileImage(models.Model):
             right = left + height
 
         img = img.crop((left, top, right, bottom))
-        output = BytesIO()
 
+        width, height = img.size
+        # resize image to 1080 x 1080 if it is larger than 1080
+        if width > 1080:
+            img = img.resize((1080, 1080))
+
+        output = BytesIO()
         img.save(output, "JPEG")
 
         return File(output, name=image.name)
@@ -140,8 +145,13 @@ class PostImage(models.Model):
             right = left + height
 
         img = img.crop((left, top, right, bottom))
-        output = BytesIO()
 
+        width, height = img.size
+        # resize image to 1080 x 1080 if it is larger than 1080
+        if width > 1080:
+            img = img.resize((1080, 1080))
+
+        output = BytesIO()
         img.save(output, "JPEG")
 
         return File(output, name=image.name)
