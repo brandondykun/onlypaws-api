@@ -5,7 +5,7 @@ Views for the user api.
 from rest_framework import generics, permissions
 from rest_framework.settings import api_settings
 from rest_framework import status
-from apps.core_app.models import Profile, User, ProfileImage
+from apps.core_app.models import Profile, User, ProfileImage, PetType
 from .serializers import (
     UserSerializer,
     ProfileDetailedSerializer,
@@ -13,6 +13,8 @@ from .serializers import (
     UserProfileSerializer,
     ProfileImageSerializer,
     ProfileCreateSerializer,
+    PetTypeSerializer,
+    ProfileUpdateSerializer,
 )
 from rest_framework.response import Response
 import logging
@@ -102,17 +104,29 @@ class RetrieveUpdateProfileView(generics.RetrieveUpdateAPIView):
     def get_serializer_class(self):
         if self.request.method == "GET":
             return ProfileDetailedSerializer
+        elif self.request.method == "PATCH":
+            return ProfileUpdateSerializer
         return ProfileSerializer
 
-    def patch(self, request, *args, **kwargs):
+    def update(self, request, *args, **kwargs):
         profile_id = self.kwargs.get("pk")
         # ensure that the profile sent belongs to the current authenticated user
         user_profile_match = self.request.user.profiles.filter(id=profile_id).first()
-
         if not user_profile_match:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        return self.partial_update(request, *args, **kwargs)
+        partial = kwargs.pop("partial", False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, "_prefetched_objects_cache", None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+        instance_serializer = ProfileSerializer(instance)
+        return Response(instance_serializer.data)
 
 
 class RetrieveUserInfoView(generics.RetrieveAPIView):
@@ -176,3 +190,16 @@ class UpdateProfileImageView(generics.UpdateAPIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         return self.partial_update(request, *args, **kwargs)
+
+
+class ListPetTypesView(generics.ListAPIView):
+    """List Pet Type options."""
+
+    serializer_class = PetTypeSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = PetType.objects.all()
+    pagination_class = None
+
+    def get_queryset(self):
+        options = PetType.objects.all().order_by("name")
+        return options

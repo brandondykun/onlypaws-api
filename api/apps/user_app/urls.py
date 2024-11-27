@@ -38,4 +38,9 @@ urlpatterns = [
         views.UpdateProfileImageView.as_view(),
         name="update_profile_image",
     ),
+    path(
+        "pet-type-options/",
+        views.ListPetTypesView.as_view(),
+        name="list_pet_types",
+    ),
 ]

@@ -4,7 +4,7 @@ Serializers for the User API view.
 
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from apps.core_app.models import Profile, ProfileImage
+from apps.core_app.models import Profile, ProfileImage, PetType
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -40,14 +40,32 @@ class ProfileImageSerializer(serializers.ModelSerializer):
         read_only_fields = ["created_at", "updated_at"]
 
 
+class PetTypeSerializer(serializers.ModelSerializer):
+    """Serializer for pet type."""
+
+    class Meta:
+        model = PetType
+        fields = ["id", "name"]
+
+
 class ProfileSerializer(serializers.ModelSerializer):
     """Serializer for Profiles."""
 
     image = ProfileImageSerializer()
+    pet_type = PetTypeSerializer()
 
     class Meta:
         model = Profile
-        fields = ["id", "username", "name", "about", "image"]
+        fields = ["id", "username", "name", "about", "image", "breed", "pet_type"]
+        read_only_fields = ["id", "image"]
+
+
+class ProfileUpdateSerializer(serializers.ModelSerializer):
+    """Serializer for updating Profiles."""
+
+    class Meta:
+        model = Profile
+        fields = ["id", "username", "name", "about", "image", "breed", "pet_type"]
         read_only_fields = ["id", "image"]
 
 
@@ -64,10 +82,20 @@ class ProfileDetailedSerializer(serializers.ModelSerializer):
 
     user = UserSerializer()
     image = ProfileImageSerializer()
+    pet_type = PetTypeSerializer()
 
     class Meta:
         model = Profile
-        fields = ["id", "username", "name", "about", "user", "image"]
+        fields = [
+            "id",
+            "username",
+            "name",
+            "about",
+            "user",
+            "image",
+            "breed",
+            "pet_type",
+        ]
 
 
 class ProfileOptionSerializer(serializers.ModelSerializer):

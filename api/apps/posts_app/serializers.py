@@ -10,7 +10,11 @@ from apps.core_app.models import (
 )
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import PermissionDenied
-from ..user_app.serializers import ProfileSerializer, ProfileImageSerializer
+from ..user_app.serializers import (
+    ProfileSerializer,
+    ProfileImageSerializer,
+    PetTypeSerializer,
+)
 
 
 class PostImageSerializer(serializers.ModelSerializer):
@@ -198,6 +202,7 @@ class ProfileDetailsSerializer(serializers.ModelSerializer):
     posts_count = serializers.SerializerMethodField()
     followers_count = serializers.SerializerMethodField()
     following_count = serializers.SerializerMethodField()
+    pet_type = PetTypeSerializer()
 
     class Meta:
         model = Profile
@@ -211,6 +216,8 @@ class ProfileDetailsSerializer(serializers.ModelSerializer):
             "posts_count",
             "followers_count",
             "following_count",
+            "breed",
+            "pet_type",
         ]
 
     def get_is_following(self, obj):

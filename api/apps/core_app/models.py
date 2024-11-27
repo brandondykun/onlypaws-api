@@ -50,6 +50,15 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.email
 
 
+class PetType(models.Model):
+    """Types of pet."""
+
+    name = models.CharField(max_length=64, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Profile(models.Model):
     """Profile for each user."""
 
@@ -59,6 +68,10 @@ class Profile(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profiles"
     )
     name = models.CharField(max_length=64, default="", blank=True)
+    pet_type = models.ForeignKey(
+        PetType, on_delete=models.SET_NULL, null=True, related_name="type", blank=True
+    )
+    breed = models.CharField(max_length=64, null=True, default=None, blank=True)
 
     def __str__(self):
         return self.username
