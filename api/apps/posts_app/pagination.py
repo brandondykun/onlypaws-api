@@ -23,3 +23,7 @@ class FollowListPagination(PageNumberPagination):
 
 class PostCommentsPagination(PageNumberPagination):
     page_size = 10
+
+
+class CommentRepliesPagination(PageNumberPagination):
+    page_size = 8

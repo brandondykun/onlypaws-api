@@ -37,6 +37,7 @@ from .pagination import (
     ListSimilarPostsPagination,
     FollowListPagination,
     PostCommentsPagination,
+    CommentRepliesPagination,
 )
 from drf_spectacular.utils import (
     extend_schema_view,
@@ -213,6 +214,10 @@ class CreateCommentView(generics.CreateAPIView):
         post_id = self.kwargs.get("id")
         text = request.data["text"]
         profile_id = request.data["profileId"]
+        parent_comment = request.data["parent_comment"]
+        reply_to_comment = request.data["reply_to_comment"]
+
+        # TODO: make sure reply_to_comment is a child comment at some level of parent_comment
 
         # ensure that the profile sent belongs to the current authenticated user
         user_profile_match = self.request.user.profiles.filter(id=profile_id).first()
@@ -221,7 +226,13 @@ class CreateCommentView(generics.CreateAPIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         serializer = self.get_serializer(
-            data={"text": text, "post": post_id, "profile": user_profile_match.id},
+            data={
+                "text": text,
+                "post": post_id,
+                "profile": user_profile_match.id,
+                "parent_comment": parent_comment,
+                "reply_to_comment": reply_to_comment,
+            },
             context={"request": request},
         )
         serializer.is_valid(raise_exception=True)
@@ -247,7 +258,9 @@ class ListPostCommentsView(generics.ListAPIView):
 
     def get_queryset(self):
         post_id = self.kwargs.get("pk")
-        comments = self.queryset.filter(post=post_id).order_by("-created_at")
+        comments = self.queryset.filter(
+            Q(post=post_id) & Q(parent_comment=None)
+        ).order_by("-created_at")
         return comments
 
 
@@ -542,3 +555,19 @@ class DestroyCommentLikeView(generics.DestroyAPIView):
             self.perform_destroy(like)
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class ListCommentRepliesView(generics.ListAPIView):
+    """Get replies to a comment."""
+
+    serializer_class = CommentDetailedSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Comment.objects.all()
+    pagination_class = CommentRepliesPagination
+
+    def get_queryset(self):
+        comment_id = self.kwargs.get("comment_id")
+        replies = Comment.objects.filter(Q(parent_comment=comment_id)).order_by(
+            "created_at"
+        )
+        return replies

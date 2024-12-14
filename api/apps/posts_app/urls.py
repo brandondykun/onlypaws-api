@@ -44,6 +44,11 @@ urlpatterns = [
         name="list_post_comments",
     ),
     path(
+        "post/<int:pk>/comments/<int:comment_id>/reply/",
+        views.ListCommentRepliesView.as_view(),
+        name="list_comment_replies",
+    ),
+    path(
         "profile/<int:id>/follow/",
         views.CreateFollowView.as_view(),
         name="create_follow",

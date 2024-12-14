@@ -67,13 +67,38 @@ class CommentDetailedSerializer(serializers.ModelSerializer):
 
     likes_count = serializers.SerializerMethodField()
     liked = serializers.SerializerMethodField()
+    replies_count = serializers.SerializerMethodField()
+    replies = serializers.SerializerMethodField()
+    parent_comment_username = serializers.SerializerMethodField()
+    reply_to_comment_username = serializers.SerializerMethodField()
 
     profile = ProfileSerializer()
 
     class Meta:
         model = Comment
-        fields = ["id", "text", "profile", "post", "created_at", "likes_count", "liked"]
-        read_only_fields = ["id", "created_at", "likes_count", "liked"]
+        fields = [
+            "id",
+            "text",
+            "profile",
+            "post",
+            "created_at",
+            "likes_count",
+            "liked",
+            "replies_count",
+            "replies",
+            "parent_comment_username",
+            "reply_to_comment_username",
+        ]
+        read_only_fields = [
+            "id",
+            "created_at",
+            "likes_count",
+            "liked",
+            "replies_count",
+            "replies",
+            "parent_comment_username",
+            "reply_to_comment_username",
+        ]
 
     def get_likes_count(self, obj):
         return obj.likes.count()
@@ -84,6 +109,23 @@ class CommentDetailedSerializer(serializers.ModelSerializer):
         if auth_profile_id:
             return obj.likes.filter(profile=auth_profile_id).exists()
         return False
+
+    def get_replies_count(self, obj):
+        replies_count = obj.all_replies.count()
+        return replies_count
+
+    def get_replies(self, obj):
+        return []
+
+    def get_parent_comment_username(self, obj):
+        if obj.parent_comment:
+            return obj.parent_comment.profile.username
+        return None
+
+    def get_reply_to_comment_username(self, obj):
+        if obj.reply_to_comment:
+            return obj.reply_to_comment.profile.username
+        return None
 
 
 class FollowersSerializer(serializers.ModelSerializer):
