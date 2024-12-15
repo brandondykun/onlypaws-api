@@ -77,11 +77,21 @@ class Profile(models.Model):
         return self.username
 
 
+def profile_image_path(instance, filename):
+    """Generate S3 path (key) for saving profile image.
+    The key is {user_id}/{profile_id}/profile_image.webp
+    On update, the same key is generated which automatically overwrites the image in S3.
+    """
+    user_id = instance.profile.user.id
+    profile_id = instance.profile.id
+    return "images/{0}/{1}/{2}".format(user_id, profile_id, filename)
+
+
 class ProfileImage(models.Model):
     profile = models.OneToOneField(
         Profile, on_delete=models.CASCADE, related_name="image"
     )
-    image = models.ImageField(upload_to="images")
+    image = models.ImageField(upload_to=profile_image_path)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -115,9 +125,12 @@ class ProfileImage(models.Model):
 
         output = BytesIO()
         img.save(output, "webp", optimize=True)
-
         name_of_file = image.name.split(".")[0] + ".webp"
+
         return File(output, name=name_of_file)
+
+    def __str__(self):
+        return self.image.name
 
 
 class Post(models.Model):
@@ -132,9 +145,19 @@ class Post(models.Model):
         return self.caption
 
 
+def post_image_path(instance, filename):
+    """Generate S3 path (key) for saving post image.
+    The key is {user_id}/{profile_id}/{post_id}/{filename}.webp
+    """
+    user_id = instance.post.profile.user.id
+    profile_id = instance.post.profile.id
+    post_id = instance.post.id
+    return "images/{0}/{1}/{2}/{3}".format(user_id, profile_id, post_id, filename)
+
+
 class PostImage(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="images")
-    image = models.ImageField(upload_to="images")
+    image = models.ImageField(upload_to=post_image_path)
     is_main = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
@@ -169,7 +192,11 @@ class PostImage(models.Model):
         img.save(output, "webp", optimize=True)
 
         name_of_file = image.name.split(".")[0] + ".webp"
+
         return File(output, name=name_of_file)
+
+    def __str__(self):
+        return self.image.name
 
 
 class Like(models.Model):
