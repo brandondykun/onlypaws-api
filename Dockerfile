@@ -10,6 +10,7 @@ ENV PYTHONUNBUFFERED 1
 COPY ./api /api
 COPY ./requirements.txt /tmp/requirements.txt
 COPY ./requirements.dev.txt /tmp/requirements.dev.txt
+COPY .env /api/.env
 
 RUN touch /var/log/django.log
 

@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "apps.core_app",
     "apps.user_app",
     "apps.posts_app",
+    "storages",
 ]
 
 MIDDLEWARE = [

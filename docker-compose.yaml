@@ -25,6 +25,8 @@ services:
       - DJANGO_ENV
     depends_on:
       - db
+    env_file:
+      - .env
 
   db:
     container_name: onlypaws_db
