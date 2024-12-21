@@ -124,7 +124,7 @@ class ProfileImage(models.Model):
             img = img.resize((1080, 1080))
 
         output = BytesIO()
-        img.save(output, "webp", optimize=True)
+        img.save(output, "webp", optimize=True, quality=70)
         name_of_file = image.name.split(".")[0] + ".webp"
 
         return File(output, name=name_of_file)
@@ -189,7 +189,7 @@ class PostImage(models.Model):
             img = img.resize((1080, 1080))
 
         output = BytesIO()
-        img.save(output, "webp", optimize=True)
+        img.save(output, "webp", optimize=True, quality=70)
 
         name_of_file = image.name.split(".")[0] + ".webp"
 
