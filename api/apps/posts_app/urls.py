@@ -7,8 +7,8 @@ urlpatterns = [
     path("post/", views.CreatePostView.as_view(), name="create_post"),
     path(
         "post/<int:pk>",
-        views.RetrievePostView.as_view(),
-        name="retrieve_post",
+        views.RetrieveDestroyPostView.as_view(),
+        name="retrieve_destroy_post",
     ),
     path(
         "post/<int:pk>/similar",

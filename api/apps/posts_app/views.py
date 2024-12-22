@@ -264,7 +264,7 @@ class ListPostCommentsView(generics.ListAPIView):
         return comments
 
 
-class RetrievePostView(generics.RetrieveAPIView):
+class RetrieveDestroyPostView(generics.RetrieveDestroyAPIView):
     """Get details of a Post."""
 
     serializer_class = PostDetailedSerializer
@@ -276,6 +276,27 @@ class RetrievePostView(generics.RetrieveAPIView):
         post = self.queryset.get(id=post_id)
         serializer = self.serializer_class(post, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def destroy(self, request, *args, **kwargs):
+        auth_profile_id = request.headers["auth-profile-id"]
+        instance = self.get_object()
+
+        # check that the user requesting the delete owns the post
+        if instance.profile.user != self.request.user:
+            return Response(
+                {"error": "Requesting user does not own this resource."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # check that the profile requesting the delete owns the post
+        if instance.profile.id != int(auth_profile_id):
+            return Response(
+                {"error": "Requesting profile does not own this resource."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 @extend_schema_view(
