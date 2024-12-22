@@ -119,9 +119,9 @@ class ProfileImage(models.Model):
         img = img.crop((left, top, right, bottom))
 
         width, height = img.size
-        # resize image to 1080 x 1080 if it is larger than 1080
-        if width > 1080:
-            img = img.resize((1080, 1080))
+        # resize image to 320 x 320 if it is larger than 320
+        if width > 320:
+            img = img.resize((320, 320))
 
         output = BytesIO()
         img.save(output, "webp", optimize=True, quality=70)
