@@ -261,3 +261,62 @@ class CommentLike(models.Model):
 
     class Meta:
         unique_together = (("profile", "comment"),)
+
+
+def post_image_staging_path(instance, filename):
+    """Generate S3 path (key) for saving staged post image.
+    This is a temporary key, that will be overwritten once the post is created.
+    """
+    user_id = instance.profile.user.id
+    profile_id = instance.profile.id
+    post_uuid = instance.post_uuid
+    return "images/{0}/{1}/staged/{2}/{3}".format(
+        user_id, profile_id, post_uuid, filename
+    )
+
+
+class PostImageStaged(models.Model):
+    profile = models.ForeignKey(
+        Profile, on_delete=models.CASCADE, related_name="staged_images"
+    )
+    post_uuid = models.CharField()
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    image = models.ImageField(upload_to=post_image_staging_path)
+
+    def save(self, *args, **kwargs):
+        self.image = self._resize_image(self.image)
+        super().save(*args, **kwargs)
+
+    def _resize_image(self, image):
+        img = Image.open(image)
+        img = ImageOps.exif_transpose(img)  # rotate the image
+
+        width, height = img.size  # Get dimensions
+
+        if height > width:
+            left = 0
+            right = width
+            top = (height / 2) - (width / 2)
+            bottom = top + width
+        else:
+            top = 0
+            bottom = height
+            left = (width / 2) - (height / 2)
+            right = left + height
+
+        img = img.crop((left, top, right, bottom))
+
+        width, height = img.size
+        # resize image to 1080 x 1080 if it is larger than 1080
+        if width > 1080:
+            img = img.resize((1080, 1080))
+
+        output = BytesIO()
+        img.save(output, "webp", optimize=True, quality=70)
+
+        name_of_file = image.name.split(".")[0] + ".webp"
+
+        return File(output, name=name_of_file)
+
+    def __str__(self):
+        return self.image.name
