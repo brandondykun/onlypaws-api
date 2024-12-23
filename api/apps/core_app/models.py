@@ -7,9 +7,7 @@ from django.contrib.auth.models import (
     BaseUserManager,
     PermissionsMixin,
 )
-from PIL import Image, ImageOps
-from django.core.files import File
-from io import BytesIO
+from .utils import crop_square_and_resize
 
 
 class UserManager(BaseUserManager):
@@ -96,41 +94,8 @@ class ProfileImage(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
-        self.image = self._resize_image(self.image)
+        self.image = crop_square_and_resize(self.image, image_size=320)
         super().save(*args, **kwargs)
-
-    def _resize_image(self, image):
-        img = Image.open(image)
-        img = ImageOps.exif_transpose(img)  # rotate the image
-
-        width, height = img.size  # Get dimensions
-
-        if height > width:
-            left = 0
-            right = width
-            top = (height / 2) - (width / 2)
-            bottom = top + width
-        else:
-            top = 0
-            bottom = height
-            left = (width / 2) - (height / 2)
-            right = left + height
-
-        img = img.crop((left, top, right, bottom))
-
-        width, height = img.size
-        # resize image to 320 x 320 if it is larger than 320
-        if width > 320:
-            img = img.resize((320, 320))
-
-        output = BytesIO()
-        img.save(output, "webp", optimize=True, quality=70)
-        name_of_file = image.name.split(".")[0] + ".webp"
-
-        return File(output, name=name_of_file)
-
-    def __str__(self):
-        return self.image.name
 
 
 class Post(models.Model):
@@ -161,42 +126,8 @@ class PostImage(models.Model):
     is_main = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
-        self.image = self._resize_image(self.image)
+        self.image = crop_square_and_resize(self.image, image_size=1080)
         super().save(*args, **kwargs)
-
-    def _resize_image(self, image):
-        img = Image.open(image)
-        img = ImageOps.exif_transpose(img)  # rotate the image
-
-        width, height = img.size  # Get dimensions
-
-        if height > width:
-            left = 0
-            right = width
-            top = (height / 2) - (width / 2)
-            bottom = top + width
-        else:
-            top = 0
-            bottom = height
-            left = (width / 2) - (height / 2)
-            right = left + height
-
-        img = img.crop((left, top, right, bottom))
-
-        width, height = img.size
-        # resize image to 1080 x 1080 if it is larger than 1080
-        if width > 1080:
-            img = img.resize((1080, 1080))
-
-        output = BytesIO()
-        img.save(output, "webp", optimize=True, quality=70)
-
-        name_of_file = image.name.split(".")[0] + ".webp"
-
-        return File(output, name=name_of_file)
-
-    def __str__(self):
-        return self.image.name
 
 
 class Like(models.Model):
@@ -284,39 +215,5 @@ class PostImageStaged(models.Model):
     image = models.ImageField(upload_to=post_image_staging_path)
 
     def save(self, *args, **kwargs):
-        self.image = self._resize_image(self.image)
+        self.image = crop_square_and_resize(self.image, image_size=1080)
         super().save(*args, **kwargs)
-
-    def _resize_image(self, image):
-        img = Image.open(image)
-        img = ImageOps.exif_transpose(img)  # rotate the image
-
-        width, height = img.size  # Get dimensions
-
-        if height > width:
-            left = 0
-            right = width
-            top = (height / 2) - (width / 2)
-            bottom = top + width
-        else:
-            top = 0
-            bottom = height
-            left = (width / 2) - (height / 2)
-            right = left + height
-
-        img = img.crop((left, top, right, bottom))
-
-        width, height = img.size
-        # resize image to 1080 x 1080 if it is larger than 1080
-        if width > 1080:
-            img = img.resize((1080, 1080))
-
-        output = BytesIO()
-        img.save(output, "webp", optimize=True, quality=70)
-
-        name_of_file = image.name.split(".")[0] + ".webp"
-
-        return File(output, name=name_of_file)
-
-    def __str__(self):
-        return self.image.name
