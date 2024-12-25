@@ -29,6 +29,16 @@ urlpatterns = [
         name="create_comment",
     ),
     path(
+        "post/saved/",
+        views.ListCreateSavedPostView.as_view(),
+        name="list_create_saved_post",
+    ),
+    path(
+        "post/saved/<int:post_id>/",
+        views.DestroySavedPostView.as_view(),
+        name="destroy_saved_post",
+    ),
+    path(
         "comment/<int:comment_id>/like/",
         views.CreateCommentLikeView.as_view(),
         name="create_comment_like",

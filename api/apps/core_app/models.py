@@ -217,3 +217,14 @@ class PostImageStaged(models.Model):
     def save(self, *args, **kwargs):
         self.image = crop_square_and_resize(self.image, image_size=1080)
         super().save(*args, **kwargs)
+
+
+class SavedPost(models.Model):
+    profile = models.ForeignKey(
+        Profile, on_delete=models.CASCADE, related_name="saved_posts"
+    )
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="saved_by")
+    saved_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = (("profile", "post"),)

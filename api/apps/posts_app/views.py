@@ -12,6 +12,7 @@ from apps.core_app.models import (
     Comment,
     Follow,
     CommentLike,
+    SavedPost,
 )
 from .serializers import (
     PostSerializer,
@@ -23,6 +24,7 @@ from .serializers import (
     SearchProfileSerializer,
     FollowSerializer,
     CommentLikeSerializer,
+    CreateSavedPostSerializer,
 )
 from ..user_app.serializers import ProfileSerializer
 from rest_framework.response import Response
@@ -179,6 +181,19 @@ class RetrieveProfileView(generics.RetrieveAPIView):
         return Response(serializer.data)
 
 
+@extend_schema_view(
+    get=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="auth-profile-id",
+                description="Auth profile id",
+                required=True,
+                type=str,
+                location=OpenApiParameter.HEADER,
+            ),
+        ]
+    ),
+)
 class RetrieveFeedView(generics.ListAPIView):
     """List feed posts from profiles that the authenticated profile follows."""
 
@@ -479,6 +494,19 @@ class DestroyFollowView(generics.DestroyAPIView):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
+@extend_schema_view(
+    get=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="auth-profile-id",
+                description="Auth profile id",
+                required=True,
+                type=str,
+                location=OpenApiParameter.HEADER,
+            ),
+        ]
+    ),
+)
 class ListExplorePostsView(generics.ListAPIView):
     """List explore posts from profiles that the authenticated profile does not follow."""
 
@@ -592,3 +620,111 @@ class ListCommentRepliesView(generics.ListAPIView):
             "created_at"
         )
         return replies
+
+
+@extend_schema_view(
+    get=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="auth-profile-id",
+                description="Auth profile id",
+                required=True,
+                type=str,
+                location=OpenApiParameter.HEADER,
+            ),
+        ]
+    ),
+    post=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="auth-profile-id",
+                description="Auth profile id",
+                required=True,
+                type=str,
+                location=OpenApiParameter.HEADER,
+            ),
+        ]
+    ),
+)
+class ListCreateSavedPostView(generics.ListCreateAPIView):
+    serializer_class = CreateSavedPostSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = SavedPost.objects.all()
+    pagination_class = ListProfilePostsPagination
+
+    def get_queryset(self):
+        profile_id = self.request.headers["auth-profile-id"]
+        profile = Profile.objects.get(id=profile_id)
+
+        saved_posts = profile.saved_posts.all()
+        saved_posts_ordered = saved_posts.order_by("-saved_at")
+        posts = [obj.post for obj in saved_posts_ordered]
+        return posts
+
+    def get_serializer_class(self):
+        if self.request.method == "GET":
+            return PostDetailedSerializer
+        return CreateSavedPostSerializer
+
+    def get(self, request, *args, **kwargs):
+        profile_id = self.request.headers["auth-profile-id"]
+        user_profile_match = self.request.user.profiles.filter(id=profile_id).first()
+
+        if not user_profile_match:
+            return Response(
+                {"message": "Profile does not belong to the authenticated user."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        profile_id = request.data["profile"]
+        user_profile_match = self.request.user.profiles.filter(id=profile_id).first()
+        # ensure profile creating saved post belongs to the authenticated user
+        if not user_profile_match:
+            return Response(
+                {"message": "Profile does not belong to the authenticated user."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return super().post(request, *args, **kwargs)
+
+
+@extend_schema_view(
+    delete=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="auth-profile-id",
+                description="Auth profile id",
+                required=True,
+                type=str,
+                location=OpenApiParameter.HEADER,
+            ),
+        ]
+    ),
+)
+class DestroySavedPostView(generics.DestroyAPIView):
+    """Delete a SavedPost."""
+
+    serializer_class = CreateSavedPostSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = SavedPost.objects.all()
+
+    def destroy(self, request, *args, **kwargs):
+        post_id = self.kwargs.get("post_id", None)
+        profile_id = self.request.headers["auth-profile-id"]
+
+        user_profile_match = self.request.user.profiles.filter(id=profile_id).first()
+
+        if not user_profile_match:
+            return Response(
+                {"message": "Profile does not belong to the authenticated user."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if post_id:
+            like = get_object_or_404(
+                SavedPost, profile=user_profile_match, post=post_id
+            )
+            self.perform_destroy(like)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_400_BAD_REQUEST)

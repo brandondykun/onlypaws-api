@@ -7,6 +7,7 @@ from apps.core_app.models import (
     Profile,
     Follow,
     CommentLike,
+    SavedPost,
 )
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import PermissionDenied
@@ -199,6 +200,7 @@ class PostDetailedSerializer(serializers.ModelSerializer):
     comments_count = serializers.SerializerMethodField()
     likes_count = serializers.SerializerMethodField()
     liked = serializers.SerializerMethodField()
+    is_saved = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
@@ -212,6 +214,7 @@ class PostDetailedSerializer(serializers.ModelSerializer):
             "comments_count",
             "likes_count",
             "liked",
+            "is_saved",
         ]
         read_only_fields = [
             "id",
@@ -220,6 +223,7 @@ class PostDetailedSerializer(serializers.ModelSerializer):
             "comments_count",
             "likes_count",
             "liked",
+            "is_saved",
         ]
 
     def get_comments_count(self, obj):
@@ -233,6 +237,13 @@ class PostDetailedSerializer(serializers.ModelSerializer):
         auth_profile_id = self.context["request"].headers["auth-profile-id"]
         if auth_profile_id:
             return obj.likes.filter(profile=auth_profile_id).exists()
+        return False
+
+    def get_is_saved(self, obj):
+        # boolean - did requesting profile save the post being fetched
+        requesting_profile = self.context["request"].headers["auth-profile-id"]
+        if requesting_profile:
+            return obj.saved_by.filter(profile=requesting_profile).exists()
         return False
 
 
@@ -297,3 +308,11 @@ class SearchProfileSerializer(serializers.ModelSerializer):
     def get_is_following(self, obj):
         requesting_profile = self.context.get("profile_id")
         return obj.following.filter(followed_by=requesting_profile).exists()
+
+
+class CreateSavedPostSerializer(serializers.ModelSerializer):
+    """Serializer for creating saved Posts."""
+
+    class Meta:
+        model = SavedPost
+        fields = ["id", "profile", "post"]
