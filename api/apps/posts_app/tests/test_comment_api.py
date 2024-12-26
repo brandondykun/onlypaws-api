@@ -86,10 +86,12 @@ class PrivateCommentApiTests(TestCase):
         new_comment = {
             "profileId": self.profile.id,
             "text": "This is a test comment.",
+            "parent_comment": "",
+            "reply_to_comment": "",
         }
 
         url = create_comment_url(self.post.id)
-        res = self.client.post(url, new_comment)
+        res = self.client.post(url, new_comment, HTTP_AUTH_PROFILE_ID=self.profile.id)
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         self.assertEqual(res.data["profile"]["id"], self.profile.id)
@@ -99,14 +101,22 @@ class PrivateCommentApiTests(TestCase):
         """Test listing a posts comments is successful."""
         # create 2 comments
         comment_1 = create_comment(
-            profile=self.profile, text="Test Comment One", post=self.post
+            profile=self.profile,
+            text="Test Comment One",
+            post=self.post,
+            parent_comment=None,
+            reply_to_comment=None,
         )
         comment_2 = create_comment(
-            profile=self.profile, text="Test Comment Two", post=self.post
+            profile=self.profile,
+            text="Test Comment Two",
+            post=self.post,
+            parent_comment=None,
+            reply_to_comment=None,
         )
 
         url = list_post_comments_url(self.post.id)
-        res = self.client.get(url)
+        res = self.client.get(url, HTTP_AUTH_PROFILE_ID=self.profile.id)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(len(res.data["results"]), 2)
@@ -129,6 +139,8 @@ class PrivateCommentApiTests(TestCase):
         new_comment = {
             "profileId": self.profile_2.id,
             "text": "This is a test comment.",
+            "parent_comment": "",
+            "reply_to_comment": "",
         }
 
         url = create_comment_url(self.post.id)
@@ -183,6 +195,8 @@ class PublicCommentApiTests(TestCase):
         new_comment = {
             "profileId": self.profile.id,
             "text": "This is a test comment.",
+            "parent_comment": "",
+            "reply_to_comment": "",
         }
         comments = Comment.objects.all()
         self.assertEqual(len(comments), 0)
@@ -199,8 +213,20 @@ class PublicCommentApiTests(TestCase):
         Test listing a posts comments without authentication returns an error.
         """
         # create 2 comments
-        create_comment(profile=self.profile, text="Test Comment One", post=self.post)
-        create_comment(profile=self.profile, text="Test Comment Two", post=self.post)
+        create_comment(
+            profile=self.profile,
+            text="Test Comment One",
+            post=self.post,
+            parent_comment=None,
+            reply_to_comment=None,
+        )
+        create_comment(
+            profile=self.profile,
+            text="Test Comment Two",
+            post=self.post,
+            parent_comment=None,
+            reply_to_comment=None,
+        )
 
         url = list_post_comments_url(self.post.id)
         res = self.client.get(url)

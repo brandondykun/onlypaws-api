@@ -118,7 +118,7 @@ class PrivateFeedApiTests(TestCase):
         """
         url = get_feed_url(self.profile.id)
 
-        res = self.client.get(url)
+        res = self.client.get(url, HTTP_AUTH_PROFILE_ID=self.profile.id)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
         self.assertEqual(len(res.data["results"]), 3)
