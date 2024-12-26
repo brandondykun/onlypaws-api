@@ -64,12 +64,28 @@ def create_follow(followed_by: Profile, followed: Profile) -> Follow:
     return Follow.objects.create(followed_by=followed_by, followed=followed)
 
 
+def create_like(profile: Profile, post: Post):
+    """Create and return new post Like.
+
+    Parameters
+    ----------
+    profile : Profile
+        Profile to like Post.
+    post : Post
+        Post being liked.
+    """
+    return Like.objects.create(profile=profile, post=post)
+
+
 #
 # Create url helper functions
 #
 
 
-def get_explore_posts_url(profile_id):
+CREATE_POST_URL = reverse("posts_app:create_post")
+
+
+def get_explore_posts_url(profile_id: int):
     """
     Create and return a get explore posts url.
 
@@ -79,6 +95,41 @@ def get_explore_posts_url(profile_id):
         The id of the profile that is used to fetch explore posts.
     """
     return reverse("posts_app:list_explore", args=[profile_id])
+
+
+def create_like_url(post_id: int):
+    """Create and return a create like post url.
+
+    Parameters
+    ----------
+    post_id : str
+        The post id of the Post to like.
+    """
+    return reverse("posts_app:create_like", args=[post_id])
+
+
+def destroy_like_url(post_id: int, profile_id: int):
+    """Create and return a destroy like url.
+
+    Parameters
+    ----------
+    post_id : str
+        The post id of post that is liked.
+    profile_id : str
+        The profile id requesting the delete.
+    """
+    return reverse("posts_app:destroy_like", args=[post_id, profile_id])
+
+
+def get_feed_url(profile_id: int):
+    """Create and return a get feed url.
+
+    Parameters
+    ----------
+    profile_id : str
+        The id of the profile that is used to fetch feed posts.
+    """
+    return reverse("posts_app:retrieve_feed", args=[profile_id])
 
 
 #
@@ -91,6 +142,12 @@ class PostsAppTestHelper(TestCase):
     Posts App tests setup helper class.
     Creates 4 user/profile combinations with 2 posts each.
     self.profile follows profile_2 leaving profile_3 and profile_4 un-followed.
+
+    setUp() method does not authenticate a user. To authenticate a user add the
+    following in the setUp() method of the child class:
+
+    self.client.force_authenticate(user=self.user)
+    self.client.credentials(HTTP_AUTH_PROFILE_ID=self.profile.id)
     """
 
     def setUp(self):
