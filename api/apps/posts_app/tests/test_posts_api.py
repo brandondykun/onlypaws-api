@@ -6,7 +6,7 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 
-from rest_framework.test import APIClient
+from rest_framework.test import APIClient, APITestCase
 from rest_framework import status
 
 from apps.core_app.models import Profile, Post
@@ -24,7 +24,7 @@ def create_profile(**params):
     return Profile.objects.create(**params)
 
 
-class PrivatePostsApiTests(TestCase):
+class PrivatePostsApiTests(APITestCase):
     """Test the private features of the Posts API."""
 
     def setUp(self):
@@ -41,6 +41,7 @@ class PrivatePostsApiTests(TestCase):
         self.profile = create_profile(**profile_details)
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=self.profile.id)
 
     def test_create_post_without_caption_returns_error(self):
         """
@@ -76,6 +77,8 @@ class PrivatePostsApiTests(TestCase):
             "about": self.profile.about,
             "name": self.profile.name,
             "image": None,
+            "breed": None,
+            "pet_type": None,
         }
         self.assertEqual(res.data["profile"], expected_profile)
 
