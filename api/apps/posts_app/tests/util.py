@@ -269,3 +269,7 @@ class PostsAppTestHelper(TestCase):
     def get_likes_count(self):
         """Get and return the number of Likes in the database."""
         return len(Like.objects.all())
+
+    def get_posts_count(self):
+        """Get and return the number of Posts in the database."""
+        return len(Post.objects.all())

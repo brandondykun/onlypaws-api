@@ -1,5 +1,5 @@
 """
-Tests for the posts api.
+Tests for the Posts api.
 """
 
 from rest_framework import status
@@ -22,7 +22,7 @@ class PrivatePostsApiTests(PostsAppTestHelper):
         Test creating a Post without a caption returns 400 error and
         does not create a Post object in the database.
         """
-        starting_post_count = len(Post.objects.all())
+        starting_post_count = self.get_posts_count()
 
         new_post = {
             "caption": "",
@@ -33,15 +33,15 @@ class PrivatePostsApiTests(PostsAppTestHelper):
         res = self.client.post(CREATE_POST_URL, data=new_post)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
-        all_posts = Post.objects.all()
-        self.assertEqual(len(all_posts), starting_post_count)
+        current_post_count = self.get_posts_count()
+        self.assertEqual(current_post_count, starting_post_count)
 
     def test_create_post_success(self):
         """
         Test successfully creating a Post returns 201 and
         creates Post object in database.
         """
-        starting_post_count = len(Post.objects.all())
+        starting_post_count = self.get_posts_count()
 
         new_post = {
             "caption": "Test caption",
@@ -63,5 +63,5 @@ class PrivatePostsApiTests(PostsAppTestHelper):
         self.assertEqual(res.data["profile"], expected_profile)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
 
-        all_posts = Post.objects.all()
-        self.assertEqual(len(all_posts), starting_post_count + 1)
+        current_post_count = self.get_posts_count()
+        self.assertEqual(current_post_count, starting_post_count + 1)
