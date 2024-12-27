@@ -185,6 +185,33 @@ def list_post_comments_url(post_id: int):
     return reverse("posts_app:list_post_comments", args=[post_id])
 
 
+def create_follow_url(auth_profile_id: int):
+    """Create and return a create follow url.
+
+    Parameters
+    ----------
+    auth_profile_id : int
+        The id of the authenticated user profile.
+    """
+    return reverse("posts_app:create_follow", args=[auth_profile_id])
+
+
+# profile id of authenticated user profile and profile id of profile being followed
+def create_destroy_follow_url(auth_profile_id: int, followed_profile_id: int):
+    """Create and return a destroy follow url.
+
+    Parameters
+    ----------
+    auth_profile_id : int
+        The id of the authenticated user profile.
+    followed_profile_id : int
+        The id of the profile being followed.
+    """
+    return reverse(
+        "posts_app:destroy_follow", args=[auth_profile_id, followed_profile_id]
+    )
+
+
 #
 # Test helper class
 #
@@ -234,3 +261,7 @@ class PostsAppTestHelper(TestCase):
         self.comment_2 = create_comment(self.profile, "Comment Two", self.post_1)
 
         self.client = APIClient()
+
+    def get_follows_count(self):
+        """Get and return the number of Follows in the database."""
+        return len(Follow.objects.all())
