@@ -2,7 +2,7 @@ from rest_framework.test import APIClient
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth import get_user_model
-from apps.core_app.models import Profile, Post, Like, Follow, User
+from apps.core_app.models import Profile, Post, Like, Follow, User, Comment
 
 #
 # Create model objects helper functions
@@ -77,6 +77,37 @@ def create_like(profile: Profile, post: Post):
     return Like.objects.create(profile=profile, post=post)
 
 
+def create_comment(
+    profile: Profile,
+    text: str,
+    post: Post,
+    parent_comment: Comment | None = None,
+    reply_to_comment: Comment | None = None,
+):
+    """Create and return new Comment.
+
+    Parameters
+    ----------
+    profile : Profile
+        Profile creating the Comment.
+    text : str
+        Comment text.
+    post : Post
+        Post that the comment belongs to.
+    parent_comment : Comment | None
+        Highest level comment that the comment belongs to if it is a reply comment.
+    reply_to_comment : Comment | None
+        Comment that this comment is directly replying to.
+    """
+    return Comment.objects.create(
+        profile=profile,
+        text=text,
+        post=post,
+        parent_comment=parent_comment,
+        reply_to_comment=reply_to_comment,
+    )
+
+
 #
 # Create url helper functions
 #
@@ -132,6 +163,28 @@ def get_feed_url(profile_id: int):
     return reverse("posts_app:retrieve_feed", args=[profile_id])
 
 
+def create_comment_url(post_id: int):
+    """Create and return a create comment url.
+
+    Parameters
+    ----------
+    post_id : int
+        The id of the Post that the comment will belong to.
+    """
+    return reverse("posts_app:create_comment", args=[post_id])
+
+
+def list_post_comments_url(post_id: int):
+    """Create and return a list post comments url.
+
+    Parameters
+    ----------
+    post_id : int
+        The id of the Post to fetch comments.
+    """
+    return reverse("posts_app:list_post_comments", args=[post_id])
+
+
 #
 # Test helper class
 #
@@ -142,6 +195,7 @@ class PostsAppTestHelper(TestCase):
     Posts App tests setup helper class.
     Creates 4 user/profile combinations with 2 posts each.
     self.profile follows profile_2 leaving profile_3 and profile_4 un-followed.
+    Create 2 comments for post_1.
 
     setUp() method does not authenticate a user. To authenticate a user add the
     following in the setUp() method of the child class:
@@ -174,5 +228,9 @@ class PostsAppTestHelper(TestCase):
 
         # self.profile follows profile 2
         self.follow = create_follow(self.profile, self.profile_2)
+
+        # create 2 comments for post_1
+        self.comment_1 = create_comment(self.profile, "Comment One", self.post_1)
+        self.comment_2 = create_comment(self.profile, "Comment Two", self.post_1)
 
         self.client = APIClient()
