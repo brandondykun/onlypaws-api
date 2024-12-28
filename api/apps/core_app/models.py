@@ -210,7 +210,7 @@ class PostImageStaged(models.Model):
     profile = models.ForeignKey(
         Profile, on_delete=models.CASCADE, related_name="staged_images"
     )
-    post_uuid = models.CharField()
+    post_uuid = models.CharField(max_length=64)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     image = models.ImageField(upload_to=post_image_staging_path)
 
