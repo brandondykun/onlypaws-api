@@ -225,6 +225,17 @@ def search_profiles_url(profile_id: int, search_text: str):
     return f"{reverse("posts_app:search_profiles", args=[profile_id])}?username={search_text}"
 
 
+def retrieve_destroy_post_url(post_id: int):
+    """Create and return a retrieve/destroy Post url.
+
+    Parameters
+    ----------
+    post_id : int
+        The id of the Post to fetch or destroy.
+    """
+    return reverse("posts_app:retrieve_destroy_post", args=[post_id])
+
+
 #
 # Test helper class
 #
