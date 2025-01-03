@@ -1,0 +1,11 @@
+[
+  {
+    "model": "core_app.commentlike",
+    "pk": 1,
+    "fields": {
+      "profile": 2,
+      "comment": 6,
+      "liked_at": "2025-01-03T04:18:38.410Z"
+    }
+  }
+]

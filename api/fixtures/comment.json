@@ -1,1 +1,134 @@
-[{"model": "core_app.comment", "pk": 1, "fields": {"text": "Always keep one eye open.", "profile": 1, "post": 1, "created_at": "2024-10-13T18:01:23.968Z"}}, {"model": "core_app.comment", "pk": 2, "fields": {"text": "Those ears tho", "profile": 5, "post": 7, "created_at": "2024-10-13T18:02:34.269Z"}}, {"model": "core_app.comment", "pk": 3, "fields": {"text": "Poopsicles", "profile": 5, "post": 3, "created_at": "2024-10-13T18:02:57.816Z"}}, {"model": "core_app.comment", "pk": 4, "fields": {"text": "Always", "profile": 5, "post": 1, "created_at": "2024-10-13T18:03:12.157Z"}}, {"model": "core_app.comment", "pk": 5, "fields": {"text": "Ivy is the best!", "profile": 1, "post": 12, "created_at": "2024-10-20T13:42:48.899Z"}}, {"model": "core_app.comment", "pk": 6, "fields": {"text": "What a good boy!", "profile": 1, "post": 24, "created_at": "2024-10-20T13:43:29.462Z"}}, {"model": "core_app.comment", "pk": 7, "fields": {"text": "What a sleepy guy", "profile": 4, "post": 1, "created_at": "2024-10-21T03:16:03.549Z"}}, {"model": "core_app.comment", "pk": 8, "fields": {"text": "Does he always sleep like that?", "profile": 4, "post": 1, "created_at": "2024-10-21T03:16:50.513Z"}}, {"model": "core_app.comment", "pk": 9, "fields": {"text": "Looks so comfy!", "profile": 4, "post": 1, "created_at": "2024-10-21T03:32:22.921Z"}}, {"model": "core_app.comment", "pk": 10, "fields": {"text": "He loves smelling those bushes!", "profile": 1, "post": 35, "created_at": "2024-10-26T16:45:20.541Z"}}]
+[
+  {
+    "model": "core_app.comment",
+    "pk": 1,
+    "fields": {
+      "text": "Always keep one eye open.",
+      "profile": 1,
+      "post": 1,
+      "created_at": "2024-10-13T18:01:23.968Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "core_app.comment",
+    "pk": 2,
+    "fields": {
+      "text": "Those ears tho",
+      "profile": 5,
+      "post": 7,
+      "created_at": "2024-10-13T18:02:34.269Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "core_app.comment",
+    "pk": 3,
+    "fields": {
+      "text": "Poopsicles",
+      "profile": 5,
+      "post": 3,
+      "created_at": "2024-10-13T18:02:57.816Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "core_app.comment",
+    "pk": 4,
+    "fields": {
+      "text": "Always",
+      "profile": 5,
+      "post": 1,
+      "created_at": "2024-10-13T18:03:12.157Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "core_app.comment",
+    "pk": 5,
+    "fields": {
+      "text": "Ivy is the best!",
+      "profile": 1,
+      "post": 12,
+      "created_at": "2024-10-20T13:42:48.899Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "core_app.comment",
+    "pk": 6,
+    "fields": {
+      "text": "What a good boy!",
+      "profile": 1,
+      "post": 24,
+      "created_at": "2024-10-20T13:43:29.462Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "core_app.comment",
+    "pk": 7,
+    "fields": {
+      "text": "What a sleepy guy",
+      "profile": 4,
+      "post": 1,
+      "created_at": "2024-10-21T03:16:03.549Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "core_app.comment",
+    "pk": 8,
+    "fields": {
+      "text": "Does he always sleep like that?",
+      "profile": 4,
+      "post": 1,
+      "created_at": "2024-10-21T03:16:50.513Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "core_app.comment",
+    "pk": 9,
+    "fields": {
+      "text": "Looks so comfy!",
+      "profile": 4,
+      "post": 1,
+      "created_at": "2024-10-21T03:32:22.921Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "core_app.comment",
+    "pk": 10,
+    "fields": {
+      "text": "He loves smelling those bushes!",
+      "profile": 1,
+      "post": 35,
+      "created_at": "2024-10-26T16:45:20.541Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "core_app.comment",
+    "pk": 11,
+    "fields": {
+      "text": "Love the bandana! Where did you get it?",
+      "profile": 2,
+      "post": 28,
+      "created_at": "2025-01-02T00:45:27.969Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  }
+]

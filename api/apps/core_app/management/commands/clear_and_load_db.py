@@ -27,6 +27,9 @@ class Command(BaseCommand):
             "fixtures/like.json",
             "fixtures/comment.json",
             "fixtures/follow.json",
+            "fixtures/commentlike.json",
+            "fixtures/pettype.json",
+            "fixtures/savedpost.json",
         ]
         for fixture_path in fixture_paths:
             call_command("loaddata", fixture_path)

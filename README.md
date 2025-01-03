@@ -44,7 +44,16 @@ revert:     reverts a previous commit
 
 ### Creating Fixture for Individual Model
 
+Create fixture for individual model from command line.
+```bash
 docker-compose run --rm only-paws-app sh -c "python manage.py dumpdata --format json --indent 4 --output fixtures/<MODEL_NAME>.json core_app.<MODEL_NAME>"
+```
+
+Create fixture for individual model from docker desktop terminal.
+```bash
+python manage.py dumpdata core_app.SavedPost --indent 4 > fixtures/savedpost.json
+```
+
 
 ### Creating Fixtures
 
