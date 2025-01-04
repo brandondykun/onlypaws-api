@@ -61,7 +61,7 @@ class Profile(models.Model):
     """Profile for each user."""
 
     username = models.CharField(max_length=32, unique=True)
-    about = models.CharField(max_length=1000, blank=True, null=True)
+    about = models.CharField(max_length=1000, blank=True, default="")
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profiles"
     )
@@ -69,7 +69,7 @@ class Profile(models.Model):
     pet_type = models.ForeignKey(
         PetType, on_delete=models.SET_NULL, null=True, related_name="type", blank=True
     )
-    breed = models.CharField(max_length=64, null=True, default=None, blank=True)
+    breed = models.CharField(max_length=64, default="", blank=True)
 
     def __str__(self):
         return self.username

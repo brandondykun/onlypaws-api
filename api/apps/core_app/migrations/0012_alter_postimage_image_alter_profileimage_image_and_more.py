@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
             name='PostImageStaged',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('post_uuid', models.CharField()),
+                ('post_uuid', models.CharField(max_length=64)),
                 ('uploaded_at', models.DateTimeField(auto_now_add=True)),
                 ('image', models.ImageField(upload_to=apps.core_app.models.post_image_staging_path)),
                 ('profile', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='staged_images', to='core_app.profile')),
