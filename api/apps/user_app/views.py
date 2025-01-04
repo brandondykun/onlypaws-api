@@ -51,8 +51,9 @@ class CreateUserView(generics.CreateAPIView):
             data={
                 "username": username,
                 "user": user_serializer.data["id"],
-                "about": None,
+                "about": "",
                 "name": "",
+                "breed": "",
             }
         )
         profile_serializer.is_valid(raise_exception=True)

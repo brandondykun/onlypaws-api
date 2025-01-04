@@ -62,7 +62,7 @@ class PrivatePostsApiTests(PostsAppTestHelper):
             "about": self.profile.about,
             "name": self.profile.name,
             "image": None,
-            "breed": None,
+            "breed": "",
             "pet_type": None,
         }
         self.assertEqual(res.data["profile"], expected_profile)
