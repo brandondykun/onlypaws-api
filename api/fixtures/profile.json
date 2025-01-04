@@ -160,7 +160,7 @@
     "pk": 14,
     "fields": {
       "username": "userthirteen",
-      "about": null,
+      "about": "",
       "user": 14,
       "name": "",
       "pet_type": null,
@@ -172,7 +172,7 @@
     "pk": 15,
     "fields": {
       "username": "userfourteen",
-      "about": null,
+      "about": "",
       "user": 15,
       "name": "",
       "pet_type": null,
@@ -184,7 +184,7 @@
     "pk": 16,
     "fields": {
       "username": "userfifteen",
-      "about": null,
+      "about": "",
       "user": 16,
       "name": "",
       "pet_type": null,
@@ -196,7 +196,7 @@
     "pk": 17,
     "fields": {
       "username": "usersixteen",
-      "about": null,
+      "about": "",
       "user": 17,
       "name": "",
       "pet_type": null,
@@ -208,7 +208,7 @@
     "pk": 18,
     "fields": {
       "username": "userseventeen",
-      "about": null,
+      "about": "",
       "user": 18,
       "name": "",
       "pet_type": null,
@@ -220,7 +220,7 @@
     "pk": 19,
     "fields": {
       "username": "usereighteen",
-      "about": null,
+      "about": "",
       "user": 19,
       "name": "",
       "pet_type": null,
@@ -232,7 +232,7 @@
     "pk": 20,
     "fields": {
       "username": "usernineteen",
-      "about": null,
+      "about": "",
       "user": 20,
       "name": "",
       "pet_type": null,
@@ -244,7 +244,7 @@
     "pk": 21,
     "fields": {
       "username": "usertwenty",
-      "about": null,
+      "about": "",
       "user": 21,
       "name": "",
       "pet_type": null,
@@ -256,7 +256,7 @@
     "pk": 22,
     "fields": {
       "username": "usertwentyone",
-      "about": null,
+      "about": "",
       "user": 22,
       "name": "",
       "pet_type": null,
@@ -268,7 +268,7 @@
     "pk": 23,
     "fields": {
       "username": "usertwentytwo",
-      "about": null,
+      "about": "",
       "user": 23,
       "name": "",
       "pet_type": null,
@@ -280,7 +280,7 @@
     "pk": 24,
     "fields": {
       "username": "usertwentythree",
-      "about": null,
+      "about": "",
       "user": 24,
       "name": "",
       "pet_type": null,
