@@ -82,7 +82,11 @@ def profile_image_path(instance, filename):
     """
     user_id = instance.profile.user.id
     profile_id = instance.profile.id
-    return "images/{0}/{1}/{2}".format(user_id, profile_id, filename)
+    path = "images/{0}/{1}/{2}".format(user_id, profile_id, filename)
+    # if in test env, use test image path
+    if os.environ.get("DJANGO_ENV") == "test":
+        path = "images/test/{0}/{1}/{2}".format(user_id, profile_id, filename)
+    return path
 
 
 class ProfileImage(models.Model):
@@ -117,7 +121,14 @@ def post_image_path(instance, filename):
     user_id = instance.post.profile.user.id
     profile_id = instance.post.profile.id
     post_id = instance.post.id
-    return "images/{0}/{1}/{2}/{3}".format(user_id, profile_id, post_id, filename)
+    path = "images/{0}/{1}/{2}/{3}".format(user_id, profile_id, post_id, filename)
+    # if in test env, use test image path
+    if os.environ.get("DJANGO_ENV") == "test":
+        path = "images/test/{0}/{1}/{2}/{3}".format(
+            user_id, profile_id, post_id, filename
+        )
+
+    return path
 
 
 class PostImage(models.Model):
