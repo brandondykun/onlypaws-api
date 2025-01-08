@@ -1,0 +1,42 @@
+[
+  {
+    "model": "core_app.reportreason",
+    "pk": 1,
+    "fields": {
+      "name": "Inappropriate Content",
+      "description": "Content contains inappropriate, offensive, or explicit material",
+      "is_active": true,
+      "created_at": "2025-01-06T04:50:58.965Z"
+    }
+  },
+  {
+    "model": "core_app.reportreason",
+    "pk": 2,
+    "fields": {
+      "name": "Not Pet Related",
+      "description": "Content is not pet related",
+      "is_active": true,
+      "created_at": "2025-01-06T04:50:58.967Z"
+    }
+  },
+  {
+    "model": "core_app.reportreason",
+    "pk": 3,
+    "fields": {
+      "name": "Too Much Human",
+      "description": "Content contains too much human presence and I'm not here for that",
+      "is_active": true,
+      "created_at": "2025-01-06T04:50:58.967Z"
+    }
+  },
+  {
+    "model": "core_app.reportreason",
+    "pk": 4,
+    "fields": {
+      "name": "Other",
+      "description": "A reason other than the ones listed",
+      "is_active": true,
+      "created_at": "2025-01-06T04:50:58.968Z"
+    }
+  }
+]
