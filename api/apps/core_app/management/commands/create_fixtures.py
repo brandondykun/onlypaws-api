@@ -20,6 +20,8 @@ class Command(BaseCommand):
             "commentlike",
             "savedpost",
             "pettype",
+            "reportreason",
+            "postreport",
         ]
         for model in apps.get_models():
             model_name = model.__name__.lower()

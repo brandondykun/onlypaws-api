@@ -30,6 +30,8 @@ class Command(BaseCommand):
             "fixtures/commentlike.json",
             "fixtures/pettype.json",
             "fixtures/savedpost.json",
+            "fixtures/reportreason.json",
+            "fixtures/postreport.json",
         ]
         for fixture_path in fixture_paths:
             call_command("loaddata", fixture_path)
