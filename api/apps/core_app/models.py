@@ -283,7 +283,11 @@ class PostReport(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     resolved_by = models.ForeignKey(
-        Profile, on_delete=models.SET_NULL, null=True, related_name="resolved_reports"
+        Profile,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="resolved_reports",
+        blank=True,
     )
     resolution_note = models.TextField(blank=True, default="")
 
