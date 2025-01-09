@@ -8,9 +8,10 @@ from apps.core_app.models import (
     Follow,
     CommentLike,
     SavedPost,
+    ReportReason,
+    PostReport,
 )
-from django.shortcuts import get_object_or_404
-from rest_framework.exceptions import PermissionDenied
+from django.db.models import Q
 from ..user_app.serializers import (
     ProfileSerializer,
     ProfileImageSerializer,
@@ -192,6 +193,21 @@ class PostSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "created_at", "updated_at", "likes", "comments"]
 
 
+class ReportReasonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReportReason
+        fields = ["id", "name", "description"]
+
+
+class PostReportPreviewSerializer(serializers.ModelSerializer):
+
+    reason = ReportReasonSerializer()
+
+    class Meta:
+        model = PostReport
+        fields = ["id", "reason", "status"]
+
+
 class PostDetailedSerializer(serializers.ModelSerializer):
     """Detailed serializer for Posts."""
 
@@ -201,6 +217,8 @@ class PostDetailedSerializer(serializers.ModelSerializer):
     likes_count = serializers.SerializerMethodField()
     liked = serializers.SerializerMethodField()
     is_saved = serializers.SerializerMethodField()
+    reports = serializers.SerializerMethodField()
+    is_hidden = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
@@ -215,6 +233,8 @@ class PostDetailedSerializer(serializers.ModelSerializer):
             "likes_count",
             "liked",
             "is_saved",
+            "reports",
+            "is_hidden",
         ]
         read_only_fields = [
             "id",
@@ -224,6 +244,8 @@ class PostDetailedSerializer(serializers.ModelSerializer):
             "likes_count",
             "liked",
             "is_saved",
+            "reports",
+            "is_hidden",
         ]
 
     def get_comments_count(self, obj):
@@ -245,6 +267,14 @@ class PostDetailedSerializer(serializers.ModelSerializer):
         if requesting_profile:
             return obj.saved_by.filter(profile=requesting_profile).exists()
         return False
+
+    def get_reports(self, obj):
+        reports = obj.reports.filter(~Q(status="DISMISSED"))
+        serializer = PostReportPreviewSerializer(reports, many=True)
+        return serializer.data
+
+    def get_is_hidden(self, obj):
+        return obj.reports.filter(~Q(status="DISMISSED")).count() > 0
 
 
 class ProfileDetailsSerializer(serializers.ModelSerializer):
@@ -316,3 +346,43 @@ class CreateSavedPostSerializer(serializers.ModelSerializer):
     class Meta:
         model = SavedPost
         fields = ["id", "profile", "post"]
+
+
+class CreatePostReportSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PostReport
+        fields = ["post", "reason", "details"]
+
+    def validate(self, data):
+        # Check if user has already reported this post
+        request = self.context.get("request")
+        auth_profile_id = request.headers["auth-profile-id"]
+        if PostReport.objects.filter(
+            post=data["post"], reporter=auth_profile_id
+        ).exists():
+            raise serializers.ValidationError("You have already reported this post.")
+        return data
+
+    def create(self, validated_data):
+        request = self.context.get("request")
+        # auth_profile_id = request.headers["auth-profile-id"]
+        validated_data["reporter"] = request.current_profile
+        return super().create(validated_data)
+
+
+class PostReportDetailSerializer(serializers.ModelSerializer):
+    reason = ReportReasonSerializer()
+    reporter = serializers.StringRelatedField()
+
+    class Meta:
+        model = PostReport
+        fields = [
+            "id",
+            "post",
+            "reporter",
+            "reason",
+            "details",
+            "status",
+            "created_at",
+            "resolution_note",
+        ]

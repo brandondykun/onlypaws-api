@@ -2,8 +2,8 @@
 Views for the posts api.
 """
 
-from rest_framework import generics, permissions
-from rest_framework import status
+from rest_framework import generics, permissions, mixins, status, viewsets
+from rest_framework.decorators import action
 from apps.core_app.models import (
     Post,
     PostImage,
@@ -13,6 +13,8 @@ from apps.core_app.models import (
     Follow,
     CommentLike,
     SavedPost,
+    ReportReason,
+    PostReport,
 )
 from .serializers import (
     PostSerializer,
@@ -25,6 +27,9 @@ from .serializers import (
     FollowSerializer,
     CommentLikeSerializer,
     CreateSavedPostSerializer,
+    PostReportDetailSerializer,
+    CreatePostReportSerializer,
+    ReportReasonSerializer,
 )
 from ..user_app.serializers import ProfileSerializer
 from rest_framework.response import Response
@@ -40,12 +45,22 @@ from .pagination import (
     FollowListPagination,
     PostCommentsPagination,
     CommentRepliesPagination,
+    ReportReasonPagination,
 )
 from drf_spectacular.utils import (
     extend_schema_view,
     extend_schema,
     OpenApiParameter,
     OpenApiTypes,
+)
+
+# schema parameter for auth profile id header
+auth_profile_param = OpenApiParameter(
+    name="auth-profile-id",
+    description="Auth profile id",
+    required=True,
+    type=str,
+    location=OpenApiParameter.HEADER,
 )
 
 
@@ -182,17 +197,7 @@ class RetrieveProfileView(generics.RetrieveAPIView):
 
 
 @extend_schema_view(
-    get=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                name="auth-profile-id",
-                description="Auth profile id",
-                required=True,
-                type=str,
-                location=OpenApiParameter.HEADER,
-            ),
-        ]
-    ),
+    get=extend_schema(parameters=[auth_profile_param]),
 )
 class RetrieveFeedView(generics.ListAPIView):
     """List feed posts from profiles that the authenticated profile follows."""
@@ -495,17 +500,7 @@ class DestroyFollowView(generics.DestroyAPIView):
 
 
 @extend_schema_view(
-    get=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                name="auth-profile-id",
-                description="Auth profile id",
-                required=True,
-                type=str,
-                location=OpenApiParameter.HEADER,
-            ),
-        ]
-    ),
+    get=extend_schema(parameters=[auth_profile_param]),
 )
 class ListExplorePostsView(generics.ListAPIView):
     """List explore posts from profiles that the authenticated profile does not follow."""
@@ -623,28 +618,8 @@ class ListCommentRepliesView(generics.ListAPIView):
 
 
 @extend_schema_view(
-    get=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                name="auth-profile-id",
-                description="Auth profile id",
-                required=True,
-                type=str,
-                location=OpenApiParameter.HEADER,
-            ),
-        ]
-    ),
-    post=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                name="auth-profile-id",
-                description="Auth profile id",
-                required=True,
-                type=str,
-                location=OpenApiParameter.HEADER,
-            ),
-        ]
-    ),
+    get=extend_schema(parameters=[auth_profile_param]),
+    post=extend_schema(parameters=[auth_profile_param]),
 )
 class ListCreateSavedPostView(generics.ListCreateAPIView):
     serializer_class = CreateSavedPostSerializer
@@ -690,17 +665,7 @@ class ListCreateSavedPostView(generics.ListCreateAPIView):
 
 
 @extend_schema_view(
-    delete=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                name="auth-profile-id",
-                description="Auth profile id",
-                required=True,
-                type=str,
-                location=OpenApiParameter.HEADER,
-            ),
-        ]
-    ),
+    delete=extend_schema(parameters=[auth_profile_param]),
 )
 class DestroySavedPostView(generics.DestroyAPIView):
     """Delete a SavedPost."""
@@ -728,3 +693,130 @@ class DestroySavedPostView(generics.DestroyAPIView):
             self.perform_destroy(like)
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+@extend_schema_view(
+    list=extend_schema(parameters=[auth_profile_param]),
+    retrieve=extend_schema(parameters=[auth_profile_param]),
+)
+class ReportReasonViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet for listing active report reasons.
+    Only GET methods are allowed as reasons should be managed via admin.
+    """
+
+    queryset = ReportReason.objects.filter(is_active=True)
+    serializer_class = ReportReasonSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = ReportReasonPagination
+
+    def list(self, request, *args, **kwargs):
+        if not request.current_profile:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+@extend_schema_view(
+    list=extend_schema(parameters=[auth_profile_param]),
+    retrieve=extend_schema(parameters=[auth_profile_param]),
+    create=extend_schema(parameters=[auth_profile_param]),
+)
+class PostReportViewSet(
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet,
+):
+    """
+    ViewSet for managing post reports.
+    Users can create reports and view their own reports.
+    Staff can view and manage all reports.
+    """
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        requesting_profile = self.request.current_profile
+        if self.request.user.is_staff:
+            return PostReport.objects.all()
+        return PostReport.objects.filter(reporter=requesting_profile)
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return CreatePostReportSerializer
+        return PostReportDetailSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["request"] = self.request
+        return context
+
+    @extend_schema(parameters=[auth_profile_param])
+    @action(detail=True, methods=["post"], permission_classes=[permissions.IsAdminUser])
+    def resolve(self, request, pk=None):
+        """
+        Endpoint for staff to resolve a report
+        """
+        resolving_profile = request.current_profile
+
+        report = self.get_object()
+        resolution_note = request.data.get("resolution_note", "")
+        request_status = request.data.get("status", PostReport.ReportStatus.RESOLVED)
+
+        if request_status not in dict(PostReport.ReportStatus.choices):
+            return Response(
+                {"error": "Invalid status"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        report.status = request_status
+        report.resolution_note = resolution_note
+        report.resolved_by = resolving_profile
+        report.save()
+
+        return Response(PostReportDetailSerializer(report).data)
+
+    @extend_schema(parameters=[auth_profile_param])
+    @action(detail=False, methods=["get"])
+    def my_reports(self, request):
+        """
+        Endpoint for users to view their own reports
+        """
+        requesting_profile = request.current_profile
+
+        queryset = PostReport.objects.filter(reporter=requesting_profile)
+        page = self.paginate_queryset(queryset)
+
+        if page is not None:
+            serializer = PostReportDetailSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        # If pagination is disabled, serialize and return all results
+        serializer = PostReportDetailSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(parameters=[auth_profile_param])
+    @action(detail=False, methods=["get"])
+    def reported_posts(self, request):
+        """
+        Endpoint for users to view reports on their posts
+        """
+        requesting_profile = request.current_profile
+
+        queryset = PostReport.objects.filter(post__profile=requesting_profile)
+        page = self.paginate_queryset(queryset)
+
+        if page is not None:
+            serializer = PostReportDetailSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        # If pagination is disabled, serialize and return all results
+        serializer = PostReportDetailSerializer(queryset, many=True)
+        return Response(serializer.data)

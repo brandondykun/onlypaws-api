@@ -2,14 +2,23 @@ from rest_framework.test import APIClient
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth import get_user_model
-from apps.core_app.models import Profile, Post, Like, Follow, User, Comment
+from apps.core_app.models import (
+    Profile,
+    Post,
+    Like,
+    Follow,
+    User,
+    Comment,
+    ReportReason,
+    PostReport,
+)
 
 #
 # Create model objects helper functions
 #
 
 
-def create_user(email: str, password: str) -> User:
+def create_user(email: str, password: str, is_staff=False) -> User:
     """Create and return new User.
 
     Parameters
@@ -19,7 +28,9 @@ def create_user(email: str, password: str) -> User:
     password : str
         Password text for the User.
     """
-    return get_user_model().objects.create_user(email=email, password=password)
+    return get_user_model().objects.create_user(
+        email=email, password=password, is_staff=is_staff
+    )
 
 
 def create_profile(username: str, about: str, user: User) -> Profile:
@@ -257,7 +268,7 @@ class PostsAppTestHelper(TestCase):
 
     def setUp(self):
         # Profile 1
-        self.user = create_user("test@example.com", "user1-password-123")
+        self.user = create_user("test@example.com", "user1-password-123", is_staff=True)
         self.profile = create_profile("username_1", "About text 1.", self.user)
         self.post_1 = create_post("Post 1 caption", self.profile)
         self.post_2 = create_post("Post 2 caption", self.profile)
@@ -283,6 +294,21 @@ class PostsAppTestHelper(TestCase):
         # create 2 comments for post_1
         self.comment_1 = create_comment(self.profile, "Comment One", self.post_1)
         self.comment_2 = create_comment(self.profile, "Comment Two", self.post_1)
+
+        # Create report reasons
+        self.reason1 = ReportReason.objects.create(
+            name="Spam", description="Unwanted commercial content"
+        )
+        self.reason2 = ReportReason.objects.create(
+            name="Harassment", description="Abusive or harassing behavior"
+        )
+
+        self.report1 = PostReport.objects.create(
+            post=self.post_4, reporter=self.profile, reason=self.reason1
+        )
+        self.report2 = PostReport.objects.create(
+            post=self.post_1, reporter=self.profile_2, reason=self.reason1
+        )
 
         self.client = APIClient()
 
