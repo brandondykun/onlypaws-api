@@ -63,7 +63,17 @@ auth_profile_param = OpenApiParameter(
     location=OpenApiParameter.HEADER,
 )
 
+# schema query param to search for username by text
+username_param = OpenApiParameter(
+    "username",
+    OpenApiTypes.STR,
+    description="Username string or substring to search.",
+)
 
+
+@extend_schema_view(
+    post=extend_schema(parameters=[auth_profile_param]),
+)
 class CreatePostView(generics.CreateAPIView):
     """Create a new Post."""
 
@@ -77,9 +87,8 @@ class CreatePostView(generics.CreateAPIView):
         images = request.FILES.getlist("images")
 
         # ensure that the profile sent belongs to the current authenticated user
-        user_profile_match = self.request.user.profiles.filter(id=profile_id).first()
-
-        if not caption or not profile_id or not user_profile_match:
+        current_profile = request.current_profile
+        if str(profile_id) != str(current_profile.id) or not caption:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         try:
@@ -87,7 +96,7 @@ class CreatePostView(generics.CreateAPIView):
                 # create post
                 data = {
                     "caption": caption,
-                    "profile": user_profile_match.id,
+                    "profile": current_profile.id,
                 }
                 serializer = self.serializer_class(data=data)
                 serializer.is_valid(raise_exception=True)
@@ -114,6 +123,9 @@ class CreatePostView(generics.CreateAPIView):
             )
 
 
+@extend_schema_view(
+    post=extend_schema(parameters=[auth_profile_param]),
+)
 class CreateLikeView(generics.CreateAPIView):
     """Create or delete a Like."""
 
@@ -125,19 +137,18 @@ class CreateLikeView(generics.CreateAPIView):
         post_id = self.kwargs.get("post_id", None)
         profile_id = request.data["profileId"]
         # ensure that the profile sent belongs to the current authenticated user
-        user_profile_match = self.request.user.profiles.filter(id=profile_id).first()
-
-        if not user_profile_match:
+        current_profile = request.current_profile
+        if str(profile_id) != str(current_profile.id):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         # prevent profile from liking own post
         post = get_object_or_404(Post, pk=post_id)
-        if post.profile.id == user_profile_match.id:
+        if post.profile.id == current_profile.id:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
         new_like_data = {
             "post": post_id,
-            "profile": user_profile_match.id,
+            "profile": current_profile.id,
         }
         serializer = self.get_serializer(data=new_like_data)
         serializer.is_valid(raise_exception=True)
@@ -148,6 +159,9 @@ class CreateLikeView(generics.CreateAPIView):
         )
 
 
+@extend_schema_view(
+    delete=extend_schema(parameters=[auth_profile_param]),
+)
 class DestroyLikeView(generics.DestroyAPIView):
     """Delete a Like."""
 
@@ -157,12 +171,15 @@ class DestroyLikeView(generics.DestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         post_id = self.kwargs.get("pk", None)
+        # TODO: don't need this anymore - need to remove from test
         profile_id = self.kwargs.get("profile_id", None)
 
-        user_profile_match = self.request.user.profiles.filter(id=profile_id).first()
+        current_profile = request.current_profile
+        if str(profile_id) != str(current_profile.id):
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        if post_id and user_profile_match:
-            like = get_object_or_404(Like, profile=user_profile_match, post=post_id)
+        if post_id:
+            like = get_object_or_404(Like, profile=current_profile, post=post_id)
             self.perform_destroy(like)
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -209,8 +226,8 @@ class RetrieveFeedView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         profile_id = self.kwargs.get("id", None)
         # ensure that the profile sent belongs to the current authenticated user
-        user_profile_match = self.request.user.profiles.filter(id=profile_id).first()
-        if not user_profile_match:
+        current_profile = request.current_profile
+        if str(profile_id) != str(current_profile.id):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         return self.list(request, *args, **kwargs)
@@ -223,6 +240,9 @@ class RetrieveFeedView(generics.ListAPIView):
         return posts
 
 
+@extend_schema_view(
+    post=extend_schema(parameters=[auth_profile_param]),
+)
 class CreateCommentView(generics.CreateAPIView):
     """Create a Comment."""
 
@@ -239,17 +259,17 @@ class CreateCommentView(generics.CreateAPIView):
 
         # TODO: make sure reply_to_comment is a child comment at some level of parent_comment
 
-        # ensure that the profile sent belongs to the current authenticated user
-        user_profile_match = self.request.user.profiles.filter(id=profile_id).first()
+        current_profile = request.current_profile
 
-        if not user_profile_match:
+        # ensure that the profile id sent belongs to the current authenticated user profile
+        if profile_id != str(current_profile.id):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         serializer = self.get_serializer(
             data={
                 "text": text,
                 "post": post_id,
-                "profile": user_profile_match.id,
+                "profile": profile_id,
                 "parent_comment": parent_comment,
                 "reply_to_comment": reply_to_comment,
             },
@@ -284,6 +304,9 @@ class ListPostCommentsView(generics.ListAPIView):
         return comments
 
 
+@extend_schema_view(
+    delete=extend_schema(parameters=[auth_profile_param]),
+)
 class RetrieveDestroyPostView(generics.RetrieveDestroyAPIView):
     """Get details of a Post."""
 
@@ -298,7 +321,8 @@ class RetrieveDestroyPostView(generics.RetrieveDestroyAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def destroy(self, request, *args, **kwargs):
-        auth_profile_id = request.headers["auth-profile-id"]
+        # auth_profile_id = request.headers["auth-profile-id"]
+        current_profile = request.current_profile
         instance = self.get_object()
 
         # check that the user requesting the delete owns the post
@@ -309,7 +333,7 @@ class RetrieveDestroyPostView(generics.RetrieveDestroyAPIView):
             )
 
         # check that the profile requesting the delete owns the post
-        if instance.profile.id != int(auth_profile_id):
+        if instance.profile.id != int(current_profile.id):
             return Response(
                 {"error": "Requesting profile does not own this resource."},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -319,17 +343,7 @@ class RetrieveDestroyPostView(generics.RetrieveDestroyAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-@extend_schema_view(
-    get=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "username",
-                OpenApiTypes.STR,
-                description="Username string or substring to search.",
-            ),
-        ]
-    )
-)
+@extend_schema_view(get=extend_schema(parameters=[username_param]))
 class ListSearchedProfilesView(generics.ListAPIView):
     """List Profiles based on search text."""
 
@@ -367,6 +381,9 @@ class ListSearchedProfilesView(generics.ListAPIView):
         }
 
 
+@extend_schema_view(
+    post=extend_schema(parameters=[auth_profile_param]),
+)
 class CreateFollowView(generics.CreateAPIView):
     """Create a follow."""
 
@@ -378,21 +395,18 @@ class CreateFollowView(generics.CreateAPIView):
         auth_profile_id = self.kwargs.get("id")
 
         # ensure that the profile sent belongs to the current authenticated user
-        user_profile_match = self.request.user.profiles.filter(
-            id=auth_profile_id
-        ).first()
-
-        if not user_profile_match:
+        current_profile = request.current_profile
+        if str(current_profile.id) != str(auth_profile_id):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         profile_to_follow = get_object_or_404(Profile, pk=request.data["profileId"])
-        # profile cannon follow itself
-        if profile_to_follow.id == user_profile_match.id:
+        # profile cannot follow itself
+        if profile_to_follow.id == current_profile.id:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         new_follow_data = {
             "followed": request.data["profileId"],
-            "followed_by": user_profile_match.id,
+            "followed_by": current_profile.id,
         }
         serializer = self.get_serializer(data=new_follow_data)
         serializer.is_valid(raise_exception=True)
@@ -403,17 +417,7 @@ class CreateFollowView(generics.CreateAPIView):
         )
 
 
-@extend_schema_view(
-    get=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "username",
-                OpenApiTypes.STR,
-                description="Username string or substring to search.",
-            ),
-        ]
-    )
-)
+@extend_schema_view(get=extend_schema(parameters=[username_param]))
 class ListFollowersView(generics.ListAPIView):
     """List Profiles that follow a given Profile."""
 
@@ -437,17 +441,7 @@ class ListFollowersView(generics.ListAPIView):
         return followers
 
 
-@extend_schema_view(
-    get=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "username",
-                OpenApiTypes.STR,
-                description="Username string or substring to search.",
-            ),
-        ]
-    )
-)
+@extend_schema_view(get=extend_schema(parameters=[username_param]))
 class ListFollowingView(generics.ListAPIView):
     """List Profiles that a given Profile follows."""
 
@@ -471,6 +465,9 @@ class ListFollowingView(generics.ListAPIView):
         return following
 
 
+@extend_schema_view(
+    delete=extend_schema(parameters=[auth_profile_param]),
+)
 class DestroyFollowView(generics.DestroyAPIView):
     """Delete a follow."""
 
@@ -483,16 +480,13 @@ class DestroyFollowView(generics.DestroyAPIView):
         auth_profile_id = self.kwargs.get("auth_profile_id")
 
         # ensure that the profile sent belongs to the current authenticated user
-        user_profile_match = self.request.user.profiles.filter(
-            id=auth_profile_id
-        ).first()
-
-        if not user_profile_match:
+        current_profile = request.current_profile
+        if str(auth_profile_id) != str(current_profile.id):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        if profile_id and user_profile_match:
+        if profile_id:
             follow = get_object_or_404(
-                Follow, followed_by=user_profile_match.id, followed=profile_id
+                Follow, followed_by=auth_profile_id, followed=profile_id
             )
             self.perform_destroy(follow)
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -548,6 +542,9 @@ class ListSimilarPostsView(generics.ListAPIView):
         return posts
 
 
+@extend_schema_view(
+    post=extend_schema(parameters=[auth_profile_param]),
+)
 class CreateCommentLikeView(generics.CreateAPIView):
     """Create or delete a Comment Like."""
 
@@ -558,15 +555,16 @@ class CreateCommentLikeView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         comment_id = self.kwargs.get("comment_id", None)
         profile_id = request.data["profileId"]
-        # ensure that the profile sent belongs to the current authenticated user
-        user_profile_match = self.request.user.profiles.filter(id=profile_id).first()
 
-        if not user_profile_match:
+        # ensure that the profile sent belongs to the current authenticated user
+        current_profile = request.current_profile
+
+        if str(profile_id) != str(current_profile.id):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         new_like_data = {
             "comment": comment_id,
-            "profile": user_profile_match.id,
+            "profile": current_profile.id,
         }
         serializer = self.get_serializer(
             data=new_like_data, context={"request": request}
@@ -579,6 +577,9 @@ class CreateCommentLikeView(generics.CreateAPIView):
         )
 
 
+@extend_schema_view(
+    delete=extend_schema(parameters=[auth_profile_param]),
+)
 class DestroyCommentLikeView(generics.DestroyAPIView):
     """Delete a Comment Like."""
 
@@ -590,17 +591,22 @@ class DestroyCommentLikeView(generics.DestroyAPIView):
         comment_id = self.kwargs.get("comment_id", None)
         profile_id = self.kwargs.get("profile_id", None)
 
-        user_profile_match = self.request.user.profiles.filter(id=profile_id).first()
+        current_profile = request.current_profile
+        if str(current_profile.id) != str(profile_id):
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        if comment_id and user_profile_match:
+        if comment_id:
             like = get_object_or_404(
-                CommentLike, profile=user_profile_match, comment=comment_id
+                CommentLike, profile=current_profile, comment=comment_id
             )
             self.perform_destroy(like)
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
+@extend_schema_view(
+    get=extend_schema(parameters=[auth_profile_param]),
+)
 class ListCommentRepliesView(generics.ListAPIView):
     """Get replies to a comment."""
 
