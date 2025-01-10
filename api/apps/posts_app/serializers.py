@@ -102,29 +102,29 @@ class CommentDetailedSerializer(serializers.ModelSerializer):
             "reply_to_comment_username",
         ]
 
-    def get_likes_count(self, obj):
+    def get_likes_count(self, obj) -> bool:
         return obj.likes.count()
 
-    def get_liked(self, obj):
+    def get_liked(self, obj) -> bool:
         # boolean - has requesting profile liked the comment being fetched
         auth_profile_id = self.context["request"].headers["auth-profile-id"]
         if auth_profile_id:
             return obj.likes.filter(profile=auth_profile_id).exists()
         return False
 
-    def get_replies_count(self, obj):
+    def get_replies_count(self, obj) -> int:
         replies_count = obj.all_replies.count()
         return replies_count
 
     def get_replies(self, obj):
         return []
 
-    def get_parent_comment_username(self, obj):
+    def get_parent_comment_username(self, obj) -> str | None:
         if obj.parent_comment:
             return obj.parent_comment.profile.username
         return None
 
-    def get_reply_to_comment_username(self, obj):
+    def get_reply_to_comment_username(self, obj) -> str | None:
         if obj.reply_to_comment:
             return obj.reply_to_comment.profile.username
         return None
@@ -248,20 +248,20 @@ class PostDetailedSerializer(serializers.ModelSerializer):
             "is_hidden",
         ]
 
-    def get_comments_count(self, obj):
+    def get_comments_count(self, obj) -> int:
         return obj.comments.count()
 
-    def get_likes_count(self, obj):
+    def get_likes_count(self, obj) -> int:
         return obj.likes.count()
 
-    def get_liked(self, obj):
+    def get_liked(self, obj) -> bool:
         # boolean - is requesting profile liked the post being fetched
         auth_profile_id = self.context["request"].headers["auth-profile-id"]
         if auth_profile_id:
             return obj.likes.filter(profile=auth_profile_id).exists()
         return False
 
-    def get_is_saved(self, obj):
+    def get_is_saved(self, obj) -> bool:
         # boolean - did requesting profile save the post being fetched
         requesting_profile = self.context["request"].headers["auth-profile-id"]
         if requesting_profile:
@@ -273,7 +273,7 @@ class PostDetailedSerializer(serializers.ModelSerializer):
         serializer = PostReportPreviewSerializer(reports, many=True)
         return serializer.data
 
-    def get_is_hidden(self, obj):
+    def get_is_hidden(self, obj) -> bool:
         return obj.reports.filter(~Q(status="DISMISSED")).count() > 0
 
 
@@ -303,22 +303,22 @@ class ProfileDetailsSerializer(serializers.ModelSerializer):
             "pet_type",
         ]
 
-    def get_is_following(self, obj):
+    def get_is_following(self, obj) -> bool:
         # boolean - is requesting profile following the profile being fetched
         requesting_profile = self.context["request"].query_params.get("profileId", None)
         if requesting_profile:
             return obj.following.filter(followed_by=requesting_profile).exists()
         return False
 
-    def get_posts_count(self, obj):
+    def get_posts_count(self, obj) -> int:
         posts = obj.posts.all()
         return posts.count()
 
-    def get_followers_count(self, obj):
+    def get_followers_count(self, obj) -> int:
         followers = obj.following.all()
         return followers.count()
 
-    def get_following_count(self, obj):
+    def get_following_count(self, obj) -> int:
         following = obj.followers.all()
         return following.count()
 
@@ -335,7 +335,7 @@ class SearchProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = ["id", "username", "name", "about", "is_following", "image"]
 
-    def get_is_following(self, obj):
+    def get_is_following(self, obj) -> bool:
         requesting_profile = self.context.get("profile_id")
         return obj.following.filter(followed_by=requesting_profile).exists()
 
