@@ -113,7 +113,7 @@ class Post(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.caption
+        return f"Post {self.id} - {self.caption}"
 
 
 def post_image_path(instance, filename):
