@@ -219,6 +219,7 @@ class PostDetailedSerializer(serializers.ModelSerializer):
     is_saved = serializers.SerializerMethodField()
     reports = serializers.SerializerMethodField()
     is_hidden = serializers.SerializerMethodField()
+    is_reported = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
@@ -235,6 +236,7 @@ class PostDetailedSerializer(serializers.ModelSerializer):
             "is_saved",
             "reports",
             "is_hidden",
+            "is_reported",
         ]
         read_only_fields = [
             "id",
@@ -246,6 +248,7 @@ class PostDetailedSerializer(serializers.ModelSerializer):
             "is_saved",
             "reports",
             "is_hidden",
+            "is_reported",
         ]
 
     def get_comments_count(self, obj) -> int:
@@ -275,6 +278,10 @@ class PostDetailedSerializer(serializers.ModelSerializer):
 
     def get_is_hidden(self, obj) -> bool:
         return obj.reports.filter(~Q(status="DISMISSED")).count() > 0
+
+    def get_is_reported(self, obj) -> bool:
+        current_profile = self.context["request"].current_profile
+        return obj.reports.filter(reporter=current_profile).exists()
 
 
 class ProfileDetailsSerializer(serializers.ModelSerializer):
@@ -306,13 +313,20 @@ class ProfileDetailsSerializer(serializers.ModelSerializer):
     def get_is_following(self, obj) -> bool:
         # boolean - is requesting profile following the profile being fetched
         requesting_profile = self.context["request"].query_params.get("profileId", None)
+
         if requesting_profile:
             return obj.following.filter(followed_by=requesting_profile).exists()
         return False
 
     def get_posts_count(self, obj) -> int:
+        requesting_profile = self.context["request"].query_params.get("profileId", None)
         posts = obj.posts.all()
-        return posts.count()
+
+        # if profile is fetching own posts, return all including reported inappropriate
+        if str(obj.id) == str(requesting_profile):
+            return posts.count()
+        # filter posts that have been reported as inappropriate from count
+        return posts.filter(~Q(reports__reason__id=1)).count()
 
     def get_followers_count(self, obj) -> int:
         followers = obj.following.all()

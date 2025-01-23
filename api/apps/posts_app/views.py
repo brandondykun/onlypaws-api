@@ -194,10 +194,16 @@ class ListProfilePostsView(generics.ListAPIView):
 
     def get_queryset(self):
         profile_id = self.kwargs.get("id", None)
-        profile_posts = Post.objects.filter(profile__id=profile_id).order_by(
-            "-created_at"
-        )
-        return profile_posts
+        current_profile = self.request.current_profile
+
+        profile_posts = Post.objects.filter(Q(profile__id=profile_id))
+
+        if str(profile_id) == str(current_profile.id):
+            # Don't filter inappropriate posts if profile is requesting their own posts
+            return profile_posts.order_by("-created_at")
+
+        # filter reported inappropriate content
+        return profile_posts.filter(~Q(reports__reason__id=1)).order_by("-created_at")
 
 
 class RetrieveProfileView(generics.RetrieveAPIView):
@@ -235,7 +241,8 @@ class RetrieveFeedView(generics.ListAPIView):
     def get_queryset(self):
         requesting_profile_id = self.kwargs.get("id", None)
         posts = Post.objects.filter(
-            profile__following__followed_by=requesting_profile_id
+            Q(profile__following__followed_by=requesting_profile_id)
+            & ~Q(reports__reason__id=1)  # filter reported inappropriate content
         ).order_by("-created_at")
         return posts
 
@@ -262,7 +269,7 @@ class CreateCommentView(generics.CreateAPIView):
         current_profile = request.current_profile
 
         # ensure that the profile id sent belongs to the current authenticated user profile
-        if profile_id != str(current_profile.id):
+        if str(profile_id) != str(current_profile.id):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         serializer = self.get_serializer(
@@ -510,6 +517,7 @@ class ListExplorePostsView(generics.ListAPIView):
         posts = Post.objects.filter(
             ~Q(profile__following__followed_by=requesting_profile_id)
             & ~Q(profile__user=self.request.user)
+            & ~Q(reports__gt=0)  # filter all reported posts for explore screen
         ).order_by("-created_at")
         return posts
 
@@ -537,7 +545,9 @@ class ListSimilarPostsView(generics.ListAPIView):
         post_id = self.kwargs.get("pk")
         profile_id = self.request.GET.get("profileId")
         posts = Post.objects.filter(
-            ~Q(profile=profile_id) & Q(id__gt=post_id)
+            ~Q(profile=profile_id)
+            & Q(id__gt=post_id)
+            & ~Q(reports__reason__id=1)  # filter reported inappropriate content
         ).order_by("-created_at")
         return posts
 
