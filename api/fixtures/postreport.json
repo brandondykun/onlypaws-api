@@ -1,15 +1,75 @@
 [
   {
     "model": "core_app.postreport",
-    "pk": 1,
+    "pk": 2,
     "fields": {
-      "post": 51,
-      "reporter": 3,
+      "post": 55,
+      "reporter": 2,
       "reason": 3,
-      "details": "There is a person in this image.",
-      "status": "UNDER_REVIEW",
-      "created_at": "2025-01-07T04:26:40.271Z",
-      "updated_at": "2025-01-07T04:58:09.916Z",
+      "details": "",
+      "status": "PENDING",
+      "created_at": "2025-01-10T05:00:44.661Z",
+      "updated_at": "2025-01-10T05:00:44.661Z",
+      "resolved_by": null,
+      "resolution_note": ""
+    }
+  },
+  {
+    "model": "core_app.postreport",
+    "pk": 3,
+    "fields": {
+      "post": 54,
+      "reporter": 2,
+      "reason": 3,
+      "details": "",
+      "status": "PENDING",
+      "created_at": "2025-01-10T05:02:10.831Z",
+      "updated_at": "2025-01-10T05:02:10.832Z",
+      "resolved_by": null,
+      "resolution_note": ""
+    }
+  },
+  {
+    "model": "core_app.postreport",
+    "pk": 4,
+    "fields": {
+      "post": 55,
+      "reporter": 5,
+      "reason": 2,
+      "details": "",
+      "status": "PENDING",
+      "created_at": "2025-01-11T02:41:14.617Z",
+      "updated_at": "2025-01-11T02:41:14.617Z",
+      "resolved_by": null,
+      "resolution_note": ""
+    }
+  },
+  {
+    "model": "core_app.postreport",
+    "pk": 6,
+    "fields": {
+      "post": 31,
+      "reporter": 1,
+      "reason": 1,
+      "details": "",
+      "status": "PENDING",
+      "created_at": "2025-01-11T19:04:52.611Z",
+      "updated_at": "2025-01-11T19:04:52.611Z",
+      "resolved_by": null,
+      "resolution_note": ""
+    }
+  },
+  {
+    "model": "core_app.postreport",
+    "pk": 8,
+    "fields": {
+      "post": 14,
+      "reporter": 7,
+      "reason": 3,
+      "details": "",
+      "status": "PENDING",
+      "created_at": "2025-01-11T21:27:38.256Z",
+      "updated_at": "2025-01-11T21:27:38.256Z",
       "resolved_by": null,
       "resolution_note": ""
     }
