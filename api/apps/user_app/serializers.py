@@ -4,7 +4,7 @@ Serializers for the User API view.
 
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from apps.core_app.models import Profile, ProfileImage, PetType
+from apps.core_app.models import Profile, ProfileImage, PetType, VerifyEmailToken
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -12,8 +12,9 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = ["id", "email", "password"]
+        fields = ["id", "email", "password", "is_email_verified"]
         extra_kwargs = {"password": {"write_only": True, "min_length": 5}}
+        read_only_fields = ["is_email_verified"]
 
     def create(self, validated_data):
         """Create and return a user with encrypted password."""
@@ -113,4 +114,14 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = ["id", "email", "profiles"]
+        fields = ["id", "email", "profiles", "is_email_verified"]
+        read_only_fields = ["is_email_verified"]
+
+
+class VerifyEmailTokenSerializer(serializers.ModelSerializer):
+    """Serializer for VerifyEmailToken."""
+
+    class Meta:
+        model = VerifyEmailToken
+        fields = ["id", "user", "token", "created_at"]
+        read_only_fields = ["created_at"]

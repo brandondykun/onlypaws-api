@@ -1,6 +1,7 @@
 from PIL import Image, ImageOps
 from django.core.files import File
 from io import BytesIO
+import uuid
 
 
 def crop_square_and_resize(image, image_size=1080):
@@ -39,3 +40,7 @@ def crop_square_and_resize(image, image_size=1080):
     name_of_file = image.name.split(".")[0] + ".webp"
 
     return File(output, name=name_of_file)
+
+
+def generate_verification_code():
+    return str(uuid.uuid4())[:6]

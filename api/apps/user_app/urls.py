@@ -43,4 +43,14 @@ urlpatterns = [
         views.ListPetTypesView.as_view(),
         name="list_pet_types",
     ),
+    path(
+        "verify-email-token/",
+        views.VerifyEmailView.as_view(),
+        name="verify_email_token",
+    ),
+    path(
+        "resend-verify-email-token/",
+        views.RequestNewVerifyEmailTokenView.as_view(),
+        name="request_new_verify_email_token",
+    ),
 ]

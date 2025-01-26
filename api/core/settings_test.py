@@ -1,6 +1,4 @@
 from pathlib import Path
-from datetime import timedelta
-import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,3 +22,5 @@ REST_FRAMEWORK = {
     "EXCEPTION_HANDLER": "apps.core_app.exceptions.exceptions.custom_exception_handler",
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

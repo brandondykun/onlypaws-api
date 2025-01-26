@@ -16,6 +16,8 @@ LOGIN_URL = reverse("user_app:token_obtain_pair")
 REFRESH_TOKEN_URL = reverse("user_app:token_refresh")
 CREATE_USER_URL = reverse("user_app:create_user")
 CREATE_PROFILE_URL = reverse("user_app:create_profile")
+VERIFY_EMAIL_URL = reverse("user_app:verify_email_token")
+REQUEST_NEW_VERIFY_EMAIL_TOKEN_URL = reverse("user_app:request_new_verify_email_token")
 
 
 def create_user(**params):
@@ -119,6 +121,7 @@ class PrivateUserApiTests(TestCase):
                     "username": self.profile.username,
                 }
             ],
+            "is_email_verified": False,
         }
         self.assertEqual(res.data, expected_info)
 
