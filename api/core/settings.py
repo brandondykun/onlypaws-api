@@ -31,6 +31,15 @@ DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
+CORS_ALLOW_HEADERS = [
+    "content-disposition",
+    "accept-encoding",
+    "content-type",
+    "accept",
+    "origin",
+    "authorization",
+    "auth-profile-id",
+]
 
 
 # Application definition
