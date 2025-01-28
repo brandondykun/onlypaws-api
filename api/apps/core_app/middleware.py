@@ -60,6 +60,7 @@ class ProfileAuthenticationMiddleware:
             "/admin",
             "/api/v1/auth/login",
             "/api/v1/auth/register",
+            "/api/v1/auth/my-info",
             # Add other paths that don't need profile validation
         ]
 
