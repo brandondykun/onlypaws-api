@@ -85,6 +85,7 @@ class CreatePostView(generics.CreateAPIView):
     def post(self, request, *args, **kwargs):
         profile_id = request.data.get("profileId", None)
         caption = request.data.get("caption", None)
+        contains_ai = request.data.get("aiGenerated", False)
         images = request.FILES.getlist("images")
 
         # ensure that the profile sent belongs to the current authenticated user
@@ -98,6 +99,7 @@ class CreatePostView(generics.CreateAPIView):
                 data = {
                     "caption": caption,
                     "profile": current_profile.id,
+                    "contains_ai": contains_ai,
                 }
                 serializer = self.serializer_class(data=data)
                 serializer.is_valid(raise_exception=True)

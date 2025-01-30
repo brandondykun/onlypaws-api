@@ -6,7 +6,8 @@
       "caption": "Could hold the record for the sleepiest dog on the planet for sure!",
       "profile": 2,
       "created_at": "2024-10-13T15:48:03.038Z",
-      "updated_at": "2024-10-13T15:48:03.038Z"
+      "updated_at": "2024-10-13T15:48:03.038Z",
+      "contains_ai": false
     }
   },
   {
@@ -16,7 +17,8 @@
       "caption": "Morning walk time!",
       "profile": 4,
       "created_at": "2024-10-13T17:31:10.690Z",
-      "updated_at": "2024-10-13T17:31:10.690Z"
+      "updated_at": "2024-10-13T17:31:10.690Z",
+      "contains_ai": false
     }
   },
   {
@@ -26,7 +28,8 @@
       "caption": "Mom got me out here in the snow. Good grief!",
       "profile": 4,
       "created_at": "2024-10-13T17:34:20.342Z",
-      "updated_at": "2024-10-13T17:34:20.342Z"
+      "updated_at": "2024-10-13T17:34:20.342Z",
+      "contains_ai": false
     }
   },
   {
@@ -36,7 +39,8 @@
       "caption": "Got a haircut today. Looking pretty dapper. Kinda feeling myself tbh.",
       "profile": 4,
       "created_at": "2024-10-13T17:36:07.841Z",
-      "updated_at": "2024-10-13T17:36:07.841Z"
+      "updated_at": "2024-10-13T17:36:07.841Z",
+      "contains_ai": false
     }
   },
   {
@@ -46,7 +50,8 @@
       "caption": "I woke up like this.",
       "profile": 5,
       "created_at": "2024-10-13T17:40:29.250Z",
-      "updated_at": "2024-10-13T17:40:29.250Z"
+      "updated_at": "2024-10-13T17:40:29.250Z",
+      "contains_ai": false
     }
   },
   {
@@ -56,7 +61,8 @@
       "caption": "Getting some pets today!",
       "profile": 8,
       "created_at": "2024-10-13T17:46:37.560Z",
-      "updated_at": "2024-10-13T17:46:37.560Z"
+      "updated_at": "2024-10-13T17:46:37.560Z",
+      "contains_ai": false
     }
   },
   {
@@ -66,7 +72,8 @@
       "caption": "Yep I’m a German shep!",
       "profile": 9,
       "created_at": "2024-10-13T17:49:24.281Z",
-      "updated_at": "2024-10-13T17:49:24.281Z"
+      "updated_at": "2024-10-13T17:49:24.281Z",
+      "contains_ai": false
     }
   },
   {
@@ -76,7 +83,8 @@
       "caption": "Mom says the cone is cute. I say it’s frickin embarrassing.",
       "profile": 10,
       "created_at": "2024-10-13T17:51:30.639Z",
-      "updated_at": "2024-10-13T17:51:30.639Z"
+      "updated_at": "2024-10-13T17:51:30.639Z",
+      "contains_ai": false
     }
   },
   {
@@ -86,7 +94,8 @@
       "caption": "Livin that cone life.",
       "profile": 10,
       "created_at": "2024-10-13T17:52:21.410Z",
-      "updated_at": "2024-10-13T17:52:21.410Z"
+      "updated_at": "2024-10-13T17:52:21.410Z",
+      "contains_ai": false
     }
   },
   {
@@ -96,7 +105,8 @@
       "caption": "Sniffing the camera man.",
       "profile": 11,
       "created_at": "2024-10-13T17:55:15.281Z",
-      "updated_at": "2024-10-13T17:55:15.281Z"
+      "updated_at": "2024-10-13T17:55:15.281Z",
+      "contains_ai": false
     }
   },
   {
@@ -106,7 +116,8 @@
       "caption": "Sniffing for chocolate.",
       "profile": 11,
       "created_at": "2024-10-13T17:56:34.040Z",
-      "updated_at": "2024-10-13T17:56:34.040Z"
+      "updated_at": "2024-10-13T17:56:34.040Z",
+      "contains_ai": false
     }
   },
   {
@@ -116,7 +127,8 @@
       "caption": "Hanging out with my friend Linus!",
       "profile": 3,
       "created_at": "2024-10-13T17:59:25.422Z",
-      "updated_at": "2024-10-13T17:59:25.422Z"
+      "updated_at": "2024-10-13T17:59:25.422Z",
+      "contains_ai": false
     }
   },
   {
@@ -126,7 +138,8 @@
       "caption": "Party!!!",
       "profile": 1,
       "created_at": "2024-10-13T20:37:32.656Z",
-      "updated_at": "2024-10-13T20:37:32.656Z"
+      "updated_at": "2024-10-13T20:37:32.656Z",
+      "contains_ai": false
     }
   },
   {
@@ -136,7 +149,8 @@
       "caption": "Goofy Shane!",
       "profile": 1,
       "created_at": "2024-10-13T21:10:10.596Z",
-      "updated_at": "2024-10-13T21:10:10.596Z"
+      "updated_at": "2024-10-13T21:10:10.596Z",
+      "contains_ai": false
     }
   },
   {
@@ -146,7 +160,8 @@
       "caption": "Baby boy sleeping on the floor like usual.",
       "profile": 1,
       "created_at": "2024-10-15T22:25:06.254Z",
-      "updated_at": "2024-10-15T22:25:06.254Z"
+      "updated_at": "2024-10-15T22:25:06.254Z",
+      "contains_ai": false
     }
   },
   {
@@ -156,7 +171,8 @@
       "caption": "Curled up like there’s no tomorrow!",
       "profile": 1,
       "created_at": "2024-10-15T22:26:51.782Z",
-      "updated_at": "2024-10-15T22:26:51.782Z"
+      "updated_at": "2024-10-15T22:26:51.782Z",
+      "contains_ai": false
     }
   },
   {
@@ -166,7 +182,8 @@
       "caption": "Little lazy boy sleeping on the carpet!",
       "profile": 1,
       "created_at": "2024-10-16T18:25:53.689Z",
-      "updated_at": "2024-10-16T18:25:53.689Z"
+      "updated_at": "2024-10-16T18:25:53.689Z",
+      "contains_ai": false
     }
   },
   {
@@ -176,7 +193,8 @@
       "caption": "He has 3 beds yet chooses to sleep on the floor lol",
       "profile": 1,
       "created_at": "2024-10-17T01:12:21.750Z",
-      "updated_at": "2024-10-17T01:12:21.750Z"
+      "updated_at": "2024-10-17T01:12:21.750Z",
+      "contains_ai": false
     }
   },
   {
@@ -186,7 +204,8 @@
       "caption": "Look at those ears!",
       "profile": 9,
       "created_at": "2024-10-17T23:08:31.529Z",
-      "updated_at": "2024-10-17T23:08:31.529Z"
+      "updated_at": "2024-10-17T23:08:31.529Z",
+      "contains_ai": false
     }
   },
   {
@@ -196,7 +215,8 @@
       "caption": "The tongue out always gets me!",
       "profile": 9,
       "created_at": "2024-10-18T00:10:55.531Z",
-      "updated_at": "2024-10-18T00:10:55.531Z"
+      "updated_at": "2024-10-18T00:10:55.531Z",
+      "contains_ai": false
     }
   },
   {
@@ -206,7 +226,8 @@
       "caption": "Walk by the waterfall!",
       "profile": 9,
       "created_at": "2024-10-18T00:15:34.175Z",
-      "updated_at": "2024-10-18T00:15:34.175Z"
+      "updated_at": "2024-10-18T00:15:34.175Z",
+      "contains_ai": false
     }
   },
   {
@@ -216,7 +237,8 @@
       "caption": "Fall bandana season",
       "profile": 1,
       "created_at": "2024-10-18T00:28:52.793Z",
-      "updated_at": "2024-10-18T00:28:52.793Z"
+      "updated_at": "2024-10-18T00:28:52.793Z",
+      "contains_ai": false
     }
   },
   {
@@ -226,7 +248,8 @@
       "caption": "Fall bandana season",
       "profile": 4,
       "created_at": "2024-10-18T18:08:50.087Z",
-      "updated_at": "2024-10-18T18:08:50.087Z"
+      "updated_at": "2024-10-18T18:08:50.087Z",
+      "contains_ai": false
     }
   },
   {
@@ -236,7 +259,8 @@
       "caption": "Does anyone else’s dog have a favorite blanket that they sleep with all the time?",
       "profile": 4,
       "created_at": "2024-10-18T18:09:54.194Z",
-      "updated_at": "2024-10-18T18:09:54.194Z"
+      "updated_at": "2024-10-18T18:09:54.194Z",
+      "contains_ai": false
     }
   },
   {
@@ -246,7 +270,8 @@
       "caption": "World’s best sleeper no doubt.",
       "profile": 5,
       "created_at": "2024-10-18T18:14:52.796Z",
-      "updated_at": "2024-10-18T18:14:52.796Z"
+      "updated_at": "2024-10-18T18:14:52.796Z",
+      "contains_ai": false
     }
   },
   {
@@ -256,7 +281,8 @@
       "caption": "I’m really happy with this dog bed. I would highly recommend it.",
       "profile": 5,
       "created_at": "2024-10-18T18:16:28.153Z",
-      "updated_at": "2024-10-18T18:16:28.153Z"
+      "updated_at": "2024-10-18T18:16:28.153Z",
+      "contains_ai": false
     }
   },
   {
@@ -266,7 +292,8 @@
       "caption": "Linus asking for him morning walk!",
       "profile": 1,
       "created_at": "2024-10-20T14:43:31.190Z",
-      "updated_at": "2024-10-20T14:43:31.190Z"
+      "updated_at": "2024-10-20T14:43:31.190Z",
+      "contains_ai": false
     }
   },
   {
@@ -276,7 +303,8 @@
       "caption": "Favorite nap spot is on my chair. Yep, my humans bought me a chair.",
       "profile": 12,
       "created_at": "2024-10-20T22:03:00.677Z",
-      "updated_at": "2024-10-20T22:03:00.677Z"
+      "updated_at": "2024-10-20T22:03:00.677Z",
+      "contains_ai": false
     }
   },
   {
@@ -286,7 +314,8 @@
       "caption": "Sleeping beauty.",
       "profile": 4,
       "created_at": "2024-10-21T02:07:28.949Z",
-      "updated_at": "2024-10-21T02:07:28.949Z"
+      "updated_at": "2024-10-21T02:07:28.949Z",
+      "contains_ai": false
     }
   },
   {
@@ -296,7 +325,8 @@
       "caption": "Sniffing around on walks is my absolute favorite. I could do it all day.",
       "profile": 13,
       "created_at": "2024-10-22T03:45:12.141Z",
-      "updated_at": "2024-10-22T03:45:12.141Z"
+      "updated_at": "2024-10-22T03:45:12.141Z",
+      "contains_ai": false
     }
   },
   {
@@ -306,7 +336,8 @@
       "caption": "Little walk in the lake!",
       "profile": 1,
       "created_at": "2024-10-23T00:28:33.991Z",
-      "updated_at": "2024-10-23T00:28:33.991Z"
+      "updated_at": "2024-10-23T00:28:33.991Z",
+      "contains_ai": false
     }
   },
   {
@@ -316,7 +347,8 @@
       "caption": "Throwback to my first lake walk",
       "profile": 1,
       "created_at": "2024-10-23T00:29:29.955Z",
-      "updated_at": "2024-10-23T00:29:29.955Z"
+      "updated_at": "2024-10-23T00:29:29.955Z",
+      "contains_ai": false
     }
   },
   {
@@ -326,7 +358,8 @@
       "caption": "I love when my parents cover me with a blanket. I can’t believe some of y’all aren’t allowed to sleep in the bed!",
       "profile": 1,
       "created_at": "2024-10-23T00:31:08.619Z",
-      "updated_at": "2024-10-23T00:31:08.619Z"
+      "updated_at": "2024-10-23T00:31:08.619Z",
+      "contains_ai": false
     }
   },
   {
@@ -336,7 +369,8 @@
       "caption": "Campfire shenanigans. I wish I could have chocolate so I could eat a s’mores.",
       "profile": 1,
       "created_at": "2024-10-23T00:32:59.886Z",
-      "updated_at": "2024-10-23T00:32:59.886Z"
+      "updated_at": "2024-10-23T00:32:59.886Z",
+      "contains_ai": false
     }
   },
   {
@@ -346,7 +380,8 @@
       "caption": "Sitting on my dad’s lap while he works.",
       "profile": 1,
       "created_at": "2024-10-23T00:34:45.275Z",
-      "updated_at": "2024-10-23T00:34:45.275Z"
+      "updated_at": "2024-10-23T00:34:45.275Z",
+      "contains_ai": false
     }
   },
   {
@@ -356,7 +391,8 @@
       "caption": "Me in the form of art",
       "profile": 1,
       "created_at": "2024-10-23T00:35:54.927Z",
-      "updated_at": "2024-10-23T00:35:54.927Z"
+      "updated_at": "2024-10-23T00:35:54.927Z",
+      "contains_ai": false
     }
   },
   {
@@ -366,7 +402,8 @@
       "caption": "Sus side eye",
       "profile": 1,
       "created_at": "2024-10-23T00:37:28.823Z",
-      "updated_at": "2024-10-23T00:37:28.823Z"
+      "updated_at": "2024-10-23T00:37:28.823Z",
+      "contains_ai": false
     }
   },
   {
@@ -376,7 +413,8 @@
       "caption": "Did I ever mention that I once saw an eclipse!",
       "profile": 1,
       "created_at": "2024-10-23T00:41:11.295Z",
-      "updated_at": "2024-10-23T00:41:11.295Z"
+      "updated_at": "2024-10-23T00:41:11.295Z",
+      "contains_ai": false
     }
   },
   {
@@ -386,7 +424,8 @@
       "caption": "Got a cool new fall bandana. No big deal",
       "profile": 1,
       "created_at": "2024-10-23T00:41:40.064Z",
-      "updated_at": "2024-10-23T00:41:40.064Z"
+      "updated_at": "2024-10-23T00:41:40.064Z",
+      "contains_ai": false
     }
   },
   {
@@ -396,7 +435,8 @@
       "caption": "Tongue out at the lake.",
       "profile": 1,
       "created_at": "2024-10-23T00:43:31.964Z",
-      "updated_at": "2024-10-23T00:43:31.964Z"
+      "updated_at": "2024-10-23T00:43:31.964Z",
+      "contains_ai": false
     }
   },
   {
@@ -406,7 +446,8 @@
       "caption": "One time I got a cake baked just for me!",
       "profile": 1,
       "created_at": "2024-10-23T00:46:57.418Z",
-      "updated_at": "2024-10-23T00:46:57.418Z"
+      "updated_at": "2024-10-23T00:46:57.418Z",
+      "contains_ai": false
     }
   },
   {
@@ -416,7 +457,8 @@
       "caption": "Got a haircut and a bowl of ice cream",
       "profile": 1,
       "created_at": "2024-10-23T00:47:44.939Z",
-      "updated_at": "2024-10-23T00:47:44.939Z"
+      "updated_at": "2024-10-23T00:47:44.939Z",
+      "contains_ai": false
     }
   },
   {
@@ -426,7 +468,8 @@
       "caption": "Bath time got me like…",
       "profile": 1,
       "created_at": "2024-10-23T00:48:48.815Z",
-      "updated_at": "2024-10-23T00:48:48.815Z"
+      "updated_at": "2024-10-23T00:48:48.815Z",
+      "contains_ai": false
     }
   },
   {
@@ -436,7 +479,8 @@
       "caption": "Made a card for mom and she really loved it",
       "profile": 1,
       "created_at": "2024-10-23T00:51:55.229Z",
-      "updated_at": "2024-10-23T00:51:55.229Z"
+      "updated_at": "2024-10-23T00:51:55.229Z",
+      "contains_ai": false
     }
   },
   {
@@ -446,7 +490,8 @@
       "caption": "Went to the airport to pick up mom. Fun fact, I’ve been on an airplane before",
       "profile": 1,
       "created_at": "2024-10-23T00:54:15.828Z",
-      "updated_at": "2024-10-23T00:54:15.828Z"
+      "updated_at": "2024-10-23T00:54:15.828Z",
+      "contains_ai": false
     }
   },
   {
@@ -456,7 +501,8 @@
       "caption": "I love my new moose chew toy. It’s a crinkly one",
       "profile": 2,
       "created_at": "2024-10-24T02:55:29.708Z",
-      "updated_at": "2024-10-24T02:55:29.708Z"
+      "updated_at": "2024-10-24T02:55:29.708Z",
+      "contains_ai": false
     }
   },
   {
@@ -466,7 +512,8 @@
       "caption": "Linus at the hotel!",
       "profile": 1,
       "created_at": "2024-10-26T15:32:45.869Z",
-      "updated_at": "2024-10-26T15:32:45.869Z"
+      "updated_at": "2024-10-26T15:32:45.869Z",
+      "contains_ai": false
     }
   },
   {
@@ -476,7 +523,8 @@
       "caption": "This hotel couch is kinda comfy!",
       "profile": 1,
       "created_at": "2024-10-26T15:39:56.464Z",
-      "updated_at": "2024-10-26T15:39:56.464Z"
+      "updated_at": "2024-10-26T15:39:56.464Z",
+      "contains_ai": false
     }
   },
   {
@@ -486,7 +534,8 @@
       "caption": "Not a dog but a dawg.",
       "profile": 1,
       "created_at": "2024-10-30T22:44:57.201Z",
-      "updated_at": "2024-10-30T22:44:57.201Z"
+      "updated_at": "2024-10-30T22:44:57.201Z",
+      "contains_ai": false
     }
   },
   {
@@ -496,7 +545,8 @@
       "caption": "Not a dog but a dawg",
       "profile": 1,
       "created_at": "2025-01-05T02:37:03.765Z",
-      "updated_at": "2025-01-05T02:37:03.765Z"
+      "updated_at": "2025-01-05T02:37:03.765Z",
+      "contains_ai": false
     }
   }
 ]

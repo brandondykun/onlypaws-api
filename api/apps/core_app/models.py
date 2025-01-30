@@ -125,6 +125,7 @@ class Post(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="posts")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    contains_ai = models.BooleanField(blank=True, default=False)
 
     def __str__(self):
         return f"Post {self.id} - {self.caption}"

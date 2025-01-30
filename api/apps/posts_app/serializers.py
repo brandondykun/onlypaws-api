@@ -189,6 +189,7 @@ class PostSerializer(serializers.ModelSerializer):
             "images",
             "likes",
             "comments",
+            "contains_ai",
         ]
         read_only_fields = ["id", "created_at", "updated_at", "likes", "comments"]
 
@@ -237,6 +238,7 @@ class PostDetailedSerializer(serializers.ModelSerializer):
             "reports",
             "is_hidden",
             "is_reported",
+            "contains_ai",
         ]
         read_only_fields = [
             "id",
