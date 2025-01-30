@@ -780,7 +780,9 @@ class PostReportViewSet(
         return context
 
     @extend_schema(parameters=[auth_profile_param])
-    @action(detail=True, methods=["post"], permission_classes=[permissions.IsAdminUser])
+    @action(
+        detail=True, methods=["patch"], permission_classes=[permissions.IsAdminUser]
+    )
     def resolve(self, request, pk=None):
         """
         Endpoint for staff to resolve a report

@@ -95,7 +95,7 @@ class PrivatePostReportTests(PostsAppTestHelper):
         url = reverse("posts_app:report-resolve", kwargs={"pk": report.id})
         data = {"status": "RESOLVED", "resolution_note": "Content removed"}
 
-        response = self.client.post(url, data)
+        response = self.client.patch(url, data)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         report.refresh_from_db()
@@ -129,7 +129,7 @@ class PrivatePostReportTests(PostsAppTestHelper):
         url = reverse("posts_app:report-resolve", kwargs={"pk": report.id})
         data = {"status": "INVALID_STATUS", "resolution_note": "Test note"}
 
-        response = self.client.post(url, data)
+        response = self.client.patch(url, data)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -149,7 +149,7 @@ class PrivateNonStaffPostReportTests(PostsAppTestHelper):
         url = reverse("posts_app:report-resolve", kwargs={"pk": report.id})
         data = {"status": "RESOLVED", "resolution_note": "Content removed"}
 
-        response = self.client.post(url, data)
+        response = self.client.patch(url, data)
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         report.refresh_from_db()
