@@ -4,11 +4,12 @@
     "pk": 1,
     "fields": {
       "password": "pbkdf2_sha256$870000$Z1KQKyc8vHw6XLL5Fkahvy$j8+SUVSSDTj3sqzv/mIT6KT/UgyQ0rIhsLntFEpPH3Q=",
-      "last_login": "2024-10-28T00:15:42.403Z",
+      "last_login": "2025-01-30T05:37:30.579Z",
       "is_superuser": true,
       "email": "admin@email.com",
       "is_active": true,
       "is_staff": true,
+      "is_email_verified": true,
       "groups": [],
       "user_permissions": []
     }
@@ -23,6 +24,7 @@
       "email": "userone@email.com",
       "is_active": true,
       "is_staff": false,
+      "is_email_verified": true,
       "groups": [],
       "user_permissions": []
     }
@@ -37,6 +39,7 @@
       "email": "usertwo@email.com",
       "is_active": true,
       "is_staff": false,
+      "is_email_verified": true,
       "groups": [],
       "user_permissions": []
     }
@@ -51,6 +54,7 @@
       "email": "userthree@email.com",
       "is_active": true,
       "is_staff": false,
+      "is_email_verified": true,
       "groups": [],
       "user_permissions": []
     }
@@ -65,6 +69,7 @@
       "email": "userfour@email.com",
       "is_active": true,
       "is_staff": false,
+      "is_email_verified": true,
       "groups": [],
       "user_permissions": []
     }
@@ -79,6 +84,7 @@
       "email": "userfive@email.com",
       "is_active": true,
       "is_staff": false,
+      "is_email_verified": true,
       "groups": [],
       "user_permissions": []
     }
@@ -93,6 +99,7 @@
       "email": "usersix@email.com",
       "is_active": true,
       "is_staff": false,
+      "is_email_verified": true,
       "groups": [],
       "user_permissions": []
     }
@@ -107,6 +114,7 @@
       "email": "userseven@email.com",
       "is_active": true,
       "is_staff": false,
+      "is_email_verified": true,
       "groups": [],
       "user_permissions": []
     }
@@ -121,6 +129,7 @@
       "email": "usereight@email.com",
       "is_active": true,
       "is_staff": false,
+      "is_email_verified": true,
       "groups": [],
       "user_permissions": []
     }
@@ -135,6 +144,7 @@
       "email": "usernine@email.com",
       "is_active": true,
       "is_staff": false,
+      "is_email_verified": true,
       "groups": [],
       "user_permissions": []
     }
@@ -149,6 +159,7 @@
       "email": "userten@email.com",
       "is_active": true,
       "is_staff": false,
+      "is_email_verified": true,
       "groups": [],
       "user_permissions": []
     }
@@ -163,6 +174,7 @@
       "email": "usereleven@email.com",
       "is_active": true,
       "is_staff": false,
+      "is_email_verified": true,
       "groups": [],
       "user_permissions": []
     }
@@ -177,6 +189,7 @@
       "email": "usertwelve@email.com",
       "is_active": true,
       "is_staff": false,
+      "is_email_verified": true,
       "groups": [],
       "user_permissions": []
     }
@@ -191,6 +204,7 @@
       "email": "userthirteen@email.com",
       "is_active": true,
       "is_staff": false,
+      "is_email_verified": true,
       "groups": [],
       "user_permissions": []
     }
@@ -205,6 +219,7 @@
       "email": "userfourteen@email.com",
       "is_active": true,
       "is_staff": false,
+      "is_email_verified": true,
       "groups": [],
       "user_permissions": []
     }
@@ -219,6 +234,7 @@
       "email": "userfifteen@email.com",
       "is_active": true,
       "is_staff": false,
+      "is_email_verified": true,
       "groups": [],
       "user_permissions": []
     }
@@ -233,6 +249,7 @@
       "email": "usersixteen@email.com",
       "is_active": true,
       "is_staff": false,
+      "is_email_verified": true,
       "groups": [],
       "user_permissions": []
     }
@@ -247,6 +264,7 @@
       "email": "userseventeen@email.com",
       "is_active": true,
       "is_staff": false,
+      "is_email_verified": true,
       "groups": [],
       "user_permissions": []
     }
@@ -261,6 +279,7 @@
       "email": "usereighteen@email.com",
       "is_active": true,
       "is_staff": false,
+      "is_email_verified": true,
       "groups": [],
       "user_permissions": []
     }
@@ -275,6 +294,7 @@
       "email": "usernineteen@email.com",
       "is_active": true,
       "is_staff": false,
+      "is_email_verified": true,
       "groups": [],
       "user_permissions": []
     }
@@ -289,6 +309,7 @@
       "email": "usertwenty@email.com",
       "is_active": true,
       "is_staff": false,
+      "is_email_verified": true,
       "groups": [],
       "user_permissions": []
     }
@@ -303,6 +324,7 @@
       "email": "usertwentyone@email.com",
       "is_active": true,
       "is_staff": false,
+      "is_email_verified": true,
       "groups": [],
       "user_permissions": []
     }
@@ -317,6 +339,7 @@
       "email": "usertwentytwo@email.com",
       "is_active": true,
       "is_staff": false,
+      "is_email_verified": true,
       "groups": [],
       "user_permissions": []
     }
@@ -331,6 +354,7 @@
       "email": "usertwentythree@email.com",
       "is_active": true,
       "is_staff": false,
+      "is_email_verified": true,
       "groups": [],
       "user_permissions": []
     }
