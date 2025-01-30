@@ -46,6 +46,7 @@ from .pagination import (
     PostCommentsPagination,
     CommentRepliesPagination,
     ReportReasonPagination,
+    ReportPostsPagination,
 )
 from drf_spectacular.utils import (
     extend_schema_view,
@@ -758,12 +759,15 @@ class PostReportViewSet(
     """
 
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = ReportPostsPagination
 
     def get_queryset(self):
         requesting_profile = self.request.current_profile
         if self.request.user.is_staff:
-            return PostReport.objects.all()
-        return PostReport.objects.filter(reporter=requesting_profile)
+            return PostReport.objects.all().order_by("created_at")
+        return PostReport.objects.filter(reporter=requesting_profile).order_by(
+            "-created_at"
+        )
 
     def get_serializer_class(self):
         if self.action == "create":
