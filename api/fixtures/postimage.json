@@ -727,5 +727,32 @@
       "image": "images/test/1/1/55/image_2.webp",
       "is_main": false
     }
+  },
+  {
+    "model": "core_app.postimage",
+    "pk": 82,
+    "fields": {
+      "post": 56,
+      "image": "images/test/1/1/56/image_0.webp",
+      "is_main": false
+    }
+  },
+  {
+    "model": "core_app.postimage",
+    "pk": 83,
+    "fields": {
+      "post": 56,
+      "image": "images/test/1/1/56/image_1.webp",
+      "is_main": false
+    }
+  },
+  {
+    "model": "core_app.postimage",
+    "pk": 84,
+    "fields": {
+      "post": 56,
+      "image": "images/test/1/1/56/image_2.webp",
+      "is_main": false
+    }
   }
 ]
