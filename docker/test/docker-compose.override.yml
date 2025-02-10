@@ -1,0 +1,19 @@
+# Docker compose  override for test environment
+
+services:
+  only-paws-app:
+    volumes:
+      - only-paws-static-data-test:/vol/web
+      - ../logs/django-test.log:/var/log/django.log
+    env_file:
+      - test/.env.test
+
+  only-paws-db:
+    volumes:
+      - only-paws-db-data-test:/var/lib/postgresql/data
+    env_file:
+      - test/.env.test.db
+
+volumes:
+  only-paws-db-data-test:
+  only-paws-static-data-test:

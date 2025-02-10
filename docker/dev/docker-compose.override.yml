@@ -1,0 +1,19 @@
+# Docker compose override for local development environment
+
+services:
+  only-paws-app:
+    volumes:
+      - only-paws-static-data-dev:/vol/web
+      - ../logs/django-dev.log:/var/log/django.log
+    env_file:
+      - dev/.env.dev.local
+
+  only-paws-db:
+    volumes:
+      - only-paws-db-data-dev:/var/lib/postgresql/data
+    env_file:
+      - dev/.env.dev.local.db
+
+volumes:
+  only-paws-db-data-dev:
+  only-paws-static-data-dev:

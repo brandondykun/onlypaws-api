@@ -38,8 +38,8 @@ class PrivateReportReasonTests(PostsAppTestHelper):
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["results"]), 2)
-        self.assertEqual(response.data["results"][1]["name"], self.reason1.name)
+        self.assertEqual(len(response.data["results"]), 4)
+        self.assertEqual(response.data["results"][0]["name"], self.reason1.name)
 
 
 class PrivatePostReportTests(PostsAppTestHelper):

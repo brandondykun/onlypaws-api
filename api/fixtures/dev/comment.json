@@ -1,0 +1,26 @@
+[
+  {
+    "model": "core_app.comment",
+    "pk": 1,
+    "fields": {
+      "text": "Did he try to bring the stick inside?",
+      "profile": 4,
+      "post": 7,
+      "created_at": "2025-02-04T04:12:37.514Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "core_app.comment",
+    "pk": 2,
+    "fields": {
+      "text": "No he knows better",
+      "profile": 1,
+      "post": 7,
+      "created_at": "2025-02-04T04:16:25.183Z",
+      "parent_comment": 1,
+      "reply_to_comment": 1
+    }
+  }
+]

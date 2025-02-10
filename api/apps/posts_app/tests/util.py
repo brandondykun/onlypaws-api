@@ -297,10 +297,19 @@ class PostsAppTestHelper(TestCase):
 
         # Create report reasons
         self.reason1 = ReportReason.objects.create(
-            name="Spam", description="Unwanted commercial content"
+            name="Inappropriate Content",
+            description="Content contains inappropriate, offensive, or explicit material",
         )
         self.reason2 = ReportReason.objects.create(
-            name="Harassment", description="Abusive or harassing behavior"
+            name="Not Pet Related", description="Content is not pet related"
+        )
+        self.reason3 = ReportReason.objects.create(
+            name="Too Much Human",
+            description="Content contains too much human presence and I'm not here for that",
+        )
+        self.reason4 = ReportReason.objects.create(
+            name="Other",
+            description="A reason other than the ones listed",
         )
 
         self.report1 = PostReport.objects.create(

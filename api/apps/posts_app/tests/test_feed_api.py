@@ -25,7 +25,7 @@ class PrivateFeedApiTests(PostsAppTestHelper):
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
-        self.assertEqual(len(res.data["results"]), 2)
+        self.assertEqual(len(res.data["results"]), 1)
 
     def test_fetch_feed_of_another_user_returns_error(self):
         """

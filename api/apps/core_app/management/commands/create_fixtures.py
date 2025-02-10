@@ -1,3 +1,4 @@
+import os
 from django.core.management.base import BaseCommand
 from django.core import serializers
 from django.apps import apps
@@ -7,6 +8,18 @@ class Command(BaseCommand):
     help = "Create a fixture file for each model in the project."
 
     def handle(self, *args, **options):
+        # Get current environment
+        environment = os.environ.get("DJANGO_ENV")
+
+        # Check if the environment is test or dev
+        if environment != "test" and environment != "dev":
+            self.stdout.write(
+                self.style.ERROR(
+                    "This command can only be run in a test or local dev environment!"
+                )
+            )
+            return
+
         # Create fixtures
         models = [
             "user",
@@ -23,10 +36,19 @@ class Command(BaseCommand):
             "reportreason",
             "postreport",
         ]
+
+        # default fixture path
+        fixture_path = "fixtures/test"
+
+        # override fixture path for dev environment
+        if environment == "dev":
+            fixture_path = "fixtures/dev"
+
+        # create fixtures for each model
         for model in apps.get_models():
             model_name = model.__name__.lower()
             if model_name in models:
-                fixture_file = f"fixtures/{model_name}.json"
+                fixture_file = f"{fixture_path}/{model_name}.json"
                 with open(fixture_file, "w") as f:
                     data = serializers.serialize("json", model.objects.all())
                     f.write(data)

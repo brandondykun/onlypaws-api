@@ -12,3 +12,4 @@ coverage==7.6.4
 django-storages>=1.14.4,<=1.15
 boto3>=1.35.81,<=1.36
 django-cors-headers>=4.6.0,<=4.7.0
+gunicorn==20.1.0

@@ -99,9 +99,11 @@ def profile_image_path(instance, filename):
     user_id = instance.profile.user.id
     profile_id = instance.profile.id
     path = "images/{0}/{1}/{2}".format(user_id, profile_id, filename)
-    # if in test env, use test image path
+    # build path based on environment
     if os.environ.get("DJANGO_ENV") == "test":
         path = "images/test/{0}/{1}/{2}".format(user_id, profile_id, filename)
+    if os.environ.get("DJANGO_ENV") == "dev":
+        path = "images/dev/{0}/{1}/{2}".format(user_id, profile_id, filename)
     return path
 
 
@@ -138,12 +140,14 @@ def post_image_path(instance, filename):
     user_id = instance.post.profile.user.id
     profile_id = instance.post.profile.id
     post_id = instance.post.id
-    path = "images/{0}/{1}/{2}/{3}".format(user_id, profile_id, post_id, filename)
-    # if in test env, use test image path
+    path = "{0}/{1}/{2}/{3}".format(user_id, profile_id, post_id, filename)
+    # build path based on environment
     if os.environ.get("DJANGO_ENV") == "test":
-        path = "images/test/{0}/{1}/{2}/{3}".format(
-            user_id, profile_id, post_id, filename
-        )
+        path = "images/test/" + path
+    elif os.environ.get("DJANGO_ENV") == "dev":
+        path = "images/dev/" + path
+    else:
+        path = "images/" + path
 
     return path
 

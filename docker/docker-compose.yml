@@ -1,0 +1,30 @@
+version: "3.9"
+name: only-paws
+
+# Base docker compose file for all environments
+# Each environment has a docker-compose.override.yml file that extends this file
+
+services:
+  only-paws-app:
+    container_name: onlypaws_django
+    build:
+      context: ../
+    ports:
+      - 8000:8000
+    volumes:
+      - ../api:/api
+    restart: unless-stopped
+    command: >
+      sh -c "python manage.py wait_for_db &&
+             python manage.py migrate &&
+             python manage.py load_report_reasons &&
+             python manage.py load_pet_types &&
+             python manage.py runserver 0.0.0.0:8000"
+    depends_on:
+      - only-paws-db
+
+  only-paws-db:
+    container_name: onlypaws_db
+    image: postgres:16-alpine
+    restart: unless-stopped
+

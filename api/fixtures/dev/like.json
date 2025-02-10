@@ -1,0 +1,11 @@
+[
+  {
+    "model": "core_app.like",
+    "pk": 1,
+    "fields": {
+      "profile": 4,
+      "post": 7,
+      "liked_at": "2025-02-04T04:12:20.650Z"
+    }
+  }
+]

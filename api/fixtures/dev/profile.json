@@ -1,0 +1,50 @@
+[
+{
+    "model": "core_app.profile",
+    "pk": 1,
+    "fields": {
+        "username": "admin_dog",
+        "about": "I am the admin dog.",
+        "user": 1,
+        "name": "Linus",
+        "pet_type": 1,
+        "breed": "Cavalier King Charles Spaniel"
+    }
+},
+{
+    "model": "core_app.profile",
+    "pk": 2,
+    "fields": {
+        "username": "hound_dog",
+        "about": "I pull like a freight train on a leash. But I can smell a rabbit from half a mile.",
+        "user": 2,
+        "name": "Ivy",
+        "pet_type": 1,
+        "breed": "Treeing Walker Coon hound"
+    }
+},
+{
+    "model": "core_app.profile",
+    "pk": 3,
+    "fields": {
+        "username": "chewyyy",
+        "about": "I’m Linus’s cousin!",
+        "user": 3,
+        "name": "Chewy",
+        "pet_type": 1,
+        "breed": "Cavi poo"
+    }
+},
+{
+    "model": "core_app.profile",
+    "pk": 4,
+    "fields": {
+        "username": "pitbulpup",
+        "about": "People think my breed is mean but I don’t have a mean bone in my body!",
+        "user": 4,
+        "name": "Jemma",
+        "pet_type": 1,
+        "breed": "Pitbull"
+    }
+}
+]

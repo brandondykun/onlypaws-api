@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 from datetime import timedelta
 import os
+from typing import Literal
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -28,6 +29,9 @@ SECRET_KEY = os.environ.get(
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
+if os.environ.get("DEBUG") == "True":
+    DEBUG = True
+
 
 ALLOWED_HOSTS = ["*"]
 CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
@@ -40,7 +44,6 @@ CORS_ALLOW_HEADERS = [
     "authorization",
     "auth-profile-id",
 ]
-
 
 # Application definition
 
@@ -96,21 +99,11 @@ WSGI_APPLICATION = "core.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#     }
-# }
-
+# Default to sqlite3 database
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("DB_NAME"),
-        "USER": os.environ.get("DB_USER"),
-        "HOST": os.environ.get("DB_HOST"),
-        "PASSWORD": os.environ.get("DB_PASSWORD"),
-        "PORT": os.environ.get("DB_PORT"),
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
 
@@ -149,7 +142,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -160,7 +155,7 @@ AUTH_USER_MODEL = "core_app.User"
 
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-    "PAGE_SIZE": 3,
+    "PAGE_SIZE": 20,
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
@@ -168,13 +163,15 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
+access_token_lifetime = int(os.environ.get("ACCESS_TOKEN_LIFETIME"))
+refresh_token_lifetime = int(os.environ.get("REFRESH_TOKEN_LIFETIME"))
+
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=access_token_lifetime),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=refresh_token_lifetime),
 }
 
 MEDIA_URL = "/media/"
-
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 
@@ -215,7 +212,8 @@ SPECTACULAR_SETTINGS = {
 # Test Fixtures
 FIXTURE_DIRS = [BASE_DIR / "fixtures"]
 
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# Email Settings
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 EMAIL_USE_TLS = True
 EMAIL_PORT = os.environ.get("EMAIL_PORT")
 EMAIL_HOST = os.environ.get("EMAIL_HOST")
@@ -223,11 +221,19 @@ EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
 
+# Get the current environment
+environment: Literal["test", "dev", "staging", "prod"] = os.environ.get("DJANGO_ENV")
 
-if os.environ.get("DJANGO_ENV") == "test":
+# Load the correct settings file based on the environment
+if environment == "test":
     from core.settings_test import *
-elif os.environ.get("DJANGO_ENV") == "dev":
+elif environment == "dev":
     from core.settings_dev import *
+elif environment == "staging":
+    from core.settings_staging import *
+elif environment == "prod":
+    from core.settings_prod import *
 
 
-print("DJANGO_ENV: ", os.getenv("DJANGO_ENV"))
+if environment == "dev" or environment == "test":
+    print("DJANGO_ENV: ", environment)

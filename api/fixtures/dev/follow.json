@@ -1,0 +1,11 @@
+[
+  {
+    "model": "core_app.follow",
+    "pk": 1,
+    "fields": {
+      "followed": 1,
+      "followed_by": 4,
+      "created_at": "2025-02-04T04:11:27.903Z"
+    }
+  }
+]

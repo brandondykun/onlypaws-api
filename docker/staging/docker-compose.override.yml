@@ -1,0 +1,43 @@
+# Docker compose override for staging environment
+
+services:
+  only-paws-app:
+    command: >
+      sh -c "python manage.py wait_for_db &&
+             python manage.py migrate &&
+             python manage.py load_report_reasons &&
+             python manage.py load_pet_types &&
+             python manage.py collectstatic --noinput &&
+             gunicorn core.wsgi:application --bind 0.0.0.0:8000"
+    volumes:
+      - only-paws-static-data-staging:/vol/web/static
+      - only-paws-media-data-staging:/vol/web/media
+      - ../logs/django-staging.log:/var/log/django.log
+    env_file:
+      - staging/.env.staging
+    expose:
+      - "8000"
+    ports: !reset []
+
+  only-paws-db:
+    volumes:
+      - only-paws-db-data-staging:/var/lib/postgresql/data
+    env_file:
+      - staging/.env.staging.db
+
+  nginx:
+    build: ../nginx
+    volumes:
+      - only-paws-static-data-staging:/vol/web/static
+      - only-paws-media-data-staging:/vol/web/media
+      - ../nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf 
+    ports:
+      - "80:80"
+    restart: unless-stopped
+    depends_on:
+      - only-paws-app
+
+volumes:
+  only-paws-db-data-staging:
+  only-paws-static-data-staging:
+  only-paws-media-data-staging:
