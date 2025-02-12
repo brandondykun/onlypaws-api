@@ -10,7 +10,7 @@ services:
              python manage.py collectstatic --noinput &&
              gunicorn core.wsgi:application --bind 0.0.0.0:8000"
     volumes:
-      - only-paws-static-data-staging:/vol/web/static
+      - ../api/static:/vol/web/static
       - only-paws-media-data-staging:/vol/web/media
       - ../logs/django-staging.log:/var/log/django.log
     env_file:
@@ -28,7 +28,7 @@ services:
   nginx:
     build: ../nginx
     volumes:
-      - only-paws-static-data-staging:/vol/web/static
+      - ../api/static:/vol/web/static
       - only-paws-media-data-staging:/vol/web/media
       - ../nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf 
     ports:
