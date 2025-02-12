@@ -1,0 +1,14 @@
+[
+  {
+    "model": "core_app.profile",
+    "pk": 1,
+    "fields": {
+      "username": "admin_dog",
+      "about": "I am the admin dog.",
+      "user": 1,
+      "name": "Linus",
+      "pet_type": 1,
+      "breed": "Cavalier King Charles Spaniel"
+    }
+  }
+]

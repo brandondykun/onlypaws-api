@@ -1,0 +1,15 @@
+[
+  { "model": "core_app.pettype", "pk": 1, "fields": { "name": "Dog" } },
+  { "model": "core_app.pettype", "pk": 2, "fields": { "name": "Cat" } },
+  { "model": "core_app.pettype", "pk": 3, "fields": { "name": "Fish" } },
+  { "model": "core_app.pettype", "pk": 4, "fields": { "name": "Bird" } },
+  { "model": "core_app.pettype", "pk": 5, "fields": { "name": "Rabbit" } },
+  { "model": "core_app.pettype", "pk": 6, "fields": { "name": "Hamster" } },
+  { "model": "core_app.pettype", "pk": 7, "fields": { "name": "Guinea Pig" } },
+  { "model": "core_app.pettype", "pk": 8, "fields": { "name": "Turtle" } },
+  { "model": "core_app.pettype", "pk": 9, "fields": { "name": "Ferret" } },
+  { "model": "core_app.pettype", "pk": 10, "fields": { "name": "Duck" } },
+  { "model": "core_app.pettype", "pk": 11, "fields": { "name": "Pig" } },
+  { "model": "core_app.pettype", "pk": 12, "fields": { "name": "Chicken" } },
+  { "model": "core_app.pettype", "pk": 13, "fields": { "name": "Other" } }
+]
