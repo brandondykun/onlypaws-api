@@ -6,19 +6,19 @@
 # Check if arguments are provided
 if [ $# -ne 2 ]; then
     echo "Error: Exactly two arguments are required"
-    echo "Usage: ./create_model_fixture.sh <dev|test> <model_name>"
+    echo "Usage: ./create_model_fixture.sh <dev|test|staging> <model_name>"
     echo "Example: ./create_model_fixture.sh dev User"
     exit 1
 fi
 
 # Validate the first argument (environment)
 case $1 in
-    dev|test)
+    dev|test|staging)
         environment=$1
         ;;
     *)
         echo "Error: Invalid environment specified"
-        echo "Valid options are: dev, test"
+        echo "Valid options are: dev, test, staging"
         exit 1
         ;;
 esac

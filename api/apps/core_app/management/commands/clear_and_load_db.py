@@ -10,10 +10,10 @@ class Command(BaseCommand):
 
         environment = os.environ.get("DJANGO_ENV")
         # Clear the database
-        if environment != "test" and environment != "dev":
+        if environment != "test" and environment != "dev" and environment != "staging":
             self.stdout.write(
                 self.style.ERROR(
-                    "This command can only be run in a test or local dev environment!"
+                    "This command can only be run in a test, staging or local dev environment!"
                 )
             )
             return
@@ -39,13 +39,16 @@ class Command(BaseCommand):
             "postreport.json",
         ]
 
+        path_prefix = "fixtures/test"
+
+        if environment == "dev":
+            path_prefix = "fixtures/dev"
+
+        if environment == "staging":
+            path_prefix = "fixtures/staging"
+
         fixture_paths = [
-            (
-                f"fixtures/test/{fixture_file}"
-                if environment == "test"
-                else f"fixtures/dev/{fixture_file}"
-            )
-            for fixture_file in fixture_files
+            f"{path_prefix}/{fixture_file}" for fixture_file in fixture_files
         ]
 
         for fixture_path in fixture_paths:
