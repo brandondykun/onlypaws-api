@@ -6,6 +6,7 @@ from rest_framework import generics, permissions
 from rest_framework import status
 from apps.core_app.models import Profile, User, ProfileImage, PetType, VerifyEmailToken
 from apps.core_app.utils import generate_verification_code
+from rest_framework import serializers
 from .serializers import (
     UserSerializer,
     ProfileDetailedSerializer,
@@ -21,7 +22,7 @@ from rest_framework.response import Response
 import logging
 from django.core.mail import send_mail
 from django.utils import timezone
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from datetime import timedelta
 from drf_spectacular.utils import (
     extend_schema_view,
@@ -123,6 +124,26 @@ class CreateUserView(generics.CreateAPIView):
         except Exception as e:
             # If an exception occurs, the transaction will be rolled back
             # and the main object will be deleted.
+            logger.info(f"Error creating user: {str(e)}")
+            if isinstance(e, serializers.ValidationError):
+                errors = {}
+                # handle unique email constraint error
+                if "email" in str(e):
+                    errors["email"] = ["A user with that email already exists."]
+                if "password" in str(e):
+                    errors["password"] = e.detail["password"]
+                # handle unique username constraint error
+                if "username" in str(e):
+                    errors["username"] = [
+                        "A profile with that username already exists."
+                    ]
+
+                if len(errors):
+                    return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
+                # handle other validation errors
+                return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
+
             return Response(
                 {"message": "Error creating account."},
                 status=status.HTTP_400_BAD_REQUEST,
