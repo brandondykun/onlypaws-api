@@ -170,10 +170,30 @@ class CreateProfileView(generics.CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         # make request data mutable
-        request.data._mutable = True
-        request.data["user"] = self.request.user.id
-        request.data._mutable = False
-        return self.create(request, *args, **kwargs)
+        try:
+            request.data["user"] = self.request.user.id
+            return self.create(request, *args, **kwargs)
+
+        except Exception as e:
+            logger.info(f"Error creating profile: {str(e)}")
+            if isinstance(e, serializers.ValidationError):
+                errors = {}
+                # handle unique username constraint error with custom error message
+                if "username" in str(e):
+                    errors["username"] = [
+                        "A profile with that username already exists."
+                    ]
+
+                if len(errors):
+                    return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
+                # handle other validation errors
+                return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
+
+            return Response(
+                {"message": "Error creating profile."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 class RetrieveUpdateProfileView(generics.RetrieveUpdateAPIView):
