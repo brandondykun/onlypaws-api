@@ -45,7 +45,6 @@ from .pagination import (
     FollowListPagination,
     PostCommentsPagination,
     CommentRepliesPagination,
-    ReportReasonPagination,
     ReportPostsPagination,
 )
 from drf_spectacular.utils import (
@@ -727,7 +726,7 @@ class ReportReasonViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = ReportReason.objects.filter(is_active=True)
     serializer_class = ReportReasonSerializer
     permission_classes = [permissions.IsAuthenticated]
-    pagination_class = ReportReasonPagination
+    pagination_class = None
 
     def list(self, request, *args, **kwargs):
         if not request.current_profile:
