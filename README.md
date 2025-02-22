@@ -1,5 +1,16 @@
 # OnlyPaws API
 
+<img src="docs/images/ios-dark.png" alt="Only Paws Icon" width="150" style="border-radius: 15%;"/>
+
+<br />
+<br />
+
+_The unapologetically pet friendly social media app._
+
+---
+
+## Table of Contents
+
 1. [Helper Scripts](#scripts)
 2. [Running the API](#running-the-api)
 3. [Shutting Down the API](#shutting-down-the-api)
@@ -10,17 +21,24 @@
 8. [Image Data](#image-data)
 9. [Commits](#commits)
 10. [Environment Variables](#environment-variables)
+12. [Dev and Test Images](#dev-and-test-images)
 
+---
 
 ## Scripts
 
 Several scripts are available to help with the development process.
 
 [create_fixtures.sh](#creating-fixtures-for-all-models) - Creates fixtures for all models in the given environment.
+
 [create_model_fixture.sh](#creating-fixture-for-individual-model) - Creates a fixture for a single model in the given environment.
+
 [load_db.sh](#clear-and-reload-database) - Clears and reloads the database with the fixtures for the given environment.
+
 [run.sh](#running-the-api) - Starts the docker containers and runs the API in the given environment.
+
 [stop.sh](#shutting-down-the-api) - Removes the docker containers and shuts down the API.
+
 [test.sh](#tests) - Runs automated test suite.
 
 
@@ -85,56 +103,65 @@ Running the test script with coverage will automatically open the coverage repor
 
 ## Creating Fixture for Individual Model
 
-Fixtures can only be created in dev or test environment.
+Fixtures can only be created in dev, test, or staging environment.
 
 To create a fixture for an individual model, run the following command:
 ```bash
 # base command example
-scripts/create_model_fixture.sh <dev|test> <MODEL_NAME>
+scripts/create_model_fixture.sh <dev|test|staging> <MODEL_NAME>
 
 # create fixture for dev environment User model
 scripts/create_model_fixture.sh dev User
 
 # create fixture for test environment Profile model
 scripts/create_model_fixture.sh test Profile
+
+# create fixture for staging environment Profile model
+scripts/create_model_fixture.sh staging Profile
 ```
 
 ## Creating Fixtures For All Models
 
 These commands will create fixtures for all models.
 Prefer using the create_model_fixture.sh script to create a fixture for an individual model if possible.
-Creating fixtures can only be done in dev or test environment.
+Creating fixtures can only be done in dev, test, or staging environment.
 
 To create fixtures for all models, run the following command:
 ```bash
 # base command example
-scripts/create_fixtures.sh <dev|test>
+scripts/create_fixtures.sh <dev|test|staging>
 
 # create fixtures for dev environment
 scripts/create_fixtures.sh dev
 
 # create fixtures for test environment
 scripts/create_fixtures.sh test
+
+# create fixtures for staging environment
+scripts/create_fixtures.sh staging
 ```
 
 
 ## Clear and Reload Database
 
-These are commands to help clear and reload the DB with data for dev or test environment.
+These are commands to help clear and reload the DB with data for dev, test, or staging environment.
 
 - The DB will first be cleared of all data.
 - Then the fixtures for the given environment from either the fixtures/dev or fixtures/test folder will be loaded into the DB.
-- This is for test or dev ENV only.
+- This is for dev, test, or staging ENV only.
 
 ```bash
 # base command example
-scripts/load_db.sh <dev|test>
+scripts/load_db.sh <dev|test|staging>
 
 # clear and reload dev db
 scripts/load_db.sh dev
 
 # clear and reload test db
 scripts/load_db.sh test
+
+# clear and reload staging db
+scripts/load_db.sh staging
 ```
 
 
@@ -186,3 +213,30 @@ cp docker/dev/.env.dev.local.db.template docker/dev/.env.dev.local.db
 ```
 
 Once the files are renamed, a value must be set for each variable in the file.
+
+
+## Dev and Test Images
+
+The images for this project are not committed to the repo and must be downloaded separately.
+
+Images for the dev and test environments are hosted on google drive. The image folder at the link below should be downloaded and placed in a media folder inside the api folder.
+
+To create the media folder, from the root of the project run: 
+
+```bash
+mkdir api/media
+```
+
+Then download the image folder from the following link and place it in the media folder:
+
+https://drive.google.com/drive/folders/1sHQJn6eXsJjC9hxduzrvB46HrzoQAytC
+
+The resulting project structure for the images directory should look like the following:
+
+```bash
+api/
+  media/
+    images/
+      dev/
+      test/
+```
