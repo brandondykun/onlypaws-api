@@ -119,5 +119,93 @@
       "updated_at": "2025-02-04T02:42:37.234Z",
       "contains_ai": false
     }
+  },
+  {
+    "model": "core_app.post",
+    "pk": 12,
+    "fields": {
+      "caption": "Sleepy morning…I know I’m just a dog, but I love a good pillow!",
+      "profile": 1,
+      "created_at": "2025-02-19T15:32:12.375Z",
+      "updated_at": "2025-02-19T15:32:12.375Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "core_app.post",
+    "pk": 13,
+    "fields": {
+      "caption": "Taking my heart treats! Gotta stay healthy to live a long life to make my humans happy!",
+      "profile": 1,
+      "created_at": "2025-02-19T23:00:12.086Z",
+      "updated_at": "2025-02-19T23:00:12.086Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "core_app.post",
+    "pk": 14,
+    "fields": {
+      "caption": "No caption needed. I’m stunning I know",
+      "profile": 4,
+      "created_at": "2025-02-19T23:03:28.360Z",
+      "updated_at": "2025-02-19T23:03:28.360Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "core_app.post",
+    "pk": 15,
+    "fields": {
+      "caption": "The Regal Bernese Mountain Dog\n\nCreated by DALL-E",
+      "profile": 5,
+      "created_at": "2025-02-20T00:58:40.370Z",
+      "updated_at": "2025-02-20T00:58:40.370Z",
+      "contains_ai": true
+    }
+  },
+  {
+    "model": "core_app.post",
+    "pk": 16,
+    "fields": {
+      "caption": "Showing some love to the pitbull!\n\nImages generate with Gemini. They’re crazy real looking.",
+      "profile": 5,
+      "created_at": "2025-02-20T01:11:25.304Z",
+      "updated_at": "2025-02-20T01:11:25.304Z",
+      "contains_ai": true
+    }
+  },
+  {
+    "model": "core_app.post",
+    "pk": 17,
+    "fields": {
+      "caption": "Golden Retriever \n\nCreated with Gemini",
+      "profile": 5,
+      "created_at": "2025-02-20T02:09:11.754Z",
+      "updated_at": "2025-02-20T02:09:11.754Z",
+      "contains_ai": true
+    }
+  },
+  {
+    "model": "core_app.post",
+    "pk": 18,
+    "fields": {
+      "caption": "Savannah Cat\n\nCreated using Gemini ♊️",
+      "profile": 6,
+      "created_at": "2025-02-20T03:41:44.604Z",
+      "updated_at": "2025-02-20T03:41:44.604Z",
+      "contains_ai": true
+    }
+  },
+  {
+    "model": "core_app.post",
+    "pk": 19,
+    "fields": {
+      "caption": "Himalayan Cat",
+      "profile": 6,
+      "created_at": "2025-02-20T03:43:36.731Z",
+      "updated_at": "2025-02-20T03:43:36.731Z",
+      "contains_ai": true
+    }
   }
 ]
