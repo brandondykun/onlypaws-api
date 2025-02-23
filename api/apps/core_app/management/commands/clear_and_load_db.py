@@ -37,6 +37,8 @@ class Command(BaseCommand):
             "commentlike.json",
             "savedpost.json",
             "postreport.json",
+            "resetpasswordtoken.json",
+            "verifyemailtoken.json",
         ]
 
         path_prefix = "fixtures/test"

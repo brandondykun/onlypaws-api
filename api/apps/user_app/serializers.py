@@ -4,7 +4,13 @@ Serializers for the User API view.
 
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from apps.core_app.models import Profile, ProfileImage, PetType, VerifyEmailToken
+from apps.core_app.models import (
+    Profile,
+    ProfileImage,
+    PetType,
+    VerifyEmailToken,
+    ResetPasswordToken,
+)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -123,5 +129,14 @@ class VerifyEmailTokenSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = VerifyEmailToken
+        fields = ["id", "user", "token", "created_at"]
+        read_only_fields = ["created_at"]
+
+
+class ResetPasswordTokenSerializer(serializers.ModelSerializer):
+    """Serializer for ResetPasswordToken."""
+
+    class Meta:
+        model = ResetPasswordToken
         fields = ["id", "user", "token", "created_at"]
         read_only_fields = ["created_at"]

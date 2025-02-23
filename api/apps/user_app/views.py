@@ -4,7 +4,14 @@ Views for the user api.
 
 from rest_framework import generics, permissions
 from rest_framework import status
-from apps.core_app.models import Profile, User, ProfileImage, PetType, VerifyEmailToken
+from apps.core_app.models import (
+    Profile,
+    User,
+    ProfileImage,
+    PetType,
+    VerifyEmailToken,
+    ResetPasswordToken,
+)
 from apps.core_app.utils import generate_verification_code
 from rest_framework import serializers
 from .serializers import (
@@ -17,12 +24,13 @@ from .serializers import (
     PetTypeSerializer,
     ProfileUpdateSerializer,
     VerifyEmailTokenSerializer,
+    ResetPasswordTokenSerializer,
 )
 from rest_framework.response import Response
 import logging
 from django.core.mail import send_mail
 from django.utils import timezone
-from django.db import transaction, IntegrityError
+from django.db import transaction
 from datetime import timedelta
 from drf_spectacular.utils import (
     extend_schema_view,
@@ -50,6 +58,19 @@ def send_verification_email(user, token):
     """Send verification email to user."""
     subject = "Verify Your OnlyPaws Email"
     message = f"Your verification code is: {token}"
+    send_mail(
+        subject,
+        message,
+        settings.DEFAULT_FROM_EMAIL,
+        [user.email],
+        fail_silently=False,
+    )
+
+
+def send_reset_password_email(user, token):
+    """Send reset password email to user."""
+    subject = "Reset Your OnlyPaws Password"
+    message = f"Your password reset code is: {token}"
     send_mail(
         subject,
         message,
@@ -169,10 +190,20 @@ class CreateProfileView(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        # make request data mutable
         try:
-            request.data["user"] = self.request.user.id
-            return self.create(request, *args, **kwargs)
+            # Make request data mutable and add user ID
+            mutable_data = request.data.copy()
+            mutable_data["user"] = self.request.user.id
+
+            # Create serializer with mutable data
+            serializer = self.get_serializer(data=mutable_data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+
+            headers = self.get_success_headers(serializer.data)
+            return Response(
+                serializer.data, status=status.HTTP_201_CREATED, headers=headers
+            )
 
         except Exception as e:
             logger.info(f"Error creating profile: {str(e)}")
@@ -412,4 +443,142 @@ class RequestNewVerifyEmailTokenView(generics.CreateAPIView):
             return Response(
                 {"error": "Failed to send verification token."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+class CreateResetPasswordTokenView(generics.CreateAPIView):
+    """Create a reset password token and send it via email."""
+
+    serializer_class = ResetPasswordTokenSerializer
+    permission_classes = []  # Allow unauthenticated access
+    authentication_classes = []
+    queryset = ResetPasswordToken.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        email = request.data.get("email")
+
+        if not email:
+            return Response(
+                {"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Find user with this email
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            # Don't reveal if email exists or not for security
+            return Response(
+                {
+                    "message": "If a user with this email exists, they will receive a reset code."
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        try:
+            with transaction.atomic():
+                # Delete any existing reset tokens for this user
+                ResetPasswordToken.objects.filter(user=user).delete()
+
+                # Generate and save new token
+                token = generate_verification_code()
+                serializer = self.get_serializer(data={"user": user.id, "token": token})
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+
+                # Send email with reset token
+                send_reset_password_email(user, token)
+
+            logger.info(f"Password reset token sent to {email}")
+            return Response(
+                {
+                    "message": "If a user with this email exists, they will receive a reset code."
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        except Exception as e:
+            logger.error(f"Error creating reset token for {email}: {str(e)}")
+            return Response(
+                {"error": "Failed to process reset password request."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+class ResetPasswordView(generics.CreateAPIView):
+    """Reset user password using reset token."""
+
+    permission_classes = []  # Allow unauthenticated access
+    authentication_classes = []
+
+    def create(self, request, *args, **kwargs):
+        email = request.data.get("email")
+        token = request.data.get("token")
+        new_password = request.data.get("password")
+
+        # Validate required fields
+        if not all([email, token, new_password]):
+            return Response(
+                {"error": "Email, token and new password are required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            # Find user and their reset token
+            user = User.objects.get(email=email)
+            reset_token = ResetPasswordToken.objects.get(user=user, token=token)
+
+            # Check if token has expired (15 minutes)
+            if timezone.now() - reset_token.created_at > timedelta(minutes=15):
+                reset_token.delete()
+                return Response(
+                    {"error": "Reset token has expired"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            try:
+                # Validate password using UserSerializer
+                user_serializer = UserSerializer(
+                    user, data={"password": new_password}, partial=True
+                )
+                try:
+                    user_serializer.is_valid(raise_exception=True)
+                except serializers.ValidationError as e:
+                    if "password" in e.detail:
+                        return Response(
+                            {"error": e.detail["password"][0]},
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
+                    raise e
+
+                with transaction.atomic():
+                    # Update password
+                    user.set_password(new_password)
+                    user.save()
+
+                    # Delete the used token
+                    reset_token.delete()
+
+                logger.info(f"Password reset successful for {email}")
+                return Response(
+                    {"message": "Password reset successful"},
+                    status=status.HTTP_200_OK,
+                )
+
+            except Exception as e:
+                logger.error(f"Error resetting password for {email}: {str(e)}")
+                return Response(
+                    {"error": "Failed to reset password"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+
+        except User.DoesNotExist:
+            # Don't reveal if email exists
+            return Response(
+                {"error": "Invalid confirmation code"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except ResetPasswordToken.DoesNotExist:
+            return Response(
+                {"error": "Invalid confirmation code"},
+                status=status.HTTP_400_BAD_REQUEST,
             )

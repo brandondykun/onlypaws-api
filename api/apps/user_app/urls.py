@@ -53,4 +53,14 @@ urlpatterns = [
         views.RequestNewVerifyEmailTokenView.as_view(),
         name="request_new_verify_email_token",
     ),
+    path(
+        "request-password-reset/",
+        views.CreateResetPasswordTokenView.as_view(),
+        name="request_password_reset",
+    ),
+    path(
+        "reset-password/",
+        views.ResetPasswordView.as_view(),
+        name="reset_password",
+    ),
 ]

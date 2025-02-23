@@ -35,6 +35,8 @@ class Command(BaseCommand):
             "pettype",
             "reportreason",
             "postreport",
+            "resetpasswordtoken",
+            "verifyemailtoken",
         ]
 
         # default fixture path
