@@ -11,7 +11,17 @@ COPY ./api /api
 COPY ./requirements.txt /tmp/requirements.txt
 COPY ./requirements.dev.txt /tmp/requirements.dev.txt
 
-RUN touch /var/log/django.log
+RUN touch /var/log/django.log && \
+    adduser \
+    --disabled-password \
+    --no-create-home \
+    django-user && \
+    mkdir -p /vol/web/media && \
+    mkdir -p /vol/web/static && \
+    chown -R django-user:django-user /vol && \
+    chmod -R 755 /vol && \
+    chown django-user:django-user /var/log/django.log && \
+    chmod 644 /var/log/django.log
 
 WORKDIR /api
 EXPOSE 8000
@@ -27,15 +37,7 @@ RUN python -m venv /py && \
     then /py/bin/pip install -r /tmp/requirements.dev.txt ; \
     fi && \
     rm -rf /tmp && \
-    apk del .tmp-build-deps && \
-    adduser \
-    --disabled-password \
-    --no-create-home \
-    django-user && \
-    mkdir -p /vol/web/media && \
-    mkdir -p /vol/web/static && \
-    chown -R django-user:django-user /vol && \
-    chmod -R 755 /vol
+    apk del .tmp-build-deps
 
 ENV PATH="/py/bin:$PATH"
 
