@@ -11,17 +11,17 @@ COPY ./api /api
 COPY ./requirements.txt /tmp/requirements.txt
 COPY ./requirements.dev.txt /tmp/requirements.dev.txt
 
-RUN touch /var/log/django.log && \
-    adduser \
+RUN adduser \
     --disabled-password \
     --no-create-home \
     django-user && \
     mkdir -p /vol/web/media && \
     mkdir -p /vol/web/static && \
+    mkdir -p /vol/log && \
+    touch /vol/log/django.log && \
     chown -R django-user:django-user /vol && \
     chmod -R 755 /vol && \
-    chown django-user:django-user /var/log/django.log && \
-    chmod 644 /var/log/django.log
+    chmod 644 /vol/log/django.log
 
 WORKDIR /api
 EXPOSE 8000

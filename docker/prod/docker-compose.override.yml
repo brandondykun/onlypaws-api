@@ -12,12 +12,12 @@ services:
     volumes:
       - ../api/static:/vol/web/static
       - only-paws-media-data-prod:/vol/web/media
-      - ../logs/django-prod.log:/var/log/django.log
+      - ../logs/django-prod.log:/vol/log/django.log
     env_file:
       - prod/.env.prod
     expose:
       - "8000"
-    ports: !reset []
+    ports: []
   
   only-paws-db:
     volumes:

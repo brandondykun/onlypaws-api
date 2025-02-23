@@ -4,7 +4,7 @@ services:
   only-paws-app:
     volumes:
       - only-paws-static-data-dev:/vol/web
-      - ../logs/django-dev.log:/var/log/django.log
+      - ../logs/django-dev.log:/vol/log/django.log
     env_file:
       - dev/.env.dev.local
 
