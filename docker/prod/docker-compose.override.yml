@@ -5,7 +5,7 @@ services:
     volumes:
       - ../api:/api
       - static_volume:/api/static
-      - ../logs/django-prod.log:/vol/log/django.log
+      - ../logs:/vol/log
     env_file:
       - prod/.env.prod
     command: >

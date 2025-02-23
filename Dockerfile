@@ -47,12 +47,10 @@ RUN apk add --no-cache postgresql-client jpeg-dev
 RUN mkdir -p /api/static && \
     mkdir -p /vol/web/media && \
     mkdir -p /vol/log && \
-    touch /vol/log/django.log && \
     chown -R django-user:django-user /api && \
     chown -R django-user:django-user /vol && \
     chmod -R 755 /api && \
-    chmod -R 755 /vol && \
-    chmod 644 /vol/log/django.log
+    chmod -R 755 /vol
 
 # Copy application code
 COPY --chown=django-user:django-user ./api /api
