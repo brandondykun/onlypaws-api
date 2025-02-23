@@ -34,7 +34,7 @@ if os.environ.get("DEBUG") == "True":
 
 
 ALLOWED_HOSTS = ["*"]
-CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
+CORS_ALLOWED_ORIGINS = ["*"]
 CORS_ALLOW_HEADERS = [
     "content-disposition",
     "accept-encoding",
