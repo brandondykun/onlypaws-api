@@ -2,45 +2,38 @@
 
 services:
   only-paws-app:
+    volumes:
+      - ../api:/api
+      - static_volume:/api/static
+      - ../logs/django-prod.log:/vol/log/django.log
+    env_file:
+      - prod/.env.prod
     command: >
-      sh -c "touch /vol/log/django.log &&
-             chmod 644 /vol/log/django.log &&
-             chown django-user:django-user /vol/log/django.log &&
-             python manage.py wait_for_db &&
+      sh -c "python manage.py wait_for_db &&
              python manage.py migrate &&
              python manage.py load_report_reasons &&
              python manage.py load_pet_types &&
              python manage.py collectstatic --noinput &&
              gunicorn core.wsgi:application --bind 0.0.0.0:8000"
-    volumes:
-      - ../api/static:/vol/web/static
-      - only-paws-media-data-prod:/vol/web/media
-      - ../logs:/vol/log
-    env_file:
-      - prod/.env.prod
     expose:
       - "8000"
-    ports: []
-  
+
   only-paws-db:
     volumes:
-      - only-paws-db-data-prod:/var/lib/postgresql/data/
+      - prod_db_volume:/var/lib/postgresql/data
     env_file:
       - prod/.env.prod.db
 
   nginx:
     build: ../nginx
     volumes:
-      - ../api/static:/vol/web/static
-      - only-paws-media-data-prod:/vol/web/media
-      - ../nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf 
+      - static_volume:/vol/web/static:ro
+      - ../nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
     ports:
       - "80:80"
-    restart: unless-stopped
     depends_on:
       - only-paws-app
 
 volumes:
-  only-paws-db-data-prod:
-  only-paws-static-data-prod:
-  only-paws-media-data-prod:
+  prod_db_volume:
+  static_volume:
