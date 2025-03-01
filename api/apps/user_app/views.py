@@ -25,6 +25,7 @@ from .serializers import (
     ProfileUpdateSerializer,
     VerifyEmailTokenSerializer,
     ResetPasswordTokenSerializer,
+    ChangePasswordSerializer,
 )
 from rest_framework.response import Response
 import logging
@@ -38,6 +39,8 @@ from drf_spectacular.utils import (
     OpenApiParameter,
 )
 from django.conf import settings
+from rest_framework.views import APIView
+from django.contrib.auth import authenticate
 
 
 # schema parameter for auth profile id header
@@ -581,4 +584,52 @@ class ResetPasswordView(generics.CreateAPIView):
             return Response(
                 {"error": "Invalid confirmation code"},
                 status=status.HTTP_400_BAD_REQUEST,
+            )
+
+
+class ChangePasswordView(APIView):
+    """View for changing user password."""
+
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ChangePasswordSerializer
+
+    def patch(self, request):
+        serializer = self.serializer_class(data=request.data)
+
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        user = request.user
+        old_password = serializer.validated_data["old_password"]
+        new_password = serializer.validated_data["new_password"]
+
+        # Check if old password is correct
+        if not authenticate(email=user.email, password=old_password):
+            return Response(
+                {"old_password": ["Password incorrect."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Check if new password is different from old password
+        if old_password == new_password:
+            return Response(
+                {"new_password": ["New password must be different from old password."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            # Set new password
+            user.set_password(new_password)
+            user.save()
+
+            logger.info(f"Password changed successfully for user {user.email}")
+            return Response(
+                {"message": "Password changed successfully."}, status=status.HTTP_200_OK
+            )
+
+        except Exception as e:
+            logger.error(f"Error changing password for user {user.email}: {str(e)}")
+            return Response(
+                {"error": "Failed to change password. Please try again."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
