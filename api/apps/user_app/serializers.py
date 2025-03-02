@@ -109,9 +109,11 @@ class ProfileDetailedSerializer(serializers.ModelSerializer):
 class ProfileOptionSerializer(serializers.ModelSerializer):
     """Serializer for Profile option."""
 
+    image = ProfileImageSerializer()
+
     class Meta:
         model = Profile
-        fields = ["id", "username"]
+        fields = ["id", "username", "image", "name"]
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
