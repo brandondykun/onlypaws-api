@@ -230,13 +230,13 @@ class CreateProfileView(generics.CreateAPIView):
             )
 
 
-class RetrieveUpdateProfileView(generics.RetrieveUpdateAPIView):
-    """Retrieve or update a Profile."""
+class RetrieveUpdateDestroyProfileView(generics.RetrieveUpdateDestroyAPIView):
+    """Retrieve, update or delete a Profile."""
 
     queryset = Profile.objects.all()
     serializer_class = ProfileDetailedSerializer
     permission_classes = [permissions.IsAuthenticated]
-    allowed_methods = ["PATCH"]
+    allowed_methods = ["PATCH", "DELETE"]
 
     def get_serializer_class(self):
         if self.request.method == "GET":
@@ -264,6 +264,50 @@ class RetrieveUpdateProfileView(generics.RetrieveUpdateAPIView):
             instance._prefetched_objects_cache = {}
         instance_serializer = ProfileSerializer(instance)
         return Response(instance_serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        profile_id = self.kwargs.get("pk")
+
+        # Ensure the profile belongs to the current authenticated user
+        try:
+            profile = self.request.user.profiles.get(id=profile_id)
+        except Profile.DoesNotExist:
+            return Response(
+                {
+                    "error": "Profile not found or you don't have permission to delete it"
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Prevent deleting the last profile
+        if self.request.user.profiles.count() <= 1:
+            return Response(
+                {
+                    "error": "Cannot delete your only profile. At least one profile is required."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            # Delete associated profile image from storage
+            if hasattr(profile, "image"):
+                profile.image.image.delete(save=False)
+                profile.image.delete()
+
+            # Delete the profile
+            profile.delete()
+            logger.info(
+                f"Profile {profile_id} deleted successfully by user {request.user.email}"
+            )
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        except Exception as e:
+            logger.error(f"Error deleting profile {profile_id}: {str(e)}")
+            return Response(
+                {"error": "Failed to delete profile. Please try again."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 class RetrieveUserInfoView(generics.RetrieveAPIView):
