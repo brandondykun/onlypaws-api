@@ -32,7 +32,7 @@ def create_profile(**params):
 
 def retrieve_update_profile_url(profile_id):
     """Create and return a retrieve/update profile url."""
-    return reverse("user_app:retrieve_update_profile", args=[profile_id])
+    return reverse("user_app:profile-detail", args=[profile_id])
 
 
 class PublicUserApiTests(TestCase):
@@ -119,6 +119,8 @@ class PrivateUserApiTests(TestCase):
                 {
                     "id": self.profile.id,
                     "username": self.profile.username,
+                    "image": None,
+                    "name": "",
                 }
             ],
             "is_email_verified": False,

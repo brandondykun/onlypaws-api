@@ -11,6 +11,7 @@ from apps.core_app.models import (
     VerifyEmailToken,
     ResetPasswordToken,
 )
+from django.contrib.auth.password_validation import validate_password
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -108,9 +109,11 @@ class ProfileDetailedSerializer(serializers.ModelSerializer):
 class ProfileOptionSerializer(serializers.ModelSerializer):
     """Serializer for Profile option."""
 
+    image = ProfileImageSerializer()
+
     class Meta:
         model = Profile
-        fields = ["id", "username"]
+        fields = ["id", "username", "image", "name"]
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -140,3 +143,16 @@ class ResetPasswordTokenSerializer(serializers.ModelSerializer):
         model = ResetPasswordToken
         fields = ["id", "user", "token", "created_at"]
         read_only_fields = ["created_at"]
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    """Serializer for password change."""
+
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True, min_length=9)
+
+    def validate_new_password(self, value):
+        """Validate the new password."""
+        # Use Django's built-in password validation
+        validate_password(value)
+        return value

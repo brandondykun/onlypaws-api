@@ -132,6 +132,9 @@ class ProfileImage(models.Model):
         self.image = crop_square_and_resize(self.image, image_size=320)
         super().save(*args, **kwargs)
 
+    def __str__(self):
+        return f"Profile {self.profile.id} - {self.image.path}"
+
 
 class Post(models.Model):
     """Post with image and text."""
@@ -173,6 +176,9 @@ class PostImage(models.Model):
     def save(self, *args, **kwargs):
         self.image = crop_square_and_resize(self.image, image_size=1080)
         super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Post {self.post.id} - {self.image.path}"
 
 
 class Like(models.Model):

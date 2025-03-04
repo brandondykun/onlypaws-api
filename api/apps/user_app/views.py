@@ -25,6 +25,7 @@ from .serializers import (
     ProfileUpdateSerializer,
     VerifyEmailTokenSerializer,
     ResetPasswordTokenSerializer,
+    ChangePasswordSerializer,
 )
 from rest_framework.response import Response
 import logging
@@ -38,6 +39,8 @@ from drf_spectacular.utils import (
     OpenApiParameter,
 )
 from django.conf import settings
+from rest_framework.views import APIView
+from django.contrib.auth import authenticate
 
 
 # schema parameter for auth profile id header
@@ -227,13 +230,13 @@ class CreateProfileView(generics.CreateAPIView):
             )
 
 
-class RetrieveUpdateProfileView(generics.RetrieveUpdateAPIView):
-    """Retrieve or update a Profile."""
+class RetrieveUpdateDestroyProfileView(generics.RetrieveUpdateDestroyAPIView):
+    """Retrieve, update or delete a Profile."""
 
     queryset = Profile.objects.all()
     serializer_class = ProfileDetailedSerializer
     permission_classes = [permissions.IsAuthenticated]
-    allowed_methods = ["PATCH"]
+    allowed_methods = ["PATCH", "DELETE"]
 
     def get_serializer_class(self):
         if self.request.method == "GET":
@@ -261,6 +264,50 @@ class RetrieveUpdateProfileView(generics.RetrieveUpdateAPIView):
             instance._prefetched_objects_cache = {}
         instance_serializer = ProfileSerializer(instance)
         return Response(instance_serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        profile_id = self.kwargs.get("pk")
+
+        # Ensure the profile belongs to the current authenticated user
+        try:
+            profile = self.request.user.profiles.get(id=profile_id)
+        except Profile.DoesNotExist:
+            return Response(
+                {
+                    "error": "Profile not found or you don't have permission to delete it"
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Prevent deleting the last profile
+        if self.request.user.profiles.count() <= 1:
+            return Response(
+                {
+                    "error": "Cannot delete your only profile. At least one profile is required."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            # Delete associated profile image from storage
+            if hasattr(profile, "image"):
+                profile.image.image.delete(save=False)
+                profile.image.delete()
+
+            # Delete the profile
+            profile.delete()
+            logger.info(
+                f"Profile {profile_id} deleted successfully by user {request.user.email}"
+            )
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        except Exception as e:
+            logger.error(f"Error deleting profile {profile_id}: {str(e)}")
+            return Response(
+                {"error": "Failed to delete profile. Please try again."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 class RetrieveUserInfoView(generics.RetrieveAPIView):
@@ -323,7 +370,27 @@ class UpdateProfileImageView(generics.UpdateAPIView):
         if not user_profile_match:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        return self.partial_update(request, *args, **kwargs)
+        try:
+            with transaction.atomic():
+                instance = self.get_object()
+                # Store reference to old image
+                old_image = instance.image if instance.image else None
+
+                # Update with new image
+                response = self.partial_update(request, *args, **kwargs)
+
+                # If update was successful and there was an old image, delete it
+                if response.status_code == 200 and old_image:
+                    old_image.delete(save=False)
+
+                return response
+
+        except Exception as e:
+            logger.error(f"Error updating profile image: {str(e)}")
+            return Response(
+                {"error": "Failed to update profile image."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 class ListPetTypesView(generics.ListAPIView):
@@ -581,4 +648,52 @@ class ResetPasswordView(generics.CreateAPIView):
             return Response(
                 {"error": "Invalid confirmation code"},
                 status=status.HTTP_400_BAD_REQUEST,
+            )
+
+
+class ChangePasswordView(APIView):
+    """View for changing user password."""
+
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ChangePasswordSerializer
+
+    def patch(self, request):
+        serializer = self.serializer_class(data=request.data)
+
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        user = request.user
+        old_password = serializer.validated_data["old_password"]
+        new_password = serializer.validated_data["new_password"]
+
+        # Check if old password is correct
+        if not authenticate(email=user.email, password=old_password):
+            return Response(
+                {"old_password": ["Password incorrect."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Check if new password is different from old password
+        if old_password == new_password:
+            return Response(
+                {"new_password": ["New password must be different from old password."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            # Set new password
+            user.set_password(new_password)
+            user.save()
+
+            logger.info(f"Password changed successfully for user {user.email}")
+            return Response(
+                {"message": "Password changed successfully."}, status=status.HTTP_200_OK
+            )
+
+        except Exception as e:
+            logger.error(f"Error changing password for user {user.email}: {str(e)}")
+            return Response(
+                {"error": "Failed to change password. Please try again."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
