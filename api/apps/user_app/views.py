@@ -370,7 +370,27 @@ class UpdateProfileImageView(generics.UpdateAPIView):
         if not user_profile_match:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        return self.partial_update(request, *args, **kwargs)
+        try:
+            with transaction.atomic():
+                instance = self.get_object()
+                # Store reference to old image
+                old_image = instance.image if instance.image else None
+
+                # Update with new image
+                response = self.partial_update(request, *args, **kwargs)
+
+                # If update was successful and there was an old image, delete it
+                if response.status_code == 200 and old_image:
+                    old_image.delete(save=False)
+
+                return response
+
+        except Exception as e:
+            logger.error(f"Error updating profile image: {str(e)}")
+            return Response(
+                {"error": "Failed to update profile image."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 class ListPetTypesView(generics.ListAPIView):
