@@ -38,7 +38,10 @@ docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.overri
 echo "### Creating dummy certificate for ${domains[0]} ..."
 path="/etc/letsencrypt/live/${domains[0]}"
 mkdir -p "$data_path/conf/live/${domains[0]}"
+mkdir -p "$data_path/conf/archive/${domains[0]}"
+
 docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.override.yml run --rm --entrypoint "\
+    mkdir -p /etc/letsencrypt/live/${domains[0]} && \
     openssl req -x509 -nodes -newkey rsa:$rsa_key_size -days 1\
     -keyout '$path/privkey.pem' \
     -out '$path/fullchain.pem' \
