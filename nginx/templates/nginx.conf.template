@@ -5,11 +5,12 @@ upstream only-paws-app {
     server only-paws-app:8000;
 }
 
+# HTTP server
 server {
     listen 80;
-    listen [::]:80;  # Add IPv6 support
+    listen [::]:80;
     server_name ${DOMAIN};
-    server_tokens off;  # Hide nginx version
+    server_tokens off;
 
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;
@@ -20,14 +21,23 @@ server {
     }
 }
 
+# HTTPS server
 server {
-    listen 443 ssl http2;  # Enable HTTP/2
-    listen [::]:443 ssl http2;  # IPv6
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
     server_name ${DOMAIN};
     server_tokens off;
 
+    # SSL configuration
     ssl_certificate /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+
+    # Don't fail on missing cert files
+    ssl_certificate_by_lua_block {
+        if not file_exists("/etc/letsencrypt/live/${DOMAIN}/fullchain.pem") then
+            return
+        end
+    }
 
     # SSL configuration
     ssl_protocols TLSv1.2 TLSv1.3;
