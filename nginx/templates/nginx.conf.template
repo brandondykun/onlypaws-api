@@ -1,0 +1,74 @@
+# prevent css, js files sent as text/plain objects
+include /etc/nginx/mime.types;
+
+upstream only-paws-app {
+    server only-paws-app:8000;
+}
+
+server {
+    listen 80;
+    listen [::]:80;  # Add IPv6 support
+    server_name ${DOMAIN};
+    server_tokens off;  # Hide nginx version
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl http2;  # Enable HTTP/2
+    listen [::]:443 ssl http2;  # IPv6
+    server_name ${DOMAIN};
+    server_tokens off;
+
+    ssl_certificate /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+
+    # SSL configuration
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384;
+    
+    # SSL session handling
+    ssl_session_timeout 1d;
+    ssl_session_cache shared:SSL:50m;
+    ssl_session_tickets off;
+
+    # Security headers
+    add_header X-Content-Type-Options nosniff;
+    add_header X-Frame-Options DENY;
+    add_header X-XSS-Protection "1; mode=block";
+
+    # Additional recommended security headers
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header Content-Security-Policy "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval';" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+    client_max_body_size 20M;
+
+    location / {
+        proxy_pass http://only-paws-app;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $host;
+        proxy_redirect off;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    location /static/ {
+        include mime.types;
+        alias /vol/web/static/;
+        expires 1y;
+        add_header Cache-Control "public, no-transform";
+    }
+
+    location /media/ {
+        alias /vol/web/media/;
+        expires 7d;
+        add_header Cache-Control "public, no-transform";
+    }
+} 
