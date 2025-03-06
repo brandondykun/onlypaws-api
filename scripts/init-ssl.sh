@@ -32,11 +32,8 @@ echo "### Creating required directories ..."
 mkdir -p "$data_path/conf"
 mkdir -p "$data_path/www"
 
-if [ ! -e "$data_path/conf/options-ssl-nginx.conf" ] || [ ! -e "$data_path/conf/ssl-dhparams.pem" ]; then
-    echo "### Downloading recommended TLS parameters ..."
-    curl -s https://raw.githubusercontent.com/certbot/certbot/master/certbot-nginx/certbot_nginx/_internal/tls_configs/options-ssl-nginx.conf > "$data_path/conf/options-ssl-nginx.conf"
-    curl -s https://raw.githubusercontent.com/certbot/certbot/master/certbot/certbot/ssl-dhparams.pem > "$data_path/conf/ssl-dhparams.pem"
-fi
+# Stop any running containers first
+docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.override.yml down
 
 echo "### Creating dummy certificate for ${domains[0]} ..."
 path="/etc/letsencrypt/live/${domains[0]}"
@@ -47,8 +44,12 @@ docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.overri
     -out '$path/fullchain.pem' \
     -subj '/CN=localhost'" certbot
 
+# Start nginx without SSL first
 echo "### Starting nginx ..."
-docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.override.yml up --force-recreate -d nginx
+docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.override.yml up -d nginx
+
+# Wait for nginx to start
+sleep 5
 
 echo "### Deleting dummy certificate ..."
 docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.override.yml run --rm --entrypoint "\

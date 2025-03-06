@@ -28,7 +28,6 @@ services:
     build: ../nginx
     volumes:
       - static_volume:/vol/web/static:ro
-      - ../nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
       - ./certbot/conf:/etc/letsencrypt:ro
       - ./certbot/www:/var/www/certbot:ro
     ports:
@@ -38,12 +37,14 @@ services:
       - only-paws-app
     environment:
       - DOMAIN=api-staging.onlypawsapp.com
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
 
   certbot:
     image: certbot/certbot:latest
     volumes:
       - ./certbot/www/:/var/www/certbot/:rw
       - ./certbot/conf/:/etc/letsencrypt/:rw
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
 volumes:
   staging_db_volume:
