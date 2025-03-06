@@ -29,12 +29,15 @@ services:
     volumes:
       - static_volume:/vol/web/static:ro
       - ../nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
-      - ./certbot/www/:/var/www/certbot/:ro
+      - ./certbot/conf:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
     ports:
       - "80:80"
       - "443:443"
     depends_on:
       - only-paws-app
+    environment:
+      - DOMAIN=api-staging.onlypawsapp.com
 
   certbot:
     image: certbot/certbot:latest
