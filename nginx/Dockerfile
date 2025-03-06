@@ -8,9 +8,11 @@ RUN mkdir -p /vol/web/static
 RUN mkdir -p /vol/web/media
 RUN chmod -R 755 /vol/web
 
-# Copy the template with the correct name
-COPY ./templates/nginx.conf.template /etc/nginx/templates/nginx.conf.template
+# Copy the template and entrypoint script
+COPY ./templates/nginx.conf.template /etc/nginx/templates/
+COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 
-# Add environment variable for template processing
-ENV NGINX_ENVSUBST_TEMPLATE_DIR=/etc/nginx/templates
-ENV NGINX_ENVSUBST_OUTPUT_DIR=/etc/nginx/conf.d
+# Make the entrypoint script executable
+RUN chmod +x /docker-entrypoint.sh
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
