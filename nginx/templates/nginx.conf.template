@@ -12,10 +12,13 @@ server {
     server_name ${DOMAIN};
     server_tokens off;
 
+    # Allow certbot authentication
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;
+        try_files $uri =404;
     }
 
+    # Redirect all other HTTP traffic to HTTPS
     location / {
         return 301 https://$host$request_uri;
     }
@@ -23,8 +26,8 @@ server {
 
 # HTTPS server
 server {
-    listen 443 ssl http2;
-    listen [::]:443 ssl http2;
+    listen 443 ssl;
+    listen [::]:443 ssl;
     server_name ${DOMAIN};
     server_tokens off;
 
@@ -32,14 +35,7 @@ server {
     ssl_certificate /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
 
-    # Don't fail on missing cert files
-    ssl_certificate_by_lua_block {
-        if not file_exists("/etc/letsencrypt/live/${DOMAIN}/fullchain.pem") then
-            return
-        end
-    }
-
-    # SSL configuration
+    # SSL parameters
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_prefer_server_ciphers on;
     ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384;
@@ -53,8 +49,6 @@ server {
     add_header X-Content-Type-Options nosniff;
     add_header X-Frame-Options DENY;
     add_header X-XSS-Protection "1; mode=block";
-
-    # Additional recommended security headers
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
     add_header Content-Security-Policy "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval';" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
