@@ -37,10 +37,6 @@ services:
       - only-paws-app
     environment:
       - DOMAIN=api-staging.onlypawsapp.com
-      - NGINX_ENVSUBST_TEMPLATE_DIR=/etc/nginx/templates
-      - NGINX_ENVSUBST_OUTPUT_DIR=/etc/nginx/conf.d
-      - NGINX_ENVSUBST_TEMPLATE_SUFFIX=.template
-    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
 
   certbot:
     image: certbot/certbot:latest
