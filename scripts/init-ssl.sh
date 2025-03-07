@@ -90,8 +90,9 @@ docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.overri
 # Add symbolic links to the latest certificates
 echo "### Creating symbolic links to the latest certificates ..."
 docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.override.yml run --rm --entrypoint "\
+    latest_cert=\$(ls -d /etc/letsencrypt/live/${domains[0]}* | sort -V | tail -n 1) && \
     rm -f /etc/letsencrypt/live/${domains[0]} && \
-    ln -s /etc/letsencrypt/live/${domains[0]}* /etc/letsencrypt/live/${domains[0]}" certbot
+    ln -s \$latest_cert /etc/letsencrypt/live/${domains[0]}" certbot
 
 echo "### Reloading nginx ..."
 docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.override.yml exec nginx nginx -s reload 
