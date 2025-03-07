@@ -12,8 +12,10 @@ ENV=$1
 # Set domain based on environment
 if [ "$ENV" == "staging" ]; then
     domains=(api-staging.onlypawsapp.com)
+    cert_name="api-staging.onlypawsapp.com"
 else
     domains=(api.onlypawsapp.com)
+    cert_name="api.onlypawsapp.com"
 fi
 
 rsa_key_size=4096
@@ -80,6 +82,7 @@ docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.overri
     $staging_arg \
     $email_arg \
     $domain_args \
+    --cert-name $cert_name \
     --rsa-key-size $rsa_key_size \
     --agree-tos \
     --force-renewal" certbot
