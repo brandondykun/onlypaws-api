@@ -10,6 +10,9 @@ from django.contrib.auth.models import (
     PermissionsMixin,
 )
 from .utils import crop_square_and_resize
+import secrets
+from datetime import timedelta
+from django.utils import timezone
 
 
 class UserManager(BaseUserManager):
@@ -336,3 +339,23 @@ class PostReport(models.Model):
 
     def __str__(self):
         return f"Report on {self.post} by {self.reporter}"
+
+
+class PendingEmailChange(models.Model):
+    """Stores pending email change requests."""
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    new_email = models.EmailField()
+    verification_token = models.CharField(max_length=64, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.email} -> {self.new_email}"
+
+    @property
+    def is_expired(self):
+        return timezone.now() > (self.created_at + timedelta(hours=12))
+
+    class Meta:
+        # Only one pending change per user
+        unique_together = [["user", "new_email"]]

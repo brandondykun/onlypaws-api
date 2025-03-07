@@ -66,4 +66,14 @@ urlpatterns = [
     path(
         "change-password/", views.ChangePasswordView.as_view(), name="change_password"
     ),
+    path(
+        "request-email-change/",
+        views.RequestEmailChangeView.as_view(),
+        name="request-email-change",
+    ),
+    path(
+        "verify-email-change/",
+        views.VerifyEmailChangeView.as_view(),
+        name="verify-email-change",
+    ),
 ]

@@ -11,6 +11,7 @@ from apps.core_app.models import (
     PetType,
     VerifyEmailToken,
     ResetPasswordToken,
+    PendingEmailChange,
 )
 from apps.core_app.utils import generate_verification_code
 from rest_framework import serializers
@@ -41,6 +42,8 @@ from drf_spectacular.utils import (
 from django.conf import settings
 from rest_framework.views import APIView
 from django.contrib.auth import authenticate
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 
 
 # schema parameter for auth profile id header
@@ -80,6 +83,19 @@ def send_reset_password_email(user, token):
         settings.DEFAULT_FROM_EMAIL,
         [user.email],
         fail_silently=False,
+    )
+
+
+def send_reset_email_email(email, token):
+    """Send change email email to user."""
+    subject = "Update Your OnlyPaws Email"
+    message = f"Your email update code is: {token}"
+    send_mail(
+        subject,
+        message,
+        settings.DEFAULT_FROM_EMAIL,
+        [email],
+        fail_silently=True,
     )
 
 
@@ -697,3 +713,126 @@ class ChangePasswordView(APIView):
                 {"error": "Failed to change password. Please try again."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+
+class RequestEmailChangeView(APIView):
+    """
+    API View to request email change.
+    Sends verification email to new address.
+    """
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        new_email = request.data.get("email")
+
+        # Validate email format
+        try:
+            validate_email(new_email)
+        except ValidationError:
+            return Response(
+                {"error": {"email": "Invalid email format."}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Check if email is already in use
+        if User.objects.filter(email=new_email).exists():
+            return Response(
+                {"error": {"email": "Email already in use."}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Delete any existing pending changes for this user
+        PendingEmailChange.objects.filter(user=request.user).delete()
+
+        # Create new pending change
+        token = generate_verification_code()
+        pending_change = PendingEmailChange.objects.create(
+            user=request.user, new_email=new_email, verification_token=token
+        )
+
+        # Send verification email
+        try:
+            send_reset_email_email(new_email, token)
+        except Exception as e:
+            pending_change.delete()
+            return Response(
+                {"error": {"other": "Failed to send verification email"}},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        return Response(
+            {"message": "Verification email sent"}, status=status.HTTP_200_OK
+        )
+
+
+class VerifyEmailChangeView(APIView):
+    """
+    API View to verify email change with token.
+    Updates user's email if verification successful.
+    """
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        token = request.data.get("token")
+
+        if not token:
+            return Response(
+                {"error": {"token": "Verification token required"}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            pending_change = PendingEmailChange.objects.get(
+                verification_token=token, user=request.user
+            )
+        except PendingEmailChange.DoesNotExist:
+            return Response(
+                {"error": {"token": "Invalid or expired token"}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Check if token is expired
+        if pending_change.is_expired:
+            pending_change.delete()
+            return Response(
+                {"error": {"token": "Verification token has expired"}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Update user's email
+        old_email = request.user.email
+        new_email = pending_change.new_email
+        request.user.email = new_email
+        request.user.save()
+
+        # Delete pending change
+        pending_change.delete()
+
+        # Send confirmation emails
+        try:
+            # Notify new email
+            send_mail(
+                "Email change successful",
+                "Your email has been successfully updated.",
+                settings.DEFAULT_FROM_EMAIL,
+                [new_email],
+                fail_silently=True,
+            )
+
+            # Notify old email
+            send_mail(
+                "Your email has been changed",
+                f"Your email has been changed to {new_email}.",
+                settings.DEFAULT_FROM_EMAIL,
+                [old_email],
+                fail_silently=True,
+            )
+        except Exception:
+            # Don't fail if confirmation emails fail
+            pass
+
+        return Response(
+            {"message": "Email updated successfully."}, status=status.HTTP_200_OK
+        )
