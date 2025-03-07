@@ -87,5 +87,11 @@ docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.overri
     --agree-tos \
     --force-renewal" certbot
 
+# Add symbolic links to the latest certificates
+echo "### Creating symbolic links to the latest certificates ..."
+docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.override.yml run --rm --entrypoint "\
+    rm -f /etc/letsencrypt/live/${domains[0]} && \
+    ln -s /etc/letsencrypt/live/${domains[0]}* /etc/letsencrypt/live/${domains[0]}" certbot
+
 echo "### Reloading nginx ..."
 docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.override.yml exec nginx nginx -s reload 
