@@ -49,6 +49,12 @@ CORS_ALLOW_HEADERS = [
 CSRF_TRUSTED_ORIGINS = [
     "https://api-staging.onlypawsapp.com",
     "https://api.onlypawsapp.com",
+    "https://onlypawsapp.com",
+]
+CSRF_ALLOWED_ORIGINS = [
+    "https://api-staging.onlypawsapp.com",
+    "https://api.onlypawsapp.com",
+    "https://onlypawsapp.com",
 ]
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
