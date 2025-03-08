@@ -45,6 +45,22 @@ CORS_ALLOW_HEADERS = [
     "auth-profile-id",
 ]
 
+# CSRF Settings
+CSRF_TRUSTED_ORIGINS = [
+    "https://api-staging.onlypawsapp.com",
+    "https://api.onlypawsapp.com",
+]
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = "Lax"
+
+# Exempt API endpoints from CSRF
+CSRF_EXEMPT_PATHS = [
+    "/api/",
+    "/docs/",
+    "/schema/",
+]
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -68,7 +84,7 @@ MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
+    "apps.core_app.middleware.CustomCsrfMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",

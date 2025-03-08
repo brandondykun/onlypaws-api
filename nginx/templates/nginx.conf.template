@@ -57,4 +57,27 @@ server {
     location /media/ {
         alias /vol/web/media/;
     }
+
+    # API endpoints - no CSRF needed
+    location /api/ {
+        proxy_pass http://only-paws-app;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Admin interface - requires CSRF
+    location /admin/ {
+        proxy_pass http://only-paws-app;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Origin $http_origin;
+        proxy_set_header Referer $http_referer;
+
+        # Ensure CSRF token is passed
+        proxy_cookie_path / "/; secure; HttpOnly; SameSite=Lax";
+    }
 } 

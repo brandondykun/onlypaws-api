@@ -1,6 +1,7 @@
 from rest_framework.exceptions import AuthenticationFailed
 from django.utils.functional import SimpleLazyObject
 from .models import Profile
+from django.conf import settings
 
 
 class ProfileAuthenticationMiddleware:
@@ -65,3 +66,16 @@ class ProfileAuthenticationMiddleware:
         ]
 
         return any(path.startswith(excluded) for excluded in EXCLUDED_PATHS)
+
+
+from django.middleware.csrf import CsrfViewMiddleware
+
+
+class CustomCsrfMiddleware(CsrfViewMiddleware):
+    def process_view(self, request, callback, callback_args, callback_kwargs):
+        if any(
+            request.path.startswith(path)
+            for path in getattr(settings, "CSRF_EXEMPT_PATHS", [])
+        ):
+            return None
+        return super().process_view(request, callback, callback_args, callback_kwargs)
