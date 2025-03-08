@@ -1,0 +1,3 @@
+upstream only-paws-app {
+    server only-paws-app:8000;
+} 

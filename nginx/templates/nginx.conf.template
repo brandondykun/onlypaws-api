@@ -1,10 +1,6 @@
 # prevent css, js files sent as text/plain objects
 include /etc/nginx/mime.types;
 
-upstream only-paws-app {
-    server only-paws-app:8000;
-}
-
 # HTTP server
 server {
     listen 80;
@@ -64,7 +60,6 @@ server {
 #    }
 #
 #    location /static/ {
-#        include mime.types;
 #        alias /vol/web/static/;
 #        expires 1y;
 #        add_header Cache-Control "public, no-transform";
