@@ -14,8 +14,8 @@ server {
 
     # Allow certbot authentication
     location /.well-known/acme-challenge/ {
+        allow all;
         root /var/www/certbot;
-        try_files $uri =404;
     }
 
     # Redirect all other HTTP traffic to HTTPS
@@ -34,6 +34,9 @@ server {
     # SSL configuration
     ssl_certificate /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+
+    # Add this line to make SSL optional during startup
+    ssl_reject_handshake off;
 
     # SSL parameters
     ssl_protocols TLSv1.2 TLSv1.3;
