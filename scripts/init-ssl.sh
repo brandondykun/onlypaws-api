@@ -37,6 +37,12 @@ mkdir -p "$data_path/www"
 # Stop any running containers first
 docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.override.yml down
 
+echo "### Cleaning up existing certificates ..."
+docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.override.yml run --rm --entrypoint "sh" certbot -c "\
+    rm -rf /etc/letsencrypt/live/* && \
+    rm -rf /etc/letsencrypt/archive/* && \
+    rm -rf /etc/letsencrypt/renewal/*"
+
 echo "### Creating dummy certificate for ${domains[0]} ..."
 path="/etc/letsencrypt/live/${domains[0]}"
 mkdir -p "$data_path/conf/live/${domains[0]}"
@@ -87,12 +93,16 @@ docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.overri
     --agree-tos \
     --force-renewal" certbot
 
-# Add symbolic links to the latest certificates
+# After certificate generation, create the directory and copy files
 echo "### Creating symbolic links to the latest certificates ..."
 docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.override.yml run --rm --entrypoint "sh" certbot -c "\
-    latest=\$(find /etc/letsencrypt/live -name '${domains[0]}*' -type d | sort -V | tail -n 1) && \
-    rm -f /etc/letsencrypt/live/${domains[0]} && \
-    ln -s \$latest /etc/letsencrypt/live/${domains[0]}"
+    mkdir -p /etc/letsencrypt/live/${domains[0]} && \
+    latest=\$(ls -d /etc/letsencrypt/live/${domains[0]}-* | sort -V | tail -n 1) && \
+    cp -L \$latest/fullchain.pem /etc/letsencrypt/live/${domains[0]}/fullchain.pem && \
+    cp -L \$latest/privkey.pem /etc/letsencrypt/live/${domains[0]}/privkey.pem && \
+    cp -L \$latest/chain.pem /etc/letsencrypt/live/${domains[0]}/chain.pem && \
+    cp -L \$latest/cert.pem /etc/letsencrypt/live/${domains[0]}/cert.pem && \
+    chown -R root:root /etc/letsencrypt/live/${domains[0]}"
 
 echo "### Reloading nginx ..."
 docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.override.yml exec nginx nginx -s reload 
