@@ -11,7 +11,6 @@ RUN chmod -R 755 /vol/web
 # Copy both templates
 COPY ./templates/nginx.conf.template /etc/nginx/templates/
 COPY ./templates/init.conf.template /etc/nginx/templates/
-COPY ./templates/upstream.conf.template /etc/nginx/templates/
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 
 # Make the entrypoint script executable
