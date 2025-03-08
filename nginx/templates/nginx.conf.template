@@ -1,6 +1,3 @@
-# Load configuration files
-include /etc/nginx/conf.d/*.conf;
-
 # prevent css, js files sent as text/plain objects
 include /etc/nginx/mime.types;
 
@@ -28,7 +25,6 @@ server {
         root /var/www/certbot;
     }
 
-    # Redirect all other HTTP traffic to HTTPS
     location / {
         return 301 https://$host$request_uri;
     }
@@ -37,89 +33,28 @@ server {
 # HTTPS server
 server {
     listen 443 ssl;
-    listen [::]:443 ssl;
     server_name ${DOMAIN};
-    server_tokens off;
 
     # SSL configuration
     ssl_certificate /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
 
-    # SSL optimization
-    ssl_stapling on;
-    ssl_stapling_verify on;
-    resolver 8.8.8.8 8.8.4.4 valid=300s;
-    resolver_timeout 5s;
-
-    # SSL parameters
+    # Only essential SSL parameters
     ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_prefer_server_ciphers on;
-    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384;
-    
-    # SSL session handling
-    ssl_session_timeout 1d;
-    ssl_session_cache shared:SSL:50m;
-    ssl_session_tickets off;
-
-    # Security headers
-    add_header X-Content-Type-Options nosniff;
-    add_header X-Frame-Options DENY;
-    add_header X-XSS-Protection "1; mode=block";
-    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
-    add_header Content-Security-Policy "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval';" always;
-    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-
-    client_max_body_size 20M;
-
-    # CORS headers at server level
-    add_header 'Access-Control-Allow-Origin' '*' always;
-    add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
-    add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization' always;
-
-    # Error handling
-    error_page 502 503 504 /50x.html;
-    location = /50x.html {
-        root /usr/share/nginx/html;
-        internal;
-    }
 
     location / {
         proxy_pass http://only-paws-app;
-        proxy_http_version 1.1;
-        proxy_set_header Connection $connection_upgrade;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_set_header X-Forwarded-Host $server_name;
-        proxy_set_header X-Forwarded-Port $server_port;
-
-        # Debug logging
-        access_log /var/log/nginx/app_access.log;
-        error_log /var/log/nginx/app_error.log debug;
-
-        # More reasonable timeouts
-        proxy_connect_timeout 60;
-        proxy_send_timeout 60;
-        proxy_read_timeout 60;
-        send_timeout 60;
-
-        # Buffer settings
-        proxy_buffer_size 128k;
-        proxy_buffers 4 256k;
-        proxy_busy_buffers_size 256k;
     }
 
     location /static/ {
         alias /vol/web/static/;
-        expires 1y;
-        add_header Cache-Control "public, no-transform";
     }
 
     location /media/ {
         alias /vol/web/media/;
-        expires 7d;
-        add_header Cache-Control "public, no-transform";
     }
 } 
