@@ -55,6 +55,10 @@ docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.overri
     -out '$path/fullchain.pem' \
     -subj '/CN=localhost'" certbot
 
+# Copy initial config for first-time setup
+echo "### Setting up initial nginx config ..."
+docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.override.yml exec nginx sh -c "cp /etc/nginx/templates/init.conf.template /etc/nginx/conf.d/default.conf"
+
 # Start nginx without SSL first
 echo "### Starting nginx ..."
 docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.override.yml up -d nginx
@@ -67,6 +71,10 @@ docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.overri
 # Increase wait time for nginx to start
 echo "### Waiting for nginx to be fully started ..."
 sleep 15
+
+# Test if nginx is responding
+echo "### Testing nginx HTTP response ..."
+curl -v http://localhost/.well-known/acme-challenge/test || true
 
 # Add verification of challenge path
 echo "### Creating challenge directory ..."
@@ -114,6 +122,10 @@ echo "### Verifying certificate path ..."
 docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.override.yml run --rm --entrypoint "sh" certbot -c "\
     ls -la /etc/letsencrypt/live/${domains[0]} && \
     echo 'Certificate files are in place'"
+
+# After certificate is obtained, copy the full config
+echo "### Setting up full nginx config ..."
+docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.override.yml exec nginx sh -c "cp /etc/nginx/templates/nginx.conf.template /etc/nginx/conf.d/default.conf"
 
 echo "### Reloading nginx ..."
 docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.override.yml exec nginx nginx -s reload 

@@ -1,0 +1,19 @@
+# Initial configuration for certificate setup
+server {
+    listen 80;
+    listen [::]:80;
+    server_name ${DOMAIN};
+    server_tokens off;
+
+    # Allow certbot authentication
+    location /.well-known/acme-challenge/ {
+        allow all;
+        root /var/www/certbot;
+    }
+
+    # During initial setup, don't redirect to HTTPS
+    location / {
+        return 200 'Ready for SSL setup';
+        add_header Content-Type text/plain;
+    }
+} 
