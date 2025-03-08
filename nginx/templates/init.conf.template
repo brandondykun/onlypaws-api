@@ -1,8 +1,9 @@
 # Initial configuration for certificate setup
 server {
-    listen 80;
-    listen [::]:80;
-    server_name ${DOMAIN};
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    
+    # Remove server_name directive to catch all requests
     server_tokens off;
 
     # Allow certbot authentication
