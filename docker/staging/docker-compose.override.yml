@@ -28,8 +28,8 @@ services:
     build: ../nginx
     volumes:
       - static_volume:/vol/web/static:ro
-      - ./certbot/conf:/etc/letsencrypt:ro
-      - ./certbot/www:/var/www/certbot:ro
+      - ./staging/certbot/conf:/etc/letsencrypt:ro
+      - ./staging/certbot/www:/var/www/certbot
     ports:
       - "80:80"
       - "443:443"
@@ -41,8 +41,8 @@ services:
   certbot:
     image: certbot/certbot:latest
     volumes:
-      - ./certbot/www/:/var/www/certbot/:rw
-      - ./certbot/conf/:/etc/letsencrypt/:rw
+      - ./staging/certbot/www:/var/www/certbot
+      - ./staging/certbot/conf:/etc/letsencrypt
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
 volumes:
