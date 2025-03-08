@@ -91,7 +91,8 @@ docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.overri
     --cert-name $cert_name \
     --rsa-key-size $rsa_key_size \
     --agree-tos \
-    --force-renewal" certbot
+    --force-renewal \
+    -v" certbot
 
 # Replace the certificate update section with this simpler version
 echo "### Verifying certificate path ..."

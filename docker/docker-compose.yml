@@ -1,4 +1,3 @@
-version: "3.9"
 name: only-paws
 
 # Base docker compose file for all environments
