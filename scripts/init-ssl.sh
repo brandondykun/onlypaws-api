@@ -59,8 +59,22 @@ docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.overri
 echo "### Starting nginx ..."
 docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.override.yml up -d nginx
 
-# Wait for nginx to start
-sleep 5
+# Add debug information
+echo "### Checking nginx status ..."
+docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.override.yml ps nginx
+docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.override.yml logs nginx
+
+# Increase wait time for nginx to start
+echo "### Waiting for nginx to be fully started ..."
+sleep 15
+
+# Add verification of challenge path
+echo "### Creating challenge directory ..."
+docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.override.yml exec nginx mkdir -p /var/www/certbot/.well-known/acme-challenge
+
+echo "### Verifying challenge path setup ..."
+docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.override.yml exec nginx ls -la /var/www/certbot/.well-known/acme-challenge || true
+docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.override.yml exec nginx curl -v http://localhost/.well-known/acme-challenge/ || true
 
 echo "### Deleting dummy certificate ..."
 docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.override.yml run --rm --entrypoint "\
@@ -92,6 +106,7 @@ docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.overri
     --rsa-key-size $rsa_key_size \
     --agree-tos \
     --force-renewal \
+    --debug-challenges \
     -v" certbot
 
 # Replace the certificate update section with this simpler version

@@ -28,7 +28,7 @@ services:
     build: ../nginx
     volumes:
       - static_volume:/vol/web/static:ro
-      - ./staging/certbot/conf:/etc/letsencrypt:ro
+      - ./staging/certbot/conf:/etc/letsencrypt
       - ./staging/certbot/www:/var/www/certbot
     ports:
       - "80:80"
