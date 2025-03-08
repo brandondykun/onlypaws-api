@@ -57,6 +57,30 @@ server {
         proxy_set_header Host $host;
         proxy_redirect off;
         proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Add CORS headers
+        add_header 'Access-Control-Allow-Origin' '*' always;
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
+        add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization' always;
+
+        # Better error handling
+        proxy_intercept_errors on;
+        error_page 502 = @backend_down;
+
+        # Add timeouts
+        proxy_connect_timeout 300;
+        proxy_send_timeout 300;
+        proxy_read_timeout 300;
+        send_timeout 300;
+
+        # Add error logging
+        error_log /var/log/nginx/app_error.log debug;
+    }
+
+    location @backend_down {
+        return 502 '{"error": "Backend service unavailable"}';
+        add_header Content-Type application/json;
     }
 
     location /static/ {
