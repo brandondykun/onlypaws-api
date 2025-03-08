@@ -93,16 +93,11 @@ docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.overri
     --agree-tos \
     --force-renewal" certbot
 
-# After certificate generation, create the directory and copy files
-echo "### Creating symbolic links to the latest certificates ..."
+# Replace the certificate update section with this simpler version
+echo "### Verifying certificate path ..."
 docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.override.yml run --rm --entrypoint "sh" certbot -c "\
-    mkdir -p /etc/letsencrypt/live/${domains[0]} && \
-    latest=\$(ls -d /etc/letsencrypt/live/${domains[0]}-* | sort -V | tail -n 1) && \
-    cp -L \$latest/fullchain.pem /etc/letsencrypt/live/${domains[0]}/fullchain.pem && \
-    cp -L \$latest/privkey.pem /etc/letsencrypt/live/${domains[0]}/privkey.pem && \
-    cp -L \$latest/chain.pem /etc/letsencrypt/live/${domains[0]}/chain.pem && \
-    cp -L \$latest/cert.pem /etc/letsencrypt/live/${domains[0]}/cert.pem && \
-    chown -R root:root /etc/letsencrypt/live/${domains[0]}"
+    ls -la /etc/letsencrypt/live/${domains[0]} && \
+    echo 'Certificate files are in place'"
 
 echo "### Reloading nginx ..."
 docker compose -f docker/docker-compose.yml -f docker/$ENV/docker-compose.override.yml exec nginx nginx -s reload 
