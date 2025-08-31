@@ -1,4 +1,6 @@
 import os
+import logging
+import traceback
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -10,9 +12,12 @@ from django.contrib.auth.models import (
     PermissionsMixin,
 )
 from .utils import crop_square_and_resize
-import secrets
 from datetime import timedelta
 from django.utils import timezone
+
+from pgvector.django import VectorField, CosineDistance
+
+logger = logging.getLogger(__name__)
 
 
 class UserManager(BaseUserManager):
@@ -176,9 +181,85 @@ class PostImage(models.Model):
     image = models.ImageField(upload_to=post_image_path)
     is_main = models.BooleanField(default=False)
 
+    # Embedding fields for similarity search
+    embedding = VectorField(
+        dimensions=512,  # 512-dimensional embedding
+        null=True,
+        blank=True,
+        help_text="Vector embedding for similarity search",
+    )
+    embedding_model = models.CharField(
+        max_length=100,
+        default="clip-vit-base-patch32",
+        help_text="Model used to generate the embedding",
+    )
+    embedding_generated_at = models.DateTimeField(
+        null=True, blank=True, help_text="When the embedding was generated"
+    )
+
     def save(self, *args, **kwargs):
+        # Process image
         self.image = crop_square_and_resize(self.image, image_size=1080)
+
+        # Check if we need to generate embedding
+        should_generate_embedding = (
+            self.pk is None  # New instance
+            or "embedding"
+            not in kwargs.get("update_fields", [])  # Not updating embedding field
+        )
+
+        # Save first to ensure we have a file path
         super().save(*args, **kwargs)
+
+        # Generate embedding asynchronously if needed
+        if should_generate_embedding and (
+            self.embedding is None
+            or (hasattr(self.embedding, "__len__") and len(self.embedding) == 0)
+        ):
+            try:
+                from .services import get_embedding_service
+
+                get_embedding_service().generate_embedding_for_post_image(self)
+            except Exception as e:
+                # Log error but don't fail the save operation
+                logger.error(
+                    f"Failed to generate embedding for PostImage {self.id}: {str(e)}"
+                )
+
+    def find_similar_images(self, limit: int = 10, min_similarity: float = 0.1):
+        """
+        Find similar images based on embedding similarity using pgvector.
+
+        Args:
+            limit: Maximum number of similar images to return
+            min_similarity: Minimum similarity threshold (0-1)
+
+        Returns:
+            QuerySet of similar PostImage instances ordered by similarity
+        """
+        if self.embedding is None or (
+            hasattr(self.embedding, "__len__") and len(self.embedding) == 0
+        ):
+            return PostImage.objects.none()
+
+        # Use pgvector's CosineDistance for similarity search
+        # CosineDistance returns values from 0 (identical) to 2 (opposite)
+        # So max_distance = 2 * (1 - min_similarity)
+        max_distance = 2 * (1 - min_similarity)
+
+        try:
+            return (
+                PostImage.objects.filter(embedding__isnull=False)
+                .exclude(id=self.id)  # Exclude self
+                .annotate(distance=CosineDistance("embedding", self.embedding))
+                .filter(distance__lte=max_distance)
+                .order_by("distance")[:limit]
+            )
+        except Exception as e:
+            logger.error(f"Error in pgvector query: {str(e)}")
+            logger.error(f"Full traceback: {traceback.format_exc()}")
+            # Fallback to empty queryset
+            return PostImage.objects.none()
 
     def __str__(self):
         return f"Post {self.post.id} - {self.image.path}"
