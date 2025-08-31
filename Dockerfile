@@ -38,6 +38,9 @@ RUN mkdir -p /app/models && \
 from sentence_transformers import SentenceTransformer
 SentenceTransformer("sentence-transformers/clip-ViT-B-32")
 EOF
+# Fix any permission issues with downloaded models
+RUN find /app/models -type f -exec chmod 644 {} \; 2>/dev/null || true && \
+    find /app/models -type d -exec chmod 755 {} \; 2>/dev/null || true
 
 # ============================
 # Final stage
