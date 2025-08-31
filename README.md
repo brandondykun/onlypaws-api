@@ -193,11 +193,76 @@ docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.overrid
 - `--image-id <ID>`: Process a specific PostImage only
 - `--batch-size <SIZE>`: Number of images to process in each batch (default: 50)
 
-**Note:** Embeddings are automatically generated when new images are uploaded, but this command is useful for:
+**Note:** Embeddings are now generated asynchronously using Celery for better performance. This command is useful for:
 - Initial setup with existing images
 - Regenerating embeddings with updated models
 - Troubleshooting missing embeddings
 
+### New Async Options
+
+The `generate_embeddings` command now supports both synchronous and asynchronous processing:
+
+```bash
+# Async processing (default, recommended for large batches)
+docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py generate_embeddings --async
+
+# Synchronous processing (useful for development/debugging)
+docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py generate_embeddings --sync
+```
+
+## Background Processing with Celery and Redis
+
+The application uses Celery with Redis for background processing of image embeddings. This ensures that image uploads don't block the user interface while embeddings are generated.
+
+### Services
+
+When running with docker-compose, the following services are automatically started:
+
+- **redis**: Redis server for Celery message broker and result backend
+- **celery-worker-default**: General purpose Celery worker
+- **celery-worker-embeddings**: Specialized worker for CPU-intensive embedding tasks
+- **celery-beat**: Periodic task scheduler (optional)
+
+### Testing Celery Setup
+
+Test that Celery is working correctly:
+
+```bash
+# Test basic Celery functionality
+docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py test_celery
+
+# Test embedding task discovery
+docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py test_celery --test-type embedding
+```
+
+### Monitoring Tasks
+
+View Celery worker logs:
+
+```bash
+# View embedding worker logs
+docker logs onlypaws_celery_embeddings -f
+
+# View default worker logs
+docker logs onlypaws_celery_default -f
+```
+
+### Manual Task Management
+
+You can also manually queue embedding tasks:
+
+```bash
+# Start Python shell
+docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py shell
+
+# In the shell:
+from apps.core_app.tasks import generate_image_embedding_task
+from apps.core_app.models import PostImage
+
+# Queue embedding for specific image
+task = generate_image_embedding_task.delay(post_image_id=1)
+print(f"Task ID: {task.id}")
+```
 
 ## Image Data
 
