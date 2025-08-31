@@ -53,6 +53,9 @@ from drf_spectacular.utils import (
     OpenApiParameter,
     OpenApiTypes,
 )
+import logging
+
+logger = logging.getLogger(__name__)
 
 # schema parameter for auth profile id header
 auth_profile_param = OpenApiParameter(
@@ -536,7 +539,7 @@ class ListExplorePostsView(generics.ListAPIView):
     )
 )
 class ListSimilarPostsView(generics.ListAPIView):
-    """Get explore posts that are similar to the desired post."""
+    """Get posts that are visually similar to the desired post using image embeddings."""
 
     serializer_class = PostDetailedSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -546,12 +549,74 @@ class ListSimilarPostsView(generics.ListAPIView):
     def get_queryset(self):
         post_id = self.kwargs.get("pk")
         profile_id = self.request.GET.get("profileId")
-        posts = Post.objects.filter(
-            ~Q(profile=profile_id)
-            & Q(id__gt=post_id)
-            & ~Q(reports__reason__id=1)  # filter reported inappropriate content
-        ).order_by("-created_at")
-        return posts
+        min_similarity = float(self.request.GET.get("min_similarity", 0.3))
+
+        try:
+            # Get the post and its main image
+            post: Post = get_object_or_404(Post, id=post_id)
+            main_image: PostImage = post.images.first()
+
+            if (
+                not main_image
+                or main_image.embedding is None
+                or (
+                    hasattr(main_image.embedding, "__len__")
+                    and len(main_image.embedding) == 0
+                )
+            ):
+                # Fallback to basic filtering if no embedding available
+                return Post.objects.filter(
+                    ~Q(profile=profile_id)
+                    & Q(id__gt=post_id)
+                    & ~Q(reports__reason__id=1)
+                ).order_by("-created_at")[:20]
+
+            # Find similar images
+            similar_images = main_image.find_similar_images(
+                limit=100, min_similarity=min_similarity
+            )
+
+            # Get posts for similar images, preserving similarity order and ensuring uniqueness
+            similar_posts_ids = []
+            seen_post_ids = set()
+            for img in similar_images:
+                # Does the post belong to the profile requesting the similar posts?
+                is_own_post = profile_id and img.post.profile.id == int(profile_id)
+                # Is the post the original post passed in kwargs?
+                is_original_post = img.post.id == post_id
+
+                # Skip if it's the user's own post or the original post
+                if is_own_post or is_original_post:
+                    continue
+
+                # Only add if we haven't seen this post before
+                if img.post.id not in seen_post_ids:
+                    similar_posts_ids.append(img.post.id)
+                    seen_post_ids.add(img.post.id)
+
+            if not similar_posts_ids:
+                return Post.objects.none()
+
+            # Get posts and filter out reported content
+            posts_dict = (
+                Post.objects.filter(id__in=similar_posts_ids)
+                .exclude(reports__reason__id=1)  # filter reported inappropriate content
+                .exclude(id=post_id)
+                .in_bulk(field_name="id")
+            )
+
+            # Return posts in similarity order (preserving the order from similar_images)
+            ordered_posts = []
+            for post_id in similar_posts_ids:
+                if post_id in posts_dict:
+                    ordered_posts.append(posts_dict[post_id])
+
+            return ordered_posts
+
+        except Exception as e:
+            # Log error and return empty queryset
+            logger.error(f"Error in ListSimilarPostsView: {str(e)}")
+            return Post.objects.none()
 
 
 @extend_schema_view(
