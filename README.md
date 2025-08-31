@@ -18,9 +18,10 @@ _The unapologetically pet friendly social media app._
 5. [Creating Fixture for Individual Model](#creating-fixture-for-individual-model)
 6. [Creating Fixtures for All Models](#creating-fixtures-for-all-models)
 7. [Clear and Reload Database](#clear-and-reload-database)
-8. [Image Data](#image-data)
-9. [Commits](#commits)
-10. [Environment Variables](#environment-variables)
+8. [Generate Image Embeddings](#generate-image-embeddings)
+9. [Image Data](#image-data)
+10. [Commits](#commits)
+11. [Environment Variables](#environment-variables)
 12. [Dev and Test Images](#dev-and-test-images)
 
 ---
@@ -163,6 +164,39 @@ scripts/load_db.sh test
 # clear and reload staging db
 scripts/load_db.sh staging
 ```
+
+
+## Generate Image Embeddings
+
+The image similarity search feature requires embeddings to be generated for images. Use the `generate_embeddings` management command to create embeddings for PostImage instances.
+
+```bash
+# Generate embeddings for all images that don't have them
+docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py generate_embeddings
+
+# Force regenerate all embeddings (overwrites existing ones)
+docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py generate_embeddings --force
+
+# Generate embeddings for a specific post
+docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py generate_embeddings --post-id 5
+
+# Generate embedding for a specific image
+docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py generate_embeddings --image-id 10
+
+# Process images in smaller batches (default: 50)
+docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py generate_embeddings --batch-size 25
+```
+
+**Options:**
+- `--force`: Regenerate embeddings even if they already exist
+- `--post-id <ID>`: Process images for a specific post only
+- `--image-id <ID>`: Process a specific PostImage only
+- `--batch-size <SIZE>`: Number of images to process in each batch (default: 50)
+
+**Note:** Embeddings are automatically generated when new images are uploaded, but this command is useful for:
+- Initial setup with existing images
+- Regenerating embeddings with updated models
+- Troubleshooting missing embeddings
 
 
 ## Image Data
