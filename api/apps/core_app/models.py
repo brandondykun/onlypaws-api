@@ -217,14 +217,31 @@ class PostImage(models.Model):
             or (hasattr(self.embedding, "__len__") and len(self.embedding) == 0)
         ):
             try:
-                from .services import get_embedding_service
+                # Import here to avoid circular imports
+                from .tasks import generate_image_embedding_task
 
-                get_embedding_service().generate_embedding_for_post_image(self)
-            except Exception as e:
-                # Log error but don't fail the save operation
-                logger.error(
-                    f"Failed to generate embedding for PostImage {self.id}: {str(e)}"
+                # Queue the embedding generation task
+                task = generate_image_embedding_task.delay(self.id)
+
+                logger.info(
+                    f"Queued embedding generation task {task.id} for PostImage {self.id}"
                 )
+
+            except Exception as e:
+                # Fallback to synchronous generation if Celery is not available
+                logger.warning(
+                    f"Failed to queue async embedding task for PostImage {self.id}, "
+                    f"falling back to synchronous generation: {str(e)}"
+                )
+
+                try:
+                    from .services import get_embedding_service
+
+                    get_embedding_service().generate_embedding_for_post_image(self)
+                except Exception as sync_error:
+                    logger.error(
+                        f"Synchronous embedding generation also failed for PostImage {self.id}: {str(sync_error)}"
+                    )
 
     def find_similar_images(self, limit: int = 10, min_similarity: float = 0.1):
         """

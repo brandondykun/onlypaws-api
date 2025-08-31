@@ -45,6 +45,66 @@ services:
       - ./staging/certbot/conf:/etc/letsencrypt
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
+  # Celery worker for general tasks
+  celery-worker-default:
+    container_name: onlypaws_celery_default_staging
+    image: only-paws-only-paws-app
+    depends_on:
+      - only-paws-app
+      - only-paws-db
+      - redis
+    volumes:
+      - ../api:/api
+      - ../logs:/vol/log
+    env_file:
+      - staging/.env.staging
+    environment:
+      - DJANGO_SETTINGS_MODULE=core.settings
+      - PYTHONPATH=/api
+    working_dir: /api
+    command: python -m celery -A core worker -Q default -l info --concurrency=2
+    restart: unless-stopped
+
+  # Celery worker for embedding tasks (CPU intensive)
+  celery-worker-embeddings:
+    container_name: onlypaws_celery_embeddings_staging
+    image: only-paws-only-paws-app
+    depends_on:
+      - only-paws-app
+      - only-paws-db
+      - redis
+    volumes:
+      - ../api:/api
+      - ../logs:/vol/log
+    env_file:
+      - staging/.env.staging
+    environment:
+      - DJANGO_SETTINGS_MODULE=core.settings
+      - PYTHONPATH=/api
+    working_dir: /api
+    command: python -m celery -A core worker -Q embeddings -l info --concurrency=2
+    restart: unless-stopped
+
+  # Celery beat for periodic tasks
+  celery-beat:
+    container_name: onlypaws_celery_beat_staging
+    image: only-paws-only-paws-app
+    depends_on:
+      - only-paws-app
+      - only-paws-db
+      - redis
+    volumes:
+      - ../api:/api
+      - ../logs:/vol/log
+    env_file:
+      - staging/.env.staging
+    environment:
+      - DJANGO_SETTINGS_MODULE=core.settings
+      - PYTHONPATH=/api
+    working_dir: /api
+    command: python -m celery -A core beat -l info
+    restart: unless-stopped
+
 volumes:
   staging_db_volume:
   static_volume:

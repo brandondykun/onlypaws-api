@@ -23,5 +23,70 @@ services:
     env_file:
       - dev/.env.dev.local.db
 
+  # Celery worker for general tasks
+  celery-worker-default:
+    container_name: onlypaws_celery_default
+    image: only-paws-only-paws-app
+    depends_on:
+      - only-paws-app
+      - only-paws-db
+      - redis
+    volumes:
+      - ../api:/api
+      - ../logs/django-dev.log:/vol/log/django.log
+    env_file:
+      - dev/.env.dev.local
+    environment:
+      - DJANGO_SETTINGS_MODULE=core.settings
+      - PYTHONPATH=/api
+    working_dir: /api
+    command: python -m celery -A core worker -Q default -l info --concurrency=4
+    restart: unless-stopped
+
+  # Celery worker for embedding tasks (CPU intensive)
+  celery-worker-embeddings:
+    container_name: onlypaws_celery_embeddings
+    image: only-paws-only-paws-app
+    depends_on:
+      - only-paws-app
+      - only-paws-db
+      - redis
+    volumes:
+      - ../api:/api
+      - ../logs/django-dev.log:/vol/log/django.log
+    env_file:
+      - dev/.env.dev.local
+    environment:
+      - DJANGO_SETTINGS_MODULE=core.settings
+      - PYTHONPATH=/api
+    working_dir: /api
+    command: python -m celery -A core worker -Q embeddings -l info --concurrency=1
+    restart: unless-stopped
+
+  # Celery beat for periodic tasks (optional)
+  celery-beat:
+    container_name: onlypaws_celery_beat
+    image: only-paws-only-paws-app
+    depends_on:
+      - only-paws-app
+      - only-paws-db
+      - redis
+    volumes:
+      - ../api:/api
+      - ../logs/django-dev.log:/vol/log/django.log
+    env_file:
+      - dev/.env.dev.local
+    environment:
+      - DJANGO_SETTINGS_MODULE=core.settings
+      - PYTHONPATH=/api
+    working_dir: /api
+    command: python -m celery -A core beat -l info
+    restart: unless-stopped
+
+  # Redis service configuration specific to dev
+  redis:
+    env_file:
+      - dev/.env.dev.local
+
 volumes:
   only-paws-db-data-dev:

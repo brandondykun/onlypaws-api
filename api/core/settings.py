@@ -244,6 +244,41 @@ EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
 
+# Celery Configuration
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
+CELERY_RESULT_BACKEND = os.environ.get(
+    "CELERY_RESULT_BACKEND", "redis://localhost:6379/0"
+)
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "UTC"
+CELERY_ENABLE_UTC = True
+
+# Task routing and queue configuration
+CELERY_TASK_DEFAULT_QUEUE = "default"
+CELERY_TASK_ROUTES = {
+    "apps.core_app.tasks.generate_image_embedding_task": {"queue": "embeddings"},
+    "apps.core_app.tasks.batch_generate_embeddings_task": {"queue": "embeddings"},
+}
+
+# Worker configuration
+CELERY_WORKER_PREFETCH_MULTIPLIER = (
+    1  # Only prefetch one task at a time for embedding workers
+)
+CELERY_TASK_ACKS_LATE = True  # Acknowledge tasks after completion
+CELERY_WORKER_MAX_TASKS_PER_CHILD = (
+    50  # Restart workers after 50 tasks to prevent memory leaks
+)
+
+# Task result settings
+CELERY_RESULT_EXPIRES = 3600  # Results expire after 1 hour
+CELERY_TASK_IGNORE_RESULT = False  # Keep task results for monitoring
+
+# Retry configuration
+CELERY_TASK_RETRY_DELAY = 60  # Wait 60 seconds before retrying
+CELERY_TASK_MAX_RETRIES = 3
+
 # Get the current environment
 environment: Literal["test", "dev", "staging", "prod"] = os.environ.get("DJANGO_ENV")
 

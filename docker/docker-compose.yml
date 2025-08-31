@@ -10,6 +10,7 @@ services:
       context: ../
     depends_on:
       - only-paws-db
+      - redis
     restart: unless-stopped
 
   only-paws-db:
@@ -17,8 +18,19 @@ services:
     image: pgvector/pgvector:pg16
     restart: unless-stopped
 
+  redis:
+    container_name: onlypaws_redis
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
 volumes:
   static_volume:
   media_volume:
   log_volume:
+  redis_data:
 

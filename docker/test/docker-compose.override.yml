@@ -23,5 +23,45 @@ services:
     env_file:
       - test/.env.test.db
 
+  # Celery worker for general tasks - Test environment
+  celery-worker-default:
+    container_name: onlypaws_celery_default_test
+    image: only-paws-only-paws-app
+    depends_on:
+      - only-paws-app
+      - only-paws-db
+      - redis
+    volumes:
+      - ../api:/api
+      - ../logs/django-test.log:/vol/log/django.log
+    env_file:
+      - test/.env.test
+    environment:
+      - DJANGO_SETTINGS_MODULE=core.settings
+      - PYTHONPATH=/api
+    working_dir: /api
+    command: python -m celery -A core worker -Q default -l info --concurrency=2
+    restart: unless-stopped
+
+  # Celery worker for embedding tasks - Test environment
+  celery-worker-embeddings:
+    container_name: onlypaws_celery_embeddings_test
+    image: only-paws-only-paws-app
+    depends_on:
+      - only-paws-app
+      - only-paws-db
+      - redis
+    volumes:
+      - ../api:/api
+      - ../logs/django-test.log:/vol/log/django.log
+    env_file:
+      - test/.env.test
+    environment:
+      - DJANGO_SETTINGS_MODULE=core.settings
+      - PYTHONPATH=/api
+    working_dir: /api
+    command: python -m celery -A core worker -Q embeddings -l info --concurrency=1
+    restart: unless-stopped
+
 volumes:
   only-paws-db-data-test:
