@@ -219,13 +219,23 @@ class PostImage(models.Model):
             try:
                 # Import here to avoid circular imports
                 from .tasks import generate_image_embedding_task
+                from django.db import transaction
 
-                # Queue the embedding generation task
-                task = generate_image_embedding_task.delay(self.id)
+                def queue_embedding_task():
+                    """Queue the embedding task after transaction commits."""
+                    try:
+                        task = generate_image_embedding_task.delay(self.id)
+                        logger.info(
+                            f"Queued embedding generation task {task.id} for PostImage {self.id}"
+                        )
+                    except Exception as e:
+                        logger.error(
+                            f"Failed to queue embedding task for PostImage {self.id}: {str(e)}"
+                        )
 
-                logger.info(
-                    f"Queued embedding generation task {task.id} for PostImage {self.id}"
-                )
+                # Queue the task only after the transaction commits
+                # This ensures the PostImage exists in the database when the worker runs
+                transaction.on_commit(queue_embedding_task)
 
             except Exception as e:
                 # Fallback to synchronous generation if Celery is not available

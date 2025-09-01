@@ -3,9 +3,8 @@ Celery tasks for the core_app.
 """
 
 import logging
-from typing import List, Optional
+from typing import List
 from celery import shared_task
-from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -32,11 +31,32 @@ def generate_image_embedding_task(self, post_image_id: int):
         try:
             post_image = PostImage.objects.get(id=post_image_id)
         except PostImage.DoesNotExist:
-            logger.error(f"PostImage {post_image_id} does not exist")
+            logger.warning(
+                f"PostImage {post_image_id} does not exist (attempt {self.request.retries + 1})"
+            )
+
+            # If this is a new PostImage, it might not be committed to DB yet
+            # Retry with exponential backoff for a few attempts
+            if self.request.retries < self.max_retries:
+                retry_delay = min(
+                    60, 5 * (2**self.request.retries)
+                )  # 5s, 10s, 20s (max 60s)
+                logger.info(
+                    f"Retrying PostImage {post_image_id} in {retry_delay} seconds..."
+                )
+                raise self.retry(
+                    exc=None, countdown=retry_delay, max_retries=self.max_retries
+                )
+
+            # After all retries, return error
+            logger.error(
+                f"PostImage {post_image_id} does not exist after {self.max_retries} retries"
+            )
             return {
                 "success": False,
-                "error": f"PostImage {post_image_id} does not exist",
+                "error": f"PostImage {post_image_id} does not exist after {self.max_retries} retries",
                 "post_image_id": post_image_id,
+                "retries": self.request.retries,
             }
 
         # Check if embedding already exists (avoid duplicate work)
