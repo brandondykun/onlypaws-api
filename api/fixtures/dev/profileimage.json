@@ -58,5 +58,15 @@
       "created_at": "2025-02-20T03:37:24.065Z",
       "updated_at": "2025-02-20T03:37:24.065Z"
     }
+  },
+  {
+    "model": "core_app.profileimage",
+    "pk": 7,
+    "fields": {
+      "profile": 7,
+      "image": "images/dev/7/7/profile_image.webp",
+      "created_at": "2025-09-01T00:03:37.191Z",
+      "updated_at": "2025-09-01T00:03:37.191Z"
+    }
   }
 ]

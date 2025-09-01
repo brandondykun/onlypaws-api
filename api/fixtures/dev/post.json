@@ -207,5 +207,104 @@
       "updated_at": "2025-02-20T03:43:36.731Z",
       "contains_ai": true
     }
+  },
+  {
+    "model": "core_app.post",
+    "pk": 20,
+    "fields": {
+      "caption": "Nothing like a good stick chew in the grass!",
+      "profile": 1,
+      "created_at": "2025-08-31T18:01:09.231Z",
+      "updated_at": "2025-08-31T18:01:09.231Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "core_app.post",
+    "pk": 21,
+    "fields": {
+      "caption": "Husky puppies",
+      "profile": 7,
+      "created_at": "2025-08-31T23:25:57.755Z",
+      "updated_at": "2025-08-31T23:25:57.756Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "core_app.post",
+    "pk": 22,
+    "fields": {
+      "caption": "Real life Snoopy! Who doesn’t love a Beagle??",
+      "profile": 7,
+      "created_at": "2025-08-31T23:59:05.637Z",
+      "updated_at": "2025-08-31T23:59:05.637Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "core_app.post",
+    "pk": 23,
+    "fields": {
+      "caption": "Pug life",
+      "profile": 7,
+      "created_at": "2025-09-01T04:51:00.916Z",
+      "updated_at": "2025-09-01T04:51:00.916Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "core_app.post",
+    "pk": 24,
+    "fields": {
+      "caption": "The always photogenic German Shepherd",
+      "profile": 7,
+      "created_at": "2025-09-01T04:57:01.609Z",
+      "updated_at": "2025-09-01T04:57:01.609Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "core_app.post",
+    "pk": 25,
+    "fields": {
+      "caption": "Bernese Mountain Dog. The last one might be a mix. If you know what it could be, leave a comment.",
+      "profile": 7,
+      "created_at": "2025-09-01T05:05:04.315Z",
+      "updated_at": "2025-09-01T05:05:04.315Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "core_app.post",
+    "pk": 26,
+    "fields": {
+      "caption": "101 reasons to love Dalmatians",
+      "profile": 7,
+      "created_at": "2025-09-01T13:17:13.793Z",
+      "updated_at": "2025-09-01T13:17:13.793Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "core_app.post",
+    "pk": 27,
+    "fields": {
+      "caption": "Black Lab puppies",
+      "profile": 7,
+      "created_at": "2025-09-01T13:40:30.574Z",
+      "updated_at": "2025-09-01T13:40:30.574Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "core_app.post",
+    "pk": 28,
+    "fields": {
+      "caption": "Rottweiler close ups",
+      "profile": 7,
+      "created_at": "2025-09-01T13:49:30.858Z",
+      "updated_at": "2025-09-01T13:49:30.858Z",
+      "contains_ai": false
+    }
   }
 ]

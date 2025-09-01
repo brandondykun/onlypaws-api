@@ -4,7 +4,7 @@
     "pk": 1,
     "fields": {
       "password": "pbkdf2_sha256$870000$FKLulwCIAAuhw42xQ0KvZX$eJgylKLMJm7Zdq671gYZc0vFmXdZAHqWowYuWT3EQOI=",
-      "last_login": "2025-02-19T22:57:35.161Z",
+      "last_login": "2025-08-30T16:28:56.989Z",
       "is_superuser": true,
       "email": "admin@email.com",
       "is_active": true,
@@ -82,6 +82,21 @@
       "last_login": null,
       "is_superuser": false,
       "email": "userfive@email.com",
+      "is_active": true,
+      "is_staff": false,
+      "is_email_verified": true,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "core_app.user",
+    "pk": 7,
+    "fields": {
+      "password": "pbkdf2_sha256$870000$heQHZBaoAvFyKIdAcjYxaV$V0d/AJb57oaY7RhBSUerz7lRXGyH4ICVhRZPkNii8gE=",
+      "last_login": null,
+      "is_superuser": false,
+      "email": "usersix@email.com",
       "is_active": true,
       "is_staff": false,
       "is_email_verified": true,

@@ -70,5 +70,17 @@
       "pet_type": 2,
       "breed": "Artificial Intelligence"
     }
+  },
+  {
+    "model": "core_app.profile",
+    "pk": 7,
+    "fields": {
+      "username": "AllPets",
+      "about": "Your home for puppies! I post puppy pics of all breeds, shapes and sizes!",
+      "user": 7,
+      "name": "The Puppy Profile",
+      "pet_type": 1,
+      "breed": "Any and all"
+    }
   }
 ]
