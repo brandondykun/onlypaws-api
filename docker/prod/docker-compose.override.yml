@@ -108,6 +108,7 @@ services:
     volumes:
       - ../api:/api
       - ../logs:/vol/log
+      - celery_beat_schedule:/tmp
     env_file:
       - prod/.env.prod
     environment:
@@ -126,3 +127,4 @@ services:
 volumes:
   prod_db_volume:
   static_volume:
+  celery_beat_schedule:
