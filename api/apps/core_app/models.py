@@ -141,7 +141,7 @@ class ProfileImage(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"Profile {self.profile.id} - {self.image.path}"
+        return f"Profile {self.profile.id} - {self.image.name}"
 
 
 class Post(models.Model):
@@ -289,7 +289,7 @@ class PostImage(models.Model):
             return PostImage.objects.none()
 
     def __str__(self):
-        return f"Post {self.post.id} - {self.image.path}"
+        return f"Post {self.post.id} - {self.image.name}"
 
 
 class Like(models.Model):
