@@ -74,6 +74,7 @@ services:
     volumes:
       - ../api:/api
       - ../logs/django-dev.log:/vol/log/django.log
+      - celery_beat_schedule:/tmp
     env_file:
       - dev/.env.dev.local
     environment:
@@ -90,3 +91,4 @@ services:
 
 volumes:
   only-paws-db-data-dev:
+  celery_beat_schedule:

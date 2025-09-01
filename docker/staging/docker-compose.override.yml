@@ -96,6 +96,7 @@ services:
     volumes:
       - ../api:/api
       - ../logs:/vol/log
+      - celery_beat_schedule:/tmp
     env_file:
       - staging/.env.staging
     environment:
@@ -108,3 +109,4 @@ services:
 volumes:
   staging_db_volume:
   static_volume:
+  celery_beat_schedule:

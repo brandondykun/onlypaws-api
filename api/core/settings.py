@@ -279,6 +279,9 @@ CELERY_TASK_IGNORE_RESULT = False  # Keep task results for monitoring
 CELERY_TASK_RETRY_DELAY = 60  # Wait 60 seconds before retrying
 CELERY_TASK_MAX_RETRIES = 3
 
+# Celery Beat configuration
+CELERY_BEAT_SCHEDULE_FILENAME = "/tmp/celerybeat-schedule"
+
 # Get the current environment
 environment: Literal["test", "dev", "staging", "prod"] = os.environ.get("DJANGO_ENV")
 
