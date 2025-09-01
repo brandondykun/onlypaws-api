@@ -212,7 +212,7 @@ class PostReportPreviewSerializer(serializers.ModelSerializer):
 class PostDetailedSerializer(serializers.ModelSerializer):
     """Detailed serializer for Posts."""
 
-    images = PostImageSerializer(many=True, read_only=True)
+    images = serializers.SerializerMethodField()
     profile = ProfileSerializer()
     comments_count = serializers.SerializerMethodField()
     likes_count = serializers.SerializerMethodField()
@@ -244,6 +244,7 @@ class PostDetailedSerializer(serializers.ModelSerializer):
             "id",
             "created_at",
             "updated_at",
+            "images",
             "comments_count",
             "likes_count",
             "liked",
@@ -252,6 +253,11 @@ class PostDetailedSerializer(serializers.ModelSerializer):
             "is_hidden",
             "is_reported",
         ]
+
+    def get_images(self, obj):
+        """Return post images ordered by ID."""
+        ordered_images = obj.images.all().order_by("id")
+        return PostImageSerializer(ordered_images, many=True, context=self.context).data
 
     def get_comments_count(self, obj) -> int:
         return obj.comments.count()
