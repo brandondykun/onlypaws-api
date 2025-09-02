@@ -42,6 +42,9 @@ server {
     # Only essential SSL parameters
     ssl_protocols TLSv1.2 TLSv1.3;
 
+    # Set maximum allowed size for client uploads
+    client_max_body_size 20M;
+
     location / {
         proxy_pass http://only-paws-app;
         proxy_set_header Host $host;
