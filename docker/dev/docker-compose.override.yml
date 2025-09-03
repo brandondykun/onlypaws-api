@@ -84,10 +84,6 @@ services:
     command: python -m celery -A core beat -l info
     restart: unless-stopped
 
-  # Redis service configuration specific to dev
-  redis:
-    command: redis-server --appendonly yes --bind 127.0.0.1
-
 volumes:
   only-paws-db-data-dev:
   celery_beat_schedule:
