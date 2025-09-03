@@ -24,9 +24,6 @@ services:
     env_file:
       - staging/.env.staging.db
 
-  redis:
-    command: redis-server --appendonly yes --bind 127.0.0.1
-
   nginx:
     build: ../nginx
     volumes:
