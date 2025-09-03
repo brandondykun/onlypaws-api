@@ -24,6 +24,9 @@ services:
     env_file:
       - prod/.env.prod.db
 
+  redis:
+    command: redis-server --appendonly yes --bind 127.0.0.1
+
   nginx:
     build: ../nginx
     volumes:
