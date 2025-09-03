@@ -22,9 +22,9 @@ services:
     container_name: onlypaws_redis
     image: redis:7-alpine
     restart: unless-stopped
-    command: redis-server --appendonly yes
-    ports:
-      - "6379:6379"
+    command: redis-server --appendonly yes --bind 127.0.0.1 --requirepass ${REDIS_PASSWORD}
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
     volumes:
       - redis_data:/data
 
