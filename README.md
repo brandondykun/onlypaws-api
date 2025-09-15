@@ -13,16 +13,17 @@ _The unapologetically pet friendly social media app._
 
 1. [Helper Scripts](#scripts)
 2. [Running the API](#running-the-api)
-3. [Shutting Down the API](#shutting-down-the-api)
-4. [Running Tests](#tests)
-5. [Creating Fixture for Individual Model](#creating-fixture-for-individual-model)
-6. [Creating Fixtures for All Models](#creating-fixtures-for-all-models)
-7. [Clear and Reload Database](#clear-and-reload-database)
-8. [Generate Image Embeddings](#generate-image-embeddings)
-9. [Image Data](#image-data)
-10. [Commits](#commits)
-11. [Environment Variables](#environment-variables)
-12. [Dev and Test Images](#dev-and-test-images)
+3. [Restarting the API](#restarting-the-api)
+4. [Shutting Down the API](#shutting-down-the-api)
+5. [Running Tests](#tests)
+6. [Creating Fixture for Individual Model](#creating-fixture-for-individual-model)
+7. [Creating Fixtures for All Models](#creating-fixtures-for-all-models)
+8. [Clear and Reload Database](#clear-and-reload-database)
+9. [Generate Image Embeddings](#generate-image-embeddings)
+10. [Image Data](#image-data)
+11. [Commits](#commits)
+12. [Environment Variables](#environment-variables)
+13. [Dev and Test Images](#dev-and-test-images)
 
 ---
 
@@ -35,6 +36,8 @@ Several scripts are available to help with the development process.
 [create_model_fixture.sh](#creating-fixture-for-individual-model) - Creates a fixture for a single model in the given environment.
 
 [load_db.sh](#clear-and-reload-database) - Clears and reloads the database with the fixtures for the given environment.
+
+[restart.sh](#restarting-the-api) - Restarts the API service for the given environment.
 
 [run.sh](#running-the-api) - Starts the docker containers and runs the API in the given environment.
 
@@ -65,6 +68,38 @@ scripts/run.sh prod
 ```
 
 _Note: The test environment is not for testing the API. The testing environment should be used when running the front end integration tests._
+
+
+## Restarting the API
+
+To restart the API service without stopping and starting all containers, use the `restart.sh` script followed by the environment.
+
+```bash
+# base command example
+scripts/restart.sh <dev|staging|test|prod>
+
+# restart the api in dev environment
+scripts/restart.sh dev
+
+# restart the api in test environment
+scripts/restart.sh test
+
+# restart the api in staging environment
+scripts/restart.sh staging
+
+# restart the api in prod environment
+scripts/restart.sh prod
+```
+
+This script will:
+- Validate the environment argument
+- Check that Docker is running and Docker Compose is available
+- Verify that the required configuration files exist
+- Restart only the `only-paws-app` service
+- Display the service status after restart
+- Provide helpful error messages if any issues occur
+
+_Note: This is more efficient than stopping and starting all services when you only need to restart the main application._
 
 
 ## Shutting Down the API
