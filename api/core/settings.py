@@ -81,6 +81,7 @@ INSTALLED_APPS = [
     "apps.core_app",
     "apps.user_app",
     "apps.posts_app",
+    "apps.feedback_app",
     "storages",
     "corsheaders",
 ]
