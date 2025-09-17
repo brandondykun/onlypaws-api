@@ -15,6 +15,12 @@ from apps.core_app.models import (
 )
 from apps.core_app.utils import generate_verification_code
 from rest_framework import serializers
+from .tasks import (
+    send_verification_email_task,
+    send_reset_password_email_task,
+    send_email_change_email_task,
+    send_email_change_confirmation_task,
+)
 from .serializers import (
     UserSerializer,
     ProfileDetailedSerializer,
@@ -30,7 +36,6 @@ from .serializers import (
 )
 from rest_framework.response import Response
 import logging
-from django.core.mail import send_mail
 from django.utils import timezone
 from django.db import transaction
 from datetime import timedelta
@@ -39,7 +44,6 @@ from drf_spectacular.utils import (
     extend_schema,
     OpenApiParameter,
 )
-from django.conf import settings
 from rest_framework.views import APIView
 from django.contrib.auth import authenticate
 from django.core.validators import validate_email
@@ -59,44 +63,36 @@ auth_profile_param = OpenApiParameter(
 logger = logging.getLogger(__file__)
 
 
-# helper function to send verification email
-def send_verification_email(user, token):
-    """Send verification email to user."""
-    subject = "Verify Your OnlyPaws Email"
-    message = f"Your verification code is: {token}"
-    send_mail(
-        subject,
-        message,
-        settings.DEFAULT_FROM_EMAIL,
-        [user.email],
-        fail_silently=False,
-    )
+# Email sending is now handled by async tasks
+# These functions are kept for backward compatibility but now queue tasks
+def send_verification_email(user, token_string):
+    """Queue verification email task for user.
+    
+    Args:
+        user: User object
+        token_string: String token (not VerifyEmailToken object)
+    """
+    send_verification_email_task.delay(user.email, token_string)
 
 
-def send_reset_password_email(user, token):
-    """Send reset password email to user."""
-    subject = "Reset Your OnlyPaws Password"
-    message = f"Your password reset code is: {token}"
-    send_mail(
-        subject,
-        message,
-        settings.DEFAULT_FROM_EMAIL,
-        [user.email],
-        fail_silently=False,
-    )
+def send_reset_password_email(user, token_string):
+    """Queue reset password email task for user.
+    
+    Args:
+        user: User object
+        token_string: String token (not ResetPasswordToken object)
+    """
+    send_reset_password_email_task.delay(user.email, token_string)
 
 
-def send_reset_email_email(email, token):
-    """Send change email email to user."""
-    subject = "Update Your OnlyPaws Email"
-    message = f"Your email update code is: {token}"
-    send_mail(
-        subject,
-        message,
-        settings.DEFAULT_FROM_EMAIL,
-        [email],
-        fail_silently=True,
-    )
+def send_reset_email_email(email, token_string):
+    """Queue email change verification task.
+    
+    Args:
+        email: Email address string
+        token_string: String token (not verification token object)
+    """
+    send_email_change_email_task.delay(email, token_string)
 
 
 class CreateUserView(generics.CreateAPIView):
@@ -146,12 +142,12 @@ class CreateUserView(generics.CreateAPIView):
                 verify_email_serializer.is_valid(raise_exception=True)
                 self.perform_create(verify_email_serializer)
 
-                token = VerifyEmailToken.objects.get(
+                verify_token_obj = VerifyEmailToken.objects.get(
                     id=verify_email_serializer.data["id"]
                 )
 
-                # send email with token
-                send_verification_email(user, token)
+                # send email with token string
+                send_verification_email(user, verify_token_obj.token)
 
                 response_serializer = UserProfileSerializer(user)
 
@@ -810,28 +806,8 @@ class VerifyEmailChangeView(APIView):
         # Delete pending change
         pending_change.delete()
 
-        # Send confirmation emails
-        try:
-            # Notify new email
-            send_mail(
-                "Email change successful",
-                "Your email has been successfully updated.",
-                settings.DEFAULT_FROM_EMAIL,
-                [new_email],
-                fail_silently=True,
-            )
-
-            # Notify old email
-            send_mail(
-                "Your email has been changed",
-                f"Your email has been changed to {new_email}.",
-                settings.DEFAULT_FROM_EMAIL,
-                [old_email],
-                fail_silently=True,
-            )
-        except Exception:
-            # Don't fail if confirmation emails fail
-            pass
+        # Send confirmation emails asynchronously
+        send_email_change_confirmation_task.delay(old_email, new_email)
 
         return Response(
             {"message": "Email updated successfully."}, status=status.HTTP_200_OK
