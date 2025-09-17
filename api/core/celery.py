@@ -23,9 +23,14 @@ app.autodiscover_tasks()
 app.conf.task_routes = {
     "apps.core_app.tasks.generate_image_embedding_task": {"queue": "embeddings"},
     "apps.core_app.tasks.batch_generate_embeddings_task": {"queue": "embeddings"},
+    # Email tasks go to default queue for fast processing
+    "apps.user_app.tasks.send_verification_email_task": {"queue": "default"},
+    "apps.user_app.tasks.send_reset_password_email_task": {"queue": "default"},
+    "apps.user_app.tasks.send_email_change_email_task": {"queue": "default"},
+    "apps.user_app.tasks.send_email_change_confirmation_task": {"queue": "default"},
 }
 
-# Configure worker settings for embedding tasks
+# Configure worker settings for different task types
 app.conf.task_annotations = {
     "apps.core_app.tasks.generate_image_embedding_task": {
         "rate_limit": "60/m",  # Increased to 60 tasks per minute for better user experience
@@ -36,6 +41,27 @@ app.conf.task_annotations = {
         "rate_limit": "10/m",  # Increased batch processing rate
         "time_limit": 3600,  # 1 hour timeout for batch jobs
         "soft_time_limit": 3300,  # 55 minutes soft timeout
+    },
+    # Email task settings - fast processing with reasonable timeouts
+    "apps.user_app.tasks.send_verification_email_task": {
+        "rate_limit": "100/m",  # Allow high throughput for emails
+        "time_limit": 60,  # 1 minute timeout
+        "soft_time_limit": 45,  # 45 seconds soft timeout
+    },
+    "apps.user_app.tasks.send_reset_password_email_task": {
+        "rate_limit": "100/m",
+        "time_limit": 60,
+        "soft_time_limit": 45,
+    },
+    "apps.user_app.tasks.send_email_change_email_task": {
+        "rate_limit": "100/m",
+        "time_limit": 60,
+        "soft_time_limit": 45,
+    },
+    "apps.user_app.tasks.send_email_change_confirmation_task": {
+        "rate_limit": "100/m",
+        "time_limit": 60,
+        "soft_time_limit": 45,
     },
 }
 

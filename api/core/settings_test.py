@@ -21,3 +21,10 @@ DATABASES = {
         "PORT": os.environ.get("DB_PORT"),
     }
 }
+
+# Celery Configuration for Tests
+# Run tasks synchronously during testing to avoid Redis dependency
+CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_EAGER_PROPAGATES = True
+CELERY_BROKER_URL = 'memory://'
+CELERY_RESULT_BACKEND = 'cache+memory://'

@@ -258,10 +258,6 @@ CELERY_ENABLE_UTC = True
 
 # Task routing and queue configuration
 CELERY_TASK_DEFAULT_QUEUE = "default"
-CELERY_TASK_ROUTES = {
-    "apps.core_app.tasks.generate_image_embedding_task": {"queue": "embeddings"},
-    "apps.core_app.tasks.batch_generate_embeddings_task": {"queue": "embeddings"},
-}
 
 # Worker configuration
 CELERY_WORKER_PREFETCH_MULTIPLIER = (
