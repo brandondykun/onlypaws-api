@@ -14,6 +14,7 @@ from pathlib import Path
 from datetime import timedelta
 import os
 from typing import Literal
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -78,10 +79,12 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "drf_spectacular",
+    "channels",
     "apps.core_app",
     "apps.user_app",
     "apps.posts_app",
     "apps.feedback_app",
+    "apps.notifications_app",
     "storages",
     "corsheaders",
 ]
@@ -117,6 +120,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "core.wsgi.application"
+ASGI_APPLICATION = "core.asgi.application"
 
 
 # Database
@@ -246,9 +250,9 @@ EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
 
 # Celery Configuration
-CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://redis:6379/0")
 CELERY_RESULT_BACKEND = os.environ.get(
-    "CELERY_RESULT_BACKEND", "redis://localhost:6379/0"
+    "CELERY_RESULT_BACKEND", "redis://redis:6379/0"
 )
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
@@ -278,6 +282,27 @@ CELERY_TASK_MAX_RETRIES = 3
 
 # Celery Beat configuration
 CELERY_BEAT_SCHEDULE_FILENAME = "/tmp/celerybeat-schedule"
+
+# Celery Beat scheduled tasks
+CELERY_BEAT_SCHEDULE = {
+    'cleanup-old-notifications': {
+        'task': 'apps.notifications_app.tasks.cleanup_old_notifications_task',
+        'schedule': crontab(hour=3, minute=0),  # Run daily at 3:00 AM UTC
+        'args': (30,),  # Delete notifications older than 30 days
+    },
+}
+
+# Django Channels configuration
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [os.environ.get("CELERY_BROKER_URL", "redis://redis:6379/0")],
+            "capacity": 1500,  # Maximum number of messages to store in a channel
+            "expiry": 60,  # Message expiry time in seconds
+        },
+    },
+}
 
 # Get the current environment
 environment: Literal["test", "dev", "staging", "prod"] = os.environ.get("DJANGO_ENV")
