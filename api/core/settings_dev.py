@@ -31,3 +31,5 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 # Celery Configuration for Development
 CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://redis:6379/0")
 CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", "redis://redis:6379/0")
+
+MEDIA_DOMAIN = os.environ.get("MEDIA_DOMAIN", "http://localhost:8000")
