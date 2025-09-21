@@ -28,6 +28,11 @@ app.conf.task_routes = {
     "apps.user_app.tasks.send_reset_password_email_task": {"queue": "default"},
     "apps.user_app.tasks.send_email_change_email_task": {"queue": "default"},
     "apps.user_app.tasks.send_email_change_confirmation_task": {"queue": "default"},
+    # Notification tasks go to default queue for real-time delivery
+    "apps.notifications_app.tasks.send_notification_task": {"queue": "default"},
+    "apps.notifications_app.tasks.create_post_like_notification_task": {"queue": "default"},
+    "apps.notifications_app.tasks.send_system_message_task": {"queue": "default"},
+    "apps.notifications_app.tasks.cleanup_old_notifications_task": {"queue": "maintenance"},
 }
 
 # Configure worker settings for different task types
@@ -62,6 +67,27 @@ app.conf.task_annotations = {
         "rate_limit": "100/m",
         "time_limit": 60,
         "soft_time_limit": 45,
+    },
+    # Notification task settings - high priority for real-time delivery
+    "apps.notifications_app.tasks.send_notification_task": {
+        "rate_limit": "200/m",  # High throughput for notifications
+        "time_limit": 30,  # Quick timeout for real-time delivery
+        "soft_time_limit": 25,
+    },
+    "apps.notifications_app.tasks.create_post_like_notification_task": {
+        "rate_limit": "200/m",
+        "time_limit": 30,
+        "soft_time_limit": 25,
+    },
+    "apps.notifications_app.tasks.send_system_message_task": {
+        "rate_limit": "100/m",
+        "time_limit": 30,
+        "soft_time_limit": 25,
+    },
+    "apps.notifications_app.tasks.cleanup_old_notifications_task": {
+        "rate_limit": "1/h",  # Run once per hour max
+        "time_limit": 300,  # 5 minutes timeout
+        "soft_time_limit": 270,
     },
 }
 
