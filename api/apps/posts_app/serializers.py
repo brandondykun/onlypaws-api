@@ -194,6 +194,14 @@ class PostSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "created_at", "updated_at", "likes", "comments"]
 
 
+class PostUpdateSerializer(serializers.ModelSerializer):
+    """Minimal serializer for updating Posts (caption only)."""
+
+    class Meta:
+        model = Post
+        fields = ["caption"]
+
+
 class ReportReasonSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReportReason

@@ -14,8 +14,8 @@ urlpatterns = [
     path("post/", views.CreatePostView.as_view(), name="create_post"),
     path(
         "post/<int:pk>",
-        views.RetrieveDestroyPostView.as_view(),
-        name="retrieve_destroy_post",
+        views.RetrieveUpdateDestroyPostView.as_view(),
+        name="retrieve_update_destroy_post",
     ),
     path(
         "post/<int:pk>/similar",

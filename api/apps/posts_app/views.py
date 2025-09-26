@@ -18,6 +18,7 @@ from apps.core_app.models import (
 )
 from .serializers import (
     PostSerializer,
+    PostUpdateSerializer,
     LikeSerializer,
     CommentSerializer,
     ProfileDetailsSerializer,
@@ -318,9 +319,11 @@ class ListPostCommentsView(generics.ListAPIView):
 
 @extend_schema_view(
     delete=extend_schema(parameters=[auth_profile_param]),
+    patch=extend_schema(parameters=[auth_profile_param]),
+    put=extend_schema(parameters=[auth_profile_param]),
 )
-class RetrieveDestroyPostView(generics.RetrieveDestroyAPIView):
-    """Get details of a Post."""
+class RetrieveUpdateDestroyPostView(generics.RetrieveUpdateDestroyAPIView):
+    """Get, update, or delete details of a Post."""
 
     serializer_class = PostDetailedSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -331,6 +334,48 @@ class RetrieveDestroyPostView(generics.RetrieveDestroyAPIView):
         post = self.queryset.get(id=post_id)
         serializer = self.serializer_class(post, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def update(self, request, *args, **kwargs):
+        current_profile = request.current_profile
+        instance = self.get_object()
+        
+        # check that the user requesting the update owns the post
+        if instance.profile.user != self.request.user:
+            return Response(
+                {"error": "Requesting user does not own this resource."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # check that the profile requesting the update owns the post
+        if instance.profile.id != int(current_profile.id):
+            return Response(
+                {"error": "Requesting profile does not own this resource."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Only allow updating the caption field
+        allowed_fields = {'caption'}
+        update_data = {k: v for k, v in request.data.items() if k in allowed_fields}
+        
+        if not update_data:
+            return Response(
+                {"error": "No valid fields provided for update. Only 'caption' can be updated."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Use PostUpdateSerializer for updates to ensure proper validation
+        serializer = PostUpdateSerializer(instance, data=update_data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        
+        # Save the updated instance
+        updated_instance = serializer.save()
+        
+        # Refresh from database to ensure we have the latest data
+        updated_instance.refresh_from_db()
+
+        # Return the updated post using PostDetailedSerializer
+        response_serializer = PostDetailedSerializer(updated_instance, context={"request": request})
+        return Response(response_serializer.data, status=status.HTTP_200_OK)
 
     def destroy(self, request, *args, **kwargs):
         # auth_profile_id = request.headers["auth-profile-id"]
