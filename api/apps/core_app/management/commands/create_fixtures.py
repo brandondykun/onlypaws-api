@@ -37,6 +37,9 @@ class Command(BaseCommand):
             "postreport",
             "resetpasswordtoken",
             "verifyemailtoken",
+            "feedback",
+            "feedbackcomment",
+            "notification",
         ]
 
         # default fixture path
