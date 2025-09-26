@@ -144,16 +144,19 @@ Fixtures can only be created in dev, test, or staging environment.
 To create a fixture for an individual model, run the following command:
 ```bash
 # base command example
-scripts/create_model_fixture.sh <dev|test|staging> <MODEL_NAME>
+scripts/create_model_fixture.sh <dev|test|staging> <app_name> <model_name>
 
-# create fixture for dev environment User model
-scripts/create_model_fixture.sh dev User
+# create fixture for dev environment User model from core_app
+scripts/create_model_fixture.sh dev core_app user
 
-# create fixture for test environment Profile model
-scripts/create_model_fixture.sh test Profile
+# create fixture for test environment Profile model from core_app
+scripts/create_model_fixture.sh test core_app profile
 
-# create fixture for staging environment Profile model
-scripts/create_model_fixture.sh staging Profile
+# create fixture for staging environment Post model from core_app
+scripts/create_model_fixture.sh staging core_app post
+
+# create fixture for dev environment Feedback model from feedback_app
+scripts/create_model_fixture.sh dev feedback_app feedback
 ```
 
 ## Creating Fixtures For All Models

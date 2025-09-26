@@ -1,0 +1,24 @@
+[
+  {
+    "model": "feedback_app.feedbackcomment",
+    "pk": 1,
+    "fields": {
+      "ticket": 2,
+      "author": 1,
+      "content": "Thank you so much for the positive feedback! The OnlyPaws team has and will continue to work tirelessly to ensure an amazing experience for our users and their pets!",
+      "is_internal": false,
+      "created_at": "2025-09-11T01:51:09.297Z"
+    }
+  },
+  {
+    "model": "feedback_app.feedbackcomment",
+    "pk": 2,
+    "fields": {
+      "ticket": 2,
+      "author": 1,
+      "content": "We have added some new features we think you will like! Check them out and let us know what you think!",
+      "is_internal": false,
+      "created_at": "2025-09-11T01:58:49.812Z"
+    }
+  }
+]
