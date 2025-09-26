@@ -1,11 +1,101 @@
 [
   {
     "model": "core_app.like",
-    "pk": 1,
+    "pk": 23,
     "fields": {
-      "profile": 4,
+      "profile": 7,
+      "post": 1,
+      "liked_at": "2025-09-19T14:22:30.529Z"
+    }
+  },
+  {
+    "model": "core_app.like",
+    "pk": 24,
+    "fields": {
+      "profile": 7,
+      "post": 13,
+      "liked_at": "2025-09-19T14:33:34.892Z"
+    }
+  },
+  {
+    "model": "core_app.like",
+    "pk": 25,
+    "fields": {
+      "profile": 7,
       "post": 7,
-      "liked_at": "2025-02-04T04:12:20.650Z"
+      "liked_at": "2025-09-19T14:34:24.474Z"
+    }
+  },
+  {
+    "model": "core_app.like",
+    "pk": 26,
+    "fields": {
+      "profile": 7,
+      "post": 12,
+      "liked_at": "2025-09-19T14:34:51.654Z"
+    }
+  },
+  {
+    "model": "core_app.like",
+    "pk": 27,
+    "fields": {
+      "profile": 7,
+      "post": 20,
+      "liked_at": "2025-09-19T14:35:48.184Z"
+    }
+  },
+  {
+    "model": "core_app.like",
+    "pk": 28,
+    "fields": {
+      "profile": 3,
+      "post": 1,
+      "liked_at": "2025-09-20T13:37:10.372Z"
+    }
+  },
+  {
+    "model": "core_app.like",
+    "pk": 29,
+    "fields": {
+      "profile": 3,
+      "post": 7,
+      "liked_at": "2025-09-20T13:38:43.031Z"
+    }
+  },
+  {
+    "model": "core_app.like",
+    "pk": 31,
+    "fields": {
+      "profile": 3,
+      "post": 8,
+      "liked_at": "2025-09-21T01:05:26.406Z"
+    }
+  },
+  {
+    "model": "core_app.like",
+    "pk": 32,
+    "fields": {
+      "profile": 3,
+      "post": 12,
+      "liked_at": "2025-09-21T01:06:33.599Z"
+    }
+  },
+  {
+    "model": "core_app.like",
+    "pk": 33,
+    "fields": {
+      "profile": 3,
+      "post": 13,
+      "liked_at": "2025-09-21T14:50:08.770Z"
+    }
+  },
+  {
+    "model": "core_app.like",
+    "pk": 36,
+    "fields": {
+      "profile": 3,
+      "post": 20,
+      "liked_at": "2025-09-21T16:11:19.181Z"
     }
   }
 ]
