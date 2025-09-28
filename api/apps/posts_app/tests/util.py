@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from apps.core_app.models import (
     Profile,
     Post,
+    PostImage,
     Like,
     Follow,
     User,
@@ -60,6 +61,36 @@ def create_post(caption: str, profile: Profile) -> Post:
         The Profile that owns/created the Post.
     """
     return Post.objects.create(caption=caption, profile=profile)
+
+
+def create_post_image(post: Post, image_file=None) -> PostImage:
+    """
+    Create and return new PostImage.
+
+    Parameters
+    ----------
+    post : Post
+        The Post that owns the PostImage.
+    image_file : file, optional
+        The image file. If None, creates with a mock file.
+    """
+    from django.core.files.uploadedfile import SimpleUploadedFile
+    from PIL import Image
+    import io
+
+    if image_file is None:
+        # Create a simple test image
+        image = Image.new('RGB', (100, 100), color='red')
+        image_io = io.BytesIO()
+        image.save(image_io, 'JPEG')
+        image_io.seek(0)
+        image_file = SimpleUploadedFile(
+            "test_image.jpg",
+            image_io.getvalue(),
+            content_type="image/jpeg"
+        )
+    
+    return PostImage.objects.create(post=post, image=image_file)
 
 
 def create_follow(followed_by: Profile, followed: Profile) -> Follow:
@@ -245,6 +276,18 @@ def retrieve_destroy_post_url(post_id: int):
         The id of the Post to fetch or destroy.
     """
     return reverse("posts_app:retrieve_destroy_post", args=[post_id])
+
+
+def destroy_post_image_url(post_image_id: int):
+    """
+    Create and return a destroy post image url.
+
+    Parameters
+    ----------
+    post_image_id : int
+        The id of the post image that is used to build the url.
+    """
+    return reverse("posts_app:destroy_post_image", args=[post_image_id])
 
 
 #
