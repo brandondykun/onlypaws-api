@@ -19,6 +19,7 @@ from apps.core_app.models import (
 from .serializers import (
     PostSerializer,
     PostUpdateSerializer,
+    PostImageSerializer,
     LikeSerializer,
     CommentSerializer,
     ProfileDetailsSerializer,
@@ -953,3 +954,45 @@ class PostReportViewSet(
         # If pagination is disabled, serialize and return all results
         serializer = PostReportDetailSerializer(queryset, many=True)
         return Response(serializer.data)
+
+
+@extend_schema_view(
+    delete=extend_schema(parameters=[auth_profile_param]),
+)
+class DestroyPostImageView(generics.DestroyAPIView):
+    """Delete a PostImage."""
+
+    serializer_class = PostImageSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = PostImage.objects.all()
+
+    def destroy(self, request, *args, **kwargs):
+        post_image_id = self.kwargs.get("pk")
+        current_profile = request.current_profile
+
+        # Get the PostImage instance
+        post_image = get_object_or_404(PostImage, pk=post_image_id)
+
+        # Check that the user requesting the delete owns the post
+        if post_image.post.profile.user != self.request.user:
+            message = "Requesting user does not own this resource."
+            logger.error(f"Delete post image failed: {message}")
+            return Response({"error": message}, status=status.HTTP_403_FORBIDDEN)
+
+        # Check that the profile requesting the delete owns the post
+        if post_image.post.profile.id != int(current_profile.id):
+            message= "Requesting profile does not own this resource."
+            logger.error(f"Delete post image failed: {message}")
+            return Response({"error": message}, status=status.HTTP_403_FORBIDDEN)
+
+        # Check if this is the last image of the post
+        post = post_image.post
+        if post.images.count() <= 1:
+            message = "Cannot delete the last image of a post. Delete the entire post instead."
+            logger.error(f"Delete post image failed: {message}")
+            return Response({"error": message}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Delete the PostImage - the signal handler will clean up storage
+        self.perform_destroy(post_image)
+        logger.info(f"Post image {post_image.id} deleted successfully")
+        return Response(status=status.HTTP_204_NO_CONTENT)

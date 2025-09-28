@@ -3,13 +3,15 @@ Tests for the Posts api.
 """
 
 from rest_framework import status
-from apps.core_app.models import Post
+from apps.core_app.models import Post, PostImage
 
 from .util import (
     CREATE_POST_URL,
     PostsAppTestHelper,
     retrieve_destroy_post_url,
+    destroy_post_image_url,
     create_post,
+    create_post_image,
 )
 
 
@@ -111,3 +113,71 @@ class PrivatePostsApiTests(PostsAppTestHelper):
         current_post_count = self.get_posts_count()
         self.assertEqual(current_post_count, starting_post_count)
         self.assertEqual(len(Post.objects.filter(id=new_post.id)), 0)
+
+    def test_delete_post_image_success(self):
+        """
+        Test deleting a PostImage is successful when post has multiple images.
+        """
+        # Create a post with multiple images
+        post = create_post("Test post with images", self.profile)
+        image1 = create_post_image(post)
+        image2 = create_post_image(post)
+        
+        # Verify we have 2 images
+        self.assertEqual(post.images.count(), 2)
+        
+        # Delete one image
+        url = destroy_post_image_url(image1.id)
+        res = self.client.delete(url)
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        
+        # Verify the image was deleted and post still exists
+        self.assertEqual(post.images.count(), 1)
+        self.assertEqual(PostImage.objects.filter(id=image1.id).count(), 0)
+        self.assertTrue(Post.objects.filter(id=post.id).exists())
+
+    def test_delete_last_post_image_fails(self):
+        """
+        Test deleting the last PostImage of a post fails with appropriate error.
+        """
+        # Create a post with only one image
+        post = create_post("Test post with one image", self.profile)
+        image = create_post_image(post)
+        
+        # Verify we have 1 image
+        self.assertEqual(post.images.count(), 1)
+        
+        # Try to delete the only image
+        url = destroy_post_image_url(image.id)
+        res = self.client.delete(url)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("Cannot delete the last image", res.data["error"])
+        
+        # Verify the image was not deleted
+        self.assertEqual(post.images.count(), 1)
+        self.assertTrue(PostImage.objects.filter(id=image.id).exists())
+
+    def test_delete_post_image_unauthorized_user_fails(self):
+        """
+        Test deleting a PostImage by unauthorized user fails.
+        """
+        # Create a post with image owned by profile_2
+        post = create_post("Test post", self.profile_2)
+        image = create_post_image(post)
+        
+        # Try to delete the image as self.profile (different user)
+        url = destroy_post_image_url(image.id)
+        res = self.client.delete(url)
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertIn("does not own this resource", res.data["error"])
+        
+        # Verify the image was not deleted
+        self.assertTrue(PostImage.objects.filter(id=image.id).exists())
+
+    def test_delete_nonexistent_post_image_fails(self):
+        """
+        Test deleting a non-existent PostImage returns 404.
+        """
+        url = destroy_post_image_url(99999)  # Non-existent ID
+        res = self.client.delete(url)
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
