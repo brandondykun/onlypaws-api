@@ -3,6 +3,7 @@ Tests for the Posts api.
 """
 
 from rest_framework import status
+from django.core.exceptions import ValidationError
 from apps.core_app.models import Post, PostImage
 
 from .util import (
@@ -72,6 +73,96 @@ class PrivatePostsApiTests(PostsAppTestHelper):
 
         current_post_count = self.get_posts_count()
         self.assertEqual(current_post_count, starting_post_count + 1)
+
+    def test_create_post_with_1000_character_caption_success(self):
+        """
+        Test creating a Post with exactly 1000 characters succeeds.
+        """
+        starting_post_count = self.get_posts_count()
+        
+        # Create a caption with exactly 1000 characters
+        caption_1000_chars = "a" * 1000
+        
+        new_post = {
+            "caption": caption_1000_chars,
+            "profileId": self.profile.id,
+            "images": [],
+        }
+
+        res = self.client.post(CREATE_POST_URL, data=new_post)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(res.data["caption"], caption_1000_chars)
+
+        current_post_count = self.get_posts_count()
+        self.assertEqual(current_post_count, starting_post_count + 1)
+
+    def test_create_post_with_1001_character_caption_fails(self):
+        """
+        Test creating a Post with 1001 characters fails with validation error.
+        """
+        starting_post_count = self.get_posts_count()
+        
+        # Create a caption with 1001 characters (exceeds limit)
+        caption_1001_chars = "a" * 1001
+        
+        new_post = {
+            "caption": caption_1001_chars,
+            "profileId": self.profile.id,
+            "images": [],
+        }
+
+        res = self.client.post(CREATE_POST_URL, data=new_post)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("caption", res.data)
+        self.assertIn("cannot exceed 1000 characters", str(res.data["caption"][0]))
+
+        # Ensure no post was created
+        current_post_count = self.get_posts_count()
+        self.assertEqual(current_post_count, starting_post_count)
+
+    def test_update_post_with_1000_character_caption_success(self):
+        """
+        Test updating a Post caption with exactly 1000 characters succeeds.
+        """
+        # Create a post first
+        post = create_post(self.profile, "Original caption")
+        
+        # Create a caption with exactly 1000 characters
+        caption_1000_chars = "b" * 1000
+        
+        url = retrieve_destroy_post_url(post.id)
+        update_data = {"caption": caption_1000_chars}
+
+        res = self.client.patch(url, data=update_data)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data["caption"], caption_1000_chars)
+
+        # Verify in database
+        post.refresh_from_db()
+        self.assertEqual(post.caption, caption_1000_chars)
+
+    def test_update_post_with_1001_character_caption_fails(self):
+        """
+        Test updating a Post caption with 1001 characters fails with validation error.
+        """
+        # Create a post first
+        original_caption = "Original caption"
+        post = create_post(self.profile, original_caption)
+        
+        # Create a caption with 1001 characters (exceeds limit)
+        caption_1001_chars = "b" * 1001
+        
+        url = retrieve_destroy_post_url(post.id)
+        update_data = {"caption": caption_1001_chars}
+
+        res = self.client.patch(url, data=update_data)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("caption", res.data)
+        self.assertIn("cannot exceed 1000 characters", str(res.data["caption"][0]))
+
+        # Verify caption wasn't changed in database
+        post.refresh_from_db()
+        self.assertEqual(post.caption, original_caption)
 
     def test_fetching_single_post_success(self):
         """
@@ -181,3 +272,45 @@ class PrivatePostsApiTests(PostsAppTestHelper):
         url = destroy_post_image_url(99999)  # Non-existent ID
         res = self.client.delete(url)
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_post_model_caption_validation_1000_chars_success(self):
+        """
+        Test that Post model accepts exactly 1000 characters in caption.
+        """
+        caption_1000_chars = "c" * 1000
+        
+        # Create post with 1000 character caption
+        post = Post(
+            caption=caption_1000_chars,
+            profile=self.profile,
+            contains_ai=False
+        )
+        
+        # This should not raise a ValidationError
+        try:
+            post.full_clean()  # This runs model validation including validators
+            post.save()
+            self.assertEqual(post.caption, caption_1000_chars)
+        except ValidationError:
+            self.fail("ValidationError raised for 1000 character caption")
+
+    def test_post_model_caption_validation_1001_chars_fails(self):
+        """
+        Test that Post model rejects 1001 characters in caption.
+        """
+        caption_1001_chars = "c" * 1001
+        
+        # Create post with 1001 character caption
+        post = Post(
+            caption=caption_1001_chars,
+            profile=self.profile,
+            contains_ai=False
+        )
+        
+        # This should raise a ValidationError
+        with self.assertRaises(ValidationError) as context:
+            post.full_clean()  # This runs model validation including validators
+        
+        # Verify the error is about caption length
+        self.assertIn('caption', context.exception.message_dict)
+        self.assertIn('1000', str(context.exception.message_dict['caption'][0]))
