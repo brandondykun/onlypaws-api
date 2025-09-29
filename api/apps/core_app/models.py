@@ -3,6 +3,7 @@ import logging
 import traceback
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.core.validators import MaxLengthValidator
 
 from django.db import models
 from django.conf import settings
@@ -147,7 +148,7 @@ class ProfileImage(models.Model):
 class Post(models.Model):
     """Post with image and text."""
 
-    caption = models.CharField(max_length=128)
+    caption = models.TextField(validators=[MaxLengthValidator(1000, message="Caption cannot exceed 1000 characters.")])
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="posts")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
