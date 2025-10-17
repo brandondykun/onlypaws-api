@@ -187,6 +187,82 @@ def create_comment_like_notification_task(self, comment_id, liker_profile_id):
 
 
 @shared_task(bind=True, ignore_result=True)
+def create_follow_notification_task(self, followed_profile_id, follower_profile_id):
+    """
+    Create and send a follow notification with security checks.
+    
+    Args:
+        followed_profile_id (int): ID of the profile being followed
+        follower_profile_id (int): ID of the profile doing the following
+    """
+    try:
+        # Validate input parameters
+        if not isinstance(followed_profile_id, int) or not isinstance(follower_profile_id, int):
+            logger.error(f"Invalid parameter types: followed_profile_id={type(followed_profile_id)}, follower_profile_id={type(follower_profile_id)}")
+            return
+        
+        # Security: Don't send notification if someone somehow followed themselves
+        if followed_profile_id == follower_profile_id:
+            logger.warning(f"Attempted to create self-follow notification for profile {followed_profile_id}")
+            return
+            
+        followed_profile = Profile.objects.get(id=followed_profile_id)
+        follower_profile = Profile.objects.select_related('image').get(id=follower_profile_id)
+        
+        # Get follower's avatar URL
+        follower_avatar = None
+        if hasattr(follower_profile, 'image') and follower_profile.image:
+            avatar_path = follower_profile.image.image.url
+            if avatar_path:
+                # Store the URL as-is from Django's ImageField
+                # The serializer will handle proper URL construction
+                follower_avatar = avatar_path
+        
+        # Get about snippet (first 150 characters)
+        about_snippet = follower_profile.about[:150] if follower_profile.about else ""
+        if len(follower_profile.about) > 150:
+            about_snippet += "..."
+        
+        # Get or update existing notification to prevent spam
+        notification, created = Notification.objects.get_or_create(
+            recipient=followed_profile,
+            sender=follower_profile,
+            notification_type=NotificationType.FOLLOW,
+            post=None,
+            comment=None,
+            defaults={
+                'title': "started following you",
+                'message': f"{follower_profile.username} started following you",
+                'extra_data': {
+                    'follower_username': follower_profile.username,
+                    'follower_id': follower_profile.id,
+                    'follower_avatar': follower_avatar,
+                    'follower_about': about_snippet,
+                    'follower_name': follower_profile.name if follower_profile.name else "",
+                    'follower_pet_type': follower_profile.pet_type.name if follower_profile.pet_type else None,
+                    'follower_breed': follower_profile.breed if follower_profile.breed else "",
+                }
+            }
+        )
+        
+        # If notification already exists, mark as unread
+        if not created and notification.is_read:
+            notification.is_read = False
+            notification.save(update_fields=['is_read'])
+        
+        # Send via WebSocket
+        send_notification_task.delay(notification.id)
+        
+        logger.info(f"Follow notification {'created' if created else 'updated'} for profile {followed_profile_id} (followed by {follower_profile_id})")
+        
+    except Profile.DoesNotExist as e:
+        logger.error(f"Profile not found for follow notification: {e}")
+    except Exception as e:
+        logger.error(f"Error creating follow notification: {e}")
+        raise self.retry(countdown=60, max_retries=3)
+
+
+@shared_task(bind=True, ignore_result=True)
 def send_system_message_task(self, profile_id, message, data=None):
     """
     Send a system message to a specific profile via WebSocket.
