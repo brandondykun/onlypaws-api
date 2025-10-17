@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Verify Your OnlyPaws Email</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        background-color: #18181b;
+        padding: 48px 16px;
+        line-height: 1.5;
+      }
+
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #27272a;
+        border-radius: 16px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(to right, #0ea5e9, #0284c7);
+        padding: 24px 32px;
+        text-align: center;
+      }
+
+      .icon-wrapper {
+        display: inline-block;
+        background-color: #ffffff;
+        border-radius: 50%;
+        padding: 16px;
+        margin-bottom: 16px;
+      }
+
+      .icon {
+        width: 64px;
+        height: 64px;
+        color: #0ea5e9;
+      }
+
+      .header h1 {
+        font-size: 36px;
+        font-weight: bold;
+        color: #ffffff;
+        margin-bottom: 8px;
+      }
+
+      .header p {
+        color: #e0f2fe;
+        font-size: 18px;
+      }
+
+      .content {
+        padding: 40px 32px;
+      }
+
+      .intro-text {
+        color: #d4d4d8;
+        font-size: 18px;
+        margin-bottom: 24px;
+      }
+
+      .code-section {
+        background-color: #18181b;
+        border: 2px solid #3f3f46;
+        border-radius: 12px;
+        padding: 32px;
+        margin-bottom: 32px;
+      }
+
+      .code-label {
+        color: #a1a1aa;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 600;
+        margin-bottom: 12px;
+        text-align: center;
+      }
+
+      .code-box {
+        background-color: #27272a;
+        border: 2px solid #38bdf8;
+        border-radius: 8px;
+        padding: 24px;
+        text-align: center;
+      }
+
+      .code {
+        font-size: 36px;
+        font-weight: bold;
+        color: #38bdf8;
+        letter-spacing: 0.1em;
+        font-family: "Courier New", monospace;
+      }
+
+      .notice {
+        background-color: #0c4a6e;
+        border-left: 4px solid #0ea5e9;
+        padding: 16px;
+      }
+
+      .notice p {
+        color: #e0f2fe;
+        font-size: 14px;
+      }
+
+      .notice-title {
+        font-weight: 600;
+        color: #7dd3fc;
+      }
+
+      .footer {
+        background-color: #18181b;
+        padding: 24px 32px;
+        border-top: 1px solid #3f3f46;
+        text-align: center;
+      }
+
+      .footer p {
+        color: #71717a;
+        font-size: 12px;
+        line-height: 1.6;
+      }
+
+      @media only screen and (max-width: 600px) {
+        body {
+          padding: 24px 8px;
+        }
+
+        .header {
+          padding: 32px 24px;
+        }
+
+        .header h1 {
+          font-size: 28px;
+        }
+
+        .content {
+          padding: 32px 24px;
+        }
+
+        .code {
+          font-size: 28px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <div class="header">
+        <h1>Verify Your Email</h1>
+        <p>Welcome to OnlyPaws! 🐾</p>
+      </div>
+
+      <!-- Content -->
+      <div class="content">
+        <p class="intro-text">
+          Thank you for signing up! To complete your registration and start
+          sharing adorable pet moments, please verify your email address.
+        </p>
+
+        <div class="code-section">
+          <p class="code-label">Your Verification Code Is:</p>
+          <div class="code-box">
+            <code class="code">{{ code }}</code>
+          </div>
+        </div>
+
+        <div class="notice">
+          <p>
+            <span class="notice-title">Important:</span> This code will expire
+            in 15 minutes. If you didn't request this verification, please
+            ignore this email.
+          </p>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <p>
+          © 2024 OnlyPaws. All rights reserved.<br />
+          This is an automated message, please do not reply to this email.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
