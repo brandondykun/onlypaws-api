@@ -31,6 +31,7 @@ app.conf.task_routes = {
     # Notification tasks go to default queue for real-time delivery
     "apps.notifications_app.tasks.send_notification_task": {"queue": "default"},
     "apps.notifications_app.tasks.create_post_like_notification_task": {"queue": "default"},
+    "apps.notifications_app.tasks.create_comment_like_notification_task": {"queue": "default"},
     "apps.notifications_app.tasks.send_system_message_task": {"queue": "default"},
     "apps.notifications_app.tasks.cleanup_old_notifications_task": {"queue": "maintenance"},
 }
@@ -75,6 +76,11 @@ app.conf.task_annotations = {
         "soft_time_limit": 25,
     },
     "apps.notifications_app.tasks.create_post_like_notification_task": {
+        "rate_limit": "200/m",
+        "time_limit": 30,
+        "soft_time_limit": 25,
+    },
+    "apps.notifications_app.tasks.create_comment_like_notification_task": {
         "rate_limit": "200/m",
         "time_limit": 30,
         "soft_time_limit": 25,

@@ -1,8 +1,8 @@
 import logging
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from apps.core_app.models import Like
-from .tasks import create_post_like_notification_task
+from apps.core_app.models import Like, CommentLike
+from .tasks import create_post_like_notification_task, create_comment_like_notification_task
 
 logger = logging.getLogger(__name__)
 
@@ -23,3 +23,21 @@ def handle_like_created(sender, instance, created, **kwargs):
             logger.info(f"Like notification task queued for post {instance.post.id}")
         except Exception as e:
             logger.error(f"Error queuing like notification task: {e}")
+
+
+@receiver(post_save, sender=CommentLike)
+def handle_comment_like_created(sender, instance, created, **kwargs):
+    """
+    Signal handler for when a CommentLike is created.
+    Triggers notification creation via Celery task.
+    """
+    if created:  # Only trigger for new comment likes, not updates
+        try:
+            # Trigger async notification creation
+            create_comment_like_notification_task.delay(
+                comment_id=instance.comment.id,
+                liker_profile_id=instance.profile.id
+            )
+            logger.info(f"Comment like notification task queued for comment {instance.comment.id}")
+        except Exception as e:
+            logger.error(f"Error queuing comment like notification task: {e}")

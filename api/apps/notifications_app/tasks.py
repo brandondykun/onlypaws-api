@@ -5,7 +5,7 @@ from asgiref.sync import async_to_sync
 
 from .models import Notification, NotificationType
 from .serializers import WebSocketNotificationSerializer
-from apps.core_app.models import Profile, Post
+from apps.core_app.models import Profile, Post, Comment
 
 logger = logging.getLogger(__name__)
 
@@ -113,6 +113,76 @@ def create_post_like_notification_task(self, post_id, liker_profile_id):
         logger.error(f"Object not found for like notification: {e}")
     except Exception as e:
         logger.error(f"Error creating like notification: {e}")
+        raise self.retry(countdown=60, max_retries=3)
+
+
+@shared_task(bind=True, ignore_result=True)
+def create_comment_like_notification_task(self, comment_id, liker_profile_id):
+    """
+    Create and send a comment like notification with security checks.
+    
+    Args:
+        comment_id (int): ID of the comment that was liked
+        liker_profile_id (int): ID of the profile that liked the comment
+    """
+    try:
+        # Validate input parameters
+        if not isinstance(comment_id, int) or not isinstance(liker_profile_id, int):
+            logger.error(f"Invalid parameter types: comment_id={type(comment_id)}, liker_profile_id={type(liker_profile_id)}")
+            return
+            
+        comment = Comment.objects.select_related('profile', 'post').get(id=comment_id)
+        liker_profile = Profile.objects.get(id=liker_profile_id)
+        
+        # Security: Don't send notification if user liked their own comment
+        if comment.profile.id == liker_profile.id:
+            return
+        
+        # Get post preview image URL (let serializer handle URL construction)
+        post_preview_image = None
+        if comment.post.images.first():
+            preview_image_path = comment.post.images.first().image.url
+            if preview_image_path:
+                # Store the URL as-is from Django's ImageField
+                # The serializer will handle proper URL construction
+                post_preview_image = preview_image_path
+        
+        # Get or update existing notification to prevent spam
+        notification, created = Notification.objects.get_or_create(
+            recipient=comment.profile,
+            sender=liker_profile,
+            notification_type=NotificationType.LIKE_COMMENT,
+            post=comment.post,
+            comment=comment,
+            defaults={
+                'title': "liked your comment",
+                'message': f"{liker_profile.username} liked your comment: \"{comment.text[:50]}{'...' if len(comment.text) > 50 else ''}\"",
+                'extra_data': {
+                    'comment_text': comment.text[:100],  # Limit data size
+                    'comment_id': comment.id,
+                    'post_id': comment.post.id,
+                    'post_caption': comment.post.caption[:100],
+                    'liker_username': liker_profile.username,
+                    'liker_id': liker_profile.id,
+                    'post_preview_image': post_preview_image
+                }
+            }
+        )
+        
+        # If notification already exists, mark as unread
+        if not created and notification.is_read:
+            notification.is_read = False
+            notification.save(update_fields=['is_read'])
+        
+        # Send via WebSocket
+        send_notification_task.delay(notification.id)
+        
+        logger.info(f"Comment like notification {'created' if created else 'updated'} for comment {comment_id}")
+        
+    except (Comment.DoesNotExist, Profile.DoesNotExist) as e:
+        logger.error(f"Object not found for comment like notification: {e}")
+    except Exception as e:
+        logger.error(f"Error creating comment like notification: {e}")
         raise self.retry(countdown=60, max_retries=3)
 
 
