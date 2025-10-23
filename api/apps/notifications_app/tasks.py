@@ -187,6 +187,127 @@ def create_comment_like_notification_task(self, comment_id, liker_profile_id):
 
 
 @shared_task(bind=True, ignore_result=True)
+def create_comment_notification_task(self, comment_id, post_id, commenter_profile_id):
+    """
+    Create and send a comment notification with security checks.
+    Handles both top-level comments (notify post owner) and replies (notify comment owner).
+    
+    Args:
+        comment_id (int): ID of the comment that was created
+        post_id (int): ID of the post that was commented on
+        commenter_profile_id (int): ID of the profile that created the comment
+    """
+    try:
+        # Validate input parameters
+        if not isinstance(comment_id, int) or not isinstance(post_id, int) or not isinstance(commenter_profile_id, int):
+            logger.error(f"Invalid parameter types: comment_id={type(comment_id)}, post_id={type(post_id)}, commenter_profile_id={type(commenter_profile_id)}")
+            return
+            
+        comment = Comment.objects.select_related(
+            'profile', 
+            'post', 
+            'post__profile',
+            'reply_to_comment',
+            'reply_to_comment__profile'
+        ).get(id=comment_id)
+        post = Post.objects.select_related('profile').get(id=post_id)
+        commenter_profile = Profile.objects.get(id=commenter_profile_id)
+        
+        # Get post preview image URL (let serializer handle URL construction)
+        post_preview_image = None
+        if post.images.first():
+            preview_image_path = post.images.first().image.url
+            if preview_image_path:
+                # Store the URL as-is from Django's ImageField
+                # The serializer will handle proper URL construction
+                post_preview_image = preview_image_path
+        
+        # Determine if this is a reply or a top-level comment
+        if comment.reply_to_comment:
+            # This is a reply to another comment
+            replied_to_comment = comment.reply_to_comment
+            recipient = replied_to_comment.profile
+            
+            # Security: Don't send notification if user replied to their own comment
+            if recipient.id == commenter_profile.id:
+                return
+            
+            # Get or update existing notification to prevent spam
+            notification, created = Notification.objects.get_or_create(
+                recipient=recipient,
+                sender=commenter_profile,
+                notification_type=NotificationType.COMMENT_REPLY,
+                post=post,
+                comment=comment,
+                defaults={
+                    'title': "replied to your comment",
+                    'message': f"{commenter_profile.username} replied to your comment: \"{comment.text[:50]}{'...' if len(comment.text) > 50 else ''}\"",
+                    'extra_data': {
+                        'comment_text': comment.text[:100],  # Limit data size
+                        'comment_id': comment.id,
+                        'replied_to_comment_id': replied_to_comment.id,
+                        'replied_to_comment_text': replied_to_comment.text[:100],
+                        'post_id': post.id,
+                        'post_caption': post.caption[:100],
+                        'commenter_username': commenter_profile.username,
+                        'commenter_id': commenter_profile.id,
+                        'post_preview_image': post_preview_image,
+                        'is_reply': True
+                    }
+                }
+            )
+            
+            logger.info(f"Comment reply notification {'created' if created else 'updated'} for comment {replied_to_comment.id}")
+            
+        else:
+            # This is a top-level comment on the post
+            recipient = post.profile
+            
+            # Security: Don't send notification if user commented on their own post
+            if recipient.id == commenter_profile.id:
+                return
+            
+            # Get or update existing notification to prevent spam
+            notification, created = Notification.objects.get_or_create(
+                recipient=recipient,
+                sender=commenter_profile,
+                notification_type=NotificationType.COMMENT,
+                post=post,
+                comment=comment,
+                defaults={
+                    'title': "commented on your post",
+                    'message': f"{commenter_profile.username} commented on your post: \"{comment.text[:50]}{'...' if len(comment.text) > 50 else ''}\"",
+                    'extra_data': {
+                        'comment_text': comment.text[:100],  # Limit data size
+                        'comment_id': comment.id,
+                        'post_id': post.id,
+                        'post_caption': post.caption[:100],
+                        'commenter_username': commenter_profile.username,
+                        'commenter_id': commenter_profile.id,
+                        'post_preview_image': post_preview_image,
+                        'is_reply': False
+                    }
+                }
+            )
+            
+            logger.info(f"Comment notification {'created' if created else 'updated'} for post {post_id}")
+        
+        # If notification already exists, mark as unread
+        if not created and notification.is_read:
+            notification.is_read = False
+            notification.save(update_fields=['is_read'])
+        
+        # Send via WebSocket
+        send_notification_task.delay(notification.id)
+        
+    except (Comment.DoesNotExist, Post.DoesNotExist, Profile.DoesNotExist) as e:
+        logger.error(f"Object not found for comment notification: {e}")
+    except Exception as e:
+        logger.error(f"Error creating comment notification: {e}")
+        raise self.retry(countdown=60, max_retries=3)
+
+
+@shared_task(bind=True, ignore_result=True)
 def create_follow_notification_task(self, followed_profile_id, follower_profile_id):
     """
     Create and send a follow notification with security checks.
