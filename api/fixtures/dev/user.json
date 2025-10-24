@@ -1,21 +1,6 @@
 [
   {
     "model": "core_app.user",
-    "pk": 1,
-    "fields": {
-      "password": "pbkdf2_sha256$870000$FKLulwCIAAuhw42xQ0KvZX$eJgylKLMJm7Zdq671gYZc0vFmXdZAHqWowYuWT3EQOI=",
-      "last_login": "2025-09-23T23:11:14.335Z",
-      "is_superuser": true,
-      "email": "admin@email.com",
-      "is_active": true,
-      "is_staff": true,
-      "is_email_verified": true,
-      "groups": [],
-      "user_permissions": []
-    }
-  },
-  {
-    "model": "core_app.user",
     "pk": 2,
     "fields": {
       "password": "pbkdf2_sha256$870000$eEaxsx92IYZsvmbUqcbsYF$jRM6Oj3NaeOFM8wcLBnqWRqXFPMtyls9XBGdPey2NNU=",
@@ -91,6 +76,21 @@
   },
   {
     "model": "core_app.user",
+    "pk": 22,
+    "fields": {
+      "password": "pbkdf2_sha256$870000$mSfQZhwPn3fgCRyrmcCCtT$0jPkLFBBF1FMQxNMYAb18nrk95rEIMFVkc7vSQE8Kq4=",
+      "last_login": null,
+      "is_superuser": false,
+      "email": "usernineteen@email.com",
+      "is_active": true,
+      "is_staff": false,
+      "is_email_verified": true,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "core_app.user",
     "pk": 7,
     "fields": {
       "password": "pbkdf2_sha256$870000$heQHZBaoAvFyKIdAcjYxaV$V0d/AJb57oaY7RhBSUerz7lRXGyH4ICVhRZPkNii8gE=",
@@ -99,6 +99,66 @@
       "email": "usersix@email.com",
       "is_active": true,
       "is_staff": false,
+      "is_email_verified": true,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "core_app.user",
+    "pk": 23,
+    "fields": {
+      "password": "pbkdf2_sha256$870000$J4Kn4J6V5WB8XKTtRKvDtX$qS9+6ULvGkzupkgJPWOxTgSweyFN0Wb0/OOlvf2W68o=",
+      "last_login": null,
+      "is_superuser": false,
+      "email": "usertwenty@email.com",
+      "is_active": true,
+      "is_staff": false,
+      "is_email_verified": true,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "core_app.user",
+    "pk": 24,
+    "fields": {
+      "password": "pbkdf2_sha256$870000$MgekdX8qYqpOEOspqdkt2h$RthmJp0XZH3mdxTd8lbvieIZyDdNXh1QwWHNDruQMTY=",
+      "last_login": null,
+      "is_superuser": false,
+      "email": "tempuser@email.com",
+      "is_active": true,
+      "is_staff": false,
+      "is_email_verified": true,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "core_app.user",
+    "pk": 25,
+    "fields": {
+      "password": "pbkdf2_sha256$870000$sQwREnpA67FqbZnA6qo41G$/KGLDL/9aoU/5/UvANw5Hbd9l8dnk3LVFbTMd/u8V68=",
+      "last_login": null,
+      "is_superuser": false,
+      "email": "tempuser2@email.com",
+      "is_active": true,
+      "is_staff": false,
+      "is_email_verified": false,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "core_app.user",
+    "pk": 1,
+    "fields": {
+      "password": "pbkdf2_sha256$870000$FKLulwCIAAuhw42xQ0KvZX$eJgylKLMJm7Zdq671gYZc0vFmXdZAHqWowYuWT3EQOI=",
+      "last_login": "2025-10-17T00:01:59.788Z",
+      "is_superuser": true,
+      "email": "admin@email.com",
+      "is_active": true,
+      "is_staff": true,
       "is_email_verified": true,
       "groups": [],
       "user_permissions": []
@@ -277,36 +337,6 @@
       "last_login": null,
       "is_superuser": false,
       "email": "usereighteen@email.com",
-      "is_active": true,
-      "is_staff": false,
-      "is_email_verified": true,
-      "groups": [],
-      "user_permissions": []
-    }
-  },
-  {
-    "model": "core_app.user",
-    "pk": 22,
-    "fields": {
-      "password": "pbkdf2_sha256$870000$mSfQZhwPn3fgCRyrmcCCtT$0jPkLFBBF1FMQxNMYAb18nrk95rEIMFVkc7vSQE8Kq4=",
-      "last_login": null,
-      "is_superuser": false,
-      "email": "usernineteen@email.com",
-      "is_active": true,
-      "is_staff": false,
-      "is_email_verified": true,
-      "groups": [],
-      "user_permissions": []
-    }
-  },
-  {
-    "model": "core_app.user",
-    "pk": 23,
-    "fields": {
-      "password": "pbkdf2_sha256$870000$J4Kn4J6V5WB8XKTtRKvDtX$qS9+6ULvGkzupkgJPWOxTgSweyFN0Wb0/OOlvf2W68o=",
-      "last_login": null,
-      "is_superuser": false,
-      "email": "usertwenty@email.com",
       "is_active": true,
       "is_staff": false,
       "is_email_verified": true,

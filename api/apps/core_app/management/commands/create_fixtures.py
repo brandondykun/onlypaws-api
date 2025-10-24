@@ -24,6 +24,10 @@ class Command(BaseCommand):
         models = [
             "user",
             "profile",
+            "regularprofile",
+            "businessprofile",
+            "address",
+            "pendingemailchange",
             "profileimage",
             "post",
             "postimage",

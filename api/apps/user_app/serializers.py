@@ -75,6 +75,49 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
         model = Profile
         fields = ["id", "username", "name", "about", "image", "breed", "pet_type"]
         read_only_fields = ["id", "image"]
+    
+    def update(self, instance, validated_data):
+        """Update both Profile legacy fields and RegularProfile _new fields."""
+        from django.db import connection
+        
+        # Update the base Profile (legacy fields)
+        profile = super().update(instance, validated_data)
+        
+        # Update RegularProfile _new fields if it exists
+        if hasattr(profile, 'regularprofile'):
+            # Build update query dynamically based on what fields are being updated
+            update_fields = []
+            params = []
+            
+            if 'name' in validated_data:
+                update_fields.append("name_new = %s")
+                params.append(validated_data['name'])
+            
+            if 'about' in validated_data:
+                update_fields.append("about_new = %s")
+                params.append(validated_data['about'])
+            
+            if 'breed' in validated_data:
+                update_fields.append("breed_new = %s")
+                params.append(validated_data['breed'])
+            
+            if 'pet_type' in validated_data:
+                update_fields.append("pet_type_new_id = %s")
+                pet_type = validated_data['pet_type']
+                params.append(pet_type.id if pet_type else None)
+            
+            # Only run update if there are fields to update
+            if update_fields:
+                params.append(profile.id)
+                with connection.cursor() as cursor:
+                    query = f"""
+                        UPDATE core_app_regularprofile 
+                        SET {', '.join(update_fields)}
+                        WHERE profile_ptr_id = %s
+                    """
+                    cursor.execute(query, params)
+        
+        return profile
 
 
 class ProfileCreateSerializer(serializers.ModelSerializer):
@@ -83,6 +126,34 @@ class ProfileCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ["id", "username", "name", "about", "user", "breed", "pet_type"]
+    
+    def create(self, validated_data):
+        """Create Profile and RegularProfile, maintaining data in both."""
+        from apps.core_app.models import RegularProfile
+        from django.db import connection
+        
+        # Extract fields
+        name = validated_data.get('name', '')
+        about = validated_data.get('about', '')
+        breed = validated_data.get('breed', '')
+        pet_type = validated_data.get('pet_type', None)
+        
+        # Create the base Profile with legacy fields
+        profile = Profile.objects.create(**validated_data)
+        
+        # Create RegularProfile using raw SQL to avoid ORM issues
+        with connection.cursor() as cursor:
+            pet_type_id = pet_type.id if pet_type else None
+            cursor.execute(
+                """
+                INSERT INTO core_app_regularprofile 
+                    (profile_ptr_id, about_new, name_new, pet_type_new_id, breed_new)
+                VALUES (%s, %s, %s, %s, %s)
+                """,
+                [profile.id, about, name, pet_type_id, breed]
+            )
+        
+        return profile
 
 
 class ProfileDetailedSerializer(serializers.ModelSerializer):

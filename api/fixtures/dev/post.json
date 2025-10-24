@@ -67,17 +67,6 @@
   },
   {
     "model": "core_app.post",
-    "pk": 7,
-    "fields": {
-      "caption": "Out and about in the snow chewing on sticks",
-      "profile": 1,
-      "created_at": "2025-02-03T04:11:34.439Z",
-      "updated_at": "2025-02-03T04:11:34.439Z",
-      "contains_ai": false
-    }
-  },
-  {
-    "model": "core_app.post",
     "pk": 8,
     "fields": {
       "caption": "Enjoying the snow day! I’m glad my parents bought me this coat so I can stay warm on my winter walks!",
@@ -206,17 +195,6 @@
       "created_at": "2025-02-20T03:43:36.731Z",
       "updated_at": "2025-02-20T03:43:36.731Z",
       "contains_ai": true
-    }
-  },
-  {
-    "model": "core_app.post",
-    "pk": 20,
-    "fields": {
-      "caption": "Nothing like a good stick chew in the grass!",
-      "profile": 1,
-      "created_at": "2025-08-31T18:01:09.231Z",
-      "updated_at": "2025-08-31T18:01:09.231Z",
-      "contains_ai": false
     }
   },
   {
@@ -716,6 +694,17 @@
   },
   {
     "model": "core_app.post",
+    "pk": 7,
+    "fields": {
+      "caption": "Out and about in the snow chewing on sticks",
+      "profile": 1,
+      "created_at": "2025-02-03T04:11:34.439Z",
+      "updated_at": "2025-09-26T20:09:27.613Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "core_app.post",
     "pk": 66,
     "fields": {
       "caption": "Poodle hanging out a window doing poodle things.\n\nYear unknown",
@@ -843,6 +832,17 @@
       "profile": 23,
       "created_at": "2025-09-26T14:18:55.741Z",
       "updated_at": "2025-09-26T14:18:55.741Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "core_app.post",
+    "pk": 20,
+    "fields": {
+      "caption": "Nothing like a good stick chew in the grass! I really like chewing on sticks. I think it helps my teeth.\n\nSometimes my parents clean my teeth with special doggy teeth cleaning pads but I’m not crazy about that. I prefer to just chew on sticks like the old days! \n\nI’ve never once had a problem with it. Sometimes I even eat a little bit of the stick but I never have problems with that either. \n\nI think I just have an iron clad stomach.\n\nAnyways, chewing sticks is the best. Especially when I’m out on a walk with my humans laying in the grass! \n\nI hope you all get to chew on some sticks today!!",
+      "profile": 1,
+      "created_at": "2025-08-31T18:01:09.231Z",
+      "updated_at": "2025-10-01T17:01:54.643Z",
       "contains_ai": false
     }
   }
