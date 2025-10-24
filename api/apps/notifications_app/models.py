@@ -8,6 +8,7 @@ class NotificationType(models.TextChoices):
     LIKE_POST = 'like_post', _('Like Post')
     LIKE_COMMENT = 'like_comment', _('Like Comment')
     COMMENT = 'comment', _('Comment')
+    COMMENT_REPLY = 'comment_reply', _('Comment Reply')
     FOLLOW = 'follow', _('Follow')
     MENTION = 'mention', _('Mention')
     SYSTEM = 'system', _('System')

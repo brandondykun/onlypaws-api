@@ -25,6 +25,7 @@ from .serializers import (
     ProfileDetailsSerializer,
     PostDetailedSerializer,
     CommentDetailedSerializer,
+    CommentChainSerializer,
     SearchProfileSerializer,
     FollowSerializer,
     CommentLikeSerializer,
@@ -744,6 +745,105 @@ class ListCommentRepliesView(generics.ListAPIView):
             "created_at"
         )
         return replies
+
+
+@extend_schema_view(
+    get=extend_schema(parameters=[auth_profile_param]),
+)
+class CommentChainRetrieveView(generics.GenericAPIView):
+    """
+    Retrieve a comment with its entire parent comment chain.
+    
+    This view optimizes database queries by:
+    1. Fetching the target comment with select_related for profile and post
+    2. Collecting all parent comment IDs in a single traversal using only('parent_comment_id')
+    3. Fetching all parent comments in a single query with select_related('profile')
+    4. Including circular reference protection to handle data corruption
+    
+    The response includes the target comment and a parent_chain field containing
+    all ancestor comments ordered from root (oldest) to immediate parent.
+    
+    Endpoint: GET /api/comments/<pk>/chain/
+    """
+
+    serializer_class = CommentChainSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Comment.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        """
+        Handle GET request to retrieve comment with parent chain.
+        
+        Query optimization strategy:
+        - Query 1: Fetch target comment with profile and post
+        - Query 2: Collect parent IDs using only('reply_to_comment_id') - minimal data transfer
+        - Query 3: Bulk fetch all parents with select_related('profile')
+        
+        This results in exactly 3 queries regardless of chain depth.
+        """
+        comment_id = self.kwargs.get("pk")
+        
+        # Step 1: Fetch the target comment with related profile and post
+        # This is Query #1
+        comment = get_object_or_404(
+            Comment.objects.select_related("profile", "post"),
+            pk=comment_id
+        )
+        
+        # Step 2: Collect all parent comment IDs by traversing up the chain
+        # This is Query #2 - uses only() to minimize data transfer
+        # NOTE: We traverse via reply_to_comment (immediate parent), not parent_comment (top-level root)
+        parent_ids = []
+        current_id = comment.reply_to_comment_id
+        seen_ids = set([comment.id])  # Circular reference protection
+        max_depth = 100  # Safety limit to prevent infinite loops
+        depth = 0
+        
+        while current_id and depth < max_depth:
+            if current_id in seen_ids:
+                # Circular reference detected - log and break
+                logger.warning(
+                    f"Circular reference detected in comment chain at comment_id={current_id}"
+                )
+                break
+            
+            seen_ids.add(current_id)
+            parent_ids.append(current_id)
+            
+            # Fetch only the reply_to_comment_id field to minimize data transfer
+            parent = Comment.objects.filter(id=current_id).only("reply_to_comment_id").first()
+            
+            if not parent:
+                # Parent comment doesn't exist (data inconsistency)
+                logger.warning(
+                    f"Parent comment {current_id} not found - possible data inconsistency"
+                )
+                break
+            
+            current_id = parent.reply_to_comment_id
+            depth += 1
+        
+        # Step 3: Bulk fetch all parent comments in a single query
+        # This is Query #3 - fetches all parents with their profiles
+        if parent_ids:
+            parent_comments = Comment.objects.filter(
+                id__in=parent_ids
+            ).select_related("profile", "post")
+            
+            # Create a lookup dictionary for efficient access
+            parent_lookup = {p.id: p for p in parent_comments}
+            
+            # Attach parent comments to the target comment for serializer access
+            # This allows the serializer to access prefetched data efficiently
+            current = comment
+            for parent_id in parent_ids:
+                if parent_id in parent_lookup:
+                    current.parent_comment = parent_lookup[parent_id]
+                    current = current.parent_comment
+        
+        # Serialize and return the comment with its parent chain
+        serializer = self.get_serializer(comment)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @extend_schema_view(

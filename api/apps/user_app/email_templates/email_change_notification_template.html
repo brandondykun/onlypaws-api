@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Email Address Changed - OnlyPaws</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        background-color: #18181b;
+        padding: 48px 16px;
+        line-height: 1.5;
+      }
+
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #27272a;
+        border-radius: 16px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(to right, #0ea5e9, #0284c7);
+        padding: 24px 32px;
+        text-align: center;
+      }
+
+      .icon-wrapper {
+        display: inline-block;
+        background-color: #ffffff;
+        border-radius: 50%;
+        padding: 16px;
+        margin-bottom: 16px;
+      }
+
+      .icon {
+        width: 64px;
+        height: 64px;
+        color: #0ea5e9;
+      }
+
+      .header h1 {
+        font-size: 36px;
+        font-weight: bold;
+        color: #ffffff;
+        margin-bottom: 8px;
+      }
+
+      .header p {
+        color: #e0f2fe;
+        font-size: 18px;
+      }
+
+      .content {
+        padding: 40px 32px;
+      }
+
+      .intro-text {
+        color: #d4d4d8;
+        font-size: 18px;
+        margin-bottom: 24px;
+      }
+
+      .alert-section {
+        background-color: #18181b;
+        border: 2px solid #3f3f46;
+        border-radius: 12px;
+        padding: 32px;
+        margin-bottom: 32px;
+        text-align: center;
+      }
+
+      .alert-icon {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto 16px;
+        background: linear-gradient(to right, #0ea5e9, #0284c7);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 38px;
+        color: #ffffff;
+      }
+
+      .alert-icon-inner {
+        margin-top: -3px;
+      }
+
+      .alert-title {
+        color: #38bdf8;
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 12px;
+      }
+
+      .alert-message {
+        color: #a1a1aa;
+        font-size: 16px;
+      }
+
+      .email-change-box {
+        background-color: #18181b;
+        border: 2px solid #3f3f46;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+      }
+
+      .email-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+      }
+
+      .email-row:last-child {
+        margin-bottom: 0;
+      }
+
+      .email-label {
+        color: #a1a1aa;
+        font-size: 14px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        flex-shrink: 0;
+        margin-right: 16px;
+      }
+
+      .email-value {
+        color: #d4d4d8;
+        font-size: 16px;
+        font-weight: 500;
+        text-align: right;
+        word-break: break-all;
+      }
+
+      .email-value.new {
+        color: #38bdf8;
+      }
+
+      .arrow {
+        color: #38bdf8;
+        font-size: 24px;
+        text-align: center;
+        margin: 8px 0;
+      }
+
+      .warning {
+        background-color: #0c4a6e;
+        border-left: 4px solid #0ea5e9;
+        padding: 16px;
+        margin-bottom: 24px;
+      }
+
+      .warning p {
+        color: #e0f2fe;
+        font-size: 14px;
+      }
+
+      .warning-title {
+        font-weight: 600;
+        color: #7dd3fc;
+        font-size: 16px;
+        margin-bottom: 8px;
+      }
+
+      .action-box {
+        background-color: #0c4a6e;
+        border: 2px solid #0ea5e9;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 24px;
+      }
+
+      .action-box p {
+        color: #e0f2fe;
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .footer-text {
+        color: #a1a1aa;
+        font-size: 14px;
+      }
+
+      .footer {
+        background-color: #18181b;
+        padding: 24px 32px;
+        border-top: 1px solid #3f3f46;
+        text-align: center;
+      }
+
+      .footer p {
+        color: #71717a;
+        font-size: 12px;
+        line-height: 1.6;
+      }
+
+      @media only screen and (max-width: 600px) {
+        body {
+          padding: 24px 8px;
+        }
+
+        .header {
+          padding: 32px 24px;
+        }
+
+        .header h1 {
+          font-size: 28px;
+        }
+
+        .content {
+          padding: 32px 24px;
+        }
+
+        .alert-title {
+          font-size: 20px;
+        }
+
+        .email-row {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .email-label {
+          margin-bottom: 4px;
+        }
+
+        .email-value {
+          text-align: left;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <div class="header">
+        <h1>Email Changed</h1>
+        <p>Security Notification 🔔</p>
+      </div>
+
+      <!-- Content -->
+      <div class="content">
+        <p class="intro-text">
+          This is a security notification to inform you that the email address
+          associated with your OnlyPaws account has been changed.
+        </p>
+
+        <div class="alert-section">
+          <div class="alert-icon"><div class="alert-icon-inner">⚠</div></div>
+          <h2 class="alert-title">Email Address Updated</h2>
+          <p class="alert-message">
+            Your account email has been successfully changed to a new address.
+          </p>
+        </div>
+
+        <div class="email-change-box">
+          <div class="email-row">
+            <span class="email-label">Previous Email:</span>
+            <span class="email-value">{{ old_email }}</span>
+          </div>
+          <div class="arrow">↓</div>
+          <div class="email-row">
+            <span class="email-label">New Email:</span>
+            <span class="email-value new">{{ new_email }}</span>
+          </div>
+        </div>
+
+        <div class="warning">
+          <p class="warning-title">⚠️ Did You Make This Change?</p>
+          <p>
+            If you authorized this email change, no further action is needed.
+            You can safely disregard this notification.
+          </p>
+        </div>
+
+        <div class="action-box">
+          <p>
+            ⛔ If you did NOT make this change, your account may be compromised.
+            Contact our support team immediately!
+          </p>
+        </div>
+
+        <p class="footer-text">
+          This notification was sent to your old email address for security
+          purposes. Future communications will be sent to your new email
+          address.
+        </p>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <p>
+          © 2024 OnlyPaws. All rights reserved.<br />
+          This is an automated message, please do not reply to this email.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
