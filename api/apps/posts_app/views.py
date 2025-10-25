@@ -613,7 +613,7 @@ class ListSimilarPostsView(generics.ListAPIView):
             ):
                 # Fallback to basic filtering if no embedding available
                 return Post.objects.filter(
-                    ~Q(profile=profile_id)
+                    ~Q(profile__user=self.request.user)
                     & Q(id__gt=post_id)
                     & ~Q(reports__reason__id=1)
                 ).order_by("-created_at")[:20]
@@ -627,8 +627,8 @@ class ListSimilarPostsView(generics.ListAPIView):
             similar_posts_ids = []
             seen_post_ids = set()
             for img in similar_images:
-                # Does the post belong to the profile requesting the similar posts?
-                is_own_post = profile_id and img.post.profile.id == int(profile_id)
+                # Does the post belong to any profile of the requesting user?
+                is_own_post = img.post.profile.user == self.request.user
                 # Is the post the original post passed in kwargs?
                 is_original_post = img.post.id == post_id
 
