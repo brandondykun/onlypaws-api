@@ -23,7 +23,6 @@ from .tasks import (
 )
 from .serializers import (
     UserSerializer,
-    ProfileDetailedSerializer,
     ProfileSerializer,
     UserProfileSerializer,
     ProfileImageSerializer,
@@ -242,18 +241,16 @@ class CreateProfileView(generics.CreateAPIView):
             )
 
 
-class RetrieveUpdateDestroyProfileView(generics.RetrieveUpdateDestroyAPIView):
+class UpdateDestroyProfileView(generics.UpdateAPIView, generics.DestroyAPIView):
     """Retrieve, update or delete a Profile."""
 
     queryset = Profile.objects.all()
-    serializer_class = ProfileDetailedSerializer
+    serializer_class = ProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
     allowed_methods = ["PATCH", "DELETE"]
 
     def get_serializer_class(self):
-        if self.request.method == "GET":
-            return ProfileDetailedSerializer
-        elif self.request.method == "PATCH":
+        if self.request.method == "PATCH":
             return ProfileUpdateSerializer
         return ProfileSerializer
 

@@ -12,7 +12,8 @@ from apps.core_app.models import (
     ResetPasswordToken,
 )
 from django.contrib.auth.password_validation import validate_password
-
+from typing import Literal
+from django.db.models import Q
 
 class UserSerializer(serializers.ModelSerializer):
     """Serializer for the User object."""
@@ -61,11 +62,15 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     image = ProfileImageSerializer()
     pet_type = PetTypeSerializer()
-
+    profile_type = serializers.SerializerMethodField()
     class Meta:
         model = Profile
-        fields = ["id", "username", "name", "about", "image", "breed", "pet_type"]
-        read_only_fields = ["id", "image"]
+        fields = ["id", "username", "name", "about", "image", "breed", "pet_type", "profile_type"]
+        read_only_fields = ["id", "image", "profile_type"]
+    
+    def get_profile_type(self, obj) -> Literal["regular", "business"]:
+        """Returns 'regular' or 'business'."""
+        return obj.get_profile_type()
 
 
 class ProfileUpdateSerializer(serializers.ModelSerializer):
@@ -156,35 +161,20 @@ class ProfileCreateSerializer(serializers.ModelSerializer):
         return profile
 
 
-class ProfileDetailedSerializer(serializers.ModelSerializer):
-    """Serializer for Profiles."""
-
-    user = UserSerializer()
-    image = ProfileImageSerializer()
-    pet_type = PetTypeSerializer()
-
-    class Meta:
-        model = Profile
-        fields = [
-            "id",
-            "username",
-            "name",
-            "about",
-            "user",
-            "image",
-            "breed",
-            "pet_type",
-        ]
-
-
 class ProfileOptionSerializer(serializers.ModelSerializer):
     """Serializer for Profile option."""
 
     image = ProfileImageSerializer()
+    profile_type = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
-        fields = ["id", "username", "image", "name"]
+        fields = ["id", "username", "image", "name", "profile_type"]
+        read_only_fields = ["profile_type"]
+    
+    def get_profile_type(self, obj) -> Literal["regular", "business"]:
+        """Returns 'regular' or 'business'."""
+        return obj.get_profile_type()
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -227,3 +217,63 @@ class ChangePasswordSerializer(serializers.Serializer):
         # Use Django's built-in password validation
         validate_password(value)
         return value
+
+
+class ProfileDetailedSerializer(serializers.ModelSerializer):
+    """Detailed serializer for Profile."""
+
+    image = ProfileImageSerializer()
+    is_following = serializers.SerializerMethodField()
+    posts_count = serializers.SerializerMethodField()
+    followers_count = serializers.SerializerMethodField()
+    following_count = serializers.SerializerMethodField()
+    pet_type = PetTypeSerializer()
+    profile_type = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Profile
+        fields = [
+            "id",
+            "username",
+            "name",
+            "about",
+            "image",
+            "is_following",
+            "posts_count",
+            "followers_count",
+            "following_count",
+            "breed",
+            "pet_type",
+            "profile_type"
+        ]
+    
+    def get_profile_type(self, obj) -> Literal["regular", "business"]:
+        """Returns 'regular' or 'business'."""
+        return obj.get_profile_type()
+
+    def get_is_following(self, obj) -> bool:
+        # boolean - is requesting profile following the profile being fetched
+        requesting_profile = self.context["request"].query_params.get("profileId", None)
+
+        if requesting_profile:
+            return obj.following.filter(followed_by=requesting_profile).exists()
+        return False
+
+    def get_posts_count(self, obj) -> int:
+        requesting_profile = self.context["request"].query_params.get("profileId", None)
+        posts = obj.posts.all()
+
+        # if profile is fetching own posts, return all including reported inappropriate
+        if str(obj.id) == str(requesting_profile):
+            return posts.count()
+        # filter posts that have been reported as inappropriate from count
+        return posts.filter(~Q(reports__reason__id=1)).count()
+
+    def get_followers_count(self, obj) -> int:
+        followers = obj.following.all()
+        return followers.count()
+
+    def get_following_count(self, obj) -> int:
+        following = obj.followers.all()
+        return following.count()
+

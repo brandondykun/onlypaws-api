@@ -22,7 +22,6 @@ from .serializers import (
     PostImageSerializer,
     LikeSerializer,
     CommentSerializer,
-    ProfileDetailsSerializer,
     PostDetailedSerializer,
     CommentDetailedSerializer,
     CommentChainSerializer,
@@ -34,7 +33,7 @@ from .serializers import (
     CreatePostReportSerializer,
     ReportReasonSerializer,
 )
-from ..user_app.serializers import ProfileSerializer
+from ..user_app.serializers import ProfileSerializer, ProfileDetailedSerializer
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import get_object_or_404
@@ -217,7 +216,7 @@ class ListProfilePostsView(generics.ListAPIView):
 class RetrieveProfileView(generics.RetrieveAPIView):
     """Get details of a Profile."""
 
-    serializer_class = ProfileDetailsSerializer
+    serializer_class = ProfileDetailedSerializer
     permission_classes = [permissions.IsAuthenticated]
     queryset = Profile.objects.all()
 
