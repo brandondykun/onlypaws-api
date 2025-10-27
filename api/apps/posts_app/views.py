@@ -954,7 +954,18 @@ class ReportReasonViewSet(viewsets.ReadOnlyModelViewSet):
 
 @extend_schema_view(
     list=extend_schema(parameters=[auth_profile_param]),
-    retrieve=extend_schema(parameters=[auth_profile_param]),
+    retrieve=extend_schema(
+        parameters=[
+            auth_profile_param,
+            OpenApiParameter(
+                name="id",
+                description="Report ID",
+                required=True,
+                type=int,
+                location=OpenApiParameter.PATH,
+            ),
+        ]
+    ),
     create=extend_schema(parameters=[auth_profile_param]),
 )
 class PostReportViewSet(
@@ -971,6 +982,8 @@ class PostReportViewSet(
 
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = ReportPostsPagination
+    # Provide base queryset for schema introspection
+    queryset = PostReport.objects.all()
 
     def get_queryset(self):
         requesting_profile = self.request.current_profile

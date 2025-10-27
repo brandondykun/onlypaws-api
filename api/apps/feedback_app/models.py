@@ -1,36 +1,34 @@
 from django.db import models
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 
 
 class Feedback(models.Model):
-    TICKET_TYPES = [
-        ("feature", "Feature Request"),
-        ("bug", "Bug Report"),
-        ("general", "General"),
-    ]
+    class TicketType(models.TextChoices):
+        FEATURE = "feature", _("Feature Request")
+        BUG = "bug", _("Bug Report")
+        GENERAL = "general", _("General")
 
-    PRIORITY_CHOICES = [
-        ("low", "Low"),
-        ("medium", "Medium"),
-        ("high", "High"),
-        ("critical", "Critical"),
-    ]
+    class Priority(models.TextChoices):
+        LOW = "low", _("Low")
+        MEDIUM = "medium", _("Medium")
+        HIGH = "high", _("High")
+        CRITICAL = "critical", _("Critical")
 
-    STATUS_CHOICES = [
-        ("open", "Open"),
-        ("in_progress", "In Progress"),
-        ("resolved", "Resolved"),
-        ("closed", "Closed"),
-        ("duplicate", "Duplicate"),
-    ]
+    class FeedbackStatus(models.TextChoices):
+        OPEN = "open", _("Open")
+        IN_PROGRESS = "in_progress", _("In Progress")
+        RESOLVED = "resolved", _("Resolved")
+        CLOSED = "closed", _("Closed")
+        DUPLICATE = "duplicate", _("Duplicate")
 
     # Core fields
     title = models.CharField(max_length=200)
     description = models.TextField()
-    ticket_type = models.CharField(max_length=20, choices=TICKET_TYPES)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="open")
+    ticket_type = models.CharField(max_length=20, choices=TicketType.choices)
+    status = models.CharField(max_length=20, choices=FeedbackStatus.choices, default=FeedbackStatus.OPEN)
     priority = models.CharField(
-        max_length=20, choices=PRIORITY_CHOICES, default="medium"
+        max_length=20, choices=Priority.choices, default=Priority.MEDIUM
     )
 
     # User relationship - using the custom User model

@@ -2,8 +2,7 @@
 Views for the user api.
 """
 
-from rest_framework import generics, permissions
-from rest_framework import status
+from rest_framework import generics, permissions, status, serializers
 from apps.core_app.models import (
     Profile,
     User,
@@ -14,7 +13,6 @@ from apps.core_app.models import (
     PendingEmailChange,
 )
 from apps.core_app.utils import generate_verification_code
-from rest_framework import serializers
 from .tasks import (
     send_verification_email_task,
     send_reset_password_email_task,
@@ -32,6 +30,9 @@ from .serializers import (
     VerifyEmailTokenSerializer,
     ResetPasswordTokenSerializer,
     ChangePasswordSerializer,
+    RequestEmailChangeSerializer,
+    VerifyEmailChangeSerializer,
+    ResetPasswordSerializer,
 )
 from rest_framework.response import Response
 import logging
@@ -43,7 +44,6 @@ from drf_spectacular.utils import (
     extend_schema,
     OpenApiParameter,
 )
-from rest_framework.views import APIView
 from django.contrib.auth import authenticate
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
@@ -583,6 +583,7 @@ class CreateResetPasswordTokenView(generics.CreateAPIView):
 class ResetPasswordView(generics.CreateAPIView):
     """Reset user password using reset token."""
 
+    serializer_class = ResetPasswordSerializer
     permission_classes = []  # Allow unauthenticated access
     authentication_classes = []
 
@@ -660,7 +661,8 @@ class ResetPasswordView(generics.CreateAPIView):
             )
 
 
-class ChangePasswordView(APIView):
+@extend_schema_view(patch=extend_schema(parameters=[auth_profile_param]))
+class ChangePasswordView(generics.GenericAPIView):
     """View for changing user password."""
 
     permission_classes = [permissions.IsAuthenticated]
@@ -708,12 +710,14 @@ class ChangePasswordView(APIView):
             )
 
 
-class RequestEmailChangeView(APIView):
+@extend_schema_view(post=extend_schema(parameters=[auth_profile_param]))
+class RequestEmailChangeView(generics.GenericAPIView):
     """
     API View to request email change.
     Sends verification email to new address.
     """
 
+    serializer_class = RequestEmailChangeSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
@@ -759,12 +763,14 @@ class RequestEmailChangeView(APIView):
         )
 
 
-class VerifyEmailChangeView(APIView):
+@extend_schema_view(post=extend_schema(parameters=[auth_profile_param]))
+class VerifyEmailChangeView(generics.GenericAPIView):
     """
     API View to verify email change with token.
     Updates user's email if verification successful.
     """
 
+    serializer_class = VerifyEmailChangeSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):

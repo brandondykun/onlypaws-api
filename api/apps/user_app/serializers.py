@@ -219,6 +219,31 @@ class ChangePasswordSerializer(serializers.Serializer):
         return value
 
 
+class RequestEmailChangeSerializer(serializers.Serializer):
+    """Serializer for email change request."""
+
+    email = serializers.EmailField(required=True)
+
+
+class VerifyEmailChangeSerializer(serializers.Serializer):
+    """Serializer for email change verification."""
+
+    token = serializers.CharField(required=True)
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    """Serializer for password reset."""
+
+    email = serializers.EmailField(required=True)
+    token = serializers.CharField(required=True)
+    password = serializers.CharField(required=True, min_length=9)
+
+    def validate_password(self, value):
+        """Validate the password."""
+        validate_password(value)
+        return value
+
+
 class ProfileDetailedSerializer(serializers.ModelSerializer):
     """Detailed serializer for Profile."""
 

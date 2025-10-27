@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Notification
 from apps.user_app.serializers import ProfileSerializer
+from drf_spectacular.utils import extend_schema_field
 
 
 def get_extra_data_with_full_urls(obj, context=None):
@@ -68,6 +69,7 @@ class NotificationSerializer(serializers.ModelSerializer):
             'extra_data',
         ]
     
+    @extend_schema_field(serializers.DictField())
     def get_extra_data(self, obj):
         """Get extra data with full URLs for images."""
         return get_extra_data_with_full_urls(obj, self.context)
@@ -122,6 +124,7 @@ class WebSocketNotificationSerializer(serializers.ModelSerializer):
             'extra_data'
         ]
     
+    @extend_schema_field(serializers.CharField(allow_null=True))
     def get_sender_avatar(self, obj):
         """Get sender's profile image URL safely."""
         try:
@@ -152,14 +155,17 @@ class WebSocketNotificationSerializer(serializers.ModelSerializer):
             pass
         return None
 
+    @extend_schema_field(serializers.DictField())
     def get_extra_data(self, obj):
         """Get extra data with full URLs for images."""
         return get_extra_data_with_full_urls(obj, self.context)
     
+    @extend_schema_field(serializers.IntegerField(allow_null=True))
     def get_post_id(self, obj):
         """Get post ID, returning None if no post."""
         return obj.post.id if obj.post else None
     
+    @extend_schema_field(serializers.IntegerField(allow_null=True))
     def get_comment_id(self, obj):
         """Get comment ID, returning None if no comment."""
         return obj.comment.id if obj.comment else None

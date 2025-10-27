@@ -231,6 +231,8 @@ class FeedbackCommentViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsStaffForComments]
     filter_backends = [OrderingFilter]
     ordering = ["created_at"]
+    # Provide base queryset for schema introspection
+    queryset = FeedbackComment.objects.all()
 
     def get_queryset(self):
         """Filter queryset based on user permissions, ticket access, and query parameters"""

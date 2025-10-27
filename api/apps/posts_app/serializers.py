@@ -13,6 +13,7 @@ from apps.core_app.models import (
 )
 from django.db.models import Q
 from ..user_app.serializers import ProfileSerializer, ProfileImageSerializer
+from drf_spectacular.utils import extend_schema_field
 
 
 class PostImageSerializer(serializers.ModelSerializer):
@@ -112,6 +113,7 @@ class CommentDetailedSerializer(serializers.ModelSerializer):
         replies_count = obj.all_replies.count()
         return replies_count
 
+    @extend_schema_field(serializers.ListField(child=serializers.DictField()))
     def get_replies(self, obj):
         return []
 
@@ -287,6 +289,7 @@ class CommentChainSerializer(serializers.ModelSerializer):
         
         return self._chain_cache
 
+    @extend_schema_field(serializers.DictField())
     def get_post(self, obj):
         """
         Returns the full post object that this comment belongs to.
@@ -296,6 +299,7 @@ class CommentChainSerializer(serializers.ModelSerializer):
         # PostDetailedSerializer is defined later in this same file
         return PostDetailedSerializer(post, context=self.context).data
 
+    @extend_schema_field(serializers.DictField())
     def get_target_comment(self, obj):
         """
         Returns the target comment (the comment that was requested).
@@ -327,6 +331,7 @@ class CommentChainSerializer(serializers.ModelSerializer):
             "liked": liked,
         }
 
+    @extend_schema_field(serializers.DictField(allow_null=True))
     def get_root_parent_comment(self, obj):
         """
         Returns the top-level (root) parent comment.
@@ -335,6 +340,7 @@ class CommentChainSerializer(serializers.ModelSerializer):
         cache = self._build_full_chain(obj)
         return cache['root']
     
+    @extend_schema_field(serializers.ListField(child=serializers.DictField()))
     def get_parent_chain(self, obj):
         """
         Returns up to the last 10 messages in the parent chain, EXCLUDING the root.
@@ -492,6 +498,7 @@ class PostDetailedSerializer(serializers.ModelSerializer):
             "is_reported",
         ]
 
+    @extend_schema_field(serializers.ListField(child=serializers.DictField()))
     def get_images(self, obj):
         """Return post images ordered by ID."""
         ordered_images = obj.images.all().order_by("id")
@@ -517,6 +524,7 @@ class PostDetailedSerializer(serializers.ModelSerializer):
             return obj.saved_by.filter(profile=requesting_profile).exists()
         return False
 
+    @extend_schema_field(serializers.ListField(child=serializers.DictField()))
     def get_reports(self, obj):
         reports = obj.reports.filter(~Q(status="DISMISSED"))
         serializer = PostReportPreviewSerializer(reports, many=True)

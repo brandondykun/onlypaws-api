@@ -233,7 +233,11 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "The place for paw pics.",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
-    # OTHER SETTINGS
+    "COMPONENT_SPLIT_REQUEST": True,
+    "ENUM_NAME_OVERRIDES": {
+        "PostReportStatusEnum": "apps.core_app.models.PostReport.ReportStatus",
+        "FeedbackStatusEnum": "apps.feedback_app.models.Feedback.FeedbackStatus",
+    },
 }
 
 

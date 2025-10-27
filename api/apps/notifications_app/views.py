@@ -79,7 +79,11 @@ class RetrieveUpdateNotificationView(generics.RetrieveUpdateAPIView):
         return NotificationUpdateSerializer if self.request.method == 'PATCH' else NotificationSerializer
 
 
-@extend_schema(parameters=[auth_profile_param])
+@extend_schema(
+    parameters=[auth_profile_param],
+    request=None,
+    responses={200: {"type": "object", "properties": {"message": {"type": "string"}, "updated_count": {"type": "integer"}}}}
+)
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
 def mark_all_notifications_read(request):
@@ -95,7 +99,10 @@ def mark_all_notifications_read(request):
     })
 
 
-@extend_schema(parameters=[auth_profile_param])
+@extend_schema(
+    parameters=[auth_profile_param],
+    responses={200: {"type": "object", "properties": {"total_count": {"type": "integer"}, "unread_count": {"type": "integer"}}}}
+)
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def get_notification_counts(request):
