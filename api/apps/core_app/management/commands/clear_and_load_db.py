@@ -46,6 +46,7 @@ class Command(BaseCommand):
             "feedback.json",
             "feedbackcomment.json",
             "notification.json",
+            "appconfiguration.json"
         ]
 
         path_prefix = "fixtures/test"

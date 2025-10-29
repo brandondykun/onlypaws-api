@@ -1,10 +1,26 @@
 from django.contrib import admin
 from . import models
 
-# Register your models here.
+
+# Inline for PostImage in Post admin
+class PostImageInline(admin.TabularInline):
+    model = models.PostImage
+    extra = 0
+    fields = ['image', 'order']
+    readonly_fields = ['image']
+    ordering = ['order', 'id']
+
+
+@admin.register(models.Post)
+class PostAdmin(admin.ModelAdmin):
+    list_display = ['id', 'caption', 'profile', 'created_at', 'contains_ai']
+    list_filter = ['contains_ai', 'created_at']
+    search_fields = ['caption', 'profile__username']
+    inlines = [PostImageInline]
+
+
 admin.site.register(models.User)
 admin.site.register(models.Profile)
-admin.site.register(models.Post)
 admin.site.register(models.PostImage)
 admin.site.register(models.Comment)
 admin.site.register(models.Like)

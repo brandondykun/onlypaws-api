@@ -21,7 +21,7 @@ class PostImageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PostImage
-        fields = ["id", "post", "image"]
+        fields = ["id", "post", "image", "order"]
 
 
 class LikeSerializer(serializers.ModelSerializer):
@@ -500,9 +500,8 @@ class PostDetailedSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(serializers.ListField(child=serializers.DictField()))
     def get_images(self, obj):
-        """Return post images ordered by ID."""
-        ordered_images = obj.images.all().order_by("id")
-        return PostImageSerializer(ordered_images, many=True, context=self.context).data
+        """Return post images (uses model's default ordering: order, then id)."""
+        return PostImageSerializer(obj.images.all(), many=True, context=self.context).data
 
     def get_comments_count(self, obj) -> int:
         return obj.comments.count()

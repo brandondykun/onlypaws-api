@@ -61,16 +61,6 @@
   },
   {
     "model": "core_app.regularprofile",
-    "pk": 1,
-    "fields": {
-      "about_new": "I am the admin dog. I basically run this app. I try to share pictures every day of my fun dog activities! Follow to keep up with what I’m doing!",
-      "name_new": "Linus",
-      "pet_type_new": 1,
-      "breed_new": "Cavalier King Charles Spaniel"
-    }
-  },
-  {
-    "model": "core_app.regularprofile",
     "pk": 10,
     "fields": {
       "about_new": "Wild about dogs and enjoy posting any and all content related to man’s best friend.",
@@ -237,6 +227,16 @@
       "name_new": "Lucy",
       "pet_type_new": 1,
       "breed_new": "Pitbull"
+    }
+  },
+  {
+    "model": "core_app.regularprofile",
+    "pk": 1,
+    "fields": {
+      "about_new": "I am the admin dog. I basically run this app. I try to share pictures every day of my fun dog activities! Follow to keep up with what I’m doing!",
+      "name_new": "Linus",
+      "pet_type_new": 1,
+      "breed_new": "Cavalier King Charles Spaniel"
     }
   }
 ]

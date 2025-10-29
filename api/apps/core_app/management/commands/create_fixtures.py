@@ -44,6 +44,7 @@ class Command(BaseCommand):
             "feedback",
             "feedbackcomment",
             "notification",
+            "appconfiguration",
         ]
 
         # default fixture path

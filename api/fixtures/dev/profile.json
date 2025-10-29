@@ -91,21 +91,6 @@
   },
   {
     "model": "core_app.profile",
-    "pk": 1,
-    "fields": {
-      "username": "admin_dog",
-      "user": 1,
-      "is_active": true,
-      "created_at": "2025-10-24T12:47:44.897Z",
-      "updated_at": "2025-10-24T12:47:44.923Z",
-      "about": "I am the admin dog. I basically run this app. I try to share pictures every day of my fun dog activities! Follow to keep up with what I’m doing!",
-      "name": "Linus",
-      "pet_type": 1,
-      "breed": "Cavalier King Charles Spaniel"
-    }
-  },
-  {
-    "model": "core_app.profile",
     "pk": 10,
     "fields": {
       "username": "SirDogsAlot",
@@ -357,6 +342,21 @@
       "name": "Lucy",
       "pet_type": 1,
       "breed": "Pitbull"
+    }
+  },
+  {
+    "model": "core_app.profile",
+    "pk": 1,
+    "fields": {
+      "username": "admin_dog",
+      "user": 1,
+      "is_active": true,
+      "created_at": "2025-10-24T12:47:44.897Z",
+      "updated_at": "2025-10-24T12:47:44.923Z",
+      "about": "I am the admin dog. I basically run this app. I try to share pictures every day of my fun dog activities! Follow to keep up with what I’m doing!",
+      "name": "Linus",
+      "pet_type": 1,
+      "breed": "Cavalier King Charles Spaniel"
     }
   }
 ]

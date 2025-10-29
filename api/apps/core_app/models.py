@@ -379,7 +379,7 @@ def post_image_path(instance, filename):
 class PostImage(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="images")
     image = models.ImageField(upload_to=post_image_path)
-    is_main = models.BooleanField(default=False)
+    order = models.IntegerField(default=0, help_text="Display order of the image in the post")
 
     # Embedding fields for similarity search
     embedding = VectorField(
@@ -490,6 +490,9 @@ class PostImage(models.Model):
 
     def __str__(self):
         return f"Post {self.post.id} - {self.image.name}"
+
+    class Meta:
+        ordering = ["order", "id"]
 
 
 class Like(models.Model):
