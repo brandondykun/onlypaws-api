@@ -3,6 +3,13 @@ from django.core.files import File
 from io import BytesIO
 import uuid
 
+# Register HEIF support for iPhone images
+try:
+    from pillow_heif import register_heif_opener
+    register_heif_opener()
+except ImportError:
+    pass  # pillow-heif not installed, HEIC images won't be supported
+
 
 def crop_square_and_resize(image, image_size=1080):
     """
