@@ -1,6 +1,6 @@
 from rest_framework.exceptions import AuthenticationFailed
 from django.utils.functional import SimpleLazyObject
-from .models import Profile
+from apps.user_app.models import Profile
 from django.conf import settings
 
 

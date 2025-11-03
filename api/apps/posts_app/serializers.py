@@ -1,16 +1,8 @@
 from rest_framework import serializers
-from apps.core_app.models import (
-    Post,
-    PostImage,
-    Like,
-    Comment,
-    Profile,
-    Follow,
-    CommentLike,
-    SavedPost,
-    ReportReason,
-    PostReport,
-)
+from apps.user_app.models import Profile
+from apps.posts_app.models import Post, PostImage, SavedPost
+from apps.interactions_app.models import Like, Comment, Follow, CommentLike
+from apps.moderation_app.models import ReportReason, PostReport
 from django.db.models import Q
 from ..user_app.serializers import ProfileSerializer, ProfileImageSerializer
 from drf_spectacular.utils import extend_schema_field

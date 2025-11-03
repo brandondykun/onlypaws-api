@@ -1,0 +1,1750 @@
+[
+  {
+    "model": "notifications_app.notification",
+    "pk": 1,
+    "fields": {
+      "recipient": 2,
+      "sender": 1,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "admin_profile liked your post: \"Could hold the record for the sleepiest dog on the...\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.197Z",
+      "post": 1,
+      "comment": null,
+      "extra_data": {
+        "post_id": 1,
+        "liker_id": 1,
+        "post_caption": "Could hold the record for the sleepiest dog on the planet for sure!",
+        "liker_username": "admin_profile",
+        "post_preview_image": "/media/images/test/2/2/1/image_0.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 2,
+    "fields": {
+      "recipient": 4,
+      "sender": 5,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "userfour liked your post: \"Got a haircut today. Looking pretty dapper. Kinda ...\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.305Z",
+      "post": 4,
+      "comment": null,
+      "extra_data": {
+        "post_id": 4,
+        "liker_id": 5,
+        "post_caption": "Got a haircut today. Looking pretty dapper. Kinda feeling myself tbh.",
+        "liker_username": "userfour",
+        "post_preview_image": "/media/images/test/4/4/4/image_0_zAjOS4v.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 3,
+    "fields": {
+      "recipient": 9,
+      "sender": 5,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "userfour liked your post: \"Yep I’m a German shep!\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.313Z",
+      "post": 7,
+      "comment": null,
+      "extra_data": {
+        "post_id": 7,
+        "liker_id": 5,
+        "post_caption": "Yep I’m a German shep!",
+        "liker_username": "userfour",
+        "post_preview_image": "/media/images/test/9/9/7/image_0_vSVax1V.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 4,
+    "fields": {
+      "recipient": 4,
+      "sender": 5,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "userfour liked your post: \"Mom got me out here in the snow. Good grief!\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.320Z",
+      "post": 3,
+      "comment": null,
+      "extra_data": {
+        "post_id": 3,
+        "liker_id": 5,
+        "post_caption": "Mom got me out here in the snow. Good grief!",
+        "liker_username": "userfour",
+        "post_preview_image": "/media/images/test/4/4/3/image_0_OWoe0WO.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 5,
+    "fields": {
+      "recipient": 8,
+      "sender": 7,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "usersix liked your post: \"Getting some pets today!\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.328Z",
+      "post": 6,
+      "comment": null,
+      "extra_data": {
+        "post_id": 6,
+        "liker_id": 7,
+        "post_caption": "Getting some pets today!",
+        "liker_username": "usersix",
+        "post_preview_image": "/media/images/test/8/8/6/image_0_BnnYLcy.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 6,
+    "fields": {
+      "recipient": 5,
+      "sender": 7,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "usersix liked your post: \"I woke up like this.\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.335Z",
+      "post": 5,
+      "comment": null,
+      "extra_data": {
+        "post_id": 5,
+        "liker_id": 7,
+        "post_caption": "I woke up like this.",
+        "liker_username": "usersix",
+        "post_preview_image": "/media/images/test/5/5/5/image_0_wt7fGcy.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 7,
+    "fields": {
+      "recipient": 4,
+      "sender": 7,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "usersix liked your post: \"Mom got me out here in the snow. Good grief!\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.342Z",
+      "post": 3,
+      "comment": null,
+      "extra_data": {
+        "post_id": 3,
+        "liker_id": 7,
+        "post_caption": "Mom got me out here in the snow. Good grief!",
+        "liker_username": "usersix",
+        "post_preview_image": "/media/images/test/4/4/3/image_0_OWoe0WO.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 8,
+    "fields": {
+      "recipient": 9,
+      "sender": 7,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "usersix liked your post: \"Yep I’m a German shep!\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.349Z",
+      "post": 7,
+      "comment": null,
+      "extra_data": {
+        "post_id": 7,
+        "liker_id": 7,
+        "post_caption": "Yep I’m a German shep!",
+        "liker_username": "usersix",
+        "post_preview_image": "/media/images/test/9/9/7/image_0_vSVax1V.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 9,
+    "fields": {
+      "recipient": 10,
+      "sender": 1,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "admin_profile liked your post: \"Livin that cone life.\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.356Z",
+      "post": 9,
+      "comment": null,
+      "extra_data": {
+        "post_id": 9,
+        "liker_id": 1,
+        "post_caption": "Livin that cone life.",
+        "liker_username": "admin_profile",
+        "post_preview_image": "/media/images/test/10/10/9/image_0_YjCcC4P.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 10,
+    "fields": {
+      "recipient": 4,
+      "sender": 1,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "admin_profile liked your post: \"Mom got me out here in the snow. Good grief!\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.363Z",
+      "post": 3,
+      "comment": null,
+      "extra_data": {
+        "post_id": 3,
+        "liker_id": 1,
+        "post_caption": "Mom got me out here in the snow. Good grief!",
+        "liker_username": "admin_profile",
+        "post_preview_image": "/media/images/test/4/4/3/image_0_OWoe0WO.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 11,
+    "fields": {
+      "recipient": 5,
+      "sender": 9,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "usereight liked your post: \"I woke up like this.\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.370Z",
+      "post": 5,
+      "comment": null,
+      "extra_data": {
+        "post_id": 5,
+        "liker_id": 9,
+        "post_caption": "I woke up like this.",
+        "liker_username": "usereight",
+        "post_preview_image": "/media/images/test/5/5/5/image_0_wt7fGcy.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 12,
+    "fields": {
+      "recipient": 5,
+      "sender": 1,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "admin_profile liked your post: \"I’m really happy with this dog bed. I would highly...\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.378Z",
+      "post": 31,
+      "comment": null,
+      "extra_data": {
+        "post_id": 31,
+        "liker_id": 1,
+        "post_caption": "I’m really happy with this dog bed. I would highly recommend it.",
+        "liker_username": "admin_profile",
+        "post_preview_image": "/media/images/test/5/5/31/image_0_RRG6O6j.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 13,
+    "fields": {
+      "recipient": 5,
+      "sender": 1,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "admin_profile liked your post: \"World’s best sleeper no doubt.\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.385Z",
+      "post": 30,
+      "comment": null,
+      "extra_data": {
+        "post_id": 30,
+        "liker_id": 1,
+        "post_caption": "World’s best sleeper no doubt.",
+        "liker_username": "admin_profile",
+        "post_preview_image": "/media/images/test/5/5/30/image_0_SXyGntH.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 14,
+    "fields": {
+      "recipient": 9,
+      "sender": 1,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "admin_profile liked your post: \"The tongue out always gets me!\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.392Z",
+      "post": 24,
+      "comment": null,
+      "extra_data": {
+        "post_id": 24,
+        "liker_id": 1,
+        "post_caption": "The tongue out always gets me!",
+        "liker_username": "admin_profile",
+        "post_preview_image": "/media/images/test/9/9/24/image_0_n41KOK0.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 15,
+    "fields": {
+      "recipient": 9,
+      "sender": 1,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "admin_profile liked your post: \"Walk by the waterfall!\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.399Z",
+      "post": 25,
+      "comment": null,
+      "extra_data": {
+        "post_id": 25,
+        "liker_id": 1,
+        "post_caption": "Walk by the waterfall!",
+        "liker_username": "admin_profile",
+        "post_preview_image": "/media/images/test/9/9/25/image_0_6HFpFQy.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 16,
+    "fields": {
+      "recipient": 10,
+      "sender": 2,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "userone liked your post: \"Livin that cone life.\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.406Z",
+      "post": 9,
+      "comment": null,
+      "extra_data": {
+        "post_id": 9,
+        "liker_id": 2,
+        "post_caption": "Livin that cone life.",
+        "liker_username": "userone",
+        "post_preview_image": "/media/images/test/10/10/9/image_0_YjCcC4P.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 17,
+    "fields": {
+      "recipient": 10,
+      "sender": 2,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "userone liked your post: \"Mom says the cone is cute. I say it’s frickin emba...\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.413Z",
+      "post": 8,
+      "comment": null,
+      "extra_data": {
+        "post_id": 8,
+        "liker_id": 2,
+        "post_caption": "Mom says the cone is cute. I say it’s frickin embarrassing.",
+        "liker_username": "userone",
+        "post_preview_image": "/media/images/test/10/10/8/image_0_PWe2kOc.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 18,
+    "fields": {
+      "recipient": 1,
+      "sender": 2,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "userone liked your post: \"Made a card for mom and she really loved it\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.420Z",
+      "post": 49,
+      "comment": null,
+      "extra_data": {
+        "post_id": 49,
+        "liker_id": 2,
+        "post_caption": "Made a card for mom and she really loved it",
+        "liker_username": "userone",
+        "post_preview_image": "/media/images/test/1/1/49/image_0_ROwJ9DY.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 19,
+    "fields": {
+      "recipient": 1,
+      "sender": 2,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "userone liked your post: \"Bath time got me like…\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.427Z",
+      "post": 48,
+      "comment": null,
+      "extra_data": {
+        "post_id": 48,
+        "liker_id": 2,
+        "post_caption": "Bath time got me like…",
+        "liker_username": "userone",
+        "post_preview_image": "/media/images/test/1/1/48/image_0_Yy2G3T9.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 20,
+    "fields": {
+      "recipient": 1,
+      "sender": 2,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "userone liked your post: \"Tongue out at the lake.\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.434Z",
+      "post": 45,
+      "comment": null,
+      "extra_data": {
+        "post_id": 45,
+        "liker_id": 2,
+        "post_caption": "Tongue out at the lake.",
+        "liker_username": "userone",
+        "post_preview_image": "/media/images/test/1/1/45/image_0_Jhtc0HP.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 21,
+    "fields": {
+      "recipient": 1,
+      "sender": 2,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "userone liked your post: \"Got a haircut and a bowl of ice cream\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.441Z",
+      "post": 47,
+      "comment": null,
+      "extra_data": {
+        "post_id": 47,
+        "liker_id": 2,
+        "post_caption": "Got a haircut and a bowl of ice cream",
+        "liker_username": "userone",
+        "post_preview_image": "/media/images/test/1/1/47/image_0_qMsZUZ0.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 22,
+    "fields": {
+      "recipient": 4,
+      "sender": 1,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "admin_profile liked your post: \"Fall bandana season\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.448Z",
+      "post": 28,
+      "comment": null,
+      "extra_data": {
+        "post_id": 28,
+        "liker_id": 1,
+        "post_caption": "Fall bandana season",
+        "liker_username": "admin_profile",
+        "post_preview_image": "/media/images/test/4/4/28/image_0_uyvtPGz.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 23,
+    "fields": {
+      "recipient": 13,
+      "sender": 1,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "admin_profile liked your post: \"Sniffing around on walks is my absolute favorite. ...\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.455Z",
+      "post": 35,
+      "comment": null,
+      "extra_data": {
+        "post_id": 35,
+        "liker_id": 1,
+        "post_caption": "Sniffing around on walks is my absolute favorite. I could do it all day.",
+        "liker_username": "admin_profile",
+        "post_preview_image": "/media/images/test/13/13/35/image_0_lcr0h6D.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 24,
+    "fields": {
+      "recipient": 4,
+      "sender": 1,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "admin_profile liked your post: \"Sleeping beauty.\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.462Z",
+      "post": 34,
+      "comment": null,
+      "extra_data": {
+        "post_id": 34,
+        "liker_id": 1,
+        "post_caption": "Sleeping beauty.",
+        "liker_username": "admin_profile",
+        "post_preview_image": "/media/images/test/4/4/34/image_0_rckHlft.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 25,
+    "fields": {
+      "recipient": 2,
+      "sender": 1,
+      "notification_type": "comment",
+      "title": "commented on your post",
+      "message": "admin_profile commented on your post: \"Always keep one eye open.\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.484Z",
+      "post": 1,
+      "comment": 1,
+      "extra_data": {
+        "post_id": 1,
+        "is_reply": false,
+        "comment_id": 1,
+        "comment_text": "Always keep one eye open.",
+        "commenter_id": 1,
+        "post_caption": "Could hold the record for the sleepiest dog on the planet for sure!",
+        "commenter_username": "admin_profile",
+        "post_preview_image": "/media/images/test/2/2/1/image_0.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 26,
+    "fields": {
+      "recipient": 9,
+      "sender": 5,
+      "notification_type": "comment",
+      "title": "commented on your post",
+      "message": "userfour commented on your post: \"Those ears tho\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.493Z",
+      "post": 7,
+      "comment": 2,
+      "extra_data": {
+        "post_id": 7,
+        "is_reply": false,
+        "comment_id": 2,
+        "comment_text": "Those ears tho",
+        "commenter_id": 5,
+        "post_caption": "Yep I’m a German shep!",
+        "commenter_username": "userfour",
+        "post_preview_image": "/media/images/test/9/9/7/image_0_vSVax1V.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 27,
+    "fields": {
+      "recipient": 4,
+      "sender": 5,
+      "notification_type": "comment",
+      "title": "commented on your post",
+      "message": "userfour commented on your post: \"Poopsicles\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.501Z",
+      "post": 3,
+      "comment": 3,
+      "extra_data": {
+        "post_id": 3,
+        "is_reply": false,
+        "comment_id": 3,
+        "comment_text": "Poopsicles",
+        "commenter_id": 5,
+        "post_caption": "Mom got me out here in the snow. Good grief!",
+        "commenter_username": "userfour",
+        "post_preview_image": "/media/images/test/4/4/3/image_0_OWoe0WO.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 28,
+    "fields": {
+      "recipient": 2,
+      "sender": 5,
+      "notification_type": "comment",
+      "title": "commented on your post",
+      "message": "userfour commented on your post: \"Always\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.509Z",
+      "post": 1,
+      "comment": 4,
+      "extra_data": {
+        "post_id": 1,
+        "is_reply": false,
+        "comment_id": 4,
+        "comment_text": "Always",
+        "commenter_id": 5,
+        "post_caption": "Could hold the record for the sleepiest dog on the planet for sure!",
+        "commenter_username": "userfour",
+        "post_preview_image": "/media/images/test/2/2/1/image_0.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 29,
+    "fields": {
+      "recipient": 3,
+      "sender": 1,
+      "notification_type": "comment",
+      "title": "commented on your post",
+      "message": "admin_profile commented on your post: \"Ivy is the best!\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.518Z",
+      "post": 12,
+      "comment": 5,
+      "extra_data": {
+        "post_id": 12,
+        "is_reply": false,
+        "comment_id": 5,
+        "comment_text": "Ivy is the best!",
+        "commenter_id": 1,
+        "post_caption": "Hanging out with my friend Linus!",
+        "commenter_username": "admin_profile",
+        "post_preview_image": "/media/images/test/3/3/12/image_0_TloGa0p.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 30,
+    "fields": {
+      "recipient": 9,
+      "sender": 1,
+      "notification_type": "comment",
+      "title": "commented on your post",
+      "message": "admin_profile commented on your post: \"What a good boy!\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.526Z",
+      "post": 24,
+      "comment": 6,
+      "extra_data": {
+        "post_id": 24,
+        "is_reply": false,
+        "comment_id": 6,
+        "comment_text": "What a good boy!",
+        "commenter_id": 1,
+        "post_caption": "The tongue out always gets me!",
+        "commenter_username": "admin_profile",
+        "post_preview_image": "/media/images/test/9/9/24/image_0_n41KOK0.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 31,
+    "fields": {
+      "recipient": 2,
+      "sender": 4,
+      "notification_type": "comment",
+      "title": "commented on your post",
+      "message": "userthree commented on your post: \"What a sleepy guy\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.534Z",
+      "post": 1,
+      "comment": 7,
+      "extra_data": {
+        "post_id": 1,
+        "is_reply": false,
+        "comment_id": 7,
+        "comment_text": "What a sleepy guy",
+        "commenter_id": 4,
+        "post_caption": "Could hold the record for the sleepiest dog on the planet for sure!",
+        "commenter_username": "userthree",
+        "post_preview_image": "/media/images/test/2/2/1/image_0.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 32,
+    "fields": {
+      "recipient": 2,
+      "sender": 4,
+      "notification_type": "comment",
+      "title": "commented on your post",
+      "message": "userthree commented on your post: \"Does he always sleep like that?\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.542Z",
+      "post": 1,
+      "comment": 8,
+      "extra_data": {
+        "post_id": 1,
+        "is_reply": false,
+        "comment_id": 8,
+        "comment_text": "Does he always sleep like that?",
+        "commenter_id": 4,
+        "post_caption": "Could hold the record for the sleepiest dog on the planet for sure!",
+        "commenter_username": "userthree",
+        "post_preview_image": "/media/images/test/2/2/1/image_0.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 33,
+    "fields": {
+      "recipient": 2,
+      "sender": 4,
+      "notification_type": "comment",
+      "title": "commented on your post",
+      "message": "userthree commented on your post: \"Looks so comfy!\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.550Z",
+      "post": 1,
+      "comment": 9,
+      "extra_data": {
+        "post_id": 1,
+        "is_reply": false,
+        "comment_id": 9,
+        "comment_text": "Looks so comfy!",
+        "commenter_id": 4,
+        "post_caption": "Could hold the record for the sleepiest dog on the planet for sure!",
+        "commenter_username": "userthree",
+        "post_preview_image": "/media/images/test/2/2/1/image_0.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 34,
+    "fields": {
+      "recipient": 13,
+      "sender": 1,
+      "notification_type": "comment",
+      "title": "commented on your post",
+      "message": "admin_profile commented on your post: \"He loves smelling those bushes!\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.558Z",
+      "post": 35,
+      "comment": 10,
+      "extra_data": {
+        "post_id": 35,
+        "is_reply": false,
+        "comment_id": 10,
+        "comment_text": "He loves smelling those bushes!",
+        "commenter_id": 1,
+        "post_caption": "Sniffing around on walks is my absolute favorite. I could do it all day.",
+        "commenter_username": "admin_profile",
+        "post_preview_image": "/media/images/test/13/13/35/image_0_lcr0h6D.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 35,
+    "fields": {
+      "recipient": 4,
+      "sender": 2,
+      "notification_type": "comment",
+      "title": "commented on your post",
+      "message": "userone commented on your post: \"Love the bandana! Where did you get it?\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.566Z",
+      "post": 28,
+      "comment": 11,
+      "extra_data": {
+        "post_id": 28,
+        "is_reply": false,
+        "comment_id": 11,
+        "comment_text": "Love the bandana! Where did you get it?",
+        "commenter_id": 2,
+        "post_caption": "Fall bandana season",
+        "commenter_username": "userone",
+        "post_preview_image": "/media/images/test/4/4/28/image_0_uyvtPGz.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 36,
+    "fields": {
+      "recipient": 10,
+      "sender": 11,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "userten started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.585Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 11,
+        "follower_name": "",
+        "follower_about": "I like chocolate even though it's bad for me.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/11/11/profile_image_gti8ZNA.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "userten"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 37,
+    "fields": {
+      "recipient": 1,
+      "sender": 13,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "usertwelve started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.592Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 13,
+        "follower_name": "",
+        "follower_about": "I often hear that I am the bestestest boy in the whole world.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/13/13/profile_image_EZrGakI.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "usertwelve"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 38,
+    "fields": {
+      "recipient": 9,
+      "sender": 13,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "usertwelve started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.598Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 13,
+        "follower_name": "",
+        "follower_about": "I often hear that I am the bestestest boy in the whole world.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/13/13/profile_image_EZrGakI.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "usertwelve"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 39,
+    "fields": {
+      "recipient": 19,
+      "sender": 13,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "usertwelve started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.605Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 13,
+        "follower_name": "",
+        "follower_about": "I often hear that I am the bestestest boy in the whole world.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/13/13/profile_image_EZrGakI.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "usertwelve"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 40,
+    "fields": {
+      "recipient": 12,
+      "sender": 13,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "usertwelve started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.611Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 13,
+        "follower_name": "",
+        "follower_about": "I often hear that I am the bestestest boy in the whole world.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/13/13/profile_image_EZrGakI.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "usertwelve"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 41,
+    "fields": {
+      "recipient": 16,
+      "sender": 13,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "usertwelve started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.617Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 13,
+        "follower_name": "",
+        "follower_about": "I often hear that I am the bestestest boy in the whole world.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/13/13/profile_image_EZrGakI.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "usertwelve"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 42,
+    "fields": {
+      "recipient": 6,
+      "sender": 13,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "usertwelve started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.625Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 13,
+        "follower_name": "",
+        "follower_about": "I often hear that I am the bestestest boy in the whole world.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/13/13/profile_image_EZrGakI.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "usertwelve"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 43,
+    "fields": {
+      "recipient": 5,
+      "sender": 13,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "usertwelve started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.632Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 13,
+        "follower_name": "",
+        "follower_about": "I often hear that I am the bestestest boy in the whole world.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/13/13/profile_image_EZrGakI.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "usertwelve"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 44,
+    "fields": {
+      "recipient": 15,
+      "sender": 13,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "usertwelve started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.639Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 13,
+        "follower_name": "",
+        "follower_about": "I often hear that I am the bestestest boy in the whole world.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/13/13/profile_image_EZrGakI.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "usertwelve"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 45,
+    "fields": {
+      "recipient": 10,
+      "sender": 13,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "usertwelve started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.646Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 13,
+        "follower_name": "",
+        "follower_about": "I often hear that I am the bestestest boy in the whole world.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/13/13/profile_image_EZrGakI.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "usertwelve"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 46,
+    "fields": {
+      "recipient": 20,
+      "sender": 13,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "usertwelve started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.652Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 13,
+        "follower_name": "",
+        "follower_about": "I often hear that I am the bestestest boy in the whole world.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/13/13/profile_image_EZrGakI.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "usertwelve"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 47,
+    "fields": {
+      "recipient": 18,
+      "sender": 13,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "usertwelve started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.658Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 13,
+        "follower_name": "",
+        "follower_about": "I often hear that I am the bestestest boy in the whole world.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/13/13/profile_image_EZrGakI.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "usertwelve"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 48,
+    "fields": {
+      "recipient": 7,
+      "sender": 13,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "usertwelve started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.664Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 13,
+        "follower_name": "",
+        "follower_about": "I often hear that I am the bestestest boy in the whole world.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/13/13/profile_image_EZrGakI.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "usertwelve"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 49,
+    "fields": {
+      "recipient": 8,
+      "sender": 13,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "usertwelve started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.671Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 13,
+        "follower_name": "",
+        "follower_about": "I often hear that I am the bestestest boy in the whole world.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/13/13/profile_image_EZrGakI.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "usertwelve"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 50,
+    "fields": {
+      "recipient": 2,
+      "sender": 13,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "usertwelve started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.677Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 13,
+        "follower_name": "",
+        "follower_about": "I often hear that I am the bestestest boy in the whole world.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/13/13/profile_image_EZrGakI.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "usertwelve"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 51,
+    "fields": {
+      "recipient": 4,
+      "sender": 13,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "usertwelve started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.683Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 13,
+        "follower_name": "",
+        "follower_about": "I often hear that I am the bestestest boy in the whole world.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/13/13/profile_image_EZrGakI.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "usertwelve"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 52,
+    "fields": {
+      "recipient": 14,
+      "sender": 13,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "usertwelve started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.690Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 13,
+        "follower_name": "",
+        "follower_about": "I often hear that I am the bestestest boy in the whole world.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/13/13/profile_image_EZrGakI.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "usertwelve"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 53,
+    "fields": {
+      "recipient": 11,
+      "sender": 13,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "usertwelve started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.696Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 13,
+        "follower_name": "",
+        "follower_about": "I often hear that I am the bestestest boy in the whole world.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/13/13/profile_image_EZrGakI.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "usertwelve"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 54,
+    "fields": {
+      "recipient": 17,
+      "sender": 13,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "usertwelve started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.702Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 13,
+        "follower_name": "",
+        "follower_about": "I often hear that I am the bestestest boy in the whole world.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/13/13/profile_image_EZrGakI.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "usertwelve"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 55,
+    "fields": {
+      "recipient": 21,
+      "sender": 13,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "usertwelve started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.709Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 13,
+        "follower_name": "",
+        "follower_about": "I often hear that I am the bestestest boy in the whole world.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/13/13/profile_image_EZrGakI.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "usertwelve"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 56,
+    "fields": {
+      "recipient": 3,
+      "sender": 13,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "usertwelve started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.715Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 13,
+        "follower_name": "",
+        "follower_about": "I often hear that I am the bestestest boy in the whole world.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/13/13/profile_image_EZrGakI.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "usertwelve"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 57,
+    "fields": {
+      "recipient": 3,
+      "sender": 2,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "userone started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.721Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 2,
+        "follower_name": "",
+        "follower_about": "I am the best dog. There is no debate. I loves cheese.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/2/2/profile_image_p97mBUB.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "userone"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 58,
+    "fields": {
+      "recipient": 11,
+      "sender": 2,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "userone started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.727Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 2,
+        "follower_name": "",
+        "follower_about": "I am the best dog. There is no debate. I loves cheese.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/2/2/profile_image_p97mBUB.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "userone"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 59,
+    "fields": {
+      "recipient": 7,
+      "sender": 2,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "userone started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.733Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 2,
+        "follower_name": "",
+        "follower_about": "I am the best dog. There is no debate. I loves cheese.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/2/2/profile_image_p97mBUB.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "userone"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 60,
+    "fields": {
+      "recipient": 10,
+      "sender": 2,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "userone started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.740Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 2,
+        "follower_name": "",
+        "follower_about": "I am the best dog. There is no debate. I loves cheese.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/2/2/profile_image_p97mBUB.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "userone"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 61,
+    "fields": {
+      "recipient": 9,
+      "sender": 2,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "userone started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.746Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 2,
+        "follower_name": "",
+        "follower_about": "I am the best dog. There is no debate. I loves cheese.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/2/2/profile_image_p97mBUB.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "userone"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 62,
+    "fields": {
+      "recipient": 19,
+      "sender": 2,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "userone started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.752Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 2,
+        "follower_name": "",
+        "follower_about": "I am the best dog. There is no debate. I loves cheese.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/2/2/profile_image_p97mBUB.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "userone"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 63,
+    "fields": {
+      "recipient": 12,
+      "sender": 2,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "userone started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.758Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 2,
+        "follower_name": "",
+        "follower_about": "I am the best dog. There is no debate. I loves cheese.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/2/2/profile_image_p97mBUB.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "userone"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 64,
+    "fields": {
+      "recipient": 16,
+      "sender": 2,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "userone started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.765Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 2,
+        "follower_name": "",
+        "follower_about": "I am the best dog. There is no debate. I loves cheese.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/2/2/profile_image_p97mBUB.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "userone"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 65,
+    "fields": {
+      "recipient": 6,
+      "sender": 2,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "userone started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.771Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 2,
+        "follower_name": "",
+        "follower_about": "I am the best dog. There is no debate. I loves cheese.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/2/2/profile_image_p97mBUB.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "userone"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 66,
+    "fields": {
+      "recipient": 5,
+      "sender": 2,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "userone started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.777Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 2,
+        "follower_name": "",
+        "follower_about": "I am the best dog. There is no debate. I loves cheese.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/2/2/profile_image_p97mBUB.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "userone"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 67,
+    "fields": {
+      "recipient": 15,
+      "sender": 2,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "userone started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.784Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 2,
+        "follower_name": "",
+        "follower_about": "I am the best dog. There is no debate. I loves cheese.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/2/2/profile_image_p97mBUB.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "userone"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 68,
+    "fields": {
+      "recipient": 4,
+      "sender": 2,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "userone started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.790Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 2,
+        "follower_name": "",
+        "follower_about": "I am the best dog. There is no debate. I loves cheese.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/2/2/profile_image_p97mBUB.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "userone"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 69,
+    "fields": {
+      "recipient": 1,
+      "sender": 2,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "userone started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.796Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 2,
+        "follower_name": "",
+        "follower_about": "I am the best dog. There is no debate. I loves cheese.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/2/2/profile_image_p97mBUB.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "userone"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 70,
+    "fields": {
+      "recipient": 13,
+      "sender": 26,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "LinusTheHighness started following you",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.802Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 26,
+        "follower_name": "",
+        "follower_about": "Regal. But tired.",
+        "follower_breed": "",
+        "follower_avatar": "/media/images/test/1/26/profile_image_FK6hAgz.jpeg",
+        "follower_pet_type": null,
+        "follower_username": "LinusTheHighness"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 71,
+    "fields": {
+      "recipient": 1,
+      "sender": 2,
+      "notification_type": "like_comment",
+      "title": "liked your comment",
+      "message": "userone liked your comment: \"What a good boy!\"",
+      "is_read": false,
+      "created_at": "2025-10-31T00:22:48.823Z",
+      "post": 24,
+      "comment": 6,
+      "extra_data": {
+        "post_id": 24,
+        "liker_id": 2,
+        "comment_id": 6,
+        "comment_text": "What a good boy!",
+        "post_caption": "The tongue out always gets me!",
+        "liker_username": "userone",
+        "post_preview_image": "/media/images/test/9/9/24/image_0_n41KOK0.jpeg"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 72,
+    "fields": {
+      "recipient": 1,
+      "sender": 3,
+      "notification_type": "comment_reply",
+      "title": "replied to your comment",
+      "message": "usertwo replied to your comment: \"I thought that same thing\"",
+      "is_read": false,
+      "created_at": "2025-11-02T20:23:29.635Z",
+      "post": 1,
+      "comment": 12,
+      "extra_data": {
+        "post_id": 1,
+        "is_reply": true,
+        "comment_id": 12,
+        "comment_text": "I thought that same thing",
+        "commenter_id": 3,
+        "post_caption": "Could hold the record for the sleepiest dog on the planet for sure!",
+        "commenter_username": "usertwo",
+        "post_preview_image": "/media/images/test/2/2/1/image_0.jpeg",
+        "replied_to_comment_id": 1,
+        "replied_to_comment_text": "Always keep one eye open."
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 73,
+    "fields": {
+      "recipient": 3,
+      "sender": 1,
+      "notification_type": "comment_reply",
+      "title": "replied to your comment",
+      "message": "admin_profile replied to your comment: \"Does your dog do that?\"",
+      "is_read": false,
+      "created_at": "2025-11-03T01:12:30.549Z",
+      "post": 1,
+      "comment": 13,
+      "extra_data": {
+        "post_id": 1,
+        "is_reply": true,
+        "comment_id": 13,
+        "comment_text": "Does your dog do that?",
+        "commenter_id": 1,
+        "post_caption": "Could hold the record for the sleepiest dog on the planet for sure!",
+        "commenter_username": "admin_profile",
+        "post_preview_image": "/media/images/test/2/2/1/image_0.jpeg",
+        "replied_to_comment_id": 12,
+        "replied_to_comment_text": "I thought that same thing"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 74,
+    "fields": {
+      "recipient": 1,
+      "sender": 3,
+      "notification_type": "comment_reply",
+      "title": "replied to your comment",
+      "message": "usertwo replied to your comment: \"All the time\"",
+      "is_read": false,
+      "created_at": "2025-11-03T01:13:58.689Z",
+      "post": 1,
+      "comment": 14,
+      "extra_data": {
+        "post_id": 1,
+        "is_reply": true,
+        "comment_id": 14,
+        "comment_text": "All the time",
+        "commenter_id": 3,
+        "post_caption": "Could hold the record for the sleepiest dog on the planet for sure!",
+        "commenter_username": "usertwo",
+        "post_preview_image": "/media/images/test/2/2/1/image_0.jpeg",
+        "replied_to_comment_id": 13,
+        "replied_to_comment_text": "Does your dog do that?"
+      }
+    }
+  }
+]

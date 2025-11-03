@@ -1,7 +1,7 @@
 import logging
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from apps.core_app.models import Like, CommentLike, Follow, Comment
+from apps.interactions_app.models import Like, CommentLike, Follow, Comment
 from .tasks import create_post_like_notification_task, create_comment_like_notification_task, create_follow_notification_task, create_comment_notification_task
 
 logger = logging.getLogger(__name__)

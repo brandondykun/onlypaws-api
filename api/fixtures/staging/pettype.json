@@ -1,15 +1,15 @@
 [
-  { "model": "core_app.pettype", "pk": 1, "fields": { "name": "Dog" } },
-  { "model": "core_app.pettype", "pk": 2, "fields": { "name": "Cat" } },
-  { "model": "core_app.pettype", "pk": 3, "fields": { "name": "Fish" } },
-  { "model": "core_app.pettype", "pk": 4, "fields": { "name": "Bird" } },
-  { "model": "core_app.pettype", "pk": 5, "fields": { "name": "Rabbit" } },
-  { "model": "core_app.pettype", "pk": 6, "fields": { "name": "Hamster" } },
-  { "model": "core_app.pettype", "pk": 7, "fields": { "name": "Guinea Pig" } },
-  { "model": "core_app.pettype", "pk": 8, "fields": { "name": "Turtle" } },
-  { "model": "core_app.pettype", "pk": 9, "fields": { "name": "Ferret" } },
-  { "model": "core_app.pettype", "pk": 10, "fields": { "name": "Duck" } },
-  { "model": "core_app.pettype", "pk": 11, "fields": { "name": "Pig" } },
-  { "model": "core_app.pettype", "pk": 12, "fields": { "name": "Chicken" } },
-  { "model": "core_app.pettype", "pk": 13, "fields": { "name": "Other" } }
+  { "model": "user_app.pettype", "pk": 1, "fields": { "name": "Dog" } },
+  { "model": "user_app.pettype", "pk": 2, "fields": { "name": "Cat" } },
+  { "model": "user_app.pettype", "pk": 3, "fields": { "name": "Fish" } },
+  { "model": "user_app.pettype", "pk": 4, "fields": { "name": "Bird" } },
+  { "model": "user_app.pettype", "pk": 5, "fields": { "name": "Rabbit" } },
+  { "model": "user_app.pettype", "pk": 6, "fields": { "name": "Hamster" } },
+  { "model": "user_app.pettype", "pk": 7, "fields": { "name": "Guinea Pig" } },
+  { "model": "user_app.pettype", "pk": 8, "fields": { "name": "Turtle" } },
+  { "model": "user_app.pettype", "pk": 9, "fields": { "name": "Ferret" } },
+  { "model": "user_app.pettype", "pk": 10, "fields": { "name": "Duck" } },
+  { "model": "user_app.pettype", "pk": 11, "fields": { "name": "Pig" } },
+  { "model": "user_app.pettype", "pk": 12, "fields": { "name": "Chicken" } },
+  { "model": "user_app.pettype", "pk": 13, "fields": { "name": "Other" } }
 ]

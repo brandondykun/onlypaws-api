@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from apps.core_app.models import ReportReason  # Replace with your actual app name
+from apps.moderation_app.models import ReportReason
 
 
 class Command(BaseCommand):

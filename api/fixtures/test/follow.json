@@ -1,6 +1,6 @@
 [
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 1,
     "fields": {
       "followed": 10,
@@ -9,7 +9,7 @@
     }
   },
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 42,
     "fields": {
       "followed": 1,
@@ -18,7 +18,7 @@
     }
   },
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 43,
     "fields": {
       "followed": 9,
@@ -27,7 +27,7 @@
     }
   },
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 44,
     "fields": {
       "followed": 19,
@@ -36,7 +36,7 @@
     }
   },
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 45,
     "fields": {
       "followed": 12,
@@ -45,7 +45,7 @@
     }
   },
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 46,
     "fields": {
       "followed": 16,
@@ -54,7 +54,7 @@
     }
   },
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 47,
     "fields": {
       "followed": 6,
@@ -63,7 +63,7 @@
     }
   },
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 48,
     "fields": {
       "followed": 5,
@@ -72,7 +72,7 @@
     }
   },
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 49,
     "fields": {
       "followed": 15,
@@ -81,7 +81,7 @@
     }
   },
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 50,
     "fields": {
       "followed": 10,
@@ -90,7 +90,7 @@
     }
   },
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 51,
     "fields": {
       "followed": 20,
@@ -99,7 +99,7 @@
     }
   },
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 52,
     "fields": {
       "followed": 18,
@@ -108,7 +108,7 @@
     }
   },
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 53,
     "fields": {
       "followed": 7,
@@ -117,7 +117,7 @@
     }
   },
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 54,
     "fields": {
       "followed": 8,
@@ -126,7 +126,7 @@
     }
   },
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 55,
     "fields": {
       "followed": 2,
@@ -135,7 +135,7 @@
     }
   },
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 56,
     "fields": {
       "followed": 4,
@@ -144,7 +144,7 @@
     }
   },
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 57,
     "fields": {
       "followed": 14,
@@ -153,7 +153,7 @@
     }
   },
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 58,
     "fields": {
       "followed": 11,
@@ -162,7 +162,7 @@
     }
   },
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 59,
     "fields": {
       "followed": 17,
@@ -171,7 +171,7 @@
     }
   },
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 60,
     "fields": {
       "followed": 21,
@@ -180,7 +180,7 @@
     }
   },
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 61,
     "fields": {
       "followed": 3,
@@ -189,7 +189,7 @@
     }
   },
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 77,
     "fields": {
       "followed": 3,
@@ -198,7 +198,7 @@
     }
   },
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 79,
     "fields": {
       "followed": 11,
@@ -207,7 +207,7 @@
     }
   },
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 80,
     "fields": {
       "followed": 7,
@@ -216,7 +216,7 @@
     }
   },
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 81,
     "fields": {
       "followed": 10,
@@ -225,7 +225,7 @@
     }
   },
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 82,
     "fields": {
       "followed": 9,
@@ -234,7 +234,7 @@
     }
   },
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 83,
     "fields": {
       "followed": 19,
@@ -243,7 +243,7 @@
     }
   },
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 84,
     "fields": {
       "followed": 12,
@@ -252,7 +252,7 @@
     }
   },
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 85,
     "fields": {
       "followed": 16,
@@ -261,7 +261,7 @@
     }
   },
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 86,
     "fields": {
       "followed": 6,
@@ -270,7 +270,7 @@
     }
   },
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 87,
     "fields": {
       "followed": 5,
@@ -279,7 +279,7 @@
     }
   },
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 88,
     "fields": {
       "followed": 15,
@@ -288,7 +288,7 @@
     }
   },
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 91,
     "fields": {
       "followed": 4,
@@ -297,7 +297,7 @@
     }
   },
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 92,
     "fields": {
       "followed": 1,
@@ -306,7 +306,7 @@
     }
   },
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 123,
     "fields": {
       "followed": 13,

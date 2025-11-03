@@ -10,6 +10,7 @@ services:
       - prod/.env.prod
     command: >
       sh -c "python manage.py wait_for_db &&
+             python manage.py ensure_vector_extension &&
              python manage.py migrate &&
              python manage.py load_report_reasons &&
              python manage.py load_pet_types &&
@@ -20,7 +21,8 @@ services:
 
   only-paws-db:
     volumes:
-      - prod_db_volume:/var/lib/postgresql/data
+      - only-paws-db-data-prod:/var/lib/postgresql/data
+      - ../init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
     env_file:
       - prod/.env.prod.db
 
@@ -125,6 +127,6 @@ services:
           memory: 128M
 
 volumes:
-  prod_db_volume:
+  only-paws-db-data-prod:
   static_volume:
   celery_beat_schedule:

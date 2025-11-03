@@ -6,3 +6,5 @@ omit =
     */__init__.py
     */*/__init.py
     */*/*/__init.py
+    apps/core_app/management/*
+    core/celery.py

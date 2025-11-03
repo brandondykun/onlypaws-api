@@ -4,7 +4,7 @@ Serializers for the User API view.
 
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from apps.core_app.models import (
+from apps.user_app.models import (
     Profile,
     ProfileImage,
     PetType,
@@ -116,7 +116,7 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
                 params.append(profile.id)
                 with connection.cursor() as cursor:
                     query = f"""
-                        UPDATE core_app_regularprofile 
+                        UPDATE user_app_regularprofile 
                         SET {', '.join(update_fields)}
                         WHERE profile_ptr_id = %s
                     """
@@ -134,7 +134,7 @@ class ProfileCreateSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         """Create Profile and RegularProfile, maintaining data in both."""
-        from apps.core_app.models import RegularProfile
+        from apps.user_app.models import RegularProfile
         from django.db import connection
         
         # Extract fields
@@ -151,7 +151,7 @@ class ProfileCreateSerializer(serializers.ModelSerializer):
             pet_type_id = pet_type.id if pet_type else None
             cursor.execute(
                 """
-                INSERT INTO core_app_regularprofile 
+                INSERT INTO user_app_regularprofile 
                     (profile_ptr_id, about_new, name_new, pet_type_new_id, breed_new)
                 VALUES (%s, %s, %s, %s, %s)
                 """,
@@ -278,14 +278,14 @@ class ProfileDetailedSerializer(serializers.ModelSerializer):
 
     def get_is_following(self, obj) -> bool:
         # boolean - is requesting profile following the profile being fetched
-        requesting_profile = self.context["request"].query_params.get("profileId", None)
+        requesting_profile = self.context["request"].headers["auth-profile-id"]
 
         if requesting_profile:
             return obj.following.filter(followed_by=requesting_profile).exists()
         return False
 
     def get_posts_count(self, obj) -> int:
-        requesting_profile = self.context["request"].query_params.get("profileId", None)
+        requesting_profile = self.context["request"].headers["auth-profile-id"]
         posts = obj.posts.all()
 
         # if profile is fetching own posts, return all including reported inappropriate

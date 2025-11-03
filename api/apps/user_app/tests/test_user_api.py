@@ -9,7 +9,7 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
 
-from apps.core_app.models import Profile, User
+from apps.user_app.models import Profile, User
 
 MY_INFO_URL = reverse("user_app:my_info")
 LOGIN_URL = reverse("user_app:token_obtain_pair")
@@ -121,6 +121,7 @@ class PrivateUserApiTests(TestCase):
                     "username": self.profile.username,
                     "image": None,
                     "name": "",
+                    "profile_type": "regular",
                 }
             ],
             "is_email_verified": False,

@@ -1,6 +1,6 @@
 [
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 2,
     "fields": {
       "username": "hound_dog",
@@ -15,7 +15,7 @@
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 3,
     "fields": {
       "username": "chewyyy",
@@ -30,7 +30,7 @@
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 4,
     "fields": {
       "username": "pitbulpup",
@@ -45,7 +45,7 @@
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 5,
     "fields": {
       "username": "AIpets",
@@ -60,7 +60,7 @@
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 6,
     "fields": {
       "username": "catAI",
@@ -75,7 +75,7 @@
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 7,
     "fields": {
       "username": "AllPets",
@@ -90,7 +90,7 @@
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 10,
     "fields": {
       "username": "SirDogsAlot",
@@ -105,7 +105,7 @@
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 11,
     "fields": {
       "username": "husky123",
@@ -120,7 +120,7 @@
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 12,
     "fields": {
       "username": "K9Historian",
@@ -135,7 +135,7 @@
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 13,
     "fields": {
       "username": "that_one_lab",
@@ -150,7 +150,7 @@
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 14,
     "fields": {
       "username": "bestpuppies",
@@ -165,7 +165,7 @@
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 15,
     "fields": {
       "username": "oldyeller",
@@ -180,7 +180,7 @@
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 16,
     "fields": {
       "username": "TheGreatOne",
@@ -195,7 +195,7 @@
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 17,
     "fields": {
       "username": "goldie",
@@ -210,7 +210,7 @@
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 18,
     "fields": {
       "username": "choco",
@@ -225,7 +225,7 @@
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 19,
     "fields": {
       "username": "SnortyPickles",
@@ -240,7 +240,7 @@
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 20,
     "fields": {
       "username": "GoldenMaple",
@@ -255,7 +255,7 @@
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 21,
     "fields": {
       "username": "GuardianTitan",
@@ -270,7 +270,7 @@
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 22,
     "fields": {
       "username": "AllAboutBeagles",
@@ -285,7 +285,7 @@
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 23,
     "fields": {
       "username": "MidnightThePoodle",
@@ -300,7 +300,7 @@
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 24,
     "fields": {
       "username": "tempaccount",
@@ -315,7 +315,7 @@
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 25,
     "fields": {
       "username": "tempuser2",
@@ -330,7 +330,7 @@
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 26,
     "fields": {
       "username": "LucyBelle",
@@ -345,7 +345,7 @@
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 1,
     "fields": {
       "username": "admin_dog",

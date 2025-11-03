@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from apps.core_app.models import Post
+from apps.posts_app.models import Post
 
 
 class Command(BaseCommand):

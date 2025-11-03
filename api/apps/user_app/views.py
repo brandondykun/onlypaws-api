@@ -3,7 +3,7 @@ Views for the user api.
 """
 
 from rest_framework import generics, permissions, status, serializers
-from apps.core_app.models import (
+from apps.user_app.models import (
     Profile,
     User,
     ProfileImage,
@@ -107,7 +107,10 @@ class CreateUserView(generics.CreateAPIView):
         email = request.data.get("email", None)
         password = request.data.get("password", None)
 
+        logger.info(f"Creating user with username: {username}, email: {email}, password: {password}")
+
         if not username or not email or not password:
+            logger.error("Username, email, or password is required to create a user.")
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         try:
@@ -118,6 +121,8 @@ class CreateUserView(generics.CreateAPIView):
                 )
                 user_serializer.is_valid(raise_exception=True)
                 self.perform_create(user_serializer)
+                logger.info(f"User created successfully: {user_serializer.data}")
+                
                 # create Profile
                 profile_serializer = ProfileCreateSerializer(
                     data={
@@ -130,6 +135,7 @@ class CreateUserView(generics.CreateAPIView):
                 )
                 profile_serializer.is_valid(raise_exception=True)
                 self.perform_create(profile_serializer)
+                logger.info(f"Profile created successfully: {profile_serializer.data}")
 
                 user = User.objects.get(id=user_serializer.data["id"])
 
@@ -140,6 +146,7 @@ class CreateUserView(generics.CreateAPIView):
                 )
                 verify_email_serializer.is_valid(raise_exception=True)
                 self.perform_create(verify_email_serializer)
+                logger.info(f"Verify email token created successfully: {verify_email_serializer.data}")
 
                 verify_token_obj = VerifyEmailToken.objects.get(
                     id=verify_email_serializer.data["id"]
@@ -159,7 +166,7 @@ class CreateUserView(generics.CreateAPIView):
         except Exception as e:
             # If an exception occurs, the transaction will be rolled back
             # and the main object will be deleted.
-            logger.info(f"Error creating user: {str(e)}")
+            logger.error(f"Error creating user: {str(e)}")
             if isinstance(e, serializers.ValidationError):
                 errors = {}
                 # handle unique email constraint error

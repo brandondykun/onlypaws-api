@@ -1,6 +1,6 @@
 [
   {
-    "model": "core_app.savedpost",
+    "model": "posts_app.savedpost",
     "pk": 1,
     "fields": {
       "profile": 4,

@@ -1,6 +1,6 @@
 [
   {
-    "model": "core_app.reportreason",
+    "model": "moderation_app.reportreason",
     "pk": 1,
     "fields": {
       "name": "Inappropriate Content",
@@ -10,7 +10,7 @@
     }
   },
   {
-    "model": "core_app.reportreason",
+    "model": "moderation_app.reportreason",
     "pk": 2,
     "fields": {
       "name": "Not Pet Related",
@@ -20,7 +20,7 @@
     }
   },
   {
-    "model": "core_app.reportreason",
+    "model": "moderation_app.reportreason",
     "pk": 4,
     "fields": {
       "name": "Other",
@@ -30,7 +30,7 @@
     }
   },
   {
-    "model": "core_app.reportreason",
+    "model": "moderation_app.reportreason",
     "pk": 3,
     "fields": {
       "name": "Too Much Human",

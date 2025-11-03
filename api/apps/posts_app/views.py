@@ -4,18 +4,10 @@ Views for the posts api.
 
 from rest_framework import generics, permissions, mixins, status, viewsets
 from rest_framework.decorators import action
-from apps.core_app.models import (
-    Post,
-    PostImage,
-    Profile,
-    Like,
-    Comment,
-    Follow,
-    CommentLike,
-    SavedPost,
-    ReportReason,
-    PostReport,
-)
+from apps.user_app.models import Profile
+from apps.posts_app.models import Post, PostImage, SavedPost
+from apps.interactions_app.models import Like, Comment, Follow, CommentLike
+from apps.moderation_app.models import ReportReason, PostReport
 from .serializers import (
     PostSerializer,
     PostUpdateSerializer,

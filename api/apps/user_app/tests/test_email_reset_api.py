@@ -9,7 +9,7 @@ from django.utils import timezone
 from datetime import timedelta
 from rest_framework.test import APIClient
 from rest_framework import status
-from apps.core_app.models import User, PendingEmailChange
+from apps.user_app.models import User, PendingEmailChange
 from apps.core_app.utils import generate_verification_code
 
 

@@ -22,7 +22,7 @@ def generate_image_embedding_task(self, post_image_id: int):
     """
     try:
         # Import here to avoid circular imports
-        from .models import PostImage
+        from apps.posts_app.models import PostImage
         from .services import get_embedding_service
 
         logger.info(f"Starting embedding generation for PostImage {post_image_id}")
@@ -201,7 +201,7 @@ def generate_embeddings_for_missing_task(batch_size: int = 50, force: bool = Fal
         Dict with processing results
     """
     try:
-        from .models import PostImage
+        from apps.posts_app.models import PostImage
 
         logger.info(
             f"Starting search for PostImages needing embeddings (force={force})"
