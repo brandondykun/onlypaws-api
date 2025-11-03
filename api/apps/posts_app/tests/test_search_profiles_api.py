@@ -5,7 +5,7 @@ Tests for the search profiles api.
 from rest_framework import status
 from django.db.models import Q
 
-from apps.core_app.models import Profile
+from apps.user_app.models import Profile
 from .util import PostsAppTestHelper, create_user, create_profile, search_profiles_url
 
 

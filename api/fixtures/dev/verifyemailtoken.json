@@ -1,6 +1,6 @@
 [
   {
-    "model": "core_app.verifyemailtoken",
+    "model": "user_app.verifyemailtoken",
     "pk": 24,
     "fields": {
       "user": 25,

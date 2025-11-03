@@ -1,4 +1,4 @@
-from .models import PostImage
+from apps.posts_app.models import PostImage
 from django.dispatch import receiver
 from django.db.models.signals import pre_delete
 

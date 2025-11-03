@@ -1,6 +1,6 @@
 [
   {
-    "model": "core_app.comment",
+    "model": "interactions_app.comment",
     "pk": 1,
     "fields": {
       "text": "Did he try to bring the stick inside?",
@@ -12,7 +12,7 @@
     }
   },
   {
-    "model": "core_app.comment",
+    "model": "interactions_app.comment",
     "pk": 2,
     "fields": {
       "text": "No he knows better",
@@ -24,7 +24,7 @@
     }
   },
   {
-    "model": "core_app.comment",
+    "model": "interactions_app.comment",
     "pk": 3,
     "fields": {
       "text": "Where did you get that jacket?",
@@ -36,7 +36,7 @@
     }
   },
   {
-    "model": "core_app.comment",
+    "model": "interactions_app.comment",
     "pk": 4,
     "fields": {
       "text": "Hey are we related!?",
@@ -48,7 +48,7 @@
     }
   },
   {
-    "model": "core_app.comment",
+    "model": "interactions_app.comment",
     "pk": 5,
     "fields": {
       "text": "Maybe, where are you from?",
@@ -60,7 +60,7 @@
     }
   },
   {
-    "model": "core_app.comment",
+    "model": "interactions_app.comment",
     "pk": 7,
     "fields": {
       "text": "Lititz PA is where my mom got me from!",
@@ -72,7 +72,7 @@
     }
   },
   {
-    "model": "core_app.comment",
+    "model": "interactions_app.comment",
     "pk": 8,
     "fields": {
       "text": "I don't know exactly where I'm from, but I did come from Pennsylvania",
@@ -84,7 +84,7 @@
     }
   },
   {
-    "model": "core_app.comment",
+    "model": "interactions_app.comment",
     "pk": 9,
     "fields": {
       "text": "Well we do look a lot a like. Do you have any brother or sister?",
@@ -96,7 +96,7 @@
     }
   },
   {
-    "model": "core_app.comment",
+    "model": "interactions_app.comment",
     "pk": 10,
     "fields": {
       "text": "I have 3 brothers and 2 sisters! What about you?",
@@ -108,7 +108,7 @@
     }
   },
   {
-    "model": "core_app.comment",
+    "model": "interactions_app.comment",
     "pk": 12,
     "fields": {
       "text": "I think I have 6 or 7. I’d have to look in my baby book to know for sure.",
@@ -120,7 +120,7 @@
     }
   },
   {
-    "model": "core_app.comment",
+    "model": "interactions_app.comment",
     "pk": 13,
     "fields": {
       "text": "Nice sweater!",
@@ -132,7 +132,7 @@
     }
   },
   {
-    "model": "core_app.comment",
+    "model": "interactions_app.comment",
     "pk": 14,
     "fields": {
       "text": "I love sticks too! They're the best free toys ever!",
@@ -144,7 +144,7 @@
     }
   },
   {
-    "model": "core_app.comment",
+    "model": "interactions_app.comment",
     "pk": 15,
     "fields": {
       "text": "And there is a never ending supply!",
@@ -156,7 +156,7 @@
     }
   },
   {
-    "model": "core_app.comment",
+    "model": "interactions_app.comment",
     "pk": 16,
     "fields": {
       "text": "Wow I didn't even think of that, but you're right",
@@ -168,7 +168,7 @@
     }
   },
   {
-    "model": "core_app.comment",
+    "model": "interactions_app.comment",
     "pk": 17,
     "fields": {
       "text": "You’re not gonna believe it, but Costco lol",

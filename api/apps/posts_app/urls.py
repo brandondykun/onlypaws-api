@@ -102,7 +102,7 @@ urlpatterns = [
         name="list_profile_posts",
     ),
     path(
-        "profile/<int:pk>",
+        "profile/<int:pk>/",
         views.RetrieveProfileView.as_view(),
         name="retrieve_profile",
     ),

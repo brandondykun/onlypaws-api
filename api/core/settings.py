@@ -15,6 +15,7 @@ from datetime import timedelta
 import os
 from typing import Literal
 from celery.schedules import crontab
+from .utils import print_environment_banner
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -83,8 +84,11 @@ INSTALLED_APPS = [
     "apps.core_app",
     "apps.user_app",
     "apps.posts_app",
+    "apps.interactions_app",
+    "apps.moderation_app",
     "apps.feedback_app",
     "apps.notifications_app",
+    "apps.config_app",
     "storages",
     "corsheaders",
 ]
@@ -179,7 +183,7 @@ STATICFILES_DIRS = []
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-AUTH_USER_MODEL = "core_app.User"
+AUTH_USER_MODEL = "user_app.User"
 
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
@@ -230,10 +234,15 @@ LOGGING = {
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "Only Paws API",
-    "DESCRIPTION": "The place for paw pics.",
+    "DESCRIPTION": "The unapologetically pet friendly social media app.",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
-    # OTHER SETTINGS
+    "COMPONENT_SPLIT_REQUEST": True,
+    "ENUM_NAME_OVERRIDES": {
+        "PostReportStatusEnum": "apps.moderation_app.models.PostReport.ReportStatus",
+        "FeedbackStatusEnum": "apps.feedback_app.models.Feedback.FeedbackStatus",
+    },
+    'SCHEMA_PATH_PREFIX': r'/api/v[0-9]',
 }
 
 
@@ -310,13 +319,13 @@ environment: Literal["test", "dev", "staging", "prod"] = os.environ.get("DJANGO_
 # Load the correct settings file based on the environment
 if environment == "test":
     from core.settings_test import *
+    print_environment_banner(environment)
 elif environment == "dev":
     from core.settings_dev import *
+    print_environment_banner(environment)
 elif environment == "staging":
     from core.settings_staging import *
+    print_environment_banner(environment)
 elif environment == "prod":
     from core.settings_prod import *
-
-
-if environment == "dev" or environment == "test":
-    print("DJANGO_ENV: ", environment)
+    print_environment_banner(environment)

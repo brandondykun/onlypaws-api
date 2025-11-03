@@ -1,311 +1,389 @@
 [
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 1,
     "fields": {
       "username": "admin_profile",
-      "about": "Admin profile.",
       "user": 1,
+      "is_active": true,
+      "created_at": "2025-10-24T12:47:44.897Z",
+      "updated_at": "2025-10-24T12:47:44.923Z",
+      "about": "Admin profile.",
       "name": "Linus",
       "pet_type": null,
       "breed": ""
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 2,
     "fields": {
       "username": "userone",
-      "about": "I am the best dog. There is no debate. I loves cheese.",
       "user": 2,
+      "is_active": true,
+      "created_at": "2025-10-24T12:47:44.897Z",
+      "updated_at": "2025-10-24T12:47:44.923Z",
+      "about": "I am the best dog. There is no debate. I loves cheese.",
       "name": "",
       "pet_type": null,
       "breed": ""
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 3,
     "fields": {
       "username": "usertwo",
-      "about": "I am a hound. I chase rabbits and squirrels like there’s no tomorrow!",
       "user": 3,
+      "is_active": true,
+      "created_at": "2025-10-24T12:47:44.897Z",
+      "updated_at": "2025-10-24T12:47:44.923Z",
+      "about": "I am a hound. I chase rabbits and squirrels like there's no tomorrow!",
       "name": "",
       "pet_type": null,
       "breed": ""
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 4,
     "fields": {
       "username": "userthree",
-      "about": "I am the best dog in the entire universe!",
       "user": 4,
+      "is_active": true,
+      "created_at": "2025-10-24T12:47:44.897Z",
+      "updated_at": "2025-10-24T12:47:44.923Z",
+      "about": "I am the best dog in the entire universe!",
       "name": "",
       "pet_type": null,
       "breed": ""
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 5,
     "fields": {
       "username": "userfour",
-      "about": "Walks by the lake are my jam. Big sticks only.",
       "user": 5,
+      "is_active": true,
+      "created_at": "2025-10-24T12:47:44.897Z",
+      "updated_at": "2025-10-24T12:47:44.923Z",
+      "about": "Walks by the lake are my jam. Big sticks only.",
       "name": "",
       "pet_type": null,
       "breed": ""
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 6,
     "fields": {
       "username": "userfive",
-      "about": "I’m the freaking dog.",
       "user": 6,
+      "is_active": true,
+      "created_at": "2025-10-24T12:47:44.897Z",
+      "updated_at": "2025-10-24T12:47:44.923Z",
+      "about": "I'm the freaking dog.",
       "name": "",
       "pet_type": null,
       "breed": ""
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 7,
     "fields": {
       "username": "usersix",
-      "about": "Kinda doofy but also sweet.",
       "user": 7,
+      "is_active": true,
+      "created_at": "2025-10-24T12:47:44.897Z",
+      "updated_at": "2025-10-24T12:47:44.923Z",
+      "about": "Kinda doofy but also sweet.",
       "name": "",
       "pet_type": null,
       "breed": ""
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 8,
     "fields": {
       "username": "userseven",
-      "about": "I know you’re here for dogs, but I’m just a baby pony. Close enough.",
       "user": 8,
+      "is_active": true,
+      "created_at": "2025-10-24T12:47:44.897Z",
+      "updated_at": "2025-10-24T12:47:44.923Z",
+      "about": "I know you're here for dogs, but I'm just a baby pony. Close enough.",
       "name": "",
       "pet_type": null,
       "breed": ""
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 9,
     "fields": {
       "username": "usereight",
-      "about": "Idk why everyone thinks I’m scary. My ears are pretty awesome.",
       "user": 9,
+      "is_active": true,
+      "created_at": "2025-10-24T12:47:44.897Z",
+      "updated_at": "2025-10-24T12:47:44.923Z",
+      "about": "Idk why everyone thinks I'm scary. My ears are pretty awesome.",
       "name": "",
       "pet_type": null,
       "breed": ""
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 10,
     "fields": {
       "username": "usernine",
-      "about": "Coned out Cavi. I’ll steal ya girl!",
       "user": 10,
+      "is_active": true,
+      "created_at": "2025-10-24T12:47:44.897Z",
+      "updated_at": "2025-10-24T12:47:44.923Z",
+      "about": "Coned out Cavi. I'll steal ya girl!",
       "name": "",
       "pet_type": null,
       "breed": ""
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 11,
     "fields": {
       "username": "userten",
-      "about": "I like chocolate even though it’s bad for me.",
       "user": 11,
+      "is_active": true,
+      "created_at": "2025-10-24T12:47:44.897Z",
+      "updated_at": "2025-10-24T12:47:44.923Z",
+      "about": "I like chocolate even though it's bad for me.",
       "name": "",
       "pet_type": null,
       "breed": ""
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 12,
     "fields": {
       "username": "usereleven",
-      "about": "Sleepy dogs only up in here.",
       "user": 12,
+      "is_active": true,
+      "created_at": "2025-10-24T12:47:44.897Z",
+      "updated_at": "2025-10-24T12:47:44.923Z",
+      "about": "Sleepy dogs only up in here.",
       "name": "",
       "pet_type": null,
       "breed": ""
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 13,
     "fields": {
       "username": "usertwelve",
-      "about": "I often hear that I am the bestestest boy in the whole world.",
       "user": 13,
+      "is_active": true,
+      "created_at": "2025-10-24T12:47:44.897Z",
+      "updated_at": "2025-10-24T12:47:44.923Z",
+      "about": "I often hear that I am the bestestest boy in the whole world.",
       "name": "",
       "pet_type": null,
       "breed": ""
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 14,
     "fields": {
       "username": "userthirteen",
-      "about": "",
       "user": 14,
+      "is_active": true,
+      "created_at": "2025-10-24T12:47:44.897Z",
+      "updated_at": "2025-10-24T12:47:44.923Z",
+      "about": "",
       "name": "",
       "pet_type": null,
       "breed": ""
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 15,
     "fields": {
       "username": "userfourteen",
-      "about": "",
       "user": 15,
+      "is_active": true,
+      "created_at": "2025-10-24T12:47:44.897Z",
+      "updated_at": "2025-10-24T12:47:44.923Z",
+      "about": "",
       "name": "",
       "pet_type": null,
       "breed": ""
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 16,
     "fields": {
       "username": "userfifteen",
-      "about": "",
       "user": 16,
+      "is_active": true,
+      "created_at": "2025-10-24T12:47:44.897Z",
+      "updated_at": "2025-10-24T12:47:44.923Z",
+      "about": "",
       "name": "",
       "pet_type": null,
       "breed": ""
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 17,
     "fields": {
       "username": "usersixteen",
-      "about": "",
       "user": 17,
+      "is_active": true,
+      "created_at": "2025-10-24T12:47:44.897Z",
+      "updated_at": "2025-10-24T12:47:44.923Z",
+      "about": "",
       "name": "",
       "pet_type": null,
       "breed": ""
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 18,
     "fields": {
       "username": "userseventeen",
-      "about": "",
       "user": 18,
+      "is_active": true,
+      "created_at": "2025-10-24T12:47:44.897Z",
+      "updated_at": "2025-10-24T12:47:44.923Z",
+      "about": "",
       "name": "",
       "pet_type": null,
       "breed": ""
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 19,
     "fields": {
       "username": "usereighteen",
-      "about": "",
       "user": 19,
+      "is_active": true,
+      "created_at": "2025-10-24T12:47:44.897Z",
+      "updated_at": "2025-10-24T12:47:44.923Z",
+      "about": "",
       "name": "",
       "pet_type": null,
       "breed": ""
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 20,
     "fields": {
       "username": "usernineteen",
-      "about": "",
       "user": 20,
+      "is_active": true,
+      "created_at": "2025-10-24T12:47:44.897Z",
+      "updated_at": "2025-10-24T12:47:44.923Z",
+      "about": "",
       "name": "",
       "pet_type": null,
       "breed": ""
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 21,
     "fields": {
       "username": "usertwenty",
-      "about": "",
       "user": 21,
+      "is_active": true,
+      "created_at": "2025-10-24T12:47:44.897Z",
+      "updated_at": "2025-10-24T12:47:44.923Z",
+      "about": "",
       "name": "",
       "pet_type": null,
       "breed": ""
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 22,
     "fields": {
       "username": "usertwentyone",
-      "about": "",
       "user": 22,
+      "is_active": true,
+      "created_at": "2025-10-24T12:47:44.897Z",
+      "updated_at": "2025-10-24T12:47:44.923Z",
+      "about": "",
       "name": "",
       "pet_type": null,
       "breed": ""
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 23,
     "fields": {
       "username": "usertwentytwo",
-      "about": "",
       "user": 23,
+      "is_active": true,
+      "created_at": "2025-10-24T12:47:44.897Z",
+      "updated_at": "2025-10-24T12:47:44.923Z",
+      "about": "",
       "name": "",
       "pet_type": null,
       "breed": ""
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 24,
     "fields": {
       "username": "usertwentythree",
-      "about": "",
       "user": 24,
+      "is_active": true,
+      "created_at": "2025-10-24T12:47:44.897Z",
+      "updated_at": "2025-10-24T12:47:44.923Z",
+      "about": "",
       "name": "",
       "pet_type": null,
       "breed": ""
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 25,
     "fields": {
       "username": "LiggyBoomBoom",
-      "about": "I am superior to all other dogs.",
       "user": 2,
+      "is_active": true,
+      "created_at": "2025-10-24T12:47:44.897Z",
+      "updated_at": "2025-10-24T12:47:44.923Z",
+      "about": "I am superior to all other dogs.",
       "name": "",
       "pet_type": null,
       "breed": ""
     }
   },
   {
-    "model": "core_app.profile",
+    "model": "user_app.profile",
     "pk": 26,
     "fields": {
       "username": "LinusTheHighness",
-      "about": "Regal. But tired.",
       "user": 1,
+      "is_active": true,
+      "created_at": "2025-10-24T12:47:44.897Z",
+      "updated_at": "2025-10-24T12:47:44.923Z",
+      "about": "Regal. But tired.",
       "name": "",
       "pet_type": null,
       "breed": ""

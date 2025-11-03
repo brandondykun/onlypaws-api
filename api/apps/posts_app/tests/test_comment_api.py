@@ -4,7 +4,7 @@ Tests for the comment api.
 
 from rest_framework import status
 
-from apps.core_app.models import Comment
+from apps.interactions_app.models import Comment
 
 from .util import PostsAppTestHelper, create_comment_url, list_post_comments_url
 

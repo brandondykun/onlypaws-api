@@ -2,9 +2,8 @@
 Views for the user api.
 """
 
-from rest_framework import generics, permissions
-from rest_framework import status
-from apps.core_app.models import (
+from rest_framework import generics, permissions, status, serializers
+from apps.user_app.models import (
     Profile,
     User,
     ProfileImage,
@@ -14,7 +13,6 @@ from apps.core_app.models import (
     PendingEmailChange,
 )
 from apps.core_app.utils import generate_verification_code
-from rest_framework import serializers
 from .tasks import (
     send_verification_email_task,
     send_reset_password_email_task,
@@ -23,7 +21,6 @@ from .tasks import (
 )
 from .serializers import (
     UserSerializer,
-    ProfileDetailedSerializer,
     ProfileSerializer,
     UserProfileSerializer,
     ProfileImageSerializer,
@@ -33,6 +30,9 @@ from .serializers import (
     VerifyEmailTokenSerializer,
     ResetPasswordTokenSerializer,
     ChangePasswordSerializer,
+    RequestEmailChangeSerializer,
+    VerifyEmailChangeSerializer,
+    ResetPasswordSerializer,
 )
 from rest_framework.response import Response
 import logging
@@ -44,7 +44,6 @@ from drf_spectacular.utils import (
     extend_schema,
     OpenApiParameter,
 )
-from rest_framework.views import APIView
 from django.contrib.auth import authenticate
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
@@ -108,7 +107,10 @@ class CreateUserView(generics.CreateAPIView):
         email = request.data.get("email", None)
         password = request.data.get("password", None)
 
+        logger.info(f"Creating user with username: {username}, email: {email}, password: {password}")
+
         if not username or not email or not password:
+            logger.error("Username, email, or password is required to create a user.")
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         try:
@@ -119,6 +121,8 @@ class CreateUserView(generics.CreateAPIView):
                 )
                 user_serializer.is_valid(raise_exception=True)
                 self.perform_create(user_serializer)
+                logger.info(f"User created successfully: {user_serializer.data}")
+                
                 # create Profile
                 profile_serializer = ProfileCreateSerializer(
                     data={
@@ -131,6 +135,7 @@ class CreateUserView(generics.CreateAPIView):
                 )
                 profile_serializer.is_valid(raise_exception=True)
                 self.perform_create(profile_serializer)
+                logger.info(f"Profile created successfully: {profile_serializer.data}")
 
                 user = User.objects.get(id=user_serializer.data["id"])
 
@@ -141,6 +146,7 @@ class CreateUserView(generics.CreateAPIView):
                 )
                 verify_email_serializer.is_valid(raise_exception=True)
                 self.perform_create(verify_email_serializer)
+                logger.info(f"Verify email token created successfully: {verify_email_serializer.data}")
 
                 verify_token_obj = VerifyEmailToken.objects.get(
                     id=verify_email_serializer.data["id"]
@@ -160,7 +166,7 @@ class CreateUserView(generics.CreateAPIView):
         except Exception as e:
             # If an exception occurs, the transaction will be rolled back
             # and the main object will be deleted.
-            logger.info(f"Error creating user: {str(e)}")
+            logger.error(f"Error creating user: {str(e)}")
             if isinstance(e, serializers.ValidationError):
                 errors = {}
                 # handle unique email constraint error
@@ -242,18 +248,16 @@ class CreateProfileView(generics.CreateAPIView):
             )
 
 
-class RetrieveUpdateDestroyProfileView(generics.RetrieveUpdateDestroyAPIView):
+class UpdateDestroyProfileView(generics.UpdateAPIView, generics.DestroyAPIView):
     """Retrieve, update or delete a Profile."""
 
     queryset = Profile.objects.all()
-    serializer_class = ProfileDetailedSerializer
+    serializer_class = ProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
     allowed_methods = ["PATCH", "DELETE"]
 
     def get_serializer_class(self):
-        if self.request.method == "GET":
-            return ProfileDetailedSerializer
-        elif self.request.method == "PATCH":
+        if self.request.method == "PATCH":
             return ProfileUpdateSerializer
         return ProfileSerializer
 
@@ -586,6 +590,7 @@ class CreateResetPasswordTokenView(generics.CreateAPIView):
 class ResetPasswordView(generics.CreateAPIView):
     """Reset user password using reset token."""
 
+    serializer_class = ResetPasswordSerializer
     permission_classes = []  # Allow unauthenticated access
     authentication_classes = []
 
@@ -663,7 +668,8 @@ class ResetPasswordView(generics.CreateAPIView):
             )
 
 
-class ChangePasswordView(APIView):
+@extend_schema_view(patch=extend_schema(parameters=[auth_profile_param]))
+class ChangePasswordView(generics.GenericAPIView):
     """View for changing user password."""
 
     permission_classes = [permissions.IsAuthenticated]
@@ -711,12 +717,14 @@ class ChangePasswordView(APIView):
             )
 
 
-class RequestEmailChangeView(APIView):
+@extend_schema_view(post=extend_schema(parameters=[auth_profile_param]))
+class RequestEmailChangeView(generics.GenericAPIView):
     """
     API View to request email change.
     Sends verification email to new address.
     """
 
+    serializer_class = RequestEmailChangeSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
@@ -762,12 +770,14 @@ class RequestEmailChangeView(APIView):
         )
 
 
-class VerifyEmailChangeView(APIView):
+@extend_schema_view(post=extend_schema(parameters=[auth_profile_param]))
+class VerifyEmailChangeView(generics.GenericAPIView):
     """
     API View to verify email change with token.
     Updates user's email if verification successful.
     """
 
+    serializer_class = VerifyEmailChangeSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):

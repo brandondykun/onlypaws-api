@@ -1,6 +1,6 @@
 [
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 1,
     "fields": {
       "caption": "Could hold the record for the sleepiest dog on the planet for sure!",
@@ -11,7 +11,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 2,
     "fields": {
       "caption": "Morning walk time!",
@@ -22,7 +22,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 3,
     "fields": {
       "caption": "Mom got me out here in the snow. Good grief!",
@@ -33,7 +33,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 4,
     "fields": {
       "caption": "Got a haircut today. Looking pretty dapper. Kinda feeling myself tbh.",
@@ -44,7 +44,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 5,
     "fields": {
       "caption": "I woke up like this.",
@@ -55,7 +55,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 6,
     "fields": {
       "caption": "Getting some pets today!",
@@ -66,7 +66,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 7,
     "fields": {
       "caption": "Yep I’m a German shep!",
@@ -77,7 +77,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 8,
     "fields": {
       "caption": "Mom says the cone is cute. I say it’s frickin embarrassing.",
@@ -88,7 +88,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 9,
     "fields": {
       "caption": "Livin that cone life.",
@@ -99,7 +99,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 10,
     "fields": {
       "caption": "Sniffing the camera man.",
@@ -110,7 +110,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 11,
     "fields": {
       "caption": "Sniffing for chocolate.",
@@ -121,7 +121,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 12,
     "fields": {
       "caption": "Hanging out with my friend Linus!",
@@ -132,7 +132,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 13,
     "fields": {
       "caption": "Party!!!",
@@ -143,7 +143,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 14,
     "fields": {
       "caption": "Goofy Shane!",
@@ -154,7 +154,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 15,
     "fields": {
       "caption": "Baby boy sleeping on the floor like usual.",
@@ -165,7 +165,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 16,
     "fields": {
       "caption": "Curled up like there’s no tomorrow!",
@@ -176,7 +176,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 17,
     "fields": {
       "caption": "Little lazy boy sleeping on the carpet!",
@@ -187,7 +187,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 18,
     "fields": {
       "caption": "He has 3 beds yet chooses to sleep on the floor lol",
@@ -198,7 +198,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 22,
     "fields": {
       "caption": "Look at those ears!",
@@ -209,7 +209,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 24,
     "fields": {
       "caption": "The tongue out always gets me!",
@@ -220,7 +220,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 25,
     "fields": {
       "caption": "Walk by the waterfall!",
@@ -231,7 +231,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 27,
     "fields": {
       "caption": "Fall bandana season",
@@ -242,7 +242,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 28,
     "fields": {
       "caption": "Fall bandana season",
@@ -253,7 +253,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 29,
     "fields": {
       "caption": "Does anyone else’s dog have a favorite blanket that they sleep with all the time?",
@@ -264,7 +264,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 30,
     "fields": {
       "caption": "World’s best sleeper no doubt.",
@@ -275,7 +275,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 31,
     "fields": {
       "caption": "I’m really happy with this dog bed. I would highly recommend it.",
@@ -286,7 +286,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 32,
     "fields": {
       "caption": "Linus asking for him morning walk!",
@@ -297,7 +297,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 33,
     "fields": {
       "caption": "Favorite nap spot is on my chair. Yep, my humans bought me a chair.",
@@ -308,7 +308,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 34,
     "fields": {
       "caption": "Sleeping beauty.",
@@ -319,7 +319,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 35,
     "fields": {
       "caption": "Sniffing around on walks is my absolute favorite. I could do it all day.",
@@ -330,7 +330,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 36,
     "fields": {
       "caption": "Little walk in the lake!",
@@ -341,7 +341,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 37,
     "fields": {
       "caption": "Throwback to my first lake walk",
@@ -352,7 +352,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 38,
     "fields": {
       "caption": "I love when my parents cover me with a blanket. I can’t believe some of y’all aren’t allowed to sleep in the bed!",
@@ -363,7 +363,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 39,
     "fields": {
       "caption": "Campfire shenanigans. I wish I could have chocolate so I could eat a s’mores.",
@@ -374,7 +374,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 40,
     "fields": {
       "caption": "Sitting on my dad’s lap while he works.",
@@ -385,7 +385,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 41,
     "fields": {
       "caption": "Me in the form of art",
@@ -396,7 +396,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 42,
     "fields": {
       "caption": "Sus side eye",
@@ -407,7 +407,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 43,
     "fields": {
       "caption": "Did I ever mention that I once saw an eclipse!",
@@ -418,7 +418,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 44,
     "fields": {
       "caption": "Got a cool new fall bandana. No big deal",
@@ -429,7 +429,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 45,
     "fields": {
       "caption": "Tongue out at the lake.",
@@ -440,7 +440,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 46,
     "fields": {
       "caption": "One time I got a cake baked just for me!",
@@ -451,7 +451,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 47,
     "fields": {
       "caption": "Got a haircut and a bowl of ice cream",
@@ -462,7 +462,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 48,
     "fields": {
       "caption": "Bath time got me like…",
@@ -473,7 +473,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 49,
     "fields": {
       "caption": "Made a card for mom and she really loved it",
@@ -484,7 +484,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 50,
     "fields": {
       "caption": "Went to the airport to pick up mom. Fun fact, I’ve been on an airplane before",
@@ -495,7 +495,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 51,
     "fields": {
       "caption": "I love my new moose chew toy. It’s a crinkly one",
@@ -506,7 +506,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 52,
     "fields": {
       "caption": "Linus at the hotel!",
@@ -517,7 +517,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 53,
     "fields": {
       "caption": "This hotel couch is kinda comfy!",
@@ -528,7 +528,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 54,
     "fields": {
       "caption": "Not a dog but a dawg.",
@@ -539,7 +539,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 55,
     "fields": {
       "caption": "Not a dog but a dawg",
@@ -550,7 +550,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 56,
     "fields": {
       "caption": "Not sure if you all know but I am a king. Here’s some proof for the haters.",

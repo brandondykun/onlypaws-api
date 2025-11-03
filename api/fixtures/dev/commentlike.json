@@ -1,6 +1,6 @@
 [
   {
-    "model": "core_app.commentlike",
+    "model": "interactions_app.commentlike",
     "pk": 1,
     "fields": {
       "profile": 1,
@@ -9,7 +9,7 @@
     }
   },
   {
-    "model": "core_app.commentlike",
+    "model": "interactions_app.commentlike",
     "pk": 2,
     "fields": {
       "profile": 3,
@@ -18,7 +18,7 @@
     }
   },
   {
-    "model": "core_app.commentlike",
+    "model": "interactions_app.commentlike",
     "pk": 4,
     "fields": {
       "profile": 17,
@@ -27,7 +27,7 @@
     }
   },
   {
-    "model": "core_app.commentlike",
+    "model": "interactions_app.commentlike",
     "pk": 5,
     "fields": {
       "profile": 17,

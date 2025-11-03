@@ -2,17 +2,10 @@ from rest_framework.test import APIClient
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth import get_user_model
-from apps.core_app.models import (
-    Profile,
-    Post,
-    PostImage,
-    Like,
-    Follow,
-    User,
-    Comment,
-    ReportReason,
-    PostReport,
-)
+from apps.user_app.models import Profile, User
+from apps.posts_app.models import Post, PostImage
+from apps.interactions_app.models import Like, Follow, Comment
+from apps.moderation_app.models import ReportReason, PostReport
 
 #
 # Create model objects helper functions
@@ -275,7 +268,7 @@ def retrieve_destroy_post_url(post_id: int):
     post_id : int
         The id of the Post to fetch or destroy.
     """
-    return reverse("posts_app:retrieve_destroy_post", args=[post_id])
+    return reverse("posts_app:retrieve_update_destroy_post", args=[post_id])
 
 
 def destroy_post_image_url(post_image_id: int):

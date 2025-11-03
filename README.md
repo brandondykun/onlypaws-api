@@ -20,16 +20,19 @@ _The unapologetically pet friendly social media app._
 7. [Creating Fixtures for All Models](#creating-fixtures-for-all-models)
 8. [Clear and Reload Database](#clear-and-reload-database)
 9. [Generate Image Embeddings](#generate-image-embeddings)
-10. [Image Data](#image-data)
-11. [Commits](#commits)
-12. [Environment Variables](#environment-variables)
-13. [Dev and Test Images](#dev-and-test-images)
+10. [Assign PostImage Order](#assign-postimage-order)
+11. [Image Data](#image-data)
+12. [Commits](#commits)
+13. [Environment Variables](#environment-variables)
+14. [Dev and Test Images](#dev-and-test-images)
 
 ---
 
 ## Scripts
 
 Several scripts are available to help with the development process.
+
+[assign_postimage_order.sh](#assign-postimage-order) - Assigns order values to PostImages based on their ID within each Post.
 
 [create_fixtures.sh](#creating-fixtures-for-all-models) - Creates fixtures for all models in the given environment.
 
@@ -301,6 +304,40 @@ from apps.core_app.models import PostImage
 task = generate_image_embedding_task.delay(post_image_id=1)
 print(f"Task ID: {task.id}")
 ```
+
+## Assign PostImage Order
+
+This script assigns order values to PostImages based on their ID within each Post. Images are ordered starting from 0 for the first image (lowest ID), 1 for the second, 2 for the third, and so on.
+
+This is useful when:
+- Setting up initial order values after adding the order field
+- Fixing order values that may have become inconsistent
+- Ensuring consistent ordering after data migrations
+
+```bash
+# base command example
+scripts/assign_postimage_order.sh <dev|test|staging> [--dry-run]
+
+# Preview changes without making them (recommended first step)
+scripts/assign_postimage_order.sh dev --dry-run
+
+# Assign order values in dev environment
+scripts/assign_postimage_order.sh dev
+
+# Assign order values in test environment
+scripts/assign_postimage_order.sh test
+
+# Preview changes in staging environment
+scripts/assign_postimage_order.sh staging --dry-run
+
+# Assign order values in staging environment
+scripts/assign_postimage_order.sh staging
+```
+
+**Options:**
+- `--dry-run`: Preview what changes would be made without actually updating the database
+
+**Note:** It's recommended to run with `--dry-run` first to preview the changes before applying them.
 
 ## Image Data
 

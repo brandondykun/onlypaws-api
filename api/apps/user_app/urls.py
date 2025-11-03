@@ -22,7 +22,7 @@ urlpatterns = [
     ),
     path(
         "profile/<int:pk>/",
-        views.RetrieveUpdateDestroyProfileView.as_view(),
+        views.UpdateDestroyProfileView.as_view(),
         name="profile-detail",
     ),
     path("login/", TokenObtainPairView.as_view(), name="token_obtain_pair"),

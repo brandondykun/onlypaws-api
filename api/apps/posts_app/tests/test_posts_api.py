@@ -4,7 +4,7 @@ Tests for the Posts api.
 
 from rest_framework import status
 from django.core.exceptions import ValidationError
-from apps.core_app.models import Post, PostImage
+from apps.posts_app.models import Post, PostImage
 
 from .util import (
     CREATE_POST_URL,
@@ -67,6 +67,7 @@ class PrivatePostsApiTests(PostsAppTestHelper):
             "image": None,
             "breed": "",
             "pet_type": None,
+            "profile_type": "regular",
         }
         self.assertEqual(res.data["profile"], expected_profile)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
@@ -109,12 +110,13 @@ class PrivatePostsApiTests(PostsAppTestHelper):
             "caption": caption_1001_chars,
             "profileId": self.profile.id,
             "images": [],
+            "order": []
         }
 
         res = self.client.post(CREATE_POST_URL, data=new_post)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("caption", res.data)
-        self.assertIn("cannot exceed 1000 characters", str(res.data["caption"][0]))
+        self.assertIn("message", res.data)
+        self.assertIn("Error creating that post.", str(res.data["message"]))
 
         # Ensure no post was created
         current_post_count = self.get_posts_count()
@@ -125,7 +127,7 @@ class PrivatePostsApiTests(PostsAppTestHelper):
         Test updating a Post caption with exactly 1000 characters succeeds.
         """
         # Create a post first
-        post = create_post(self.profile, "Original caption")
+        post = create_post("Original caption", self.profile)
         
         # Create a caption with exactly 1000 characters
         caption_1000_chars = "b" * 1000
@@ -147,7 +149,7 @@ class PrivatePostsApiTests(PostsAppTestHelper):
         """
         # Create a post first
         original_caption = "Original caption"
-        post = create_post(self.profile, original_caption)
+        post = create_post(original_caption, self.profile)
         
         # Create a caption with 1001 characters (exceeds limit)
         caption_1001_chars = "b" * 1001

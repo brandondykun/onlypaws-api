@@ -6,7 +6,8 @@ from rest_framework.test import APIClient
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from apps.core_app.models import Profile, Post, Like
+from apps.user_app.models import Profile
+from apps.posts_app.models import Post
 from apps.notifications_app.models import Notification, NotificationType
 
 User = get_user_model()
@@ -63,7 +64,7 @@ class NotificationAPITestCase(TestCase):
         notification = Notification.objects.create(
             recipient=self.profile1,
             sender=self.profile2,
-            notification_type=NotificationType.LIKE,
+            notification_type=NotificationType.LIKE_POST,
             title="Test notification",
             message="This is a test notification",
             post=self.post
@@ -71,7 +72,7 @@ class NotificationAPITestCase(TestCase):
         
         self.assertEqual(notification.recipient, self.profile1)
         self.assertEqual(notification.sender, self.profile2)
-        self.assertEqual(notification.notification_type, NotificationType.LIKE)
+        self.assertEqual(notification.notification_type, NotificationType.LIKE_POST)
         self.assertFalse(notification.is_read)
     
     def test_list_notifications(self):
@@ -80,7 +81,7 @@ class NotificationAPITestCase(TestCase):
         Notification.objects.create(
             recipient=self.profile1,
             sender=self.profile2,
-            notification_type=NotificationType.LIKE,
+            notification_type=NotificationType.LIKE_POST,
             title="Test notification",
             message="This is a test notification",
             post=self.post
@@ -100,7 +101,7 @@ class NotificationAPITestCase(TestCase):
         Notification.objects.create(
             recipient=self.profile1,
             sender=self.profile2,
-            notification_type=NotificationType.LIKE,
+            notification_type=NotificationType.LIKE_POST,
             title="Read notification",
             message="This notification is read",
             post=self.post,
@@ -109,7 +110,7 @@ class NotificationAPITestCase(TestCase):
         Notification.objects.create(
             recipient=self.profile1,
             sender=self.profile2,
-            notification_type=NotificationType.LIKE,
+            notification_type=NotificationType.LIKE_POST,
             title="Unread notification",
             message="This notification is unread",
             post=self.post,
@@ -129,7 +130,7 @@ class NotificationAPITestCase(TestCase):
         notification = Notification.objects.create(
             recipient=self.profile1,
             sender=self.profile2,
-            notification_type=NotificationType.LIKE,
+            notification_type=NotificationType.LIKE_POST,
             title="Test notification",
             message="This is a test notification",
             post=self.post,
@@ -150,7 +151,7 @@ class NotificationAPITestCase(TestCase):
         Notification.objects.create(
             recipient=self.profile1,
             sender=self.profile2,
-            notification_type=NotificationType.LIKE,
+            notification_type=NotificationType.LIKE_POST,
             title="Read notification",
             message="This notification is read",
             post=self.post,
@@ -159,7 +160,7 @@ class NotificationAPITestCase(TestCase):
         Notification.objects.create(
             recipient=self.profile1,
             sender=self.profile2,
-            notification_type=NotificationType.LIKE,
+            notification_type=NotificationType.LIKE_POST,
             title="Unread notification",
             message="This notification is unread",
             post=self.post,
@@ -180,7 +181,7 @@ class NotificationAPITestCase(TestCase):
         Notification.objects.create(
             recipient=self.profile1,
             sender=self.profile2,
-            notification_type=NotificationType.LIKE,
+            notification_type=NotificationType.LIKE_POST,
             title="Unread notification 1",
             message="This notification is unread",
             post=self.post,
@@ -189,7 +190,7 @@ class NotificationAPITestCase(TestCase):
         Notification.objects.create(
             recipient=self.profile1,
             sender=self.profile2,
-            notification_type=NotificationType.LIKE,
+            notification_type=NotificationType.LIKE_POST,
             title="Unread notification 2",
             message="This notification is unread",
             post=self.post,

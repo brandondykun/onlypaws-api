@@ -1,6 +1,6 @@
 [
   {
-    "model": "core_app.comment",
+    "model": "interactions_app.comment",
     "pk": 1,
     "fields": {
       "text": "Always keep one eye open.",
@@ -12,7 +12,7 @@
     }
   },
   {
-    "model": "core_app.comment",
+    "model": "interactions_app.comment",
     "pk": 2,
     "fields": {
       "text": "Those ears tho",
@@ -24,7 +24,7 @@
     }
   },
   {
-    "model": "core_app.comment",
+    "model": "interactions_app.comment",
     "pk": 3,
     "fields": {
       "text": "Poopsicles",
@@ -36,7 +36,7 @@
     }
   },
   {
-    "model": "core_app.comment",
+    "model": "interactions_app.comment",
     "pk": 4,
     "fields": {
       "text": "Always",
@@ -48,7 +48,7 @@
     }
   },
   {
-    "model": "core_app.comment",
+    "model": "interactions_app.comment",
     "pk": 5,
     "fields": {
       "text": "Ivy is the best!",
@@ -60,7 +60,7 @@
     }
   },
   {
-    "model": "core_app.comment",
+    "model": "interactions_app.comment",
     "pk": 6,
     "fields": {
       "text": "What a good boy!",
@@ -72,7 +72,7 @@
     }
   },
   {
-    "model": "core_app.comment",
+    "model": "interactions_app.comment",
     "pk": 7,
     "fields": {
       "text": "What a sleepy guy",
@@ -84,7 +84,7 @@
     }
   },
   {
-    "model": "core_app.comment",
+    "model": "interactions_app.comment",
     "pk": 8,
     "fields": {
       "text": "Does he always sleep like that?",
@@ -96,7 +96,7 @@
     }
   },
   {
-    "model": "core_app.comment",
+    "model": "interactions_app.comment",
     "pk": 9,
     "fields": {
       "text": "Looks so comfy!",
@@ -108,7 +108,7 @@
     }
   },
   {
-    "model": "core_app.comment",
+    "model": "interactions_app.comment",
     "pk": 10,
     "fields": {
       "text": "He loves smelling those bushes!",
@@ -120,7 +120,7 @@
     }
   },
   {
-    "model": "core_app.comment",
+    "model": "interactions_app.comment",
     "pk": 11,
     "fields": {
       "text": "Love the bandana! Where did you get it?",
@@ -129,6 +129,42 @@
       "created_at": "2025-01-02T00:45:27.969Z",
       "parent_comment": null,
       "reply_to_comment": null
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 12,
+    "fields": {
+      "text": "I thought that same thing",
+      "profile": 3,
+      "post": 1,
+      "created_at": "2025-11-02T20:23:29.620Z",
+      "parent_comment": 1,
+      "reply_to_comment": 1
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 13,
+    "fields": {
+      "text": "Does your dog do that?",
+      "profile": 1,
+      "post": 1,
+      "created_at": "2025-11-03T01:12:30.529Z",
+      "parent_comment": 1,
+      "reply_to_comment": 12
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 14,
+    "fields": {
+      "text": "All the time",
+      "profile": 3,
+      "post": 1,
+      "created_at": "2025-11-03T01:13:58.650Z",
+      "parent_comment": 1,
+      "reply_to_comment": 13
     }
   }
 ]

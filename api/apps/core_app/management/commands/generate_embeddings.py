@@ -3,7 +3,7 @@ Management command to generate embeddings for existing PostImage instances.
 """
 
 from django.core.management.base import BaseCommand
-from apps.core_app.models import PostImage
+from apps.posts_app.models import PostImage
 from apps.core_app.services import get_embedding_service
 from apps.core_app.tasks import batch_generate_embeddings_task
 

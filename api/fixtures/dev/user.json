@@ -1,6 +1,6 @@
 [
   {
-    "model": "core_app.user",
+    "model": "user_app.user",
     "pk": 2,
     "fields": {
       "password": "pbkdf2_sha256$870000$eEaxsx92IYZsvmbUqcbsYF$jRM6Oj3NaeOFM8wcLBnqWRqXFPMtyls9XBGdPey2NNU=",
@@ -15,7 +15,7 @@
     }
   },
   {
-    "model": "core_app.user",
+    "model": "user_app.user",
     "pk": 3,
     "fields": {
       "password": "pbkdf2_sha256$870000$uXaOSRL6102AfC4nLVGCv3$eA8bpdsxFJQjDtfDaj8wcP1rJZKQnO2KHUi12PiFFwA=",
@@ -30,7 +30,7 @@
     }
   },
   {
-    "model": "core_app.user",
+    "model": "user_app.user",
     "pk": 4,
     "fields": {
       "password": "pbkdf2_sha256$870000$F7m7AjK2RHw3kvMxL61i2S$3hGGB6rN48s9rftVsJZaCThamcoWPC59fH8CwxgktXY=",
@@ -45,7 +45,7 @@
     }
   },
   {
-    "model": "core_app.user",
+    "model": "user_app.user",
     "pk": 5,
     "fields": {
       "password": "pbkdf2_sha256$870000$bomLfOrihCdcwtN7NMYV6q$RbAp81s56YtFmJTyj2Q7TzFfr/LfdK89Fdai4NkEyuE=",
@@ -60,7 +60,7 @@
     }
   },
   {
-    "model": "core_app.user",
+    "model": "user_app.user",
     "pk": 6,
     "fields": {
       "password": "pbkdf2_sha256$870000$KwPDLK48H7FzdjCaufzLhP$nfD8CJHvOJSeS/VQ9efwdPPqRYH6zKqhueNlyCvCd5M=",
@@ -75,7 +75,7 @@
     }
   },
   {
-    "model": "core_app.user",
+    "model": "user_app.user",
     "pk": 22,
     "fields": {
       "password": "pbkdf2_sha256$870000$mSfQZhwPn3fgCRyrmcCCtT$0jPkLFBBF1FMQxNMYAb18nrk95rEIMFVkc7vSQE8Kq4=",
@@ -90,7 +90,7 @@
     }
   },
   {
-    "model": "core_app.user",
+    "model": "user_app.user",
     "pk": 7,
     "fields": {
       "password": "pbkdf2_sha256$870000$heQHZBaoAvFyKIdAcjYxaV$V0d/AJb57oaY7RhBSUerz7lRXGyH4ICVhRZPkNii8gE=",
@@ -105,7 +105,7 @@
     }
   },
   {
-    "model": "core_app.user",
+    "model": "user_app.user",
     "pk": 23,
     "fields": {
       "password": "pbkdf2_sha256$870000$J4Kn4J6V5WB8XKTtRKvDtX$qS9+6ULvGkzupkgJPWOxTgSweyFN0Wb0/OOlvf2W68o=",
@@ -120,7 +120,7 @@
     }
   },
   {
-    "model": "core_app.user",
+    "model": "user_app.user",
     "pk": 24,
     "fields": {
       "password": "pbkdf2_sha256$870000$MgekdX8qYqpOEOspqdkt2h$RthmJp0XZH3mdxTd8lbvieIZyDdNXh1QwWHNDruQMTY=",
@@ -135,7 +135,7 @@
     }
   },
   {
-    "model": "core_app.user",
+    "model": "user_app.user",
     "pk": 25,
     "fields": {
       "password": "pbkdf2_sha256$870000$sQwREnpA67FqbZnA6qo41G$/KGLDL/9aoU/5/UvANw5Hbd9l8dnk3LVFbTMd/u8V68=",
@@ -150,22 +150,7 @@
     }
   },
   {
-    "model": "core_app.user",
-    "pk": 1,
-    "fields": {
-      "password": "pbkdf2_sha256$870000$FKLulwCIAAuhw42xQ0KvZX$eJgylKLMJm7Zdq671gYZc0vFmXdZAHqWowYuWT3EQOI=",
-      "last_login": "2025-10-17T00:01:59.788Z",
-      "is_superuser": true,
-      "email": "admin@email.com",
-      "is_active": true,
-      "is_staff": true,
-      "is_email_verified": true,
-      "groups": [],
-      "user_permissions": []
-    }
-  },
-  {
-    "model": "core_app.user",
+    "model": "user_app.user",
     "pk": 10,
     "fields": {
       "password": "pbkdf2_sha256$870000$b92Zom0zvCD6DC65NviuPZ$CbbhqpuS7mOoaBAeNJnJ2QGdh2bEmvlvP79D3fKgjbY=",
@@ -180,7 +165,7 @@
     }
   },
   {
-    "model": "core_app.user",
+    "model": "user_app.user",
     "pk": 11,
     "fields": {
       "password": "pbkdf2_sha256$870000$VKwTkhU142qr3vhHyMi93v$fOItRMrlWectg4wTWelFKO8O3WgHjvr/9nXNxRlYXtw=",
@@ -195,7 +180,7 @@
     }
   },
   {
-    "model": "core_app.user",
+    "model": "user_app.user",
     "pk": 12,
     "fields": {
       "password": "pbkdf2_sha256$870000$oWcBIhivRldleVqu6r09ho$xajyPtbCvfTQmtjZtQTTIx6Y9wg13UbAQYt4JfEWsqc=",
@@ -210,7 +195,7 @@
     }
   },
   {
-    "model": "core_app.user",
+    "model": "user_app.user",
     "pk": 13,
     "fields": {
       "password": "pbkdf2_sha256$870000$jooJuAi5y3B0HskNh8Bd4w$hxnaYuZ7eGrzVJimkjrXq/I3XFjmFwm+DP1eFXrmsPc=",
@@ -225,7 +210,7 @@
     }
   },
   {
-    "model": "core_app.user",
+    "model": "user_app.user",
     "pk": 14,
     "fields": {
       "password": "pbkdf2_sha256$870000$Cmp7b8mAhCzG5dyjMAbRUT$k3cXhnNHnHT5Hurw54zRpd3/j+SQvNPCAavIr0Ib+1g=",
@@ -240,7 +225,7 @@
     }
   },
   {
-    "model": "core_app.user",
+    "model": "user_app.user",
     "pk": 15,
     "fields": {
       "password": "pbkdf2_sha256$870000$WszP6p4ralpFDQYxmUjvjN$Plvte5GnpiIsDSlGxKKNuYKPm0wQQ4mEv+FvObsAyaY=",
@@ -255,7 +240,7 @@
     }
   },
   {
-    "model": "core_app.user",
+    "model": "user_app.user",
     "pk": 16,
     "fields": {
       "password": "pbkdf2_sha256$870000$RwbTazPovaqMdqHCjdB5u0$nsXRIHiwgOQbf0UZZnSsF+PQxoJzLpQ3wusswtBYO2A=",
@@ -270,7 +255,7 @@
     }
   },
   {
-    "model": "core_app.user",
+    "model": "user_app.user",
     "pk": 17,
     "fields": {
       "password": "pbkdf2_sha256$870000$SuYV6gGunBzWyBJSKLBDM9$47njFSbtAJ6ulXko/gr7z+gHym37mNmAaxGQtTbaiOE=",
@@ -285,7 +270,7 @@
     }
   },
   {
-    "model": "core_app.user",
+    "model": "user_app.user",
     "pk": 18,
     "fields": {
       "password": "pbkdf2_sha256$870000$6ihBs83XVuC4If2dToZK5X$43sOGHHswRa4V7hmpZMD9bloayyjst59iRa0KUUHLls=",
@@ -300,7 +285,7 @@
     }
   },
   {
-    "model": "core_app.user",
+    "model": "user_app.user",
     "pk": 19,
     "fields": {
       "password": "pbkdf2_sha256$870000$iVt94OUXLUfPnx5fGCTGIp$YdqEBHhx0UHKR8OcFn4tHOQxcFcLwOA7dFN28poi0Gg=",
@@ -315,7 +300,7 @@
     }
   },
   {
-    "model": "core_app.user",
+    "model": "user_app.user",
     "pk": 20,
     "fields": {
       "password": "pbkdf2_sha256$870000$khrEfLLiZ1DVND7ivk7CdW$IoxbRh2H6kMMQUP0KScnVr0wFGDjImBvx/SVVB/qDSQ=",
@@ -330,7 +315,7 @@
     }
   },
   {
-    "model": "core_app.user",
+    "model": "user_app.user",
     "pk": 21,
     "fields": {
       "password": "pbkdf2_sha256$870000$BnV9iyJcs5VK1eob0BVWRI$mtHXOn8ffw23v+4Tkx+SOQ0suYubLOiylx7Fo7dIJhM=",
@@ -339,6 +324,21 @@
       "email": "usereighteen@email.com",
       "is_active": true,
       "is_staff": false,
+      "is_email_verified": true,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "user_app.user",
+    "pk": 1,
+    "fields": {
+      "password": "pbkdf2_sha256$870000$FKLulwCIAAuhw42xQ0KvZX$eJgylKLMJm7Zdq671gYZc0vFmXdZAHqWowYuWT3EQOI=",
+      "last_login": "2025-10-28T23:55:21.420Z",
+      "is_superuser": true,
+      "email": "admin@email.com",
+      "is_active": true,
+      "is_staff": true,
       "is_email_verified": true,
       "groups": [],
       "user_permissions": []

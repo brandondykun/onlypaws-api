@@ -11,7 +11,7 @@ from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 from rest_framework import status
 
-from apps.core_app.models import ResetPasswordToken
+from apps.user_app.models import ResetPasswordToken
 
 REQUEST_RESET_URL = reverse("user_app:request_password_reset")
 RESET_PASSWORD_URL = reverse("user_app:reset_password")

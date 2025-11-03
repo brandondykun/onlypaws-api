@@ -1,22 +1,11 @@
 from rest_framework import serializers
-from apps.core_app.models import (
-    Post,
-    PostImage,
-    Like,
-    Comment,
-    Profile,
-    Follow,
-    CommentLike,
-    SavedPost,
-    ReportReason,
-    PostReport,
-)
+from apps.user_app.models import Profile
+from apps.posts_app.models import Post, PostImage, SavedPost
+from apps.interactions_app.models import Like, Comment, Follow, CommentLike
+from apps.moderation_app.models import ReportReason, PostReport
 from django.db.models import Q
-from ..user_app.serializers import (
-    ProfileSerializer,
-    ProfileImageSerializer,
-    PetTypeSerializer,
-)
+from ..user_app.serializers import ProfileSerializer, ProfileImageSerializer
+from drf_spectacular.utils import extend_schema_field
 
 
 class PostImageSerializer(serializers.ModelSerializer):
@@ -24,7 +13,7 @@ class PostImageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PostImage
-        fields = ["id", "post", "image"]
+        fields = ["id", "post", "image", "order"]
 
 
 class LikeSerializer(serializers.ModelSerializer):
@@ -116,6 +105,7 @@ class CommentDetailedSerializer(serializers.ModelSerializer):
         replies_count = obj.all_replies.count()
         return replies_count
 
+    @extend_schema_field(serializers.ListField(child=serializers.DictField()))
     def get_replies(self, obj):
         return []
 
@@ -291,6 +281,7 @@ class CommentChainSerializer(serializers.ModelSerializer):
         
         return self._chain_cache
 
+    @extend_schema_field(serializers.DictField())
     def get_post(self, obj):
         """
         Returns the full post object that this comment belongs to.
@@ -300,6 +291,7 @@ class CommentChainSerializer(serializers.ModelSerializer):
         # PostDetailedSerializer is defined later in this same file
         return PostDetailedSerializer(post, context=self.context).data
 
+    @extend_schema_field(serializers.DictField())
     def get_target_comment(self, obj):
         """
         Returns the target comment (the comment that was requested).
@@ -331,6 +323,7 @@ class CommentChainSerializer(serializers.ModelSerializer):
             "liked": liked,
         }
 
+    @extend_schema_field(serializers.DictField(allow_null=True))
     def get_root_parent_comment(self, obj):
         """
         Returns the top-level (root) parent comment.
@@ -339,6 +332,7 @@ class CommentChainSerializer(serializers.ModelSerializer):
         cache = self._build_full_chain(obj)
         return cache['root']
     
+    @extend_schema_field(serializers.ListField(child=serializers.DictField()))
     def get_parent_chain(self, obj):
         """
         Returns up to the last 10 messages in the parent chain, EXCLUDING the root.
@@ -496,10 +490,10 @@ class PostDetailedSerializer(serializers.ModelSerializer):
             "is_reported",
         ]
 
+    @extend_schema_field(serializers.ListField(child=serializers.DictField()))
     def get_images(self, obj):
-        """Return post images ordered by ID."""
-        ordered_images = obj.images.all().order_by("id")
-        return PostImageSerializer(ordered_images, many=True, context=self.context).data
+        """Return post images (uses model's default ordering: order, then id)."""
+        return PostImageSerializer(obj.images.all(), many=True, context=self.context).data
 
     def get_comments_count(self, obj) -> int:
         return obj.comments.count()
@@ -521,6 +515,7 @@ class PostDetailedSerializer(serializers.ModelSerializer):
             return obj.saved_by.filter(profile=requesting_profile).exists()
         return False
 
+    @extend_schema_field(serializers.ListField(child=serializers.DictField()))
     def get_reports(self, obj):
         reports = obj.reports.filter(~Q(status="DISMISSED"))
         serializer = PostReportPreviewSerializer(reports, many=True)
@@ -532,59 +527,6 @@ class PostDetailedSerializer(serializers.ModelSerializer):
     def get_is_reported(self, obj) -> bool:
         current_profile = self.context["request"].current_profile
         return obj.reports.filter(reporter=current_profile).exists()
-
-
-class ProfileDetailsSerializer(serializers.ModelSerializer):
-    """Detailed serializer for Profile."""
-
-    image = ProfileImageSerializer()
-    is_following = serializers.SerializerMethodField()
-    posts_count = serializers.SerializerMethodField()
-    followers_count = serializers.SerializerMethodField()
-    following_count = serializers.SerializerMethodField()
-    pet_type = PetTypeSerializer()
-
-    class Meta:
-        model = Profile
-        fields = [
-            "id",
-            "username",
-            "name",
-            "about",
-            "image",
-            "is_following",
-            "posts_count",
-            "followers_count",
-            "following_count",
-            "breed",
-            "pet_type",
-        ]
-
-    def get_is_following(self, obj) -> bool:
-        # boolean - is requesting profile following the profile being fetched
-        requesting_profile = self.context["request"].query_params.get("profileId", None)
-
-        if requesting_profile:
-            return obj.following.filter(followed_by=requesting_profile).exists()
-        return False
-
-    def get_posts_count(self, obj) -> int:
-        requesting_profile = self.context["request"].query_params.get("profileId", None)
-        posts = obj.posts.all()
-
-        # if profile is fetching own posts, return all including reported inappropriate
-        if str(obj.id) == str(requesting_profile):
-            return posts.count()
-        # filter posts that have been reported as inappropriate from count
-        return posts.filter(~Q(reports__reason__id=1)).count()
-
-    def get_followers_count(self, obj) -> int:
-        followers = obj.following.all()
-        return followers.count()
-
-    def get_following_count(self, obj) -> int:
-        following = obj.followers.all()
-        return following.count()
 
 
 class SearchProfileSerializer(serializers.ModelSerializer):

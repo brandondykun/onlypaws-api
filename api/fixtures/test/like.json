@@ -1,6 +1,6 @@
 [
   {
-    "model": "core_app.like",
+    "model": "interactions_app.like",
     "pk": 2,
     "fields": {
       "profile": 1,
@@ -9,7 +9,7 @@
     }
   },
   {
-    "model": "core_app.like",
+    "model": "interactions_app.like",
     "pk": 3,
     "fields": {
       "profile": 5,
@@ -18,7 +18,7 @@
     }
   },
   {
-    "model": "core_app.like",
+    "model": "interactions_app.like",
     "pk": 4,
     "fields": {
       "profile": 5,
@@ -27,7 +27,7 @@
     }
   },
   {
-    "model": "core_app.like",
+    "model": "interactions_app.like",
     "pk": 5,
     "fields": {
       "profile": 5,
@@ -36,7 +36,7 @@
     }
   },
   {
-    "model": "core_app.like",
+    "model": "interactions_app.like",
     "pk": 6,
     "fields": {
       "profile": 7,
@@ -45,7 +45,7 @@
     }
   },
   {
-    "model": "core_app.like",
+    "model": "interactions_app.like",
     "pk": 7,
     "fields": {
       "profile": 7,
@@ -54,7 +54,7 @@
     }
   },
   {
-    "model": "core_app.like",
+    "model": "interactions_app.like",
     "pk": 8,
     "fields": {
       "profile": 7,
@@ -63,7 +63,7 @@
     }
   },
   {
-    "model": "core_app.like",
+    "model": "interactions_app.like",
     "pk": 9,
     "fields": {
       "profile": 7,
@@ -72,7 +72,7 @@
     }
   },
   {
-    "model": "core_app.like",
+    "model": "interactions_app.like",
     "pk": 10,
     "fields": {
       "profile": 1,
@@ -81,7 +81,7 @@
     }
   },
   {
-    "model": "core_app.like",
+    "model": "interactions_app.like",
     "pk": 11,
     "fields": {
       "profile": 1,
@@ -90,7 +90,7 @@
     }
   },
   {
-    "model": "core_app.like",
+    "model": "interactions_app.like",
     "pk": 13,
     "fields": {
       "profile": 9,
@@ -99,7 +99,7 @@
     }
   },
   {
-    "model": "core_app.like",
+    "model": "interactions_app.like",
     "pk": 15,
     "fields": {
       "profile": 1,
@@ -108,7 +108,7 @@
     }
   },
   {
-    "model": "core_app.like",
+    "model": "interactions_app.like",
     "pk": 16,
     "fields": {
       "profile": 1,
@@ -117,7 +117,7 @@
     }
   },
   {
-    "model": "core_app.like",
+    "model": "interactions_app.like",
     "pk": 20,
     "fields": {
       "profile": 1,
@@ -126,7 +126,7 @@
     }
   },
   {
-    "model": "core_app.like",
+    "model": "interactions_app.like",
     "pk": 21,
     "fields": {
       "profile": 1,
@@ -135,7 +135,7 @@
     }
   },
   {
-    "model": "core_app.like",
+    "model": "interactions_app.like",
     "pk": 42,
     "fields": {
       "profile": 2,
@@ -144,7 +144,7 @@
     }
   },
   {
-    "model": "core_app.like",
+    "model": "interactions_app.like",
     "pk": 43,
     "fields": {
       "profile": 2,
@@ -153,7 +153,7 @@
     }
   },
   {
-    "model": "core_app.like",
+    "model": "interactions_app.like",
     "pk": 45,
     "fields": {
       "profile": 2,
@@ -162,7 +162,7 @@
     }
   },
   {
-    "model": "core_app.like",
+    "model": "interactions_app.like",
     "pk": 46,
     "fields": {
       "profile": 2,
@@ -171,7 +171,7 @@
     }
   },
   {
-    "model": "core_app.like",
+    "model": "interactions_app.like",
     "pk": 47,
     "fields": {
       "profile": 2,
@@ -180,7 +180,7 @@
     }
   },
   {
-    "model": "core_app.like",
+    "model": "interactions_app.like",
     "pk": 50,
     "fields": {
       "profile": 2,
@@ -189,7 +189,7 @@
     }
   },
   {
-    "model": "core_app.like",
+    "model": "interactions_app.like",
     "pk": 62,
     "fields": {
       "profile": 1,
@@ -198,7 +198,7 @@
     }
   },
   {
-    "model": "core_app.like",
+    "model": "interactions_app.like",
     "pk": 67,
     "fields": {
       "profile": 1,
@@ -207,7 +207,7 @@
     }
   },
   {
-    "model": "core_app.like",
+    "model": "interactions_app.like",
     "pk": 70,
     "fields": {
       "profile": 1,

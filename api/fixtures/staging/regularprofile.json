@@ -1,0 +1,62 @@
+[
+  {
+    "model": "user_app.regularprofile",
+    "pk": 1,
+    "fields": {
+      "about_new": "I am the admin dog.",
+      "name_new": "Linus",
+      "pet_type_new": 1,
+      "breed_new": "Cavalier King Charles Spaniel"
+    }
+  },
+  {
+    "model": "user_app.regularprofile",
+    "pk": 2,
+    "fields": {
+      "about_new": "I pull like a freight train on a leash. But I can smell a rabbit from half a mile.",
+      "name_new": "Ivy",
+      "pet_type_new": 1,
+      "breed_new": "Treeing Walker Coon hound"
+    }
+  },
+  {
+    "model": "user_app.regularprofile",
+    "pk": 3,
+    "fields": {
+      "about_new": "I’m Linus’s cousin!",
+      "name_new": "Chewy",
+      "pet_type_new": 1,
+      "breed_new": "Cavi poo"
+    }
+  },
+  {
+    "model": "user_app.regularprofile",
+    "pk": 4,
+    "fields": {
+      "about_new": "People think my breed is mean but I don’t have a mean bone in my body!",
+      "name_new": "Jemma",
+      "pet_type_new": 1,
+      "breed_new": "Pitbull"
+    }
+  },
+  {
+    "model": "user_app.regularprofile",
+    "pk": 5,
+    "fields": {
+      "about_new": "The best AI pet account.\n\nUsing generative AI to create lifelike portrayals of pets of all kinds.",
+      "name_new": "The AI Pet King",
+      "pet_type_new": 1,
+      "breed_new": ""
+    }
+  },
+  {
+    "model": "user_app.regularprofile",
+    "pk": 6,
+    "fields": {
+      "about_new": "All the best of AI cats. \n\nIf you want to see your favorite cat breed as AI, let me know. I take requests.\n\nNote: none of the pictures are real. They’re all created using AI.\n\n🐈🐈‍⬛❤️",
+      "name_new": "The AI Cat",
+      "pet_type_new": 2,
+      "breed_new": "Artificial Intelligence"
+    }
+  }
+]

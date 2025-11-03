@@ -4,25 +4,16 @@ Views for the posts api.
 
 from rest_framework import generics, permissions, mixins, status, viewsets
 from rest_framework.decorators import action
-from apps.core_app.models import (
-    Post,
-    PostImage,
-    Profile,
-    Like,
-    Comment,
-    Follow,
-    CommentLike,
-    SavedPost,
-    ReportReason,
-    PostReport,
-)
+from apps.user_app.models import Profile
+from apps.posts_app.models import Post, PostImage, SavedPost
+from apps.interactions_app.models import Like, Comment, Follow, CommentLike
+from apps.moderation_app.models import ReportReason, PostReport
 from .serializers import (
     PostSerializer,
     PostUpdateSerializer,
     PostImageSerializer,
     LikeSerializer,
     CommentSerializer,
-    ProfileDetailsSerializer,
     PostDetailedSerializer,
     CommentDetailedSerializer,
     CommentChainSerializer,
@@ -34,7 +25,7 @@ from .serializers import (
     CreatePostReportSerializer,
     ReportReasonSerializer,
 )
-from ..user_app.serializers import ProfileSerializer
+from ..user_app.serializers import ProfileSerializer, ProfileDetailedSerializer
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import get_object_or_404
@@ -92,11 +83,20 @@ class CreatePostView(generics.CreateAPIView):
         caption = request.data.get("caption", None)
         contains_ai = request.data.get("aiGenerated", False)
         images = request.FILES.getlist("images")
+        orders = request.POST.getlist("order")
 
         # ensure that the profile sent belongs to the current authenticated user
         current_profile = request.current_profile
         if str(profile_id) != str(current_profile.id) or not caption:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        # Validate that images and orders match in length
+        if len(images) != len(orders):
+            logger.error("Number of images and order values must match.")
+            return Response(
+                {"error": "Number of images and order values must match."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         try:
             with transaction.atomic():
@@ -112,8 +112,13 @@ class CreatePostView(generics.CreateAPIView):
 
                 new_post = Post.objects.get(id=serializer.data["id"])
 
-                for image in images:
-                    PostImage.objects.create(image=image, post=new_post)
+                # Create PostImage objects with order
+                for image, order in zip(images, orders):
+                    PostImage.objects.create(
+                        image=image,
+                        post=new_post,
+                        order=int(order)
+                    )
                 new_post = Post.objects.get(id=serializer.data["id"])
                 serializer = PostDetailedSerializer(
                     new_post, context={"request": request}
@@ -125,7 +130,8 @@ class CreatePostView(generics.CreateAPIView):
         except Exception as e:
             # If an exception occurs, the transaction will be rolled back
             # and the main object will be deleted.
-            Response(
+            logger.error(f"Error creating post: {str(e)}")
+            return Response(
                 {"message": "Error creating that post."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
@@ -217,7 +223,7 @@ class ListProfilePostsView(generics.ListAPIView):
 class RetrieveProfileView(generics.RetrieveAPIView):
     """Get details of a Profile."""
 
-    serializer_class = ProfileDetailsSerializer
+    serializer_class = ProfileDetailedSerializer
     permission_classes = [permissions.IsAuthenticated]
     queryset = Profile.objects.all()
 
@@ -613,7 +619,7 @@ class ListSimilarPostsView(generics.ListAPIView):
             ):
                 # Fallback to basic filtering if no embedding available
                 return Post.objects.filter(
-                    ~Q(profile=profile_id)
+                    ~Q(profile__user=self.request.user)
                     & Q(id__gt=post_id)
                     & ~Q(reports__reason__id=1)
                 ).order_by("-created_at")[:20]
@@ -627,8 +633,8 @@ class ListSimilarPostsView(generics.ListAPIView):
             similar_posts_ids = []
             seen_post_ids = set()
             for img in similar_images:
-                # Does the post belong to the profile requesting the similar posts?
-                is_own_post = profile_id and img.post.profile.id == int(profile_id)
+                # Does the post belong to any profile of the requesting user?
+                is_own_post = img.post.profile.user == self.request.user
                 # Is the post the original post passed in kwargs?
                 is_original_post = img.post.id == post_id
 
@@ -955,7 +961,18 @@ class ReportReasonViewSet(viewsets.ReadOnlyModelViewSet):
 
 @extend_schema_view(
     list=extend_schema(parameters=[auth_profile_param]),
-    retrieve=extend_schema(parameters=[auth_profile_param]),
+    retrieve=extend_schema(
+        parameters=[
+            auth_profile_param,
+            OpenApiParameter(
+                name="id",
+                description="Report ID",
+                required=True,
+                type=int,
+                location=OpenApiParameter.PATH,
+            ),
+        ]
+    ),
     create=extend_schema(parameters=[auth_profile_param]),
 )
 class PostReportViewSet(
@@ -972,6 +989,8 @@ class PostReportViewSet(
 
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = ReportPostsPagination
+    # Provide base queryset for schema introspection
+    queryset = PostReport.objects.all()
 
     def get_queryset(self):
         requesting_profile = self.request.current_profile

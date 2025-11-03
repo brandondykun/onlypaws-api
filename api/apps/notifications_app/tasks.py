@@ -5,7 +5,9 @@ from asgiref.sync import async_to_sync
 
 from .models import Notification, NotificationType
 from .serializers import WebSocketNotificationSerializer
-from apps.core_app.models import Profile, Post, Comment
+from apps.user_app.models import Profile
+from apps.posts_app.models import Post
+from apps.interactions_app.models import Comment
 
 logger = logging.getLogger(__name__)
 
