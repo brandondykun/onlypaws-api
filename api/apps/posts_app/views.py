@@ -414,7 +414,7 @@ class ListSearchedProfilesView(generics.ListAPIView):
 
     serializer_class = SearchProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
-    queryset = Profile.objects.all()
+    queryset = Profile.objects.select_related('regularprofile', 'businessprofile').all()
     pagination_class = SearchedProfilesPagination
 
     def get(self, request, *args, **kwargs):

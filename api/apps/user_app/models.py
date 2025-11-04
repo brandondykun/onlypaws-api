@@ -156,29 +156,6 @@ class Profile(models.Model):
     # Will change to auto_now_add in a later migration after data is populated
     created_at = models.DateTimeField(default=timezone.now, blank=True)
     updated_at = models.DateTimeField(default=timezone.now, blank=True)
-    
-    # TEMPORARY: Legacy fields for migration - will be removed after data migration
-    # These are being moved to specific profile types but kept here temporarily
-    about = models.CharField(
-        max_length=1000, blank=True, default="",
-        help_text="DEPRECATED: Will be moved to RegularProfile/BusinessProfile"
-    )
-    name = models.CharField(
-        max_length=64, default="", blank=True,
-        help_text="DEPRECATED: Will be moved to RegularProfile"
-    )
-    pet_type = models.ForeignKey(
-        PetType, 
-        on_delete=models.SET_NULL, 
-        null=True, 
-        related_name="legacy_profiles",  # Changed to avoid conflict with RegularProfile
-        blank=True,
-        help_text="DEPRECATED: Will be moved to RegularProfile"
-    )
-    breed = models.CharField(
-        max_length=64, default="", blank=True,
-        help_text="DEPRECATED: Will be moved to RegularProfile"
-    )
 
     def __str__(self):
         return self.username
@@ -220,7 +197,7 @@ class RegularProfile(Profile):
     """
     
     # Profile description
-    about_new = models.CharField(
+    about = models.CharField(
         max_length=1000,
         blank=True,
         default="",
@@ -228,13 +205,13 @@ class RegularProfile(Profile):
     )
     
     # Pet-specific fields
-    name_new = models.CharField(
+    name = models.CharField(
         max_length=64, 
         default="", 
         blank=True,
         help_text="Name of the pet"
     )
-    pet_type_new = models.ForeignKey(
+    pet_type = models.ForeignKey(
         PetType,
         on_delete=models.SET_NULL,
         null=True,
@@ -242,7 +219,7 @@ class RegularProfile(Profile):
         blank=True,
         help_text="Type of pet (dog, cat, etc.)"
     )
-    breed_new = models.CharField(
+    breed = models.CharField(
         max_length=64,
         default="",
         blank=True,
@@ -286,7 +263,7 @@ class BusinessProfile(Profile):
         ENTERPRISE = "ENTERPRISE", _("Enterprise")
     
     # Profile description (longer for businesses)
-    about_new = models.CharField(
+    about = models.CharField(
         max_length=2000, blank=True, default="", help_text="About this business profile"
     )
     # Business-specific fields

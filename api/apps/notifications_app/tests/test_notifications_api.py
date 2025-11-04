@@ -1,4 +1,3 @@
-import json
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth import get_user_model
@@ -6,7 +5,7 @@ from rest_framework.test import APIClient
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from apps.user_app.models import Profile
+from apps.user_app.models import RegularProfile
 from apps.posts_app.models import Post
 from apps.notifications_app.models import Notification, NotificationType
 
@@ -28,12 +27,12 @@ class NotificationAPITestCase(TestCase):
             password="testpass123"
         )
         
-        self.profile1 = Profile.objects.create(
+        self.profile1 = RegularProfile.objects.create(
             user=self.user1,
             username="user1",
             name="User One"
         )
-        self.profile2 = Profile.objects.create(
+        self.profile2 = RegularProfile.objects.create(
             user=self.user2,
             username="user2",
             name="User Two"

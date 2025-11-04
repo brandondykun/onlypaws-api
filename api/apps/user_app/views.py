@@ -33,6 +33,15 @@ from .serializers import (
     RequestEmailChangeSerializer,
     VerifyEmailChangeSerializer,
     ResetPasswordSerializer,
+    # New type-specific serializers
+    RegularProfileSerializer,
+    RegularProfileCreateSerializer,
+    RegularProfileUpdateSerializer,
+    RegularProfileDetailedSerializer,
+    BusinessProfileSerializer,
+    BusinessProfileCreateSerializer,
+    BusinessProfileUpdateSerializer,
+    BusinessProfileDetailedSerializer,
 )
 from rest_framework.response import Response
 import logging
@@ -251,7 +260,7 @@ class CreateProfileView(generics.CreateAPIView):
 class UpdateDestroyProfileView(generics.UpdateAPIView, generics.DestroyAPIView):
     """Retrieve, update or delete a Profile."""
 
-    queryset = Profile.objects.all()
+    queryset = Profile.objects.select_related('regularprofile', 'businessprofile').all()
     serializer_class = ProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
     allowed_methods = ["PATCH", "DELETE"]

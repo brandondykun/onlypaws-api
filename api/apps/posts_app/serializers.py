@@ -536,6 +536,8 @@ class SearchProfileSerializer(serializers.ModelSerializer):
 
     is_following = serializers.SerializerMethodField()
     image = ProfileImageSerializer()
+    name = serializers.SerializerMethodField()
+    about = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
@@ -544,6 +546,22 @@ class SearchProfileSerializer(serializers.ModelSerializer):
     def get_is_following(self, obj) -> bool:
         requesting_profile = self.context.get("profile_id")
         return obj.following.filter(followed_by=requesting_profile).exists()
+    
+    def get_name(self, obj):
+        """Get name from the specific profile type."""
+        if hasattr(obj, 'regularprofile'):
+            return obj.regularprofile.name
+        elif hasattr(obj, 'businessprofile'):
+            return obj.businessprofile.business_name
+        return ""
+    
+    def get_about(self, obj):
+        """Get about from the specific profile type."""
+        if hasattr(obj, 'regularprofile'):
+            return obj.regularprofile.about
+        elif hasattr(obj, 'businessprofile'):
+            return obj.businessprofile.about
+        return ""
 
 
 class CreateSavedPostSerializer(serializers.ModelSerializer):
