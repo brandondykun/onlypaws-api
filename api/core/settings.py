@@ -14,6 +14,8 @@ from pathlib import Path
 from datetime import timedelta
 import os
 from typing import Literal
+from celery.schedules import crontab
+from .utils import print_environment_banner
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -45,6 +47,28 @@ CORS_ALLOW_HEADERS = [
     "auth-profile-id",
 ]
 
+# CSRF Settings
+CSRF_TRUSTED_ORIGINS = [
+    "https://api-staging.onlypawsapp.com",
+    "https://api.onlypawsapp.com",
+    "https://onlypawsapp.com",
+]
+CSRF_ALLOWED_ORIGINS = [
+    "https://api-staging.onlypawsapp.com",
+    "https://api.onlypawsapp.com",
+    "https://onlypawsapp.com",
+]
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = "Lax"
+
+# Exempt API endpoints from CSRF
+CSRF_EXEMPT_PATHS = [
+    "/api/",
+    "/docs/",
+    "/schema/",
+]
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -56,9 +80,15 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "drf_spectacular",
+    "channels",
     "apps.core_app",
     "apps.user_app",
     "apps.posts_app",
+    "apps.interactions_app",
+    "apps.moderation_app",
+    "apps.feedback_app",
+    "apps.notifications_app",
+    "apps.config_app",
     "storages",
     "corsheaders",
 ]
@@ -68,7 +98,7 @@ MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
+    "apps.core_app.middleware.CustomCsrfMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -94,6 +124,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "core.wsgi.application"
+ASGI_APPLICATION = "core.asgi.application"
 
 
 # Database
@@ -152,7 +183,7 @@ STATICFILES_DIRS = []
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-AUTH_USER_MODEL = "core_app.User"
+AUTH_USER_MODEL = "user_app.User"
 
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
@@ -203,10 +234,15 @@ LOGGING = {
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "Only Paws API",
-    "DESCRIPTION": "The place for paw pics.",
+    "DESCRIPTION": "The unapologetically pet friendly social media app.",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
-    # OTHER SETTINGS
+    "COMPONENT_SPLIT_REQUEST": True,
+    "ENUM_NAME_OVERRIDES": {
+        "PostReportStatusEnum": "apps.moderation_app.models.PostReport.ReportStatus",
+        "FeedbackStatusEnum": "apps.feedback_app.models.Feedback.FeedbackStatus",
+    },
+    'SCHEMA_PATH_PREFIX': r'/api/v[0-9]',
 }
 
 
@@ -222,19 +258,74 @@ EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
 
+# Celery Configuration
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://redis:6379/0")
+CELERY_RESULT_BACKEND = os.environ.get(
+    "CELERY_RESULT_BACKEND", "redis://redis:6379/0"
+)
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "UTC"
+CELERY_ENABLE_UTC = True
+
+# Task routing and queue configuration
+CELERY_TASK_DEFAULT_QUEUE = "default"
+
+# Worker configuration
+CELERY_WORKER_PREFETCH_MULTIPLIER = (
+    1  # Only prefetch one task at a time for embedding workers
+)
+CELERY_TASK_ACKS_LATE = True  # Acknowledge tasks after completion
+CELERY_WORKER_MAX_TASKS_PER_CHILD = (
+    50  # Restart workers after 50 tasks to prevent memory leaks
+)
+
+# Task result settings
+CELERY_RESULT_EXPIRES = 3600  # Results expire after 1 hour
+CELERY_TASK_IGNORE_RESULT = False  # Keep task results for monitoring
+
+# Retry configuration
+CELERY_TASK_RETRY_DELAY = 60  # Wait 60 seconds before retrying
+CELERY_TASK_MAX_RETRIES = 3
+
+# Celery Beat configuration
+CELERY_BEAT_SCHEDULE_FILENAME = "/tmp/celerybeat-schedule"
+
+# Celery Beat scheduled tasks
+CELERY_BEAT_SCHEDULE = {
+    'cleanup-old-notifications': {
+        'task': 'apps.notifications_app.tasks.cleanup_old_notifications_task',
+        'schedule': crontab(hour=3, minute=0),  # Run daily at 3:00 AM UTC
+        'args': (30,),  # Delete notifications older than 30 days
+    },
+}
+
+# Django Channels configuration
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [os.environ.get("CELERY_BROKER_URL", "redis://redis:6379/0")],
+            "capacity": 1500,  # Maximum number of messages to store in a channel
+            "expiry": 60,  # Message expiry time in seconds
+        },
+    },
+}
+
 # Get the current environment
 environment: Literal["test", "dev", "staging", "prod"] = os.environ.get("DJANGO_ENV")
 
 # Load the correct settings file based on the environment
 if environment == "test":
     from core.settings_test import *
+    print_environment_banner(environment)
 elif environment == "dev":
     from core.settings_dev import *
+    print_environment_banner(environment)
 elif environment == "staging":
     from core.settings_staging import *
+    print_environment_banner(environment)
 elif environment == "prod":
     from core.settings_prod import *
-
-
-if environment == "dev" or environment == "test":
-    print("DJANGO_ENV: ", environment)
+    print_environment_banner(environment)

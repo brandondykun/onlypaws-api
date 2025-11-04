@@ -4,25 +4,19 @@ Views for the posts api.
 
 from rest_framework import generics, permissions, mixins, status, viewsets
 from rest_framework.decorators import action
-from apps.core_app.models import (
-    Post,
-    PostImage,
-    Profile,
-    Like,
-    Comment,
-    Follow,
-    CommentLike,
-    SavedPost,
-    ReportReason,
-    PostReport,
-)
+from apps.user_app.models import Profile
+from apps.posts_app.models import Post, PostImage, SavedPost
+from apps.interactions_app.models import Like, Comment, Follow, CommentLike
+from apps.moderation_app.models import ReportReason, PostReport
 from .serializers import (
     PostSerializer,
+    PostUpdateSerializer,
+    PostImageSerializer,
     LikeSerializer,
     CommentSerializer,
-    ProfileDetailsSerializer,
     PostDetailedSerializer,
     CommentDetailedSerializer,
+    CommentChainSerializer,
     SearchProfileSerializer,
     FollowSerializer,
     CommentLikeSerializer,
@@ -31,7 +25,7 @@ from .serializers import (
     CreatePostReportSerializer,
     ReportReasonSerializer,
 )
-from ..user_app.serializers import ProfileSerializer
+from ..user_app.serializers import ProfileSerializer, ProfileDetailedSerializer
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import get_object_or_404
@@ -53,6 +47,9 @@ from drf_spectacular.utils import (
     OpenApiParameter,
     OpenApiTypes,
 )
+import logging
+
+logger = logging.getLogger(__name__)
 
 # schema parameter for auth profile id header
 auth_profile_param = OpenApiParameter(
@@ -86,11 +83,20 @@ class CreatePostView(generics.CreateAPIView):
         caption = request.data.get("caption", None)
         contains_ai = request.data.get("aiGenerated", False)
         images = request.FILES.getlist("images")
+        orders = request.POST.getlist("order")
 
         # ensure that the profile sent belongs to the current authenticated user
         current_profile = request.current_profile
         if str(profile_id) != str(current_profile.id) or not caption:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        # Validate that images and orders match in length
+        if len(images) != len(orders):
+            logger.error("Number of images and order values must match.")
+            return Response(
+                {"error": "Number of images and order values must match."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         try:
             with transaction.atomic():
@@ -106,8 +112,13 @@ class CreatePostView(generics.CreateAPIView):
 
                 new_post = Post.objects.get(id=serializer.data["id"])
 
-                for image in images:
-                    PostImage.objects.create(image=image, post=new_post)
+                # Create PostImage objects with order
+                for image, order in zip(images, orders):
+                    PostImage.objects.create(
+                        image=image,
+                        post=new_post,
+                        order=int(order)
+                    )
                 new_post = Post.objects.get(id=serializer.data["id"])
                 serializer = PostDetailedSerializer(
                     new_post, context={"request": request}
@@ -119,7 +130,8 @@ class CreatePostView(generics.CreateAPIView):
         except Exception as e:
             # If an exception occurs, the transaction will be rolled back
             # and the main object will be deleted.
-            Response(
+            logger.error(f"Error creating post: {str(e)}")
+            return Response(
                 {"message": "Error creating that post."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
@@ -211,7 +223,7 @@ class ListProfilePostsView(generics.ListAPIView):
 class RetrieveProfileView(generics.RetrieveAPIView):
     """Get details of a Profile."""
 
-    serializer_class = ProfileDetailsSerializer
+    serializer_class = ProfileDetailedSerializer
     permission_classes = [permissions.IsAuthenticated]
     queryset = Profile.objects.all()
 
@@ -315,9 +327,11 @@ class ListPostCommentsView(generics.ListAPIView):
 
 @extend_schema_view(
     delete=extend_schema(parameters=[auth_profile_param]),
+    patch=extend_schema(parameters=[auth_profile_param]),
+    put=extend_schema(parameters=[auth_profile_param]),
 )
-class RetrieveDestroyPostView(generics.RetrieveDestroyAPIView):
-    """Get details of a Post."""
+class RetrieveUpdateDestroyPostView(generics.RetrieveUpdateDestroyAPIView):
+    """Get, update, or delete details of a Post."""
 
     serializer_class = PostDetailedSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -328,6 +342,48 @@ class RetrieveDestroyPostView(generics.RetrieveDestroyAPIView):
         post = self.queryset.get(id=post_id)
         serializer = self.serializer_class(post, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def update(self, request, *args, **kwargs):
+        current_profile = request.current_profile
+        instance = self.get_object()
+        
+        # check that the user requesting the update owns the post
+        if instance.profile.user != self.request.user:
+            return Response(
+                {"error": "Requesting user does not own this resource."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # check that the profile requesting the update owns the post
+        if instance.profile.id != int(current_profile.id):
+            return Response(
+                {"error": "Requesting profile does not own this resource."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Only allow updating the caption field
+        allowed_fields = {'caption'}
+        update_data = {k: v for k, v in request.data.items() if k in allowed_fields}
+        
+        if not update_data:
+            return Response(
+                {"error": "No valid fields provided for update. Only 'caption' can be updated."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Use PostUpdateSerializer for updates to ensure proper validation
+        serializer = PostUpdateSerializer(instance, data=update_data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        
+        # Save the updated instance
+        updated_instance = serializer.save()
+        
+        # Refresh from database to ensure we have the latest data
+        updated_instance.refresh_from_db()
+
+        # Return the updated post using PostDetailedSerializer
+        response_serializer = PostDetailedSerializer(updated_instance, context={"request": request})
+        return Response(response_serializer.data, status=status.HTTP_200_OK)
 
     def destroy(self, request, *args, **kwargs):
         # auth_profile_id = request.headers["auth-profile-id"]
@@ -358,7 +414,7 @@ class ListSearchedProfilesView(generics.ListAPIView):
 
     serializer_class = SearchProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
-    queryset = Profile.objects.all()
+    queryset = Profile.objects.select_related('regularprofile', 'businessprofile').all()
     pagination_class = SearchedProfilesPagination
 
     def get(self, request, *args, **kwargs):
@@ -536,7 +592,7 @@ class ListExplorePostsView(generics.ListAPIView):
     )
 )
 class ListSimilarPostsView(generics.ListAPIView):
-    """Get explore posts that are similar to the desired post."""
+    """Get posts that are visually similar to the desired post using image embeddings."""
 
     serializer_class = PostDetailedSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -546,12 +602,74 @@ class ListSimilarPostsView(generics.ListAPIView):
     def get_queryset(self):
         post_id = self.kwargs.get("pk")
         profile_id = self.request.GET.get("profileId")
-        posts = Post.objects.filter(
-            ~Q(profile=profile_id)
-            & Q(id__gt=post_id)
-            & ~Q(reports__reason__id=1)  # filter reported inappropriate content
-        ).order_by("-created_at")
-        return posts
+        min_similarity = float(self.request.GET.get("min_similarity", 0.3))
+
+        try:
+            # Get the post and its main image
+            post: Post = get_object_or_404(Post, id=post_id)
+            main_image: PostImage = post.images.first()
+
+            if (
+                not main_image
+                or main_image.embedding is None
+                or (
+                    hasattr(main_image.embedding, "__len__")
+                    and len(main_image.embedding) == 0
+                )
+            ):
+                # Fallback to basic filtering if no embedding available
+                return Post.objects.filter(
+                    ~Q(profile__user=self.request.user)
+                    & Q(id__gt=post_id)
+                    & ~Q(reports__reason__id=1)
+                ).order_by("-created_at")[:20]
+
+            # Find similar images
+            similar_images = main_image.find_similar_images(
+                limit=100, min_similarity=min_similarity
+            )
+
+            # Get posts for similar images, preserving similarity order and ensuring uniqueness
+            similar_posts_ids = []
+            seen_post_ids = set()
+            for img in similar_images:
+                # Does the post belong to any profile of the requesting user?
+                is_own_post = img.post.profile.user == self.request.user
+                # Is the post the original post passed in kwargs?
+                is_original_post = img.post.id == post_id
+
+                # Skip if it's the user's own post or the original post
+                if is_own_post or is_original_post:
+                    continue
+
+                # Only add if we haven't seen this post before
+                if img.post.id not in seen_post_ids:
+                    similar_posts_ids.append(img.post.id)
+                    seen_post_ids.add(img.post.id)
+
+            if not similar_posts_ids:
+                return Post.objects.none()
+
+            # Get posts and filter out reported content
+            posts_dict = (
+                Post.objects.filter(id__in=similar_posts_ids)
+                .exclude(reports__reason__id=1)  # filter reported inappropriate content
+                .exclude(id=post_id)
+                .in_bulk(field_name="id")
+            )
+
+            # Return posts in similarity order (preserving the order from similar_images)
+            ordered_posts = []
+            for post_id in similar_posts_ids:
+                if post_id in posts_dict:
+                    ordered_posts.append(posts_dict[post_id])
+
+            return ordered_posts
+
+        except Exception as e:
+            # Log error and return empty queryset
+            logger.error(f"Error in ListSimilarPostsView: {str(e)}")
+            return Post.objects.none()
 
 
 @extend_schema_view(
@@ -633,6 +751,105 @@ class ListCommentRepliesView(generics.ListAPIView):
             "created_at"
         )
         return replies
+
+
+@extend_schema_view(
+    get=extend_schema(parameters=[auth_profile_param]),
+)
+class CommentChainRetrieveView(generics.GenericAPIView):
+    """
+    Retrieve a comment with its entire parent comment chain.
+    
+    This view optimizes database queries by:
+    1. Fetching the target comment with select_related for profile and post
+    2. Collecting all parent comment IDs in a single traversal using only('parent_comment_id')
+    3. Fetching all parent comments in a single query with select_related('profile')
+    4. Including circular reference protection to handle data corruption
+    
+    The response includes the target comment and a parent_chain field containing
+    all ancestor comments ordered from root (oldest) to immediate parent.
+    
+    Endpoint: GET /api/comments/<pk>/chain/
+    """
+
+    serializer_class = CommentChainSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Comment.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        """
+        Handle GET request to retrieve comment with parent chain.
+        
+        Query optimization strategy:
+        - Query 1: Fetch target comment with profile and post
+        - Query 2: Collect parent IDs using only('reply_to_comment_id') - minimal data transfer
+        - Query 3: Bulk fetch all parents with select_related('profile')
+        
+        This results in exactly 3 queries regardless of chain depth.
+        """
+        comment_id = self.kwargs.get("pk")
+        
+        # Step 1: Fetch the target comment with related profile and post
+        # This is Query #1
+        comment = get_object_or_404(
+            Comment.objects.select_related("profile", "post"),
+            pk=comment_id
+        )
+        
+        # Step 2: Collect all parent comment IDs by traversing up the chain
+        # This is Query #2 - uses only() to minimize data transfer
+        # NOTE: We traverse via reply_to_comment (immediate parent), not parent_comment (top-level root)
+        parent_ids = []
+        current_id = comment.reply_to_comment_id
+        seen_ids = set([comment.id])  # Circular reference protection
+        max_depth = 100  # Safety limit to prevent infinite loops
+        depth = 0
+        
+        while current_id and depth < max_depth:
+            if current_id in seen_ids:
+                # Circular reference detected - log and break
+                logger.warning(
+                    f"Circular reference detected in comment chain at comment_id={current_id}"
+                )
+                break
+            
+            seen_ids.add(current_id)
+            parent_ids.append(current_id)
+            
+            # Fetch only the reply_to_comment_id field to minimize data transfer
+            parent = Comment.objects.filter(id=current_id).only("reply_to_comment_id").first()
+            
+            if not parent:
+                # Parent comment doesn't exist (data inconsistency)
+                logger.warning(
+                    f"Parent comment {current_id} not found - possible data inconsistency"
+                )
+                break
+            
+            current_id = parent.reply_to_comment_id
+            depth += 1
+        
+        # Step 3: Bulk fetch all parent comments in a single query
+        # This is Query #3 - fetches all parents with their profiles
+        if parent_ids:
+            parent_comments = Comment.objects.filter(
+                id__in=parent_ids
+            ).select_related("profile", "post")
+            
+            # Create a lookup dictionary for efficient access
+            parent_lookup = {p.id: p for p in parent_comments}
+            
+            # Attach parent comments to the target comment for serializer access
+            # This allows the serializer to access prefetched data efficiently
+            current = comment
+            for parent_id in parent_ids:
+                if parent_id in parent_lookup:
+                    current.parent_comment = parent_lookup[parent_id]
+                    current = current.parent_comment
+        
+        # Serialize and return the comment with its parent chain
+        serializer = self.get_serializer(comment)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @extend_schema_view(
@@ -744,7 +961,18 @@ class ReportReasonViewSet(viewsets.ReadOnlyModelViewSet):
 
 @extend_schema_view(
     list=extend_schema(parameters=[auth_profile_param]),
-    retrieve=extend_schema(parameters=[auth_profile_param]),
+    retrieve=extend_schema(
+        parameters=[
+            auth_profile_param,
+            OpenApiParameter(
+                name="id",
+                description="Report ID",
+                required=True,
+                type=int,
+                location=OpenApiParameter.PATH,
+            ),
+        ]
+    ),
     create=extend_schema(parameters=[auth_profile_param]),
 )
 class PostReportViewSet(
@@ -761,6 +989,8 @@ class PostReportViewSet(
 
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = ReportPostsPagination
+    # Provide base queryset for schema introspection
+    queryset = PostReport.objects.all()
 
     def get_queryset(self):
         requesting_profile = self.request.current_profile
@@ -843,3 +1073,45 @@ class PostReportViewSet(
         # If pagination is disabled, serialize and return all results
         serializer = PostReportDetailSerializer(queryset, many=True)
         return Response(serializer.data)
+
+
+@extend_schema_view(
+    delete=extend_schema(parameters=[auth_profile_param]),
+)
+class DestroyPostImageView(generics.DestroyAPIView):
+    """Delete a PostImage."""
+
+    serializer_class = PostImageSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = PostImage.objects.all()
+
+    def destroy(self, request, *args, **kwargs):
+        post_image_id = self.kwargs.get("pk")
+        current_profile = request.current_profile
+
+        # Get the PostImage instance
+        post_image = get_object_or_404(PostImage, pk=post_image_id)
+
+        # Check that the user requesting the delete owns the post
+        if post_image.post.profile.user != self.request.user:
+            message = "Requesting user does not own this resource."
+            logger.error(f"Delete post image failed: {message}")
+            return Response({"error": message}, status=status.HTTP_403_FORBIDDEN)
+
+        # Check that the profile requesting the delete owns the post
+        if post_image.post.profile.id != int(current_profile.id):
+            message= "Requesting profile does not own this resource."
+            logger.error(f"Delete post image failed: {message}")
+            return Response({"error": message}, status=status.HTTP_403_FORBIDDEN)
+
+        # Check if this is the last image of the post
+        post = post_image.post
+        if post.images.count() <= 1:
+            message = "Cannot delete the last image of a post. Delete the entire post instead."
+            logger.error(f"Delete post image failed: {message}")
+            return Response({"error": message}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Delete the PostImage - the signal handler will clean up storage
+        self.perform_destroy(post_image)
+        logger.info(f"Post image {post_image.id} deleted successfully")
+        return Response(status=status.HTTP_204_NO_CONTENT)

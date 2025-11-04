@@ -1,0 +1,35 @@
+# Initial configuration for certificate setup
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    
+    # Remove server_name directive to catch all requests
+    server_tokens off;
+
+    # Allow certbot authentication
+    location /.well-known/acme-challenge/ {
+        allow all;
+        root /var/www/certbot;
+    }
+
+    # During initial setup, don't redirect to HTTPS
+    location / {
+        return 200 'Ready for SSL setup';
+        add_header Content-Type text/plain;
+    }
+}
+
+user nginx;
+worker_processes auto;
+pid /var/run/nginx.pid;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+    
+    include /etc/nginx/conf.d/*.conf;
+} 

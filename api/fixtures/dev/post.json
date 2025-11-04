@@ -1,6 +1,6 @@
 [
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 1,
     "fields": {
       "caption": "I do love sleeping on my favorite pillow!",
@@ -11,7 +11,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 2,
     "fields": {
       "caption": "Went for a walk and the snow was pretty deep.",
@@ -22,7 +22,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 3,
     "fields": {
       "caption": "There were some really cool signs in the dog park that I went to!",
@@ -33,7 +33,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 4,
     "fields": {
       "caption": "Some more cool pics of me sniffing around the dog park!",
@@ -44,7 +44,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 5,
     "fields": {
       "caption": "This is my “I want attention” face",
@@ -55,7 +55,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 6,
     "fields": {
       "caption": "Chewing on a toy when I had a sleepover with my cousin Linus! He’s pretty good at sharing toys with me but he keeps a close eye!",
@@ -66,18 +66,18 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 7,
     "fields": {
       "caption": "Out and about in the snow chewing on sticks",
       "profile": 1,
       "created_at": "2025-02-03T04:11:34.439Z",
-      "updated_at": "2025-02-03T04:11:34.439Z",
+      "updated_at": "2025-09-26T20:09:27.613Z",
       "contains_ai": false
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 8,
     "fields": {
       "caption": "Enjoying the snow day! I’m glad my parents bought me this coat so I can stay warm on my winter walks!",
@@ -88,7 +88,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 9,
     "fields": {
       "caption": "Believe it or not that’s me as a little puppy!",
@@ -99,7 +99,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 10,
     "fields": {
       "caption": "Can’t believe my humans wake me up just to take a picture of me",
@@ -110,7 +110,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 11,
     "fields": {
       "caption": "I love sitting by the door watching for my favorite humans to come home",
@@ -121,7 +121,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 12,
     "fields": {
       "caption": "Sleepy morning…I know I’m just a dog, but I love a good pillow!",
@@ -132,7 +132,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 13,
     "fields": {
       "caption": "Taking my heart treats! Gotta stay healthy to live a long life to make my humans happy!",
@@ -143,7 +143,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 14,
     "fields": {
       "caption": "No caption needed. I’m stunning I know",
@@ -154,7 +154,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 15,
     "fields": {
       "caption": "The Regal Bernese Mountain Dog\n\nCreated by DALL-E",
@@ -165,7 +165,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 16,
     "fields": {
       "caption": "Showing some love to the pitbull!\n\nImages generate with Gemini. They’re crazy real looking.",
@@ -176,7 +176,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 17,
     "fields": {
       "caption": "Golden Retriever \n\nCreated with Gemini",
@@ -187,7 +187,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 18,
     "fields": {
       "caption": "Savannah Cat\n\nCreated using Gemini ♊️",
@@ -198,7 +198,7 @@
     }
   },
   {
-    "model": "core_app.post",
+    "model": "posts_app.post",
     "pk": 19,
     "fields": {
       "caption": "Himalayan Cat",
@@ -206,6 +206,655 @@
       "created_at": "2025-02-20T03:43:36.731Z",
       "updated_at": "2025-02-20T03:43:36.731Z",
       "contains_ai": true
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 20,
+    "fields": {
+      "caption": "Nothing like a good stick chew in the grass! I really like chewing on sticks. I think it helps my teeth.\n\nSometimes my parents clean my teeth with special doggy teeth cleaning pads but I’m not crazy about that. I prefer to just chew on sticks like the old days! \n\nI’ve never once had a problem with it. Sometimes I even eat a little bit of the stick but I never have problems with that either. \n\nI think I just have an iron clad stomach.\n\nAnyways, chewing sticks is the best. Especially when I’m out on a walk with my humans laying in the grass! \n\nI hope you all get to chew on some sticks today!!",
+      "profile": 1,
+      "created_at": "2025-08-31T18:01:09.231Z",
+      "updated_at": "2025-10-01T17:01:54.643Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 21,
+    "fields": {
+      "caption": "Husky puppies",
+      "profile": 7,
+      "created_at": "2025-08-31T23:25:57.755Z",
+      "updated_at": "2025-08-31T23:25:57.756Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 22,
+    "fields": {
+      "caption": "Real life Snoopy! Who doesn’t love a Beagle??",
+      "profile": 7,
+      "created_at": "2025-08-31T23:59:05.637Z",
+      "updated_at": "2025-08-31T23:59:05.637Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 23,
+    "fields": {
+      "caption": "Pug life",
+      "profile": 7,
+      "created_at": "2025-09-01T04:51:00.916Z",
+      "updated_at": "2025-09-01T04:51:00.916Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 24,
+    "fields": {
+      "caption": "The always photogenic German Shepherd",
+      "profile": 7,
+      "created_at": "2025-09-01T04:57:01.609Z",
+      "updated_at": "2025-09-01T04:57:01.609Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 25,
+    "fields": {
+      "caption": "Bernese Mountain Dog. The last one might be a mix. If you know what it could be, leave a comment.",
+      "profile": 7,
+      "created_at": "2025-09-01T05:05:04.315Z",
+      "updated_at": "2025-09-01T05:05:04.315Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 26,
+    "fields": {
+      "caption": "101 reasons to love Dalmatians",
+      "profile": 7,
+      "created_at": "2025-09-01T13:17:13.793Z",
+      "updated_at": "2025-09-01T13:17:13.793Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 27,
+    "fields": {
+      "caption": "Black Lab puppies",
+      "profile": 7,
+      "created_at": "2025-09-01T13:40:30.574Z",
+      "updated_at": "2025-09-01T13:40:30.574Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 28,
+    "fields": {
+      "caption": "Rottweiler close ups",
+      "profile": 7,
+      "created_at": "2025-09-01T13:49:30.858Z",
+      "updated_at": "2025-09-01T13:49:30.858Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 29,
+    "fields": {
+      "caption": "Me as a puppy",
+      "profile": 11,
+      "created_at": "2025-09-22T01:54:54.944Z",
+      "updated_at": "2025-09-22T01:54:54.944Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 30,
+    "fields": {
+      "caption": "My ears are pretty cool!",
+      "profile": 11,
+      "created_at": "2025-09-22T01:56:22.724Z",
+      "updated_at": "2025-09-22T01:56:22.724Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 31,
+    "fields": {
+      "caption": "Santa hat and couch time",
+      "profile": 11,
+      "created_at": "2025-09-22T02:02:45.324Z",
+      "updated_at": "2025-09-22T02:02:45.324Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 32,
+    "fields": {
+      "caption": "A couple of my favorite smiling pictures.",
+      "profile": 11,
+      "created_at": "2025-09-22T02:05:50.009Z",
+      "updated_at": "2025-09-22T02:05:50.009Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 33,
+    "fields": {
+      "caption": "Looking good in the sunshine!",
+      "profile": 11,
+      "created_at": "2025-09-22T02:07:46.038Z",
+      "updated_at": "2025-09-22T02:07:46.038Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 34,
+    "fields": {
+      "caption": "Proud parents showing off a brand new litter!\n\nYear unknown",
+      "profile": 12,
+      "created_at": "2025-09-22T02:25:21.554Z",
+      "updated_at": "2025-09-22T02:25:21.554Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 35,
+    "fields": {
+      "caption": "Sergeant Stubby - WWI\n\nSGT Stubby served in the 102nd Infantry Regiment, 26th ID. He took part in 17 battles and 4 offensives.",
+      "profile": 12,
+      "created_at": "2025-09-22T03:15:03.616Z",
+      "updated_at": "2025-09-22T03:15:03.616Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 36,
+    "fields": {
+      "caption": "Going way back with this one.\n\nc. 1852-53",
+      "profile": 12,
+      "created_at": "2025-09-22T12:03:14.419Z",
+      "updated_at": "2025-09-22T12:03:14.419Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 37,
+    "fields": {
+      "caption": "Lt. George A. Custer with his dog",
+      "profile": 12,
+      "created_at": "2025-09-22T21:22:30.153Z",
+      "updated_at": "2025-09-22T21:22:30.153Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 38,
+    "fields": {
+      "caption": "Photogenic in my younger days.",
+      "profile": 13,
+      "created_at": "2025-09-23T04:49:48.614Z",
+      "updated_at": "2025-09-23T04:49:48.614Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 39,
+    "fields": {
+      "caption": "Lurking in the grass",
+      "profile": 13,
+      "created_at": "2025-09-23T04:50:27.932Z",
+      "updated_at": "2025-09-23T04:50:27.932Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 40,
+    "fields": {
+      "caption": "Big ears and big smiles for this little guy",
+      "profile": 14,
+      "created_at": "2025-09-23T23:18:38.509Z",
+      "updated_at": "2025-09-23T23:18:38.509Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 41,
+    "fields": {
+      "caption": "Today we have some puppies in the grass. Why do puppies always look cuter laying in the grass?",
+      "profile": 14,
+      "created_at": "2025-09-23T23:22:25.502Z",
+      "updated_at": "2025-09-23T23:22:25.502Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 42,
+    "fields": {
+      "caption": "Nothing better than a whole litter",
+      "profile": 14,
+      "created_at": "2025-09-23T23:26:48.128Z",
+      "updated_at": "2025-09-23T23:26:48.128Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 43,
+    "fields": {
+      "caption": "A couple pictures of me as a puppy. That’s me in the middle with my brothers",
+      "profile": 15,
+      "created_at": "2025-09-23T23:54:13.910Z",
+      "updated_at": "2025-09-23T23:54:13.910Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 44,
+    "fields": {
+      "caption": "My puppy form. Before I got all big and goofy I was just small and goofy.",
+      "profile": 16,
+      "created_at": "2025-09-24T00:18:50.324Z",
+      "updated_at": "2025-09-24T00:18:50.324Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 45,
+    "fields": {
+      "caption": "Wondering why my humans aren’t petting me???",
+      "profile": 17,
+      "created_at": "2025-09-24T01:08:14.227Z",
+      "updated_at": "2025-09-24T01:08:14.227Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 46,
+    "fields": {
+      "caption": "Puppy teeth lookin for treats!",
+      "profile": 18,
+      "created_at": "2025-09-24T01:25:09.165Z",
+      "updated_at": "2025-09-24T01:25:09.165Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 47,
+    "fields": {
+      "caption": "Big eyes and smile to match!",
+      "profile": 19,
+      "created_at": "2025-09-24T01:32:17.981Z",
+      "updated_at": "2025-09-24T01:32:17.981Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 48,
+    "fields": {
+      "caption": "Puppy eyes and puppy breath. Aren’t Goldens the best??",
+      "profile": 20,
+      "created_at": "2025-09-24T01:42:21.776Z",
+      "updated_at": "2025-09-24T01:42:21.776Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 49,
+    "fields": {
+      "caption": "Couldn’t decide if I wanted to sit down, lie down or stick my tongue out. So I did all 3 🤣🤣",
+      "profile": 21,
+      "created_at": "2025-09-24T01:50:49.201Z",
+      "updated_at": "2025-09-24T01:50:49.201Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 50,
+    "fields": {
+      "caption": "Beagle on the beach!",
+      "profile": 22,
+      "created_at": "2025-09-24T01:59:25.156Z",
+      "updated_at": "2025-09-24T01:59:25.156Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 51,
+    "fields": {
+      "caption": "Stealth mode followed by serious face 🤣",
+      "profile": 13,
+      "created_at": "2025-09-24T02:09:05.506Z",
+      "updated_at": "2025-09-24T02:09:05.506Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 52,
+    "fields": {
+      "caption": "Channeling my inner wolf today",
+      "profile": 11,
+      "created_at": "2025-09-24T12:34:30.943Z",
+      "updated_at": "2025-09-24T12:34:30.943Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 53,
+    "fields": {
+      "caption": "Old school dog catcher.\n\nYear - unknown",
+      "profile": 12,
+      "created_at": "2025-09-24T12:36:25.807Z",
+      "updated_at": "2025-09-24T12:36:25.807Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 54,
+    "fields": {
+      "caption": "Some action shots of me running with and without a stick. I’m fast as heck",
+      "profile": 13,
+      "created_at": "2025-09-24T12:39:46.723Z",
+      "updated_at": "2025-09-24T12:39:46.723Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 55,
+    "fields": {
+      "caption": "Cutest photoshoot ever. Who doesn’t love a puppy wearing clothes??",
+      "profile": 14,
+      "created_at": "2025-09-24T12:44:18.571Z",
+      "updated_at": "2025-09-24T12:44:18.571Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 56,
+    "fields": {
+      "caption": "I’m growing up so fast! I try my best to listen but sometimes it’s so hard",
+      "profile": 15,
+      "created_at": "2025-09-24T12:51:13.176Z",
+      "updated_at": "2025-09-24T12:51:13.176Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 57,
+    "fields": {
+      "caption": "I think fall is my favorite season",
+      "profile": 16,
+      "created_at": "2025-09-24T13:10:15.864Z",
+      "updated_at": "2025-09-24T13:10:15.864Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 58,
+    "fields": {
+      "caption": "Got a Christmas outfit and my hair cut!",
+      "profile": 17,
+      "created_at": "2025-09-24T13:18:45.922Z",
+      "updated_at": "2025-09-24T13:18:45.922Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 59,
+    "fields": {
+      "caption": "My two favorite activities. Lounging around and refusing to come back inside 🤣🤣",
+      "profile": 18,
+      "created_at": "2025-09-24T13:30:42.393Z",
+      "updated_at": "2025-09-24T13:30:42.393Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 60,
+    "fields": {
+      "caption": "Went to the park today and had some fun. I learned how to sit at a table!",
+      "profile": 19,
+      "created_at": "2025-09-25T03:31:04.354Z",
+      "updated_at": "2025-09-25T03:31:04.354Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 61,
+    "fields": {
+      "caption": "Running around playing with my toy in the grass today. What more could I ask for?",
+      "profile": 20,
+      "created_at": "2025-09-25T03:40:15.025Z",
+      "updated_at": "2025-09-25T03:40:15.025Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 62,
+    "fields": {
+      "caption": "Just popped in to say hey. If you saw me and aren’t following, what are you waiting for?",
+      "profile": 21,
+      "created_at": "2025-09-25T03:43:03.085Z",
+      "updated_at": "2025-09-25T03:43:03.085Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 63,
+    "fields": {
+      "caption": "A couple good city beagles. Goes to show that Beagles can thrive anywhere!",
+      "profile": 22,
+      "created_at": "2025-09-25T03:47:18.539Z",
+      "updated_at": "2025-09-25T03:47:18.539Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 64,
+    "fields": {
+      "caption": "People think poodles are fancy. I mean we are, but we still like to lay in the grass.",
+      "profile": 23,
+      "created_at": "2025-09-25T12:09:38.674Z",
+      "updated_at": "2025-09-25T12:09:38.674Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 65,
+    "fields": {
+      "caption": "Day full of running around",
+      "profile": 11,
+      "created_at": "2025-09-26T03:31:08.440Z",
+      "updated_at": "2025-09-26T03:31:08.440Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 66,
+    "fields": {
+      "caption": "Poodle hanging out a window doing poodle things.\n\nYear unknown",
+      "profile": 12,
+      "created_at": "2025-09-26T03:33:03.796Z",
+      "updated_at": "2025-09-26T03:33:03.796Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 67,
+    "fields": {
+      "caption": "Majestic fall vibes going on today🍁🍂",
+      "profile": 13,
+      "created_at": "2025-09-26T03:36:03.025Z",
+      "updated_at": "2025-09-26T03:36:03.025Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 68,
+    "fields": {
+      "caption": "Some adorable golden’s for your viewing pleasure",
+      "profile": 14,
+      "created_at": "2025-09-26T03:39:48.835Z",
+      "updated_at": "2025-09-26T03:39:48.835Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 69,
+    "fields": {
+      "caption": "Got a cool harness today. My parents say it’ll help keep me safe but I think it’s kind of embarrassing.",
+      "profile": 15,
+      "created_at": "2025-09-26T03:42:57.966Z",
+      "updated_at": "2025-09-26T03:42:57.966Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 70,
+    "fields": {
+      "caption": "A couple epic outdoor portraits",
+      "profile": 16,
+      "created_at": "2025-09-26T03:46:33.643Z",
+      "updated_at": "2025-09-26T03:46:33.643Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 71,
+    "fields": {
+      "caption": "No one can resist my puppy dog eyes! This is why I usually get my way!",
+      "profile": 17,
+      "created_at": "2025-09-26T03:49:28.109Z",
+      "updated_at": "2025-09-26T03:49:28.109Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 72,
+    "fields": {
+      "caption": "Lounging is my favorite activity by far 💤",
+      "profile": 18,
+      "created_at": "2025-09-26T03:52:04.149Z",
+      "updated_at": "2025-09-26T03:52:04.149Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 73,
+    "fields": {
+      "caption": "Who did it better? Me or the AI me?",
+      "profile": 19,
+      "created_at": "2025-09-26T03:57:02.252Z",
+      "updated_at": "2025-09-26T03:57:02.252Z",
+      "contains_ai": true
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 74,
+    "fields": {
+      "caption": "Out playing in the grass today!",
+      "profile": 20,
+      "created_at": "2025-09-26T14:11:56.810Z",
+      "updated_at": "2025-09-26T14:11:56.810Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 75,
+    "fields": {
+      "caption": "Hanging out with my friend today",
+      "profile": 21,
+      "created_at": "2025-09-26T14:13:53.489Z",
+      "updated_at": "2025-09-26T14:13:53.489Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 76,
+    "fields": {
+      "caption": "Look at this good boy rocking a sweet harness. 10/10 does like sticks",
+      "profile": 22,
+      "created_at": "2025-09-26T14:16:44.746Z",
+      "updated_at": "2025-09-26T14:16:44.746Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 77,
+    "fields": {
+      "caption": "Another day out playing in the grass!",
+      "profile": 23,
+      "created_at": "2025-09-26T14:18:55.741Z",
+      "updated_at": "2025-09-26T14:18:55.741Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 85,
+    "fields": {
+      "caption": "It was a great day for a walk! Only 12 weeks and I’m learning to walk so good!",
+      "profile": 26,
+      "created_at": "2025-10-29T03:51:11.078Z",
+      "updated_at": "2025-10-29T03:51:11.079Z",
+      "contains_ai": false
     }
   }
 ]

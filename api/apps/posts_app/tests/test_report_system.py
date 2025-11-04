@@ -1,6 +1,6 @@
 from django.urls import reverse
 from rest_framework import status
-from apps.core_app.models import PostReport
+from apps.moderation_app.models import PostReport
 from .util import PostsAppTestHelper
 
 

@@ -1,13 +1,13 @@
 #!/bin/bash
 
-# This script creates a fixture for a specific model in the core_app app
-# Depending on the environment, it will create the fixture in the dev or test folder
+# This script creates a fixture for a specific model in a specified app
+# Depending on the environment, it will create the fixture in the dev, test, or staging folder
 
 # Check if arguments are provided
-if [ $# -ne 2 ]; then
-    echo "Error: Exactly two arguments are required"
-    echo "Usage: ./create_model_fixture.sh <dev|test|staging> <model_name>"
-    echo "Example: ./create_model_fixture.sh dev User"
+if [ $# -ne 3 ]; then
+    echo "Error: Exactly three arguments are required"
+    echo "Usage: ./create_model_fixture.sh <dev|test|staging> <app_name> <model_name>"
+    echo "Example: ./create_model_fixture.sh dev feedback_app feedback"
     exit 1
 fi
 
@@ -23,8 +23,9 @@ case $1 in
         ;;
 esac
 
-# Store the model name
-model_name=$2
+# Store the app name and model name
+app_name=$2
+model_name=$3
 
 # Get the current directory name
 current_dir=$(basename "$(pwd)")
@@ -34,5 +35,5 @@ if [ "$current_dir" = "scripts" ]; then
     cd .. || exit 1
 fi
 
-# Run the command with the provided model name
-docker compose -f docker/docker-compose.yml -f docker/$environment/docker-compose.override.yml exec -e DJANGO_ENV=$environment only-paws-app python manage.py dumpdata --format json --indent 2 --output fixtures/$environment/${model_name}.json core_app.${model_name}
+# Run the command with the provided app name and model name
+docker compose -f docker/docker-compose.yml -f docker/$environment/docker-compose.override.yml exec -e DJANGO_ENV=$environment only-paws-app python manage.py dumpdata --format json --indent 2 --output fixtures/$environment/${model_name}.json ${app_name}.${model_name}

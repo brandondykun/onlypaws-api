@@ -22,8 +22,8 @@ urlpatterns = [
     ),
     path(
         "profile/<int:pk>/",
-        views.RetrieveUpdateProfileView.as_view(),
-        name="retrieve_update_profile",
+        views.UpdateDestroyProfileView.as_view(),
+        name="profile-detail",
     ),
     path("login/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("refresh/", TokenRefreshView.as_view(), name="token_refresh"),
@@ -62,5 +62,18 @@ urlpatterns = [
         "reset-password/",
         views.ResetPasswordView.as_view(),
         name="reset_password",
+    ),
+    path(
+        "change-password/", views.ChangePasswordView.as_view(), name="change_password"
+    ),
+    path(
+        "request-email-change/",
+        views.RequestEmailChangeView.as_view(),
+        name="request-email-change",
+    ),
+    path(
+        "verify-email-change/",
+        views.VerifyEmailChangeView.as_view(),
+        name="verify-email-change",
     ),
 ]

@@ -9,7 +9,7 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
 
-from apps.core_app.models import Profile, User
+from apps.user_app.models import Profile, RegularProfile, User
 
 MY_INFO_URL = reverse("user_app:my_info")
 LOGIN_URL = reverse("user_app:token_obtain_pair")
@@ -26,13 +26,13 @@ def create_user(**params):
 
 
 def create_profile(**params):
-    """Create and return new Profile."""
-    return Profile.objects.create(**params)
+    """Create and return new RegularProfile (which also creates a Profile)."""
+    return RegularProfile.objects.create(**params)
 
 
 def retrieve_update_profile_url(profile_id):
     """Create and return a retrieve/update profile url."""
-    return reverse("user_app:retrieve_update_profile", args=[profile_id])
+    return reverse("user_app:profile-detail", args=[profile_id])
 
 
 class PublicUserApiTests(TestCase):
@@ -119,6 +119,9 @@ class PrivateUserApiTests(TestCase):
                 {
                     "id": self.profile.id,
                     "username": self.profile.username,
+                    "image": None,
+                    "name": "",
+                    "profile_type": "regular",
                 }
             ],
             "is_email_verified": False,
@@ -163,6 +166,6 @@ class PrivateUserApiTests(TestCase):
         self.assertEqual(res.data["name"], updated_profile["name"])
         self.assertEqual(res.data["about"], updated_profile["about"])
 
-        profile = Profile.objects.get(id=self.profile.id)
+        profile = RegularProfile.objects.get(id=self.profile.id)
         self.assertEqual(profile.name, updated_profile["name"])
         self.assertEqual(profile.about, updated_profile["about"])

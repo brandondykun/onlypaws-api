@@ -14,13 +14,18 @@ urlpatterns = [
     path("post/", views.CreatePostView.as_view(), name="create_post"),
     path(
         "post/<int:pk>",
-        views.RetrieveDestroyPostView.as_view(),
-        name="retrieve_destroy_post",
+        views.RetrieveUpdateDestroyPostView.as_view(),
+        name="retrieve_update_destroy_post",
     ),
     path(
         "post/<int:pk>/similar",
         views.ListSimilarPostsView.as_view(),
         name="lists_similar_posts",
+    ),
+    path(
+        "post/image/<int:pk>/",
+        views.DestroyPostImageView.as_view(),
+        name="destroy_post_image",
     ),
     path(
         "post/<int:post_id>/like/", views.CreateLikeView.as_view(), name="create_like"
@@ -66,6 +71,11 @@ urlpatterns = [
         name="list_comment_replies",
     ),
     path(
+        "comment/<int:pk>/chain/",
+        views.CommentChainRetrieveView.as_view(),
+        name="comment_chain_retrieve",
+    ),
+    path(
         "profile/<int:id>/follow/",
         views.CreateFollowView.as_view(),
         name="create_follow",
@@ -92,7 +102,7 @@ urlpatterns = [
         name="list_profile_posts",
     ),
     path(
-        "profile/<int:pk>",
+        "profile/<int:pk>/",
         views.RetrieveProfileView.as_view(),
         name="retrieve_profile",
     ),

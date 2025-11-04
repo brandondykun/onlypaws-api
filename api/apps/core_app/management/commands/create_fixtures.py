@@ -24,6 +24,10 @@ class Command(BaseCommand):
         models = [
             "user",
             "profile",
+            "regularprofile",
+            "businessprofile",
+            "address",
+            "pendingemailchange",
             "profileimage",
             "post",
             "postimage",
@@ -37,6 +41,10 @@ class Command(BaseCommand):
             "postreport",
             "resetpasswordtoken",
             "verifyemailtoken",
+            "feedback",
+            "feedbackcomment",
+            "notification",
+            "appconfiguration",
         ]
 
         # default fixture path
@@ -54,9 +62,39 @@ class Command(BaseCommand):
             model_name = model.__name__.lower()
             if model_name in models:
                 fixture_file = f"{fixture_path}/{model_name}.json"
-                with open(fixture_file, "w") as f:
-                    data = serializers.serialize("json", model.objects.all())
-                    f.write(data)
-                self.stdout.write(
-                    self.style.SUCCESS(f"Created fixture file: {fixture_file}")
-                )
+
+                # Ensure the directory exists
+                os.makedirs(os.path.dirname(fixture_file), exist_ok=True)
+
+                # Check if file exists and fix permissions before opening
+                if os.path.exists(fixture_file):
+                    try:
+                        # Try to make the file writable by the current user
+                        os.chmod(fixture_file, 0o664)
+                    except OSError as e:
+                        self.stdout.write(
+                            self.style.ERROR(
+                                f"Cannot write to {fixture_file}. Permission denied. "
+                                f"File is owned by a different user. Error: {e}"
+                            )
+                        )
+                        continue
+
+                try:
+                    with open(fixture_file, "w") as f:
+                        data = serializers.serialize("json", model.objects.all())
+                        f.write(data)
+
+                    # Set proper permissions for newly created files
+                    os.chmod(fixture_file, 0o664)
+
+                    self.stdout.write(
+                        self.style.SUCCESS(f"Created fixture file: {fixture_file}")
+                    )
+                except (OSError, PermissionError) as e:
+                    self.stdout.write(
+                        self.style.ERROR(
+                            f"Failed to create fixture file {fixture_file}: {e}. "
+                            f"Try running the command as root or fix file permissions."
+                        )
+                    )

@@ -2,21 +2,25 @@
 Views for the user api.
 """
 
-from rest_framework import generics, permissions
-from rest_framework import status
-from apps.core_app.models import (
+from rest_framework import generics, permissions, status, serializers
+from apps.user_app.models import (
     Profile,
     User,
     ProfileImage,
     PetType,
     VerifyEmailToken,
     ResetPasswordToken,
+    PendingEmailChange,
 )
 from apps.core_app.utils import generate_verification_code
-from rest_framework import serializers
+from .tasks import (
+    send_verification_email_task,
+    send_reset_password_email_task,
+    send_email_change_email_task,
+    send_email_change_confirmation_task,
+)
 from .serializers import (
     UserSerializer,
-    ProfileDetailedSerializer,
     ProfileSerializer,
     UserProfileSerializer,
     ProfileImageSerializer,
@@ -25,10 +29,22 @@ from .serializers import (
     ProfileUpdateSerializer,
     VerifyEmailTokenSerializer,
     ResetPasswordTokenSerializer,
+    ChangePasswordSerializer,
+    RequestEmailChangeSerializer,
+    VerifyEmailChangeSerializer,
+    ResetPasswordSerializer,
+    # New type-specific serializers
+    RegularProfileSerializer,
+    RegularProfileCreateSerializer,
+    RegularProfileUpdateSerializer,
+    RegularProfileDetailedSerializer,
+    BusinessProfileSerializer,
+    BusinessProfileCreateSerializer,
+    BusinessProfileUpdateSerializer,
+    BusinessProfileDetailedSerializer,
 )
 from rest_framework.response import Response
 import logging
-from django.core.mail import send_mail
 from django.utils import timezone
 from django.db import transaction
 from datetime import timedelta
@@ -37,7 +53,9 @@ from drf_spectacular.utils import (
     extend_schema,
     OpenApiParameter,
 )
-from django.conf import settings
+from django.contrib.auth import authenticate
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 
 
 # schema parameter for auth profile id header
@@ -53,31 +71,36 @@ auth_profile_param = OpenApiParameter(
 logger = logging.getLogger(__file__)
 
 
-# helper function to send verification email
-def send_verification_email(user, token):
-    """Send verification email to user."""
-    subject = "Verify Your OnlyPaws Email"
-    message = f"Your verification code is: {token}"
-    send_mail(
-        subject,
-        message,
-        settings.DEFAULT_FROM_EMAIL,
-        [user.email],
-        fail_silently=False,
-    )
+# Email sending is now handled by async tasks
+# These functions are kept for backward compatibility but now queue tasks
+def send_verification_email(user, token_string):
+    """Queue verification email task for user.
+    
+    Args:
+        user: User object
+        token_string: String token (not VerifyEmailToken object)
+    """
+    send_verification_email_task.delay(user.email, token_string)
 
 
-def send_reset_password_email(user, token):
-    """Send reset password email to user."""
-    subject = "Reset Your OnlyPaws Password"
-    message = f"Your password reset code is: {token}"
-    send_mail(
-        subject,
-        message,
-        settings.DEFAULT_FROM_EMAIL,
-        [user.email],
-        fail_silently=False,
-    )
+def send_reset_password_email(user, token_string):
+    """Queue reset password email task for user.
+    
+    Args:
+        user: User object
+        token_string: String token (not ResetPasswordToken object)
+    """
+    send_reset_password_email_task.delay(user.email, token_string)
+
+
+def send_reset_email_email(email, token_string):
+    """Queue email change verification task.
+    
+    Args:
+        email: Email address string
+        token_string: String token (not verification token object)
+    """
+    send_email_change_email_task.delay(email, token_string)
 
 
 class CreateUserView(generics.CreateAPIView):
@@ -93,7 +116,10 @@ class CreateUserView(generics.CreateAPIView):
         email = request.data.get("email", None)
         password = request.data.get("password", None)
 
+        logger.info(f"Creating user with username: {username}, email: {email}, password: {password}")
+
         if not username or not email or not password:
+            logger.error("Username, email, or password is required to create a user.")
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         try:
@@ -104,6 +130,8 @@ class CreateUserView(generics.CreateAPIView):
                 )
                 user_serializer.is_valid(raise_exception=True)
                 self.perform_create(user_serializer)
+                logger.info(f"User created successfully: {user_serializer.data}")
+                
                 # create Profile
                 profile_serializer = ProfileCreateSerializer(
                     data={
@@ -116,6 +144,7 @@ class CreateUserView(generics.CreateAPIView):
                 )
                 profile_serializer.is_valid(raise_exception=True)
                 self.perform_create(profile_serializer)
+                logger.info(f"Profile created successfully: {profile_serializer.data}")
 
                 user = User.objects.get(id=user_serializer.data["id"])
 
@@ -126,13 +155,14 @@ class CreateUserView(generics.CreateAPIView):
                 )
                 verify_email_serializer.is_valid(raise_exception=True)
                 self.perform_create(verify_email_serializer)
+                logger.info(f"Verify email token created successfully: {verify_email_serializer.data}")
 
-                token = VerifyEmailToken.objects.get(
+                verify_token_obj = VerifyEmailToken.objects.get(
                     id=verify_email_serializer.data["id"]
                 )
 
-                # send email with token
-                send_verification_email(user, token)
+                # send email with token string
+                send_verification_email(user, verify_token_obj.token)
 
                 response_serializer = UserProfileSerializer(user)
 
@@ -145,7 +175,7 @@ class CreateUserView(generics.CreateAPIView):
         except Exception as e:
             # If an exception occurs, the transaction will be rolled back
             # and the main object will be deleted.
-            logger.info(f"Error creating user: {str(e)}")
+            logger.error(f"Error creating user: {str(e)}")
             if isinstance(e, serializers.ValidationError):
                 errors = {}
                 # handle unique email constraint error
@@ -227,18 +257,16 @@ class CreateProfileView(generics.CreateAPIView):
             )
 
 
-class RetrieveUpdateProfileView(generics.RetrieveUpdateAPIView):
-    """Retrieve or update a Profile."""
+class UpdateDestroyProfileView(generics.UpdateAPIView, generics.DestroyAPIView):
+    """Retrieve, update or delete a Profile."""
 
-    queryset = Profile.objects.all()
-    serializer_class = ProfileDetailedSerializer
+    queryset = Profile.objects.select_related('regularprofile', 'businessprofile').all()
+    serializer_class = ProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
-    allowed_methods = ["PATCH"]
+    allowed_methods = ["PATCH", "DELETE"]
 
     def get_serializer_class(self):
-        if self.request.method == "GET":
-            return ProfileDetailedSerializer
-        elif self.request.method == "PATCH":
+        if self.request.method == "PATCH":
             return ProfileUpdateSerializer
         return ProfileSerializer
 
@@ -261,6 +289,50 @@ class RetrieveUpdateProfileView(generics.RetrieveUpdateAPIView):
             instance._prefetched_objects_cache = {}
         instance_serializer = ProfileSerializer(instance)
         return Response(instance_serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        profile_id = self.kwargs.get("pk")
+
+        # Ensure the profile belongs to the current authenticated user
+        try:
+            profile = self.request.user.profiles.get(id=profile_id)
+        except Profile.DoesNotExist:
+            return Response(
+                {
+                    "error": "Profile not found or you don't have permission to delete it"
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Prevent deleting the last profile
+        if self.request.user.profiles.count() <= 1:
+            return Response(
+                {
+                    "error": "Cannot delete your only profile. At least one profile is required."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            # Delete associated profile image from storage
+            if hasattr(profile, "image"):
+                profile.image.image.delete(save=False)
+                profile.image.delete()
+
+            # Delete the profile
+            profile.delete()
+            logger.info(
+                f"Profile {profile_id} deleted successfully by user {request.user.email}"
+            )
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        except Exception as e:
+            logger.error(f"Error deleting profile {profile_id}: {str(e)}")
+            return Response(
+                {"error": "Failed to delete profile. Please try again."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 class RetrieveUserInfoView(generics.RetrieveAPIView):
@@ -323,7 +395,27 @@ class UpdateProfileImageView(generics.UpdateAPIView):
         if not user_profile_match:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        return self.partial_update(request, *args, **kwargs)
+        try:
+            with transaction.atomic():
+                instance = self.get_object()
+                # Store reference to old image
+                old_image = instance.image if instance.image else None
+
+                # Update with new image
+                response = self.partial_update(request, *args, **kwargs)
+
+                # If update was successful and there was an old image, delete it
+                if response.status_code == 200 and old_image:
+                    old_image.delete(save=False)
+
+                return response
+
+        except Exception as e:
+            logger.error(f"Error updating profile image: {str(e)}")
+            return Response(
+                {"error": "Failed to update profile image."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 class ListPetTypesView(generics.ListAPIView):
@@ -507,6 +599,7 @@ class CreateResetPasswordTokenView(generics.CreateAPIView):
 class ResetPasswordView(generics.CreateAPIView):
     """Reset user password using reset token."""
 
+    serializer_class = ResetPasswordSerializer
     permission_classes = []  # Allow unauthenticated access
     authentication_classes = []
 
@@ -582,3 +675,159 @@ class ResetPasswordView(generics.CreateAPIView):
                 {"error": "Invalid confirmation code"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+
+@extend_schema_view(patch=extend_schema(parameters=[auth_profile_param]))
+class ChangePasswordView(generics.GenericAPIView):
+    """View for changing user password."""
+
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ChangePasswordSerializer
+
+    def patch(self, request):
+        serializer = self.serializer_class(data=request.data)
+
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        user = request.user
+        old_password = serializer.validated_data["old_password"]
+        new_password = serializer.validated_data["new_password"]
+
+        # Check if old password is correct
+        if not authenticate(email=user.email, password=old_password):
+            return Response(
+                {"old_password": ["Password incorrect."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Check if new password is different from old password
+        if old_password == new_password:
+            return Response(
+                {"new_password": ["New password must be different from old password."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            # Set new password
+            user.set_password(new_password)
+            user.save()
+
+            logger.info(f"Password changed successfully for user {user.email}")
+            return Response(
+                {"message": "Password changed successfully."}, status=status.HTTP_200_OK
+            )
+
+        except Exception as e:
+            logger.error(f"Error changing password for user {user.email}: {str(e)}")
+            return Response(
+                {"error": "Failed to change password. Please try again."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+@extend_schema_view(post=extend_schema(parameters=[auth_profile_param]))
+class RequestEmailChangeView(generics.GenericAPIView):
+    """
+    API View to request email change.
+    Sends verification email to new address.
+    """
+
+    serializer_class = RequestEmailChangeSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        new_email = request.data.get("email")
+
+        # Validate email format
+        try:
+            validate_email(new_email)
+        except ValidationError:
+            return Response(
+                {"error": {"email": "Invalid email format."}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Check if email is already in use
+        if User.objects.filter(email=new_email).exists():
+            return Response(
+                {"error": {"email": "Email already in use."}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Delete any existing pending changes for this user
+        PendingEmailChange.objects.filter(user=request.user).delete()
+
+        # Create new pending change
+        token = generate_verification_code()
+        pending_change = PendingEmailChange.objects.create(
+            user=request.user, new_email=new_email, verification_token=token
+        )
+
+        # Send verification email
+        try:
+            send_reset_email_email(new_email, token)
+        except Exception as e:
+            pending_change.delete()
+            return Response(
+                {"error": {"other": "Failed to send verification email"}},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        return Response(
+            {"message": "Verification email sent"}, status=status.HTTP_200_OK
+        )
+
+
+@extend_schema_view(post=extend_schema(parameters=[auth_profile_param]))
+class VerifyEmailChangeView(generics.GenericAPIView):
+    """
+    API View to verify email change with token.
+    Updates user's email if verification successful.
+    """
+
+    serializer_class = VerifyEmailChangeSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        token = request.data.get("token")
+
+        if not token:
+            return Response(
+                {"error": {"token": "Verification token required"}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            pending_change = PendingEmailChange.objects.get(
+                verification_token=token, user=request.user
+            )
+        except PendingEmailChange.DoesNotExist:
+            return Response(
+                {"error": {"token": "Invalid or expired token"}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Check if token is expired
+        if pending_change.is_expired:
+            pending_change.delete()
+            return Response(
+                {"error": {"token": "Verification token has expired"}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Update user's email
+        old_email = request.user.email
+        new_email = pending_change.new_email
+        request.user.email = new_email
+        request.user.save()
+
+        # Delete pending change
+        pending_change.delete()
+
+        # Send confirmation emails asynchronously
+        send_email_change_confirmation_task.delay(old_email, new_email)
+
+        return Response(
+            {"message": "Email updated successfully."}, status=status.HTTP_200_OK
+        )

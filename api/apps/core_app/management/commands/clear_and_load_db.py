@@ -28,6 +28,10 @@ class Command(BaseCommand):
             "reportreason.json",
             "user.json",
             "profile.json",
+            "regularprofile.json",
+            "businessprofile.json",
+            "address.json",
+            "pendingemailchange.json",
             "profileimage.json",
             "post.json",
             "postimage.json",
@@ -39,6 +43,10 @@ class Command(BaseCommand):
             "postreport.json",
             "resetpasswordtoken.json",
             "verifyemailtoken.json",
+            "feedback.json",
+            "feedbackcomment.json",
+            "notification.json",
+            "appconfiguration.json"
         ]
 
         path_prefix = "fixtures/test"

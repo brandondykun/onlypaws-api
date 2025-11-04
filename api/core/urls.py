@@ -35,6 +35,9 @@ urlpatterns = [
     path(admin_url, admin.site.urls),
     path("api/v1/", include("apps.posts_app.urls")),
     path("api/v1/auth/", include("apps.user_app.urls")),
+    path("api/v1/", include("apps.feedback_app.urls")),
+    path("api/v1/", include("apps.notifications_app.urls")),
+    path("api/v1/config/", include("apps.config_app.urls")),
     path("api-auth/", include("rest_framework.urls")),
 ]
 
@@ -50,3 +53,4 @@ if environment == "dev" or environment == "staging" or environment == "test":
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

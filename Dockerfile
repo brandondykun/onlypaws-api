@@ -1,35 +1,57 @@
+# ============================
 # Builder stage
-FROM python:3.12.2-alpine3.19 as builder
+# ============================
+FROM python:3.12.2-slim as builder
 
 # Set environment variables
-ENV PIP_DISABLE_PIP_VERSION_CHECK 1
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
-# Copy requirements files
+# Copy requirements
 COPY ./requirements.txt /tmp/requirements.txt
 COPY ./requirements.dev.txt /tmp/requirements.dev.txt
 
-# Create python virtual environment
+# Create python virtual environment and install dependencies
 RUN python -m venv /py && \
     /py/bin/pip install --upgrade pip && \
-    apk add --update --no-cache postgresql-client jpeg-dev && \
-    apk add --update --no-cache --virtual .tmp-build-deps \
-    build-base gcc postgresql-dev musl-dev libffi-dev zlib zlib-dev && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+        postgresql-client \
+        libjpeg-dev \
+        build-essential \
+        gcc \
+        libpq-dev \
+        libffi-dev \
+        zlib1g-dev && \
     /py/bin/pip install -r /tmp/requirements.txt && \
     if [ "$DEV" = "true" ]; \
     then /py/bin/pip install -r /tmp/requirements.dev.txt ; \
     fi && \
-    rm -rf /tmp && \
-    apk del .tmp-build-deps
+    apt-get purge -y --auto-remove build-essential gcc && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/requirements.txt /tmp/requirements.dev.txt
 
+# Pre-download the sentence-transformers model into /app/models
+RUN mkdir -p /app/models && \
+    HF_HOME=/app/models /py/bin/python - <<'EOF'
+from sentence_transformers import SentenceTransformer
+SentenceTransformer("sentence-transformers/clip-ViT-B-32")
+EOF
+# Fix any permission issues with downloaded models
+RUN find /app/models -type f -exec chmod 644 {} \; 2>/dev/null || true && \
+    find /app/models -type d -exec chmod 755 {} \; 2>/dev/null || true
+
+# ============================
 # Final stage
-FROM python:3.12.2-alpine3.19
+# ============================
+FROM python:3.12.2-slim
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PATH="/py/bin:$PATH"
+    PATH="/py/bin:$PATH" \
+    HF_HOME=/app/models
 
 # Create django user
 RUN adduser \
@@ -37,20 +59,22 @@ RUN adduser \
     --no-create-home \
     django-user
 
-# Copy virtual environment from builder
+# Copy virtual environment and pre-downloaded models from builder
 COPY --from=builder /py /py
+COPY --from=builder /app/models /app/models
 
 # Install runtime dependencies
-RUN apk add --no-cache postgresql-client jpeg-dev
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        postgresql-client \
+        libjpeg62-turbo && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Setup directories and permissions
-RUN mkdir -p /api/static && \
-    mkdir -p /vol/web/media && \
-    mkdir -p /vol/log && \
-    chown -R django-user:django-user /api && \
-    chown -R django-user:django-user /vol && \
-    chmod -R 755 /api && \
-    chmod -R 755 /vol
+RUN mkdir -p /api/static /vol/web/media /vol/log && \
+    chown -R django-user:django-user /api /vol /app/models && \
+    chmod -R 755 /api /vol /app/models
 
 # Copy application code
 COPY --chown=django-user:django-user ./api /api

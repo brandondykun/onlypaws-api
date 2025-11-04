@@ -11,7 +11,7 @@ from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 from rest_framework import status
 
-from apps.core_app.models import VerifyEmailToken
+from apps.user_app.models import VerifyEmailToken
 
 CREATE_USER_URL = reverse("user_app:create_user")
 VERIFY_EMAIL_URL = reverse("user_app:verify_email_token")

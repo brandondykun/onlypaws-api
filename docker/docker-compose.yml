@@ -1,4 +1,3 @@
-version: "3.9"
 name: only-paws
 
 # Base docker compose file for all environments
@@ -11,15 +10,25 @@ services:
       context: ../
     depends_on:
       - only-paws-db
+      - redis
     restart: unless-stopped
 
   only-paws-db:
     container_name: onlypaws_db
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg16
     restart: unless-stopped
+
+  redis:
+    container_name: onlypaws_redis
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes --bind 0.0.0.0 --protected-mode no
+    volumes:
+      - redis_data:/data
 
 volumes:
   static_volume:
   media_volume:
   log_volume:
+  redis_data:
 

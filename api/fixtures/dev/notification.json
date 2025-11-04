@@ -1,0 +1,1049 @@
+[
+  {
+    "model": "notifications_app.notification",
+    "pk": 65,
+    "fields": {
+      "recipient": 14,
+      "sender": 1,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "admin_dog liked your post: \"Today we have some puppies in the grass. Why do pu...\"",
+      "is_read": false,
+      "created_at": "2025-10-27T03:56:46.287Z",
+      "post": 41,
+      "comment": null,
+      "extra_data": {
+        "post_id": 41,
+        "liker_id": 1,
+        "post_caption": "Today we have some puppies in the grass. Why do puppies always look cuter laying in the grass?",
+        "liker_username": "admin_dog",
+        "post_preview_image": "/media/images/dev/14/14/41/image_0.webp"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 64,
+    "fields": {
+      "recipient": 20,
+      "sender": 1,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "admin_dog liked your post: \"Out playing in the grass today!\"",
+      "is_read": false,
+      "created_at": "2025-10-27T03:56:26.084Z",
+      "post": 74,
+      "comment": null,
+      "extra_data": {
+        "post_id": 74,
+        "liker_id": 1,
+        "post_caption": "Out playing in the grass today!",
+        "liker_username": "admin_dog",
+        "post_preview_image": "/media/images/dev/20/20/74/image_0.webp"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 63,
+    "fields": {
+      "recipient": 4,
+      "sender": 1,
+      "notification_type": "like_comment",
+      "title": "liked your comment",
+      "message": "admin_dog liked your comment: \"Did he try to bring the stick inside?\"",
+      "is_read": false,
+      "created_at": "2025-10-24T13:10:02.286Z",
+      "post": 7,
+      "comment": 1,
+      "extra_data": {
+        "post_id": 7,
+        "liker_id": 1,
+        "comment_id": 1,
+        "comment_text": "Did he try to bring the stick inside?",
+        "post_caption": "Out and about in the snow chewing on sticks",
+        "liker_username": "admin_dog",
+        "post_preview_image": "/media/images/dev/1/1/7/image_0.webp"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 62,
+    "fields": {
+      "recipient": 1,
+      "sender": 4,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "pitbulpup started following you",
+      "is_read": false,
+      "created_at": "2025-10-24T13:10:02.251Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 4,
+        "follower_name": "Jemma",
+        "follower_about": "People think my breed is mean but I don’t have a mean bone in my body!",
+        "follower_breed": "Pitbull",
+        "follower_avatar": "/media/images/dev/4/4/profile_image.webp",
+        "follower_pet_type": "Dog",
+        "follower_username": "pitbulpup"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 61,
+    "fields": {
+      "recipient": 17,
+      "sender": 1,
+      "notification_type": "comment",
+      "title": "commented on your post",
+      "message": "admin_dog commented on your post: \"Nice sweater!\"",
+      "is_read": false,
+      "created_at": "2025-10-24T13:10:01.926Z",
+      "post": 58,
+      "comment": 13,
+      "extra_data": {
+        "post_id": 58,
+        "is_reply": false,
+        "comment_id": 13,
+        "comment_text": "Nice sweater!",
+        "commenter_id": 1,
+        "post_caption": "Got a Christmas outfit and my hair cut!",
+        "commenter_username": "admin_dog",
+        "post_preview_image": "/media/images/dev/17/17/58/image_0.webp"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 60,
+    "fields": {
+      "recipient": 17,
+      "sender": 1,
+      "notification_type": "comment_reply",
+      "title": "replied to your comment",
+      "message": "admin_dog replied to your comment: \"I think I have 6 or 7. I’d have to look in my baby...\"",
+      "is_read": false,
+      "created_at": "2025-10-24T13:10:01.634Z",
+      "post": 71,
+      "comment": 12,
+      "extra_data": {
+        "post_id": 71,
+        "is_reply": true,
+        "comment_id": 12,
+        "comment_text": "I think I have 6 or 7. I’d have to look in my baby book to know for sure.",
+        "commenter_id": 1,
+        "post_caption": "No one can resist my puppy dog eyes! This is why I usually get my way!",
+        "commenter_username": "admin_dog",
+        "post_preview_image": "/media/images/dev/17/17/71/image_0.webp",
+        "replied_to_comment_id": 10,
+        "replied_to_comment_text": "I have 3 brothers and 2 sisters! What about you?"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 59,
+    "fields": {
+      "recipient": 1,
+      "sender": 17,
+      "notification_type": "comment_reply",
+      "title": "replied to your comment",
+      "message": "goldie replied to your comment: \"I have 3 brothers and 2 sisters! What about you?\"",
+      "is_read": false,
+      "created_at": "2025-10-24T13:10:01.321Z",
+      "post": 71,
+      "comment": 10,
+      "extra_data": {
+        "post_id": 71,
+        "is_reply": true,
+        "comment_id": 10,
+        "comment_text": "I have 3 brothers and 2 sisters! What about you?",
+        "commenter_id": 17,
+        "post_caption": "No one can resist my puppy dog eyes! This is why I usually get my way!",
+        "commenter_username": "goldie",
+        "post_preview_image": "/media/images/dev/17/17/71/image_0.webp",
+        "replied_to_comment_id": 9,
+        "replied_to_comment_text": "Well we do look a lot a like. Do you have any brother or sister?"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 58,
+    "fields": {
+      "recipient": 17,
+      "sender": 1,
+      "notification_type": "comment_reply",
+      "title": "replied to your comment",
+      "message": "admin_dog replied to your comment: \"Well we do look a lot a like. Do you have any brot...\"",
+      "is_read": false,
+      "created_at": "2025-10-24T13:10:00.995Z",
+      "post": 71,
+      "comment": 9,
+      "extra_data": {
+        "post_id": 71,
+        "is_reply": true,
+        "comment_id": 9,
+        "comment_text": "Well we do look a lot a like. Do you have any brother or sister?",
+        "commenter_id": 1,
+        "post_caption": "No one can resist my puppy dog eyes! This is why I usually get my way!",
+        "commenter_username": "admin_dog",
+        "post_preview_image": "/media/images/dev/17/17/71/image_0.webp",
+        "replied_to_comment_id": 8,
+        "replied_to_comment_text": "I don't know exactly where I'm from, but I did come from Pennsylvania"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 57,
+    "fields": {
+      "recipient": 1,
+      "sender": 17,
+      "notification_type": "comment_reply",
+      "title": "replied to your comment",
+      "message": "goldie replied to your comment: \"I don't know exactly where I'm from, but I did com...\"",
+      "is_read": false,
+      "created_at": "2025-10-24T13:10:00.710Z",
+      "post": 71,
+      "comment": 8,
+      "extra_data": {
+        "post_id": 71,
+        "is_reply": true,
+        "comment_id": 8,
+        "comment_text": "I don't know exactly where I'm from, but I did come from Pennsylvania",
+        "commenter_id": 17,
+        "post_caption": "No one can resist my puppy dog eyes! This is why I usually get my way!",
+        "commenter_username": "goldie",
+        "post_preview_image": "/media/images/dev/17/17/71/image_0.webp",
+        "replied_to_comment_id": 7,
+        "replied_to_comment_text": "Lititz PA is where my mom got me from!"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 56,
+    "fields": {
+      "recipient": 17,
+      "sender": 1,
+      "notification_type": "comment_reply",
+      "title": "replied to your comment",
+      "message": "admin_dog replied to your comment: \"Lititz PA is where my mom got me from!\"",
+      "is_read": false,
+      "created_at": "2025-10-24T13:10:00.417Z",
+      "post": 71,
+      "comment": 7,
+      "extra_data": {
+        "post_id": 71,
+        "is_reply": true,
+        "comment_id": 7,
+        "comment_text": "Lititz PA is where my mom got me from!",
+        "commenter_id": 1,
+        "post_caption": "No one can resist my puppy dog eyes! This is why I usually get my way!",
+        "commenter_username": "admin_dog",
+        "post_preview_image": "/media/images/dev/17/17/71/image_0.webp",
+        "replied_to_comment_id": 5,
+        "replied_to_comment_text": "Maybe, where are you from?"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 55,
+    "fields": {
+      "recipient": 1,
+      "sender": 17,
+      "notification_type": "comment_reply",
+      "title": "replied to your comment",
+      "message": "goldie replied to your comment: \"Maybe, where are you from?\"",
+      "is_read": false,
+      "created_at": "2025-10-24T13:10:00.086Z",
+      "post": 71,
+      "comment": 5,
+      "extra_data": {
+        "post_id": 71,
+        "is_reply": true,
+        "comment_id": 5,
+        "comment_text": "Maybe, where are you from?",
+        "commenter_id": 17,
+        "post_caption": "No one can resist my puppy dog eyes! This is why I usually get my way!",
+        "commenter_username": "goldie",
+        "post_preview_image": "/media/images/dev/17/17/71/image_0.webp",
+        "replied_to_comment_id": 4,
+        "replied_to_comment_text": "Hey are we related!?"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 54,
+    "fields": {
+      "recipient": 17,
+      "sender": 1,
+      "notification_type": "comment",
+      "title": "commented on your post",
+      "message": "admin_dog commented on your post: \"Hey are we related!?\"",
+      "is_read": false,
+      "created_at": "2025-10-24T13:09:59.787Z",
+      "post": 71,
+      "comment": 4,
+      "extra_data": {
+        "post_id": 71,
+        "is_reply": false,
+        "comment_id": 4,
+        "comment_text": "Hey are we related!?",
+        "commenter_id": 1,
+        "post_caption": "No one can resist my puppy dog eyes! This is why I usually get my way!",
+        "commenter_username": "admin_dog",
+        "post_preview_image": "/media/images/dev/17/17/71/image_0.webp"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 53,
+    "fields": {
+      "recipient": 1,
+      "sender": 10,
+      "notification_type": "comment",
+      "title": "commented on your post",
+      "message": "SirDogsAlot commented on your post: \"Where did you get that jacket?\"",
+      "is_read": false,
+      "created_at": "2025-10-24T13:09:59.485Z",
+      "post": 7,
+      "comment": 3,
+      "extra_data": {
+        "post_id": 7,
+        "is_reply": false,
+        "comment_id": 3,
+        "comment_text": "Where did you get that jacket?",
+        "commenter_id": 10,
+        "post_caption": "Out and about in the snow chewing on sticks",
+        "commenter_username": "SirDogsAlot",
+        "post_preview_image": "/media/images/dev/1/1/7/image_0.webp"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 52,
+    "fields": {
+      "recipient": 4,
+      "sender": 1,
+      "notification_type": "comment_reply",
+      "title": "replied to your comment",
+      "message": "admin_dog replied to your comment: \"No he knows better\"",
+      "is_read": false,
+      "created_at": "2025-10-24T13:09:59.177Z",
+      "post": 7,
+      "comment": 2,
+      "extra_data": {
+        "post_id": 7,
+        "is_reply": true,
+        "comment_id": 2,
+        "comment_text": "No he knows better",
+        "commenter_id": 1,
+        "post_caption": "Out and about in the snow chewing on sticks",
+        "commenter_username": "admin_dog",
+        "post_preview_image": "/media/images/dev/1/1/7/image_0.webp",
+        "replied_to_comment_id": 1,
+        "replied_to_comment_text": "Did he try to bring the stick inside?"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 51,
+    "fields": {
+      "recipient": 1,
+      "sender": 4,
+      "notification_type": "comment",
+      "title": "commented on your post",
+      "message": "pitbulpup commented on your post: \"Did he try to bring the stick inside?\"",
+      "is_read": false,
+      "created_at": "2025-10-24T13:09:59.150Z",
+      "post": 7,
+      "comment": 1,
+      "extra_data": {
+        "post_id": 7,
+        "is_reply": false,
+        "comment_id": 1,
+        "comment_text": "Did he try to bring the stick inside?",
+        "commenter_id": 4,
+        "post_caption": "Out and about in the snow chewing on sticks",
+        "commenter_username": "pitbulpup",
+        "post_preview_image": "/media/images/dev/1/1/7/image_0.webp"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 50,
+    "fields": {
+      "recipient": 1,
+      "sender": 7,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "AllPets liked your post: \"Taking my heart treats! Gotta stay healthy to live...\"",
+      "is_read": false,
+      "created_at": "2025-10-24T13:09:57.536Z",
+      "post": 13,
+      "comment": null,
+      "extra_data": {
+        "post_id": 13,
+        "liker_id": 7,
+        "post_caption": "Taking my heart treats! Gotta stay healthy to live a long life to make my humans happy!",
+        "liker_username": "AllPets",
+        "post_preview_image": "/media/images/dev/1/1/13/image_0.webp"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 49,
+    "fields": {
+      "recipient": 10,
+      "sender": 1,
+      "notification_type": "comment_reply",
+      "title": "replied to your comment",
+      "message": "admin_dog replied to your comment: \"You’re not gonna believe it, but Costco lol\"",
+      "is_read": false,
+      "created_at": "2025-10-22T22:03:04.483Z",
+      "post": 7,
+      "comment": 17,
+      "extra_data": {
+        "post_id": 7,
+        "is_reply": true,
+        "comment_id": 17,
+        "comment_text": "You’re not gonna believe it, but Costco lol",
+        "commenter_id": 1,
+        "post_caption": "Out and about in the snow chewing on sticks",
+        "commenter_username": "admin_dog",
+        "post_preview_image": "/media/images/dev/1/1/7/image_0.webp",
+        "replied_to_comment_id": 3,
+        "replied_to_comment_text": "Where did you get that jacket?"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 48,
+    "fields": {
+      "recipient": 1,
+      "sender": 10,
+      "notification_type": "comment_reply",
+      "title": "replied to your comment",
+      "message": "SirDogsAlot replied to your comment: \"Wow I didn't even think of that, but you're right\"",
+      "is_read": false,
+      "created_at": "2025-10-22T03:25:10.747Z",
+      "post": 20,
+      "comment": 16,
+      "extra_data": {
+        "post_id": 20,
+        "is_reply": true,
+        "comment_id": 16,
+        "comment_text": "Wow I didn't even think of that, but you're right",
+        "commenter_id": 10,
+        "post_caption": "Nothing like a good stick chew in the grass! I really like chewing on sticks. I think it helps my te",
+        "commenter_username": "SirDogsAlot",
+        "post_preview_image": "/media/images/dev/1/1/20/image_0_G4lvbAV.webp",
+        "replied_to_comment_id": 15,
+        "replied_to_comment_text": "And there is a never ending supply!"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 47,
+    "fields": {
+      "recipient": 10,
+      "sender": 1,
+      "notification_type": "comment_reply",
+      "title": "replied to your comment",
+      "message": "admin_dog replied to your comment: \"And there is a never ending supply!\"",
+      "is_read": false,
+      "created_at": "2025-10-22T03:23:18.943Z",
+      "post": 20,
+      "comment": 15,
+      "extra_data": {
+        "post_id": 20,
+        "is_reply": true,
+        "comment_id": 15,
+        "comment_text": "And there is a never ending supply!",
+        "commenter_id": 1,
+        "post_caption": "Nothing like a good stick chew in the grass! I really like chewing on sticks. I think it helps my te",
+        "commenter_username": "admin_dog",
+        "post_preview_image": "/media/images/dev/1/1/20/image_0_G4lvbAV.webp",
+        "replied_to_comment_id": 14,
+        "replied_to_comment_text": "I love sticks too! They're the best free toys ever!"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 46,
+    "fields": {
+      "recipient": 1,
+      "sender": 10,
+      "notification_type": "comment",
+      "title": "commented on your post",
+      "message": "SirDogsAlot commented on your post: \"I love sticks too! They're the best free toys ever...\"",
+      "is_read": false,
+      "created_at": "2025-10-22T00:53:45.045Z",
+      "post": 20,
+      "comment": 14,
+      "extra_data": {
+        "post_id": 20,
+        "is_reply": false,
+        "comment_id": 14,
+        "comment_text": "I love sticks too! They're the best free toys ever!",
+        "commenter_id": 10,
+        "post_caption": "Nothing like a good stick chew in the grass! I really like chewing on sticks. I think it helps my te",
+        "commenter_username": "SirDogsAlot",
+        "post_preview_image": "/media/images/dev/1/1/20/image_0_G4lvbAV.webp"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 45,
+    "fields": {
+      "recipient": 1,
+      "sender": 17,
+      "notification_type": "like_comment",
+      "title": "liked your comment",
+      "message": "goldie liked your comment: \"Nice sweater!\"",
+      "is_read": false,
+      "created_at": "2025-10-18T23:56:57.142Z",
+      "post": 58,
+      "comment": 13,
+      "extra_data": {
+        "post_id": 58,
+        "liker_id": 17,
+        "comment_id": 13,
+        "comment_text": "Nice sweater!",
+        "post_caption": "Got a Christmas outfit and my hair cut!",
+        "liker_username": "goldie",
+        "post_preview_image": "/media/images/dev/17/17/58/image_0.webp"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 44,
+    "fields": {
+      "recipient": 1,
+      "sender": 17,
+      "notification_type": "like_comment",
+      "title": "liked your comment",
+      "message": "goldie liked your comment: \"I think I have 6 or 7. I’d have to look in my baby...\"",
+      "is_read": false,
+      "created_at": "2025-10-18T15:57:51.779Z",
+      "post": 71,
+      "comment": 12,
+      "extra_data": {
+        "post_id": 71,
+        "liker_id": 17,
+        "comment_id": 12,
+        "comment_text": "I think I have 6 or 7. I’d have to look in my baby book to know for sure.",
+        "post_caption": "No one can resist my puppy dog eyes! This is why I usually get my way!",
+        "liker_username": "goldie",
+        "post_preview_image": "/media/images/dev/17/17/71/image_0.webp"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 43,
+    "fields": {
+      "recipient": 7,
+      "sender": 1,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "admin_dog started following you",
+      "is_read": false,
+      "created_at": "2025-10-17T14:12:44.672Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 1,
+        "follower_name": "Linus",
+        "follower_about": "I am the admin dog. I basically run this app. I try to share pictures every day of my fun dog activities! Follow to keep up with what I’m doing!",
+        "follower_breed": "Cavalier King Charles Spaniel",
+        "follower_avatar": "/media/images/dev/1/1/profile_image_xEwniGq.webp",
+        "follower_pet_type": "Dog",
+        "follower_username": "admin_dog"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 42,
+    "fields": {
+      "recipient": 1,
+      "sender": 7,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "AllPets started following you",
+      "is_read": false,
+      "created_at": "2025-10-17T13:22:25.680Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 7,
+        "follower_name": "The Puppy Profile",
+        "follower_about": "Your home for puppies! I post puppy pics of all breeds, shapes and sizes!",
+        "follower_breed": "Any and all",
+        "follower_avatar": "/media/images/dev/7/7/profile_image.webp",
+        "follower_pet_type": "Dog",
+        "follower_username": "AllPets"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 41,
+    "fields": {
+      "recipient": 1,
+      "sender": 3,
+      "notification_type": "like_comment",
+      "title": "liked your comment",
+      "message": "chewyyy liked your comment: \"No he knows better\"",
+      "is_read": false,
+      "created_at": "2025-10-17T00:03:29.152Z",
+      "post": 7,
+      "comment": 2,
+      "extra_data": {
+        "post_id": 7,
+        "liker_id": 3,
+        "comment_id": 2,
+        "comment_text": "No he knows better",
+        "post_caption": "Out and about in the snow chewing on sticks",
+        "liker_username": "chewyyy",
+        "post_preview_image": "/media/images/dev/1/1/7/image_0.webp"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 40,
+    "fields": {
+      "recipient": 16,
+      "sender": 1,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "admin_dog liked your post: \"I think fall is my favorite season\"",
+      "is_read": false,
+      "created_at": "2025-10-13T03:33:00.533Z",
+      "post": 57,
+      "comment": null,
+      "extra_data": {
+        "post_id": 57,
+        "liker_id": 1,
+        "post_caption": "I think fall is my favorite season",
+        "liker_username": "admin_dog",
+        "post_preview_image": "/media/images/dev/16/16/57/image_0.webp"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 39,
+    "fields": {
+      "recipient": 13,
+      "sender": 1,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "admin_dog liked your post: \"Stealth mode followed by serious face 🤣\"",
+      "is_read": false,
+      "created_at": "2025-10-13T03:31:40.302Z",
+      "post": 51,
+      "comment": null,
+      "extra_data": {
+        "post_id": 51,
+        "liker_id": 1,
+        "post_caption": "Stealth mode followed by serious face 🤣",
+        "liker_username": "admin_dog",
+        "post_preview_image": "/media/images/dev/13/13/51/image_0.webp"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 38,
+    "fields": {
+      "recipient": 18,
+      "sender": 1,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "admin_dog liked your post: \"Puppy teeth lookin for treats!\"",
+      "is_read": false,
+      "created_at": "2025-10-13T03:31:23.435Z",
+      "post": 46,
+      "comment": null,
+      "extra_data": {
+        "post_id": 46,
+        "liker_id": 1,
+        "post_caption": "Puppy teeth lookin for treats!",
+        "liker_username": "admin_dog",
+        "post_preview_image": "/media/images/dev/18/18/46/image_0.webp"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 37,
+    "fields": {
+      "recipient": 20,
+      "sender": 1,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "admin_dog liked your post: \"Running around playing with my toy in the grass to...\"",
+      "is_read": false,
+      "created_at": "2025-10-13T03:30:44.623Z",
+      "post": 61,
+      "comment": null,
+      "extra_data": {
+        "post_id": 61,
+        "liker_id": 1,
+        "post_caption": "Running around playing with my toy in the grass today. What more could I ask for?",
+        "liker_username": "admin_dog",
+        "post_preview_image": "/media/images/dev/20/20/61/image_0.webp"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 36,
+    "fields": {
+      "recipient": 7,
+      "sender": 1,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "admin_dog liked your post: \"Bernese Mountain Dog. The last one might be a mix....\"",
+      "is_read": false,
+      "created_at": "2025-10-13T03:27:51.907Z",
+      "post": 25,
+      "comment": null,
+      "extra_data": {
+        "post_id": 25,
+        "liker_id": 1,
+        "post_caption": "Bernese Mountain Dog. The last one might be a mix. If you know what it could be, leave a comment.",
+        "liker_username": "admin_dog",
+        "post_preview_image": "/media/images/dev/7/7/25/image_0.webp"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 35,
+    "fields": {
+      "recipient": 14,
+      "sender": 1,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "admin_dog liked your post: \"Cutest photoshoot ever. Who doesn’t love a puppy w...\"",
+      "is_read": false,
+      "created_at": "2025-10-13T03:23:57.801Z",
+      "post": 55,
+      "comment": null,
+      "extra_data": {
+        "post_id": 55,
+        "liker_id": 1,
+        "post_caption": "Cutest photoshoot ever. Who doesn’t love a puppy wearing clothes??",
+        "liker_username": "admin_dog",
+        "post_preview_image": "/media/images/dev/14/14/55/image_0.webp"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 34,
+    "fields": {
+      "recipient": 20,
+      "sender": 1,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "admin_dog liked your post: \"Puppy eyes and puppy breath. Aren’t Goldens the be...\"",
+      "is_read": false,
+      "created_at": "2025-10-13T03:23:34.243Z",
+      "post": 48,
+      "comment": null,
+      "extra_data": {
+        "post_id": 48,
+        "liker_id": 1,
+        "post_caption": "Puppy eyes and puppy breath. Aren’t Goldens the best??",
+        "liker_username": "admin_dog",
+        "post_preview_image": "/media/images/dev/20/20/48/image_0.webp"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 33,
+    "fields": {
+      "recipient": 16,
+      "sender": 1,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "admin_dog liked your post: \"A couple epic outdoor portraits\"",
+      "is_read": false,
+      "created_at": "2025-10-12T19:17:29.333Z",
+      "post": 70,
+      "comment": null,
+      "extra_data": {
+        "post_id": 70,
+        "liker_id": 1,
+        "post_caption": "A couple epic outdoor portraits",
+        "liker_username": "admin_dog",
+        "post_preview_image": "/media/images/dev/16/16/70/image_0.webp"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 32,
+    "fields": {
+      "recipient": 1,
+      "sender": 3,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "chewyyy liked your post: \"Nothing like a good stick chew in the grass!\"",
+      "is_read": false,
+      "created_at": "2025-09-21T16:11:19.288Z",
+      "post": 20,
+      "comment": null,
+      "extra_data": {
+        "post_id": 20,
+        "liker_id": 3,
+        "post_caption": "Nothing like a good stick chew in the grass!",
+        "liker_username": "chewyyy",
+        "post_preview_image": "/media/images/dev/1/1/20/image_0_G4lvbAV.webp"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 29,
+    "fields": {
+      "recipient": 1,
+      "sender": 3,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "chewyyy liked your post: \"Taking my heart treats! Gotta stay healthy to live...\"",
+      "is_read": false,
+      "created_at": "2025-09-21T14:50:09.085Z",
+      "post": 13,
+      "comment": null,
+      "extra_data": {
+        "post_id": 13,
+        "liker_id": 3,
+        "post_caption": "Taking my heart treats! Gotta stay healthy to live a long life to make my humans happy!",
+        "liker_username": "chewyyy",
+        "post_preview_image": "http://192.168.0.190:8000/media/images/dev/1/1/13/image_0.webp"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 28,
+    "fields": {
+      "recipient": 1,
+      "sender": 3,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "chewyyy liked your post: \"Sleepy morning…I know I’m just a dog, but I love a...\"",
+      "is_read": false,
+      "created_at": "2025-09-21T01:06:33.657Z",
+      "post": 12,
+      "comment": null,
+      "extra_data": {
+        "post_id": 12,
+        "liker_id": 3,
+        "post_caption": "Sleepy morning…I know I’m just a dog, but I love a good pillow!",
+        "liker_username": "chewyyy",
+        "post_preview_image": "http://192.168.0.190:8000/media/images/dev/1/1/12/image_0.webp"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 27,
+    "fields": {
+      "recipient": 1,
+      "sender": 3,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "chewyyy liked your post: \"Enjoying the snow day! I’m glad my parents bought ...\"",
+      "is_read": false,
+      "created_at": "2025-09-21T01:05:26.668Z",
+      "post": 8,
+      "comment": null,
+      "extra_data": {
+        "post_id": 8,
+        "liker_id": 3,
+        "post_caption": "Enjoying the snow day! I’m glad my parents bought me this coat so I can stay warm on my winter walks",
+        "liker_username": "chewyyy",
+        "post_preview_image": "http://192.168.0.190:8000/media/images/dev/1/1/8/image_0.webp"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 25,
+    "fields": {
+      "recipient": 1,
+      "sender": 3,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "chewyyy liked your post: \"Out and about in the snow chewing on sticks\"",
+      "is_read": false,
+      "created_at": "2025-09-20T13:38:43.079Z",
+      "post": 7,
+      "comment": null,
+      "extra_data": {
+        "post_id": 7,
+        "liker_id": 3,
+        "post_caption": "Out and about in the snow chewing on sticks",
+        "liker_username": "chewyyy",
+        "post_preview_image": "http://192.168.0.190:8000/media/images/dev/1/1/7/image_0.webp"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 24,
+    "fields": {
+      "recipient": 1,
+      "sender": 3,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "chewyyy liked your post: \"I do love sleeping on my favorite pillow!\"",
+      "is_read": false,
+      "created_at": "2025-09-20T13:37:11.810Z",
+      "post": 1,
+      "comment": null,
+      "extra_data": {
+        "post_id": 1,
+        "liker_id": 3,
+        "post_caption": "I do love sleeping on my favorite pillow!",
+        "liker_username": "chewyyy",
+        "post_preview_image": "http://192.168.0.190:8000/media/images/dev/1/1/1/image_0.webp"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 23,
+    "fields": {
+      "recipient": 1,
+      "sender": 7,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "AllPets liked your post: \"Nothing like a good stick chew in the grass!\"",
+      "is_read": false,
+      "created_at": "2025-09-19T14:35:48.308Z",
+      "post": 20,
+      "comment": null,
+      "extra_data": {
+        "post_id": 20,
+        "liker_id": 7,
+        "post_caption": "Nothing like a good stick chew in the grass!",
+        "liker_username": "AllPets",
+        "post_preview_image": "http://192.168.0.190:8000/media/images/dev/1/1/20/image_0_G4lvbAV.webp"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 22,
+    "fields": {
+      "recipient": 1,
+      "sender": 7,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "AllPets liked your post: \"Sleepy morning…I know I’m just a dog, but I love a...\"",
+      "is_read": false,
+      "created_at": "2025-09-19T14:34:51.721Z",
+      "post": 12,
+      "comment": null,
+      "extra_data": {
+        "post_id": 12,
+        "liker_id": 7,
+        "post_caption": "Sleepy morning…I know I’m just a dog, but I love a good pillow!",
+        "liker_username": "AllPets",
+        "post_preview_image": "http://192.168.0.190:8000/media/images/dev/1/1/12/image_0.webp"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 21,
+    "fields": {
+      "recipient": 1,
+      "sender": 7,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "AllPets liked your post: \"Out and about in the snow chewing on sticks\"",
+      "is_read": false,
+      "created_at": "2025-09-19T14:34:24.580Z",
+      "post": 7,
+      "comment": null,
+      "extra_data": {
+        "post_id": 7,
+        "liker_id": 7,
+        "post_caption": "Out and about in the snow chewing on sticks",
+        "liker_username": "AllPets",
+        "post_preview_image": "http://192.168.0.190:8000/media/images/dev/1/1/7/image_0.webp"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 20,
+    "fields": {
+      "recipient": 1,
+      "sender": 7,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "AllPets liked your post: \"Taking my heart treats! Gotta stay healthy to live...\"",
+      "is_read": true,
+      "created_at": "2025-09-19T14:33:35.006Z",
+      "post": 13,
+      "comment": null,
+      "extra_data": {
+        "post_id": 13,
+        "liker_id": 7,
+        "post_caption": "Taking my heart treats! Gotta stay healthy to live a long life to make my humans happy!",
+        "liker_username": "AllPets",
+        "post_preview_image": "http://192.168.0.190:8000/media/images/dev/1/1/13/image_0.webp"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 19,
+    "fields": {
+      "recipient": 1,
+      "sender": 7,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "AllPets liked your post: \"I do love sleeping on my favorite pillow!\"",
+      "is_read": true,
+      "created_at": "2025-09-19T14:22:30.760Z",
+      "post": 1,
+      "comment": null,
+      "extra_data": {
+        "post_id": 1,
+        "liker_id": 7,
+        "post_caption": "I do love sleeping on my favorite pillow!",
+        "liker_username": "AllPets",
+        "post_preview_image": "http://192.168.0.190:8000/media/images/dev/1/1/1/image_0.webp"
+      }
+    }
+  }
+]
