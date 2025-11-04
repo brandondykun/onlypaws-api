@@ -62,8 +62,8 @@ class PrivatePostsApiTests(PostsAppTestHelper):
         expected_profile = {
             "id": self.profile.id,
             "username": self.profile.username,
-            "about": self.profile.about,
-            "name": self.profile.name,
+            "about": self.profile.regularprofile.about,
+            "name": self.profile.regularprofile.name,
             "image": None,
             "breed": "",
             "pet_type": None,

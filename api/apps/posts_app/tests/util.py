@@ -2,7 +2,7 @@ from rest_framework.test import APIClient
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth import get_user_model
-from apps.user_app.models import Profile, User
+from apps.user_app.models import Profile, RegularProfile, User
 from apps.posts_app.models import Post, PostImage
 from apps.interactions_app.models import Like, Follow, Comment
 from apps.moderation_app.models import ReportReason, PostReport
@@ -28,7 +28,7 @@ def create_user(email: str, password: str, is_staff=False) -> User:
 
 
 def create_profile(username: str, about: str, user: User) -> Profile:
-    """Create and return new Profile.
+    """Create and return new Profile (via RegularProfile creation).
 
     Parameters
     ----------
@@ -38,8 +38,15 @@ def create_profile(username: str, about: str, user: User) -> Profile:
         About text for the Profile.
     user : User
         The User that owns the Profile.
+    
+    Returns
+    -------
+    Profile
+        The base Profile instance (for consistency with ForeignKey relationships).
     """
-    return Profile.objects.create(username=username, about=about, user=user)
+    regular_profile = RegularProfile.objects.create(username=username, about=about, user=user)
+    # Return the base Profile instance to match what ForeignKey relationships return
+    return Profile.objects.get(pk=regular_profile.pk)
 
 
 def create_post(caption: str, profile: Profile) -> Post:

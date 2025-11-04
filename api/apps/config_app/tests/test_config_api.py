@@ -9,7 +9,7 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
 
-from apps.user_app.models import Profile
+from apps.user_app.models import RegularProfile
 from apps.config_app.models import AppConfiguration
 
 
@@ -22,8 +22,8 @@ def create_user(**params):
 
 
 def create_profile(**params):
-    """Create and return a new Profile."""
-    return Profile.objects.create(**params)
+    """Create and return a new RegularProfile."""
+    return RegularProfile.objects.create(**params)
 
 
 class PublicAdsConfigApiTests(TestCase):

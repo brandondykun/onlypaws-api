@@ -7,7 +7,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 from django.contrib.auth import get_user_model
-from apps.user_app.models import Profile, ProfileImage
+from apps.user_app.models import Profile, RegularProfile, ProfileImage
 from django.core.files.uploadedfile import SimpleUploadedFile
 import tempfile
 from PIL import Image
@@ -20,8 +20,8 @@ def create_user(email="user@example.com", password="testpass123"):
 
 
 def create_profile(user, username="testuser"):
-    """Helper function to create a profile."""
-    return Profile.objects.create(user=user, username=username)
+    """Helper function to create a regular profile."""
+    return RegularProfile.objects.create(user=user, username=username)
 
 
 def create_profile_image(profile):

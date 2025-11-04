@@ -7,11 +7,7 @@
       "user": 1,
       "is_active": true,
       "created_at": "2025-10-24T12:47:44.897Z",
-      "updated_at": "2025-10-24T12:47:44.923Z",
-      "about": "Admin profile.",
-      "name": "Linus",
-      "pet_type": null,
-      "breed": ""
+      "updated_at": "2025-10-24T12:47:44.923Z"
     }
   },
   {
@@ -22,11 +18,7 @@
       "user": 2,
       "is_active": true,
       "created_at": "2025-10-24T12:47:44.897Z",
-      "updated_at": "2025-10-24T12:47:44.923Z",
-      "about": "I am the best dog. There is no debate. I loves cheese.",
-      "name": "",
-      "pet_type": null,
-      "breed": ""
+      "updated_at": "2025-10-24T12:47:44.923Z"
     }
   },
   {
@@ -37,11 +29,7 @@
       "user": 3,
       "is_active": true,
       "created_at": "2025-10-24T12:47:44.897Z",
-      "updated_at": "2025-10-24T12:47:44.923Z",
-      "about": "I am a hound. I chase rabbits and squirrels like there's no tomorrow!",
-      "name": "",
-      "pet_type": null,
-      "breed": ""
+      "updated_at": "2025-10-24T12:47:44.923Z"
     }
   },
   {
@@ -52,11 +40,7 @@
       "user": 4,
       "is_active": true,
       "created_at": "2025-10-24T12:47:44.897Z",
-      "updated_at": "2025-10-24T12:47:44.923Z",
-      "about": "I am the best dog in the entire universe!",
-      "name": "",
-      "pet_type": null,
-      "breed": ""
+      "updated_at": "2025-10-24T12:47:44.923Z"
     }
   },
   {
@@ -67,11 +51,7 @@
       "user": 5,
       "is_active": true,
       "created_at": "2025-10-24T12:47:44.897Z",
-      "updated_at": "2025-10-24T12:47:44.923Z",
-      "about": "Walks by the lake are my jam. Big sticks only.",
-      "name": "",
-      "pet_type": null,
-      "breed": ""
+      "updated_at": "2025-10-24T12:47:44.923Z"
     }
   },
   {
@@ -82,11 +62,7 @@
       "user": 6,
       "is_active": true,
       "created_at": "2025-10-24T12:47:44.897Z",
-      "updated_at": "2025-10-24T12:47:44.923Z",
-      "about": "I'm the freaking dog.",
-      "name": "",
-      "pet_type": null,
-      "breed": ""
+      "updated_at": "2025-10-24T12:47:44.923Z"
     }
   },
   {
@@ -97,11 +73,7 @@
       "user": 7,
       "is_active": true,
       "created_at": "2025-10-24T12:47:44.897Z",
-      "updated_at": "2025-10-24T12:47:44.923Z",
-      "about": "Kinda doofy but also sweet.",
-      "name": "",
-      "pet_type": null,
-      "breed": ""
+      "updated_at": "2025-10-24T12:47:44.923Z"
     }
   },
   {
@@ -112,11 +84,7 @@
       "user": 8,
       "is_active": true,
       "created_at": "2025-10-24T12:47:44.897Z",
-      "updated_at": "2025-10-24T12:47:44.923Z",
-      "about": "I know you're here for dogs, but I'm just a baby pony. Close enough.",
-      "name": "",
-      "pet_type": null,
-      "breed": ""
+      "updated_at": "2025-10-24T12:47:44.923Z"
     }
   },
   {
@@ -127,11 +95,7 @@
       "user": 9,
       "is_active": true,
       "created_at": "2025-10-24T12:47:44.897Z",
-      "updated_at": "2025-10-24T12:47:44.923Z",
-      "about": "Idk why everyone thinks I'm scary. My ears are pretty awesome.",
-      "name": "",
-      "pet_type": null,
-      "breed": ""
+      "updated_at": "2025-10-24T12:47:44.923Z"
     }
   },
   {
@@ -142,11 +106,7 @@
       "user": 10,
       "is_active": true,
       "created_at": "2025-10-24T12:47:44.897Z",
-      "updated_at": "2025-10-24T12:47:44.923Z",
-      "about": "Coned out Cavi. I'll steal ya girl!",
-      "name": "",
-      "pet_type": null,
-      "breed": ""
+      "updated_at": "2025-10-24T12:47:44.923Z"
     }
   },
   {
@@ -157,11 +117,7 @@
       "user": 11,
       "is_active": true,
       "created_at": "2025-10-24T12:47:44.897Z",
-      "updated_at": "2025-10-24T12:47:44.923Z",
-      "about": "I like chocolate even though it's bad for me.",
-      "name": "",
-      "pet_type": null,
-      "breed": ""
+      "updated_at": "2025-10-24T12:47:44.923Z"
     }
   },
   {
@@ -172,11 +128,7 @@
       "user": 12,
       "is_active": true,
       "created_at": "2025-10-24T12:47:44.897Z",
-      "updated_at": "2025-10-24T12:47:44.923Z",
-      "about": "Sleepy dogs only up in here.",
-      "name": "",
-      "pet_type": null,
-      "breed": ""
+      "updated_at": "2025-10-24T12:47:44.923Z"
     }
   },
   {
@@ -187,11 +139,7 @@
       "user": 13,
       "is_active": true,
       "created_at": "2025-10-24T12:47:44.897Z",
-      "updated_at": "2025-10-24T12:47:44.923Z",
-      "about": "I often hear that I am the bestestest boy in the whole world.",
-      "name": "",
-      "pet_type": null,
-      "breed": ""
+      "updated_at": "2025-10-24T12:47:44.923Z"
     }
   },
   {
@@ -202,11 +150,7 @@
       "user": 14,
       "is_active": true,
       "created_at": "2025-10-24T12:47:44.897Z",
-      "updated_at": "2025-10-24T12:47:44.923Z",
-      "about": "",
-      "name": "",
-      "pet_type": null,
-      "breed": ""
+      "updated_at": "2025-10-24T12:47:44.923Z"
     }
   },
   {
@@ -217,11 +161,7 @@
       "user": 15,
       "is_active": true,
       "created_at": "2025-10-24T12:47:44.897Z",
-      "updated_at": "2025-10-24T12:47:44.923Z",
-      "about": "",
-      "name": "",
-      "pet_type": null,
-      "breed": ""
+      "updated_at": "2025-10-24T12:47:44.923Z"
     }
   },
   {
@@ -232,11 +172,7 @@
       "user": 16,
       "is_active": true,
       "created_at": "2025-10-24T12:47:44.897Z",
-      "updated_at": "2025-10-24T12:47:44.923Z",
-      "about": "",
-      "name": "",
-      "pet_type": null,
-      "breed": ""
+      "updated_at": "2025-10-24T12:47:44.923Z"
     }
   },
   {
@@ -247,11 +183,7 @@
       "user": 17,
       "is_active": true,
       "created_at": "2025-10-24T12:47:44.897Z",
-      "updated_at": "2025-10-24T12:47:44.923Z",
-      "about": "",
-      "name": "",
-      "pet_type": null,
-      "breed": ""
+      "updated_at": "2025-10-24T12:47:44.923Z"
     }
   },
   {
@@ -262,11 +194,7 @@
       "user": 18,
       "is_active": true,
       "created_at": "2025-10-24T12:47:44.897Z",
-      "updated_at": "2025-10-24T12:47:44.923Z",
-      "about": "",
-      "name": "",
-      "pet_type": null,
-      "breed": ""
+      "updated_at": "2025-10-24T12:47:44.923Z"
     }
   },
   {
@@ -277,11 +205,7 @@
       "user": 19,
       "is_active": true,
       "created_at": "2025-10-24T12:47:44.897Z",
-      "updated_at": "2025-10-24T12:47:44.923Z",
-      "about": "",
-      "name": "",
-      "pet_type": null,
-      "breed": ""
+      "updated_at": "2025-10-24T12:47:44.923Z"
     }
   },
   {
@@ -292,11 +216,7 @@
       "user": 20,
       "is_active": true,
       "created_at": "2025-10-24T12:47:44.897Z",
-      "updated_at": "2025-10-24T12:47:44.923Z",
-      "about": "",
-      "name": "",
-      "pet_type": null,
-      "breed": ""
+      "updated_at": "2025-10-24T12:47:44.923Z"
     }
   },
   {
@@ -307,11 +227,7 @@
       "user": 21,
       "is_active": true,
       "created_at": "2025-10-24T12:47:44.897Z",
-      "updated_at": "2025-10-24T12:47:44.923Z",
-      "about": "",
-      "name": "",
-      "pet_type": null,
-      "breed": ""
+      "updated_at": "2025-10-24T12:47:44.923Z"
     }
   },
   {
@@ -322,11 +238,7 @@
       "user": 22,
       "is_active": true,
       "created_at": "2025-10-24T12:47:44.897Z",
-      "updated_at": "2025-10-24T12:47:44.923Z",
-      "about": "",
-      "name": "",
-      "pet_type": null,
-      "breed": ""
+      "updated_at": "2025-10-24T12:47:44.923Z"
     }
   },
   {
@@ -337,11 +249,7 @@
       "user": 23,
       "is_active": true,
       "created_at": "2025-10-24T12:47:44.897Z",
-      "updated_at": "2025-10-24T12:47:44.923Z",
-      "about": "",
-      "name": "",
-      "pet_type": null,
-      "breed": ""
+      "updated_at": "2025-10-24T12:47:44.923Z"
     }
   },
   {
@@ -352,11 +260,7 @@
       "user": 24,
       "is_active": true,
       "created_at": "2025-10-24T12:47:44.897Z",
-      "updated_at": "2025-10-24T12:47:44.923Z",
-      "about": "",
-      "name": "",
-      "pet_type": null,
-      "breed": ""
+      "updated_at": "2025-10-24T12:47:44.923Z"
     }
   },
   {
@@ -367,11 +271,7 @@
       "user": 2,
       "is_active": true,
       "created_at": "2025-10-24T12:47:44.897Z",
-      "updated_at": "2025-10-24T12:47:44.923Z",
-      "about": "I am superior to all other dogs.",
-      "name": "",
-      "pet_type": null,
-      "breed": ""
+      "updated_at": "2025-10-24T12:47:44.923Z"
     }
   },
   {
@@ -382,11 +282,7 @@
       "user": 1,
       "is_active": true,
       "created_at": "2025-10-24T12:47:44.897Z",
-      "updated_at": "2025-10-24T12:47:44.923Z",
-      "about": "Regal. But tired.",
-      "name": "",
-      "pet_type": null,
-      "breed": ""
+      "updated_at": "2025-10-24T12:47:44.923Z"
     }
   }
 ]
