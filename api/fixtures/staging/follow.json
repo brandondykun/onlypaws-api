@@ -1,6 +1,6 @@
 [
   {
-    "model": "core_app.follow",
+    "model": "interactions_app.follow",
     "pk": 1,
     "fields": {
       "followed": 4,

@@ -21,10 +21,11 @@ _The unapologetically pet friendly social media app._
 8. [Clear and Reload Database](#clear-and-reload-database)
 9. [Generate Image Embeddings](#generate-image-embeddings)
 10. [Assign PostImage Order](#assign-postimage-order)
-11. [Image Data](#image-data)
-12. [Commits](#commits)
-13. [Environment Variables](#environment-variables)
-14. [Dev and Test Images](#dev-and-test-images)
+11. [Nginx Configuration and SSL Setup](#nginx-configuration-and-ssl-setup)
+12. [Image Data](#image-data)
+13. [Commits](#commits)
+14. [Environment Variables](#environment-variables)
+15. [Dev and Test Images](#dev-and-test-images)
 
 ---
 
@@ -338,6 +339,38 @@ scripts/assign_postimage_order.sh staging
 - `--dry-run`: Preview what changes would be made without actually updating the database
 
 **Note:** It's recommended to run with `--dry-run` first to preview the changes before applying them.
+
+## Nginx Configuration and SSL Setup
+
+The project uses nginx as a reverse proxy with SSL/TLS support via Let's Encrypt certificates. The nginx configuration is template-based to support multiple environments and domains.
+
+### Configuration Files
+
+- **`nginx/templates/nginx.conf.template`** - Production configuration with HTTPS, WebSocket support, and security headers
+- **`nginx/templates/init.conf.template`** - Bootstrap configuration for initial SSL certificate setup
+- **`nginx/docker-entrypoint.sh`** - Startup script that processes templates with environment variables
+
+### Quick Overview
+
+The nginx container uses template files that are processed at startup. The `${DOMAIN}` variable is replaced with your actual domain, generating the final nginx configuration.
+
+### Setting Up SSL for New Domains
+
+When deploying to a new domain (production), you need to obtain SSL certificates before nginx can serve HTTPS traffic. This requires a two-stage process:
+
+1. **Stage 1**: Use the init configuration (HTTP-only) to allow Certbot to validate your domain
+2. **Stage 2**: Switch to production configuration (HTTPS) once certificates are obtained
+
+**For complete step-by-step instructions**, see the dedicated guide:
+
+📖 **[nginx/README.md](nginx/README.md)** - Complete SSL Setup and Configuration Guide
+
+The guide includes:
+- Detailed explanation of all configuration files
+- Step-by-step SSL certificate setup process
+- Certificate renewal information
+- Comprehensive troubleshooting section
+- Quick reference commands
 
 ## Image Data
 
