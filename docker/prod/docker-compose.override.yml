@@ -30,7 +30,6 @@ services:
     build: ../nginx
     volumes:
       - static_volume:/vol/web/static:ro
-      - ../nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
       - ./certbot/conf:/etc/letsencrypt:ro
       - ./certbot/www:/var/www/certbot:ro
     ports:
