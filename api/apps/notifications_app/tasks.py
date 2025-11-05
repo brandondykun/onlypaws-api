@@ -332,6 +332,9 @@ def create_follow_notification_task(self, followed_profile_id, follower_profile_
         followed_profile = Profile.objects.get(id=followed_profile_id)
         follower_profile = Profile.objects.select_related('image').get(id=follower_profile_id)
         
+        # Get the specific profile (RegularProfile or BusinessProfile)
+        specific_follower = follower_profile.get_specific_profile()
+        
         # Get follower's avatar URL
         follower_avatar = None
         if hasattr(follower_profile, 'image') and follower_profile.image:
@@ -342,9 +345,32 @@ def create_follow_notification_task(self, followed_profile_id, follower_profile_
                 follower_avatar = avatar_path
         
         # Get about snippet (first 150 characters)
-        about_snippet = follower_profile.about[:150] if follower_profile.about else ""
-        if len(follower_profile.about) > 150:
-            about_snippet += "..."
+        about_snippet = ""
+        if hasattr(specific_follower, 'about') and specific_follower.about:
+            about_snippet = specific_follower.about[:150]
+            if len(specific_follower.about) > 150:
+                about_snippet += "..."
+        
+        # Build extra data based on profile type
+        extra_data = {
+            'follower_username': follower_profile.username,
+            'follower_id': follower_profile.id,
+            'follower_avatar': follower_avatar,
+            'follower_about': about_snippet,
+        }
+        
+        # Add profile-type-specific fields
+        if follower_profile.is_regular_profile():
+            extra_data.update({
+                'follower_name': specific_follower.name if specific_follower.name else "",
+                'follower_pet_type': specific_follower.pet_type.name if specific_follower.pet_type else None,
+                'follower_breed': specific_follower.breed if specific_follower.breed else "",
+            })
+        elif follower_profile.is_business_profile():
+            extra_data.update({
+                'follower_name': specific_follower.business_name if hasattr(specific_follower, 'business_name') else "",
+                'follower_business_category': specific_follower.business_category if hasattr(specific_follower, 'business_category') else None,
+            })
         
         # Get or update existing notification to prevent spam
         notification, created = Notification.objects.get_or_create(
@@ -356,15 +382,7 @@ def create_follow_notification_task(self, followed_profile_id, follower_profile_
             defaults={
                 'title': "started following you",
                 'message': f"{follower_profile.username} started following you",
-                'extra_data': {
-                    'follower_username': follower_profile.username,
-                    'follower_id': follower_profile.id,
-                    'follower_avatar': follower_avatar,
-                    'follower_about': about_snippet,
-                    'follower_name': follower_profile.name if follower_profile.name else "",
-                    'follower_pet_type': follower_profile.pet_type.name if follower_profile.pet_type else None,
-                    'follower_breed': follower_profile.breed if follower_profile.breed else "",
-                }
+                'extra_data': extra_data
             }
         )
         
