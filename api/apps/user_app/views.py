@@ -67,8 +67,8 @@ auth_profile_param = OpenApiParameter(
     location=OpenApiParameter.HEADER,
 )
 
-# Create a logger for this file
-logger = logging.getLogger(__file__)
+# Create a logger for this module
+logger = logging.getLogger(__name__)
 
 
 # Email sending is now handled by async tasks
@@ -116,7 +116,7 @@ class CreateUserView(generics.CreateAPIView):
         email = request.data.get("email", None)
         password = request.data.get("password", None)
 
-        logger.info(f"Creating user with username: {username}, email: {email}, password: {password}")
+        logger.info(f"Creating user with username: {username}, email: {email}")
 
         if not username or not email or not password:
             logger.error("Username, email, or password is required to create a user.")
@@ -230,13 +230,15 @@ class CreateProfileView(generics.CreateAPIView):
             serializer.is_valid(raise_exception=True)
             self.perform_create(serializer)
 
+            logger.info(f"Profile created: {serializer.data['username']} for user {request.user.id}")
+
             headers = self.get_success_headers(serializer.data)
             return Response(
                 serializer.data, status=status.HTTP_201_CREATED, headers=headers
             )
 
         except Exception as e:
-            logger.info(f"Error creating profile: {str(e)}")
+            logger.error(f"Error creating profile: {str(e)}")
             if isinstance(e, serializers.ValidationError):
                 errors = {}
                 # handle unique username constraint error with custom error message
@@ -275,20 +277,33 @@ class UpdateDestroyProfileView(generics.UpdateAPIView, generics.DestroyAPIView):
         # ensure that the profile sent belongs to the current authenticated user
         user_profile_match = self.request.user.profiles.filter(id=profile_id).first()
         if not user_profile_match:
+            logger.warning(
+                f"Unauthorized profile update attempt: "
+                f"profile {profile_id} does not belong to user {request.user.id}"
+            )
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        partial = kwargs.pop("partial", False)
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
+        try:
+            partial = kwargs.pop("partial", False)
+            instance = self.get_object()
+            serializer = self.get_serializer(instance, data=request.data, partial=partial)
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
 
-        if getattr(instance, "_prefetched_objects_cache", None):
-            # If 'prefetch_related' has been applied to a queryset, we need to
-            # forcibly invalidate the prefetch cache on the instance.
-            instance._prefetched_objects_cache = {}
-        instance_serializer = ProfileSerializer(instance)
-        return Response(instance_serializer.data)
+            if getattr(instance, "_prefetched_objects_cache", None):
+                # If 'prefetch_related' has been applied to a queryset, we need to
+                # forcibly invalidate the prefetch cache on the instance.
+                instance._prefetched_objects_cache = {}
+            
+            instance_serializer = ProfileSerializer(instance)
+            logger.info(f"Profile {profile_id} updated successfully")
+            return Response(instance_serializer.data)
+        except Exception as e:
+            logger.error(f"Error updating profile {profile_id}: {str(e)}")
+            return Response(
+                {"error": "Failed to update profile"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     def destroy(self, request, *args, **kwargs):
         profile_id = self.kwargs.get("pk")
@@ -364,19 +379,42 @@ class CreateProfileImageView(generics.CreateAPIView):
         # ensure that the profile sent belongs to the current authenticated user
         user_profile_match = self.request.user.profiles.filter(id=profile_id).first()
 
-        if not user_profile_match or not image:
+        if not user_profile_match:
+            logger.warning(
+                f"Unauthorized profile image creation: "
+                f"profile {profile_id} does not belong to user {request.user.id}"
+            )
             return Response(status=status.HTTP_400_BAD_REQUEST)
+        
+        if not image:
+            logger.warning(f"Profile image creation attempted without image file")
+            return Response(
+                {"error": "Image file is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-        image_serializer = self.get_serializer(
-            data={"profile": user_profile_match.id, "image": image}
-        )
-        image_serializer.is_valid(raise_exception=True)
-        self.perform_create(image_serializer)
+        try:
+            image_serializer = self.get_serializer(
+                data={"profile": user_profile_match.id, "image": image}
+            )
+            image_serializer.is_valid(raise_exception=True)
+            self.perform_create(image_serializer)
 
-        headers = self.get_success_headers(image_serializer.data)
-        return Response(
-            image_serializer.data, status=status.HTTP_201_CREATED, headers=headers
-        )
+            logger.info(f"Profile image created for profile {profile_id}")
+
+            headers = self.get_success_headers(image_serializer.data)
+            return Response(
+                image_serializer.data, status=status.HTTP_201_CREATED, headers=headers
+            )
+        except Exception as e:
+            logger.error(
+                f"Error creating profile image for profile {profile_id}: {str(e)}",
+                exc_info=True
+            )
+            return Response(
+                {"error": "Failed to create profile image"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class UpdateProfileImageView(generics.UpdateAPIView):
@@ -405,8 +443,10 @@ class UpdateProfileImageView(generics.UpdateAPIView):
                 response = self.partial_update(request, *args, **kwargs)
 
                 # If update was successful and there was an old image, delete it
-                if response.status_code == 200 and old_image:
-                    old_image.delete(save=False)
+                if response.status_code == 200:
+                    if old_image:
+                        old_image.delete(save=False)
+                    logger.info(f"Profile image updated for profile {profile_id}")
 
                 return response
 
@@ -480,6 +520,8 @@ class VerifyEmailView(generics.CreateAPIView):
                 user.is_email_verified = True
                 user.save()
                 user_token.delete()
+                
+            logger.info(f"Email verified successfully for user {user.email}")
         except Exception as e:
             logger.error(f"Error verifying email for user {user.id}: {str(e)}")
             return Response(
@@ -622,6 +664,7 @@ class ResetPasswordView(generics.CreateAPIView):
 
             # Check if token has expired (15 minutes)
             if timezone.now() - reset_token.created_at > timedelta(minutes=15):
+                logger.warning(f"Expired reset token used for email {email}")
                 reset_token.delete()
                 return Response(
                     {"error": "Reset token has expired"},
@@ -666,11 +709,13 @@ class ResetPasswordView(generics.CreateAPIView):
 
         except User.DoesNotExist:
             # Don't reveal if email exists
+            logger.warning(f"Password reset attempted for non-existent email: {email}")
             return Response(
                 {"error": "Invalid confirmation code"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         except ResetPasswordToken.DoesNotExist:
+            logger.warning(f"Invalid reset token provided for email: {email}")
             return Response(
                 {"error": "Invalid confirmation code"},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -743,6 +788,7 @@ class RequestEmailChangeView(generics.GenericAPIView):
         try:
             validate_email(new_email)
         except ValidationError:
+            logger.warning(f"Invalid email format provided: {new_email}")
             return Response(
                 {"error": {"email": "Invalid email format."}},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -750,6 +796,7 @@ class RequestEmailChangeView(generics.GenericAPIView):
 
         # Check if email is already in use
         if User.objects.filter(email=new_email).exists():
+            logger.warning(f"Email change requested to already existing email: {new_email}")
             return Response(
                 {"error": {"email": "Email already in use."}},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -767,7 +814,14 @@ class RequestEmailChangeView(generics.GenericAPIView):
         # Send verification email
         try:
             send_reset_email_email(new_email, token)
+            logger.info(
+                f"Email change verification sent: {request.user.email} -> {new_email}"
+            )
         except Exception as e:
+            logger.error(
+                f"Failed to send email change verification to {new_email}: {str(e)}",
+                exc_info=True
+            )
             pending_change.delete()
             return Response(
                 {"error": {"other": "Failed to send verification email"}},
@@ -793,6 +847,7 @@ class VerifyEmailChangeView(generics.GenericAPIView):
         token = request.data.get("token")
 
         if not token:
+            logger.warning("Email change verification attempted without token")
             return Response(
                 {"error": {"token": "Verification token required"}},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -803,6 +858,9 @@ class VerifyEmailChangeView(generics.GenericAPIView):
                 verification_token=token, user=request.user
             )
         except PendingEmailChange.DoesNotExist:
+            logger.warning(
+                f"Invalid email change token used by user {request.user.email}"
+            )
             return Response(
                 {"error": {"token": "Invalid or expired token"}},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -810,6 +868,9 @@ class VerifyEmailChangeView(generics.GenericAPIView):
 
         # Check if token is expired
         if pending_change.is_expired:
+            logger.warning(
+                f"Expired email change token used by user {request.user.email}"
+            )
             pending_change.delete()
             return Response(
                 {"error": {"token": "Verification token has expired"}},
@@ -824,6 +885,8 @@ class VerifyEmailChangeView(generics.GenericAPIView):
 
         # Delete pending change
         pending_change.delete()
+
+        logger.info(f"Email changed successfully: {old_email} -> {new_email}")
 
         # Send confirmation emails asynchronously
         send_email_change_confirmation_task.delay(old_email, new_email)

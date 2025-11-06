@@ -153,6 +153,7 @@ class CreateLikeView(generics.CreateAPIView):
         # ensure that the profile sent belongs to the current authenticated user
         current_profile = request.current_profile
         if str(profile_id) != str(current_profile.id):
+            logger.error(f"Profile {profile_id} does not belong to current authenticated user {current_profile.id}")
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         # prevent profile from liking own post
@@ -168,6 +169,7 @@ class CreateLikeView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
+        logger.info(f"Like created for post {post_id} by profile {current_profile.id}")
         return Response(
             serializer.data, status=status.HTTP_201_CREATED, headers=headers
         )
@@ -190,12 +192,16 @@ class DestroyLikeView(generics.DestroyAPIView):
 
         current_profile = request.current_profile
         if str(profile_id) != str(current_profile.id):
+            logger.error(f"Profile {profile_id} does not belong to current authenticated user {current_profile.id}")
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         if post_id:
             like = get_object_or_404(Like, profile=current_profile, post=post_id)
             self.perform_destroy(like)
+            logger.info(f"Like deleted for post {post_id} by profile {current_profile.id}")
             return Response(status=status.HTTP_204_NO_CONTENT)
+
+        logger.warning(f"Delete like attempt with no post_id by profile {current_profile.id}")
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -273,10 +279,10 @@ class CreateCommentView(generics.CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         post_id = self.kwargs.get("id")
-        text = request.data["text"]
-        profile_id = request.data["profileId"]
-        parent_comment = request.data["parent_comment"]
-        reply_to_comment = request.data["reply_to_comment"]
+        text = request.data.get("text")
+        profile_id = request.data.get("profileId")
+        parent_comment = request.data.get("parent_comment")
+        reply_to_comment = request.data.get("reply_to_comment")
 
         # TODO: make sure reply_to_comment is a child comment at some level of parent_comment
 
@@ -284,29 +290,48 @@ class CreateCommentView(generics.CreateAPIView):
 
         # ensure that the profile id sent belongs to the current authenticated user profile
         if str(profile_id) != str(current_profile.id):
+            logger.warning(
+                f"Profile mismatch in comment creation: "
+                f"provided {profile_id}, expected {current_profile.id}"
+            )
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = self.get_serializer(
-            data={
-                "text": text,
-                "post": post_id,
-                "profile": profile_id,
-                "parent_comment": parent_comment,
-                "reply_to_comment": reply_to_comment,
-            },
-            context={"request": request},
-        )
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        comment = Comment.objects.get(id=serializer.data["id"])
+        try:
+            serializer = self.get_serializer(
+                data={
+                    "text": text,
+                    "post": post_id,
+                    "profile": profile_id,
+                    "parent_comment": parent_comment,
+                    "reply_to_comment": reply_to_comment,
+                },
+                context={"request": request},
+            )
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            comment = Comment.objects.get(id=serializer.data["id"])
 
-        res_serializer = CommentDetailedSerializer(
-            comment, context={"request": request}
-        )
-        headers = self.get_success_headers(res_serializer.data)
-        return Response(
-            res_serializer.data, status=status.HTTP_201_CREATED, headers=headers
-        )
+            res_serializer = CommentDetailedSerializer(
+                comment, context={"request": request}
+            )
+            headers = self.get_success_headers(res_serializer.data)
+            
+            logger.info(
+                f"Comment created on post {post_id} by profile {current_profile.id}"
+            )
+            
+            return Response(
+                res_serializer.data, status=status.HTTP_201_CREATED, headers=headers
+            )
+        except Exception as e:
+            logger.error(
+                f"Error creating comment on post {post_id}: {str(e)}",
+                exc_info=True
+            )
+            return Response(
+                {"error": "Failed to create comment"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class ListPostCommentsView(generics.ListAPIView):
@@ -339,9 +364,14 @@ class RetrieveUpdateDestroyPostView(generics.RetrieveUpdateDestroyAPIView):
 
     def get(self, request, *args, **kwargs):
         post_id = self.kwargs.get("pk")
-        post = self.queryset.get(id=post_id)
-        serializer = self.serializer_class(post, context={"request": request})
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        try:
+            post = self.queryset.get(id=post_id)
+            logger.debug(f"Post {post_id} retrieved by user {request.user.id}")
+            serializer = self.serializer_class(post, context={"request": request})
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Post.DoesNotExist:
+            logger.warning(f"Post {post_id} not found")
+            return Response({"error": "Post not found"}, status=status.HTTP_404_NOT_FOUND)
 
     def update(self, request, *args, **kwargs):
         current_profile = request.current_profile
@@ -349,6 +379,10 @@ class RetrieveUpdateDestroyPostView(generics.RetrieveUpdateDestroyAPIView):
         
         # check that the user requesting the update owns the post
         if instance.profile.user != self.request.user:
+            logger.warning(
+                f"Unauthorized post update attempt: user {request.user.id} "
+                f"attempted to update post {instance.id} owned by user {instance.profile.user.id}"
+            )
             return Response(
                 {"error": "Requesting user does not own this resource."},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -356,6 +390,10 @@ class RetrieveUpdateDestroyPostView(generics.RetrieveUpdateDestroyAPIView):
 
         # check that the profile requesting the update owns the post
         if instance.profile.id != int(current_profile.id):
+            logger.warning(
+                f"Unauthorized post update attempt: profile {current_profile.id} "
+                f"attempted to update post {instance.id} owned by profile {instance.profile.id}"
+            )
             return Response(
                 {"error": "Requesting profile does not own this resource."},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -383,6 +421,7 @@ class RetrieveUpdateDestroyPostView(generics.RetrieveUpdateDestroyAPIView):
 
         # Return the updated post using PostDetailedSerializer
         response_serializer = PostDetailedSerializer(updated_instance, context={"request": request})
+        logger.info(f"Post {updated_instance.id} updated successfully by profile {current_profile.id}")
         return Response(response_serializer.data, status=status.HTTP_200_OK)
 
     def destroy(self, request, *args, **kwargs):
@@ -392,6 +431,10 @@ class RetrieveUpdateDestroyPostView(generics.RetrieveUpdateDestroyAPIView):
 
         # check that the user requesting the delete owns the post
         if instance.profile.user != self.request.user:
+            logger.warning(
+                f"Unauthorized post deletion attempt: user {request.user.id} "
+                f"attempted to delete post {instance.id} owned by user {instance.profile.user.id}"
+            )
             return Response(
                 {"error": "Requesting user does not own this resource."},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -399,11 +442,16 @@ class RetrieveUpdateDestroyPostView(generics.RetrieveUpdateDestroyAPIView):
 
         # check that the profile requesting the delete owns the post
         if instance.profile.id != int(current_profile.id):
+            logger.warning(
+                f"Unauthorized post deletion attempt: profile {current_profile.id} "
+                f"attempted to delete post {instance.id} owned by profile {instance.profile.id}"
+            )
             return Response(
                 {"error": "Requesting profile does not own this resource."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        logger.info(f"Post {instance.id} deleted by profile {current_profile.id}")
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -462,24 +510,45 @@ class CreateFollowView(generics.CreateAPIView):
         # ensure that the profile sent belongs to the current authenticated user
         current_profile = request.current_profile
         if str(current_profile.id) != str(auth_profile_id):
+            logger.warning(
+                f"Profile mismatch in follow creation: "
+                f"current profile {current_profile.id}, auth profile {auth_profile_id}"
+            )
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        profile_to_follow = get_object_or_404(Profile, pk=request.data["profileId"])
+        profile_to_follow_id = request.data.get("profileId")
+        profile_to_follow = get_object_or_404(Profile, pk=profile_to_follow_id)
+        
         # profile cannot follow itself
         if profile_to_follow.id == current_profile.id:
+            logger.warning(f"Profile {current_profile.id} attempted to follow itself")
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        new_follow_data = {
-            "followed": request.data["profileId"],
-            "followed_by": current_profile.id,
-        }
-        serializer = self.get_serializer(data=new_follow_data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(
-            serializer.data, status=status.HTTP_201_CREATED, headers=headers
-        )
+        try:
+            new_follow_data = {
+                "followed": profile_to_follow_id,
+                "followed_by": current_profile.id,
+            }
+            serializer = self.get_serializer(data=new_follow_data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            
+            logger.info(
+                f"Follow created: profile {current_profile.id} now follows {profile_to_follow_id}"
+            )
+            
+            return Response(
+                serializer.data, status=status.HTTP_201_CREATED, headers=headers
+            )
+        except Exception as e:
+            logger.error(
+                f"Error creating follow from {current_profile.id} to {profile_to_follow_id}: {str(e)}"
+            )
+            return Response(
+                {"error": "Failed to create follow"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 @extend_schema_view(get=extend_schema(parameters=[username_param]))
@@ -495,15 +564,19 @@ class ListFollowersView(generics.ListAPIView):
         profile_id = self.kwargs.get("id", None)
         username = self.request.query_params.get("username", None)
 
-        profile = Profile.objects.get(id=profile_id)
-        followers_objs = profile.following.all()
-        if username:
-            followers_objs = followers_objs.filter(
-                Q(followed_by__username__icontains=username)
-            )
-        sorted = followers_objs.order_by("followed_by__username")
-        followers = [obj.followed_by for obj in sorted]
-        return followers
+        try:
+            profile = Profile.objects.get(id=profile_id)
+            followers_objs = profile.following.all()
+            if username:
+                followers_objs = followers_objs.filter(
+                    Q(followed_by__username__icontains=username)
+                )
+            sorted_objs = followers_objs.order_by("followed_by__username")
+            followers = [obj.followed_by for obj in sorted_objs]
+            return followers
+        except Profile.DoesNotExist:
+            logger.error(f"Profile {profile_id} not found when listing followers")
+            return []
 
 
 @extend_schema_view(get=extend_schema(parameters=[username_param]))
@@ -519,15 +592,19 @@ class ListFollowingView(generics.ListAPIView):
         profile_id = self.kwargs.get("id", None)
         username = self.request.query_params.get("username", None)
 
-        profile = Profile.objects.get(id=profile_id)
-        following_objs = profile.followers.all()
-        if username:
-            following_objs = following_objs.filter(
-                Q(followed__username__icontains=username)
-            )
-        sorted = following_objs.order_by("followed__username")
-        following = [obj.followed for obj in sorted]
-        return following
+        try:
+            profile = Profile.objects.get(id=profile_id)
+            following_objs = profile.followers.all()
+            if username:
+                following_objs = following_objs.filter(
+                    Q(followed__username__icontains=username)
+                )
+            sorted_objs = following_objs.order_by("followed__username")
+            following = [obj.followed for obj in sorted_objs]
+            return following
+        except Profile.DoesNotExist:
+            logger.error(f"Profile {profile_id} not found when listing following")
+            return []
 
 
 @extend_schema_view(
@@ -547,14 +624,29 @@ class DestroyFollowView(generics.DestroyAPIView):
         # ensure that the profile sent belongs to the current authenticated user
         current_profile = request.current_profile
         if str(auth_profile_id) != str(current_profile.id):
+            logger.warning(
+                f"Unauthorized unfollow attempt: profile mismatch "
+                f"{auth_profile_id} vs {current_profile.id}"
+            )
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         if profile_id:
-            follow = get_object_or_404(
-                Follow, followed_by=auth_profile_id, followed=profile_id
-            )
-            self.perform_destroy(follow)
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            try:
+                follow = get_object_or_404(
+                    Follow, followed_by=auth_profile_id, followed=profile_id
+                )
+                self.perform_destroy(follow)
+                logger.info(
+                    f"Unfollow: profile {auth_profile_id} unfollowed {profile_id}"
+                )
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            except Exception as e:
+                logger.error(
+                    f"Error unfollowing: profile {auth_profile_id} -> {profile_id}: {str(e)}"
+                )
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+        
+        logger.warning(f"Unfollow attempt with no profile_id by profile {auth_profile_id}")
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -684,27 +776,43 @@ class CreateCommentLikeView(generics.CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         comment_id = self.kwargs.get("comment_id", None)
-        profile_id = request.data["profileId"]
+        profile_id = request.data.get("profileId")
 
         # ensure that the profile sent belongs to the current authenticated user
         current_profile = request.current_profile
 
         if str(profile_id) != str(current_profile.id):
+            logger.warning(
+                f"Profile mismatch in comment like creation: "
+                f"provided {profile_id}, expected {current_profile.id}"
+            )
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        new_like_data = {
-            "comment": comment_id,
-            "profile": current_profile.id,
-        }
-        serializer = self.get_serializer(
-            data=new_like_data, context={"request": request}
-        )
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(
-            serializer.data, status=status.HTTP_201_CREATED, headers=headers
-        )
+        try:
+            new_like_data = {
+                "comment": comment_id,
+                "profile": current_profile.id,
+            }
+            serializer = self.get_serializer(
+                data=new_like_data, context={"request": request}
+            )
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            
+            logger.info(f"Comment like created for comment {comment_id} by profile {current_profile.id}")
+            
+            return Response(
+                serializer.data, status=status.HTTP_201_CREATED, headers=headers
+            )
+        except Exception as e:
+            logger.error(
+                f"Error creating comment like for comment {comment_id}: {str(e)}"
+            )
+            return Response(
+                {"error": "Failed to like comment"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 @extend_schema_view(
@@ -723,14 +831,27 @@ class DestroyCommentLikeView(generics.DestroyAPIView):
 
         current_profile = request.current_profile
         if str(current_profile.id) != str(profile_id):
+            logger.warning(
+                f"Profile mismatch in comment like deletion: "
+                f"current profile {current_profile.id}, provided {profile_id}"
+            )
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         if comment_id:
-            like = get_object_or_404(
-                CommentLike, profile=current_profile, comment=comment_id
-            )
-            self.perform_destroy(like)
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            try:
+                like = get_object_or_404(
+                    CommentLike, profile=current_profile, comment=comment_id
+                )
+                self.perform_destroy(like)
+                logger.info(f"Comment like deleted for comment {comment_id} by profile {current_profile.id}")
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            except Exception as e:
+                logger.error(
+                    f"Error deleting comment like for comment {comment_id}: {str(e)}"
+                )
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+        
+        logger.warning(f"Delete comment like attempt with no comment_id by profile {current_profile.id}")
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -864,12 +985,15 @@ class ListCreateSavedPostView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         profile_id = self.request.headers["auth-profile-id"]
-        profile = Profile.objects.get(id=profile_id)
-
-        saved_posts = profile.saved_posts.all()
-        saved_posts_ordered = saved_posts.order_by("-saved_at")
-        posts = [obj.post for obj in saved_posts_ordered]
-        return posts
+        try:
+            profile = Profile.objects.get(id=profile_id)
+            saved_posts = profile.saved_posts.all()
+            saved_posts_ordered = saved_posts.order_by("-saved_at")
+            posts = [obj.post for obj in saved_posts_ordered]
+            return posts
+        except Profile.DoesNotExist:
+            logger.error(f"Profile {profile_id} not found when retrieving saved posts")
+            return []
 
     def get_serializer_class(self):
         if self.request.method == "GET":
@@ -888,15 +1012,31 @@ class ListCreateSavedPostView(generics.ListCreateAPIView):
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        profile_id = request.data["profile"]
+        profile_id = request.data.get("profile")
         user_profile_match = self.request.user.profiles.filter(id=profile_id).first()
         # ensure profile creating saved post belongs to the authenticated user
         if not user_profile_match:
+            logger.warning(
+                f"Unauthorized save post attempt: profile {profile_id} "
+                f"does not belong to user {request.user.id}"
+            )
             return Response(
                 {"message": "Profile does not belong to the authenticated user."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        return super().post(request, *args, **kwargs)
+        
+        try:
+            response = super().post(request, *args, **kwargs)
+            if response.status_code == 201:
+                post_id = request.data.get("post")
+                logger.info(f"Post {post_id} saved by profile {profile_id}")
+            return response
+        except Exception as e:
+            logger.error(f"Error saving post for profile {profile_id}: {str(e)}")
+            return Response(
+                {"error": "Failed to save post"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 @extend_schema_view(
@@ -916,17 +1056,30 @@ class DestroySavedPostView(generics.DestroyAPIView):
         user_profile_match = self.request.user.profiles.filter(id=profile_id).first()
 
         if not user_profile_match:
+            logger.warning(
+                f"Unauthorized unsave post attempt: profile {profile_id} "
+                f"does not belong to user {request.user.id}"
+            )
             return Response(
                 {"message": "Profile does not belong to the authenticated user."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         if post_id:
-            like = get_object_or_404(
-                SavedPost, profile=user_profile_match, post=post_id
-            )
-            self.perform_destroy(like)
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            try:
+                saved_post = get_object_or_404(
+                    SavedPost, profile=user_profile_match, post=post_id
+                )
+                self.perform_destroy(saved_post)
+                logger.info(f"Post {post_id} unsaved by profile {profile_id}")
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            except Exception as e:
+                logger.error(
+                    f"Error unsaving post {post_id} for profile {profile_id}: {str(e)}"
+                )
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+        
+        logger.warning(f"Unsave attempt with no post_id by profile {profile_id}")
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -1010,6 +1163,26 @@ class PostReportViewSet(
         context["request"] = self.request
         return context
 
+    def create(self, request, *args, **kwargs):
+        """Override create to add logging for report creation."""
+        try:
+            response = super().create(request, *args, **kwargs)
+            if response.status_code == 201:
+                logger.info(
+                    f"Post report created by profile {request.current_profile.id}: "
+                    f"post {request.data.get('post')}, reason {request.data.get('reason')}"
+                )
+            return response
+        except Exception as e:
+            logger.error(
+                f"Error creating post report: {str(e)}",
+                exc_info=True
+            )
+            return Response(
+                {"error": "Failed to create report"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
     @extend_schema(parameters=[auth_profile_param])
     @action(
         detail=True, methods=["patch"], permission_classes=[permissions.IsAdminUser]
@@ -1025,14 +1198,24 @@ class PostReportViewSet(
         request_status = request.data.get("status", PostReport.ReportStatus.RESOLVED)
 
         if request_status not in dict(PostReport.ReportStatus.choices):
+            logger.warning(
+                f"Invalid status '{request_status}' provided for report {pk} "
+                f"by profile {resolving_profile.id}"
+            )
             return Response(
                 {"error": "Invalid status"}, status=status.HTTP_400_BAD_REQUEST
             )
 
+        old_status = report.status
         report.status = request_status
         report.resolution_note = resolution_note
         report.resolved_by = resolving_profile
         report.save()
+
+        logger.info(
+            f"Report {pk} resolved: status changed from {old_status} to {request_status} "
+            f"by profile {resolving_profile.id}"
+        )
 
         return Response(PostReportDetailSerializer(report).data)
 

@@ -103,6 +103,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "apps.core_app.middleware.ProfileAuthenticationMiddleware",
+    "apps.core_app.logging_middleware.RequestLoggingMiddleware",  # HTTP request logging
 ]
 
 ROOT_URLCONF = "core.urls"
@@ -207,29 +208,11 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 
+# Logging configuration will be set up after environment-specific settings are loaded
+# This placeholder will be overridden by the environment-specific configuration
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
-    "root": {"level": "INFO", "handlers": ["file"]},
-    "handlers": {
-        "file": {
-            "level": "INFO",
-            "class": "logging.FileHandler",
-            "filename": "/vol/log/django.log",
-            "formatter": "app",
-        },
-    },
-    "loggers": {
-        "django": {"handlers": ["file"], "level": "INFO", "propagate": False},
-    },
-    "formatters": {
-        "app": {
-            "format": (
-                "%(asctime)s [%(levelname)-8s] " "(%(module)s.%(funcName)s) %(message)s"
-            ),
-            "datefmt": "%Y-%m-%d %H:%M:%S",
-        },
-    },
 }
 
 SPECTACULAR_SETTINGS = {
@@ -329,3 +312,11 @@ elif environment == "staging":
 elif environment == "prod":
     from core.settings_prod import *
     print_environment_banner(environment)
+
+# Configure logging after environment-specific settings are loaded
+if environment:
+    from core.logging_config import get_logging_config
+    import logging.config
+    
+    LOGGING = get_logging_config(environment, log_dir="/vol/log")
+    logging.config.dictConfig(LOGGING)
