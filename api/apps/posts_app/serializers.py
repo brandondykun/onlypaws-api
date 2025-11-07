@@ -545,16 +545,15 @@ class CreatePostReportSerializer(serializers.ModelSerializer):
     def validate(self, data):
         # Check if user has already reported this post
         request = self.context.get("request")
-        auth_profile_id = request.headers["auth-profile-id"]
+        current_profile = request.current_profile
         if PostReport.objects.filter(
-            post=data["post"], reporter=auth_profile_id
+            post=data["post"], reporter=current_profile
         ).exists():
             raise serializers.ValidationError("You have already reported this post.")
         return data
 
     def create(self, validated_data):
         request = self.context.get("request")
-        # auth_profile_id = request.headers["auth-profile-id"]
         validated_data["reporter"] = request.current_profile
         return super().create(validated_data)
 

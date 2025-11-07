@@ -29,7 +29,7 @@ def create_profile_url():
 
 def retrieve_update_profile_url(profile_id):
     """Create and return a retrieve/update profile url."""
-    return reverse("profile_app:update_destroy_profile", args=[profile_id])
+    return reverse("profile_app:retrieve_update_destroy_profile", args=[profile_id])
 
 
 class PrivateProfileApiTests(TestCase):

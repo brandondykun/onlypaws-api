@@ -43,7 +43,7 @@ def create_profile_image(profile):
 
 def get_profile_detail_url(profile_id):
     """Return profile detail URL."""
-    return reverse("profile_app:update_destroy_profile", args=[profile_id])
+    return reverse("profile_app:retrieve_update_destroy_profile", args=[profile_id])
 
 
 class DeleteProfileAPITests(TestCase):

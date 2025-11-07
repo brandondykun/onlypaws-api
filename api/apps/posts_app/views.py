@@ -231,19 +231,11 @@ class RetrieveFeedView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     queryset = Post.objects.all()
 
-    def get(self, request, *args, **kwargs):
-        profile_id = self.kwargs.get("id", None)
-        # ensure that the profile sent belongs to the current authenticated user
-        current_profile = request.current_profile
-        if str(profile_id) != str(current_profile.id):
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
-        return self.list(request, *args, **kwargs)
-
     def get_queryset(self):
-        requesting_profile_id = self.kwargs.get("id", None)
+        current_profile = self.request.current_profile
+
         posts = Post.objects.filter(
-            Q(profile__following__followed_by=requesting_profile_id)
+            Q(profile__following__followed_by=current_profile)
             & ~Q(reports__reason__id=1)  # filter reported inappropriate content
         ).order_by("-created_at")
         return posts
@@ -407,7 +399,6 @@ class RetrieveUpdateDestroyPostView(generics.RetrieveUpdateDestroyAPIView):
         return Response(response_serializer.data, status=status.HTTP_200_OK)
 
     def destroy(self, request, *args, **kwargs):
-        # auth_profile_id = request.headers["auth-profile-id"]
         current_profile = request.current_profile
         instance = self.get_object()
 
@@ -450,10 +441,10 @@ class ListExplorePostsView(generics.ListAPIView):
     pagination_class = ListExplorePostsPagination
 
     def get_queryset(self):
-        requesting_profile_id = self.kwargs.get("id")
+        current_profile = self.request.current_profile
 
         posts = Post.objects.filter(
-            ~Q(profile__following__followed_by=requesting_profile_id)
+            ~Q(profile__following__followed_by=current_profile)
             & ~Q(profile__user=self.request.user)
             & ~Q(reports__gt=0)  # filter all reported posts for explore screen
         ).order_by("-created_at")
@@ -554,15 +545,17 @@ class ListSimilarPostsView(generics.ListAPIView):
 
 @extend_schema_view(
     post=extend_schema(parameters=[auth_profile_param]),
+    delete=extend_schema(parameters=[auth_profile_param]),
 )
-class CreateCommentLikeView(generics.CreateAPIView):
+class CreateDestroyCommentLikeView(generics.GenericAPIView):
     """Create or delete a Comment Like."""
 
     serializer_class = CommentLikeSerializer
     permission_classes = [permissions.IsAuthenticated]
     queryset = CommentLike.objects.all()
 
-    def create(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
+        """Create a comment like."""
         comment_id = self.kwargs.get("comment_id", None)
         profile_id = request.data.get("profileId")
 
@@ -585,13 +578,12 @@ class CreateCommentLikeView(generics.CreateAPIView):
                 data=new_like_data, context={"request": request}
             )
             serializer.is_valid(raise_exception=True)
-            self.perform_create(serializer)
-            headers = self.get_success_headers(serializer.data)
+            serializer.save()
             
             logger.info(f"Comment like created for comment {comment_id} by profile {current_profile.id}")
             
             return Response(
-                serializer.data, status=status.HTTP_201_CREATED, headers=headers
+                serializer.data, status=status.HTTP_201_CREATED
             )
         except Exception as e:
             logger.error(
@@ -602,35 +594,17 @@ class CreateCommentLikeView(generics.CreateAPIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-
-@extend_schema_view(
-    delete=extend_schema(parameters=[auth_profile_param]),
-)
-class DestroyCommentLikeView(generics.DestroyAPIView):
-    """Delete a Comment Like."""
-
-    serializer_class = CommentLikeSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    queryset = CommentLike.objects.all()
-
-    def destroy(self, request, *args, **kwargs):
+    def delete(self, request, *args, **kwargs):
+        """Delete a comment like."""
         comment_id = self.kwargs.get("comment_id", None)
-        profile_id = self.kwargs.get("profile_id", None)
 
         current_profile = request.current_profile
-        if str(current_profile.id) != str(profile_id):
-            logger.warning(
-                f"Profile mismatch in comment like deletion: "
-                f"current profile {current_profile.id}, provided {profile_id}"
-            )
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
         if comment_id:
             try:
                 like = get_object_or_404(
                     CommentLike, profile=current_profile, comment=comment_id
                 )
-                self.perform_destroy(like)
+                like.delete()
                 logger.info(f"Comment like deleted for comment {comment_id} by profile {current_profile.id}")
                 return Response(status=status.HTTP_204_NO_CONTENT)
             except Exception as e:
@@ -772,46 +746,23 @@ class ListCreateSavedPostView(generics.ListCreateAPIView):
     pagination_class = ListProfilePostsPagination
 
     def get_queryset(self):
-        profile_id = self.request.headers["auth-profile-id"]
-        try:
-            profile = Profile.objects.get(id=profile_id)
-            saved_posts = profile.saved_posts.all()
-            saved_posts_ordered = saved_posts.order_by("-saved_at")
-            posts = [obj.post for obj in saved_posts_ordered]
-            return posts
-        except Profile.DoesNotExist:
-            logger.error(f"Profile {profile_id} not found when retrieving saved posts")
-            return []
+        current_profile = self.request.current_profile
+        saved_posts = current_profile.saved_posts.all()
+        saved_posts_ordered = saved_posts.order_by("-saved_at")
+        posts = [obj.post for obj in saved_posts_ordered]
+        return posts
 
     def get_serializer_class(self):
         if self.request.method == "GET":
             return PostDetailedSerializer
         return CreateSavedPostSerializer
 
-    def get(self, request, *args, **kwargs):
-        profile_id = self.request.headers["auth-profile-id"]
-        user_profile_match = self.request.user.profiles.filter(id=profile_id).first()
-
-        if not user_profile_match:
-            return Response(
-                {"message": "Profile does not belong to the authenticated user."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        return super().get(request, *args, **kwargs)
-
     def post(self, request, *args, **kwargs):
+        current_profile = request.current_profile
         profile_id = request.data.get("profile")
-        user_profile_match = self.request.user.profiles.filter(id=profile_id).first()
         # ensure profile creating saved post belongs to the authenticated user
-        if not user_profile_match:
-            logger.warning(
-                f"Unauthorized save post attempt: profile {profile_id} "
-                f"does not belong to user {request.user.id}"
-            )
-            return Response(
-                {"message": "Profile does not belong to the authenticated user."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        if str(profile_id) != str(current_profile.id):
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         
         try:
             response = super().post(request, *args, **kwargs)
@@ -839,35 +790,23 @@ class DestroySavedPostView(generics.DestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         post_id = self.kwargs.get("post_id", None)
-        profile_id = self.request.headers["auth-profile-id"]
-
-        user_profile_match = self.request.user.profiles.filter(id=profile_id).first()
-
-        if not user_profile_match:
-            logger.warning(
-                f"Unauthorized unsave post attempt: profile {profile_id} "
-                f"does not belong to user {request.user.id}"
-            )
-            return Response(
-                {"message": "Profile does not belong to the authenticated user."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        current_profile = request.current_profile
 
         if post_id:
             try:
                 saved_post = get_object_or_404(
-                    SavedPost, profile=user_profile_match, post=post_id
+                    SavedPost, profile=current_profile, post=post_id
                 )
                 self.perform_destroy(saved_post)
-                logger.info(f"Post {post_id} unsaved by profile {profile_id}")
+                logger.info(f"Post {post_id} unsaved by profile {current_profile.id}")
                 return Response(status=status.HTTP_204_NO_CONTENT)
             except Exception as e:
                 logger.error(
-                    f"Error unsaving post {post_id} for profile {profile_id}: {str(e)}"
+                    f"Error unsaving post {post_id} for profile {current_profile.id}: {str(e)}"
                 )
                 return Response(status=status.HTTP_400_BAD_REQUEST)
         
-        logger.warning(f"Unsave attempt with no post_id by profile {profile_id}")
+        logger.warning(f"Unsave attempt with no post_id by profile {current_profile.id}")
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 

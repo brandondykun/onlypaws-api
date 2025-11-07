@@ -12,13 +12,8 @@ urlpatterns = [
     ),
     path(
         "<int:pk>/",
-        views.UpdateDestroyProfileView.as_view(),
-        name="update_destroy_profile",
-    ),
-    path(
-        "<int:pk>/detail/",
-        views.RetrieveProfileView.as_view(),
-        name="retrieve_profile",
+        views.RetrieveUpdateDestroyProfileView.as_view(),
+        name="retrieve_update_destroy_profile",
     ),
     
     # Profile Images
@@ -42,7 +37,7 @@ urlpatterns = [
     
     # Profile Search
     path(
-        "<int:id>/search/",
+        "search/",
         views.ListSearchedProfilesView.as_view(),
         name="search_profiles",
     ),

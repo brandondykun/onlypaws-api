@@ -100,21 +100,29 @@ class CreateProfileView(generics.CreateAPIView):
 
 
 @extend_schema_view(
+    get=extend_schema(parameters=[auth_profile_param]),
     patch=extend_schema(parameters=[auth_profile_param]),
     delete=extend_schema(parameters=[auth_profile_param]),
 )
-class UpdateDestroyProfileView(generics.UpdateAPIView, generics.DestroyAPIView):
+class RetrieveUpdateDestroyProfileView(generics.RetrieveAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
     """Retrieve, update or delete a Profile."""
 
     queryset = Profile.objects.select_related('regularprofile', 'businessprofile').all()
     serializer_class = ProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
-    allowed_methods = ["PATCH", "DELETE"]
+    allowed_methods = ["GET", "PATCH", "DELETE"]
 
     def get_serializer_class(self):
-        if self.request.method == "PATCH":
+        if self.request.method == "GET":
+            return ProfileDetailedSerializer
+        elif self.request.method == "PATCH":
             return ProfileUpdateSerializer
         return ProfileSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, context={"request": request})
+        return Response(serializer.data)
 
     def update(self, request, *args, **kwargs):
         profile_id = self.kwargs.get("pk")
@@ -192,22 +200,6 @@ class UpdateDestroyProfileView(generics.UpdateAPIView, generics.DestroyAPIView):
                 {"error": "Failed to delete profile. Please try again."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-
-
-@extend_schema_view(
-    get=extend_schema(parameters=[auth_profile_param]),
-)
-class  RetrieveProfileView(generics.RetrieveAPIView):
-    """Get details of a Profile."""
-
-    serializer_class = ProfileDetailedSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    queryset = Profile.objects.all()
-
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, context={"request": request})
-        return Response(serializer.data)
 
 
 @extend_schema_view(
@@ -347,18 +339,17 @@ class ListSearchedProfilesView(generics.ListAPIView):
         return self.list(request, *args, **kwargs)
 
     def get_queryset(self):
+        current_profile = self.request.current_profile
         username = self.request.query_params.get("username", None)
-        profile_id = self.kwargs.get("id", None)
         profiles = Profile.objects.filter(
-            Q(username__icontains=username) & ~Q(id=profile_id)
+            Q(username__icontains=username) & ~Q(id=current_profile.id)
         ).order_by("username")
         return profiles
 
     def get_serializer_context(self):
-        profile_id = self.kwargs.get("id", None)
-
+        current_profile = self.request.current_profile
         return {
-            "profile_id": profile_id,
+            "profile_id": current_profile.id,
             "request": self.request,
         }
 

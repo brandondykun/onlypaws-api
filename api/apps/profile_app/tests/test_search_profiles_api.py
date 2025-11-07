@@ -27,7 +27,7 @@ class PrivateSearchProfilesApiTests(ProfileAppTestHelper):
         that match the searched username text.
         """
         search_text = "user"
-        url = search_profiles_url(self.profile.id, "user")
+        url = search_profiles_url("user")
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         match_count = len(
@@ -42,7 +42,7 @@ class PrivateSearchProfilesApiTests(ProfileAppTestHelper):
         Test searching for profiles by username but not
         providing a username returns error.
         """
-        url = search_profiles_url(self.profile.id, "")
+        url = search_profiles_url("")
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -59,7 +59,7 @@ class PublicSearchProfilesApiTests(ProfileAppTestHelper):
         Test searching for profiles by username without
         authentication returns error.
         """
-        url = search_profiles_url(self.profile.id, "user")
+        url = search_profiles_url("user")
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 

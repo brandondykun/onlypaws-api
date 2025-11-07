@@ -107,17 +107,15 @@ def create_destroy_follow_url(auth_profile_id: int, followed_profile_id: int):
     )
 
 
-def search_profiles_url(profile_id: int, search_text: str):
+def search_profiles_url(search_text: str):
     """Create and return a search profiles url.
 
     Parameters
     ----------
-    profile_id : int
-        The id of the authenticated user profile performing the search.
     search_text : str
         Search text of username (partial or full) to be searched.
     """
-    return f"{reverse('profile_app:search_profiles', args=[profile_id])}?username={search_text}"
+    return f"{reverse('profile_app:search_profiles')}?username={search_text}"
 
 
 #

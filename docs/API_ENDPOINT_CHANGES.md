@@ -12,12 +12,9 @@ Profile-related endpoints have been moved from multiple locations to a dedicated
 
 **OLD:** `/api/v1/auth/profile/<id>/`
 **NEW:** `/api/v1/profile/<id>/`
+- GET to retrieve profile details
 - PATCH to update profile
 - DELETE to delete profile
-
-**OLD:** `/api/v1/posts/profile/<id>/`
-**NEW:** `/api/v1/profile/<id>/detail/`
-- GET to retrieve profile details
 
 ### 2. Profile Images
 **OLD:** `/api/v1/auth/profile-image/`

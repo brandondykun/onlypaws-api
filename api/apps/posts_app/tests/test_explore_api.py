@@ -20,7 +20,7 @@ class PrivateExploreApiTests(PostsAppTestHelper):
         """
         Test fetching a profiles explore posts returns posts from profiles that they do not follow.
         """
-        url = get_explore_posts_url(self.profile.id)
+        url = get_explore_posts_url()
 
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -40,7 +40,7 @@ class PublicExploreApiTests(PostsAppTestHelper):
         Test fetching a profiles explore posts while not being authenticated
         returns a 401 error.
         """
-        url = get_explore_posts_url(self.profile.id)
+        url = get_explore_posts_url()
 
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)

@@ -52,13 +52,8 @@ urlpatterns = [
     ),
     path(
         "comment/<int:comment_id>/like/",
-        views.CreateCommentLikeView.as_view(),
-        name="create_comment_like",
-    ),
-    path(
-        "comment/<int:comment_id>/like/<int:profile_id>/",
-        views.DestroyCommentLikeView.as_view(),
-        name="destroy_comment_like",
+        views.CreateDestroyCommentLikeView.as_view(),
+        name="comment_like",
     ),
     path(
         "post/<int:pk>/comments/",
@@ -82,10 +77,10 @@ urlpatterns = [
         name="list_profile_posts",
     ),
     path(
-        "profile/<int:id>/feed/", views.RetrieveFeedView.as_view(), name="retrieve_feed"
+        "post/feed/", views.RetrieveFeedView.as_view(), name="retrieve_feed"
     ),
     path(
-        "profile/<int:id>/explore/",
+        "post/explore/",
         views.ListExplorePostsView.as_view(),
         name="list_explore",
     ),

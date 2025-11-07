@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from apps.user_app.models import User
 from apps.profile_app.models import Profile, RegularProfile
 from apps.posts_app.models import Post, PostImage
-from apps.interactions_app.models import Like, Follow, Comment
+from apps.interactions_app.models import Like, Follow, Comment, CommentLike
 from apps.moderation_app.models import ReportReason, PostReport
 
 #
@@ -151,6 +151,19 @@ def create_comment(
     )
 
 
+def create_comment_like(profile: Profile, comment: Comment):
+    """Create and return new comment Like.
+
+    Parameters
+    ----------
+    profile : Profile
+        Profile to like Comment.
+    comment : Comment
+        Comment being liked.
+    """
+    return CommentLike.objects.create(profile=profile, comment=comment)
+
+
 #
 # Create url helper functions
 #
@@ -159,7 +172,7 @@ def create_comment(
 CREATE_POST_URL = reverse("posts_app:create_post")
 
 
-def get_explore_posts_url(profile_id: int):
+def get_explore_posts_url():
     """
     Create and return a get explore posts url.
 
@@ -168,10 +181,10 @@ def get_explore_posts_url(profile_id: int):
     profile_id : int
         The id of the profile that is used to fetch explore posts.
     """
-    return reverse("posts_app:list_explore", args=[profile_id])
+    return reverse("posts_app:list_explore")
 
 
-def get_feed_url(profile_id: int):
+def get_feed_url():
     """Create and return a get feed url.
 
     Parameters
@@ -179,7 +192,7 @@ def get_feed_url(profile_id: int):
     profile_id : int
         The id of the profile that is used to fetch feed posts.
     """
-    return reverse("posts_app:retrieve_feed", args=[profile_id])
+    return reverse("posts_app:retrieve_feed")
 
 
 def create_like_url(post_id: int):
