@@ -177,3 +177,4 @@ docker/prod/.env.prod
 docker/prod/.env.prod.db
 docker/test/.env.test
 docker/test/.env.test.db
+docs/STAGING_USER_INFO.md

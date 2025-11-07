@@ -313,35 +313,5 @@
       "groups": [],
       "user_permissions": []
     }
-  },
-  {
-    "model": "user_app.user",
-    "pk": 24,
-    "fields": {
-      "password": "pbkdf2_sha256$870000$MgekdX8qYqpOEOspqdkt2h$RthmJp0XZH3mdxTd8lbvieIZyDdNXh1QwWHNDruQMTY=",
-      "last_login": null,
-      "is_superuser": false,
-      "email": "tempuser@email.com",
-      "is_active": true,
-      "is_staff": false,
-      "is_email_verified": true,
-      "groups": [],
-      "user_permissions": []
-    }
-  },
-  {
-    "model": "user_app.user",
-    "pk": 25,
-    "fields": {
-      "password": "pbkdf2_sha256$870000$sQwREnpA67FqbZnA6qo41G$/KGLDL/9aoU/5/UvANw5Hbd9l8dnk3LVFbTMd/u8V68=",
-      "last_login": null,
-      "is_superuser": false,
-      "email": "tempuser2@email.com",
-      "is_active": true,
-      "is_staff": false,
-      "is_email_verified": false,
-      "groups": [],
-      "user_permissions": []
-    }
   }
 ]
