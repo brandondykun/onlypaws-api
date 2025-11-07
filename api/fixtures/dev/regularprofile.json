@@ -1,6 +1,16 @@
 [
   {
     "model": "profile_app.regularprofile",
+    "pk": 1,
+    "fields": {
+      "about": "I am the admin dog. I basically run this app. I try to share pictures every day of my fun dog activities! Follow to keep up with what I’m doing!",
+      "name": "Linus",
+      "pet_type": 1,
+      "breed": "Cavalier King Charles Spaniel"
+    }
+  },
+  {
+    "model": "profile_app.regularprofile",
     "pk": 2,
     "fields": {
       "about": "I pull like a freight train on a leash. But I can smell a rabbit from half a mile.",
@@ -201,42 +211,12 @@
   },
   {
     "model": "profile_app.regularprofile",
-    "pk": 24,
-    "fields": {
-      "about": "",
-      "name": "",
-      "pet_type": null,
-      "breed": ""
-    }
-  },
-  {
-    "model": "profile_app.regularprofile",
-    "pk": 25,
-    "fields": {
-      "about": "",
-      "name": "",
-      "pet_type": null,
-      "breed": ""
-    }
-  },
-  {
-    "model": "profile_app.regularprofile",
     "pk": 26,
     "fields": {
       "about": "I am Lucy! Linus is my brother! I’m just a little pup that’s learning how to be a good dog!",
       "name": "Lucy",
       "pet_type": 1,
       "breed": "Pitbull"
-    }
-  },
-  {
-    "model": "profile_app.regularprofile",
-    "pk": 1,
-    "fields": {
-      "about": "I am the admin dog. I basically run this app. I try to share pictures every day of my fun dog activities! Follow to keep up with what I’m doing!",
-      "name": "Linus",
-      "pet_type": 1,
-      "breed": "Cavalier King Charles Spaniel"
     }
   }
 ]
