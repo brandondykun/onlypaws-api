@@ -4,9 +4,9 @@ Views for the posts api.
 
 from rest_framework import generics, permissions, mixins, status, viewsets
 from rest_framework.decorators import action
-from apps.user_app.models import Profile
+from apps.profile_app.models import Profile
 from apps.posts_app.models import Post, PostImage, SavedPost
-from apps.interactions_app.models import Like, Comment, Follow, CommentLike
+from apps.interactions_app.models import Like, Comment, CommentLike
 from apps.moderation_app.models import ReportReason, PostReport
 from .serializers import (
     PostSerializer,
@@ -17,26 +17,21 @@ from .serializers import (
     PostDetailedSerializer,
     CommentDetailedSerializer,
     CommentChainSerializer,
-    SearchProfileSerializer,
-    FollowSerializer,
     CommentLikeSerializer,
     CreateSavedPostSerializer,
     PostReportDetailSerializer,
     CreatePostReportSerializer,
     ReportReasonSerializer,
 )
-from ..user_app.serializers import ProfileSerializer, ProfileDetailedSerializer
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from django.db import transaction
 from .pagination import (
-    SearchedProfilesPagination,
     ListExplorePostsPagination,
     ListProfilePostsPagination,
     ListSimilarPostsPagination,
-    FollowListPagination,
     PostCommentsPagination,
     CommentRepliesPagination,
     ReportPostsPagination,
@@ -224,19 +219,6 @@ class ListProfilePostsView(generics.ListAPIView):
 
         # filter reported inappropriate content
         return profile_posts.filter(~Q(reports__reason__id=1)).order_by("-created_at")
-
-
-class RetrieveProfileView(generics.RetrieveAPIView):
-    """Get details of a Profile."""
-
-    serializer_class = ProfileDetailedSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    queryset = Profile.objects.all()
-
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, context={"request": request})
-        return Response(serializer.data)
 
 
 @extend_schema_view(
@@ -454,200 +436,6 @@ class RetrieveUpdateDestroyPostView(generics.RetrieveUpdateDestroyAPIView):
         logger.info(f"Post {instance.id} deleted by profile {current_profile.id}")
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-@extend_schema_view(get=extend_schema(parameters=[username_param]))
-class ListSearchedProfilesView(generics.ListAPIView):
-    """List Profiles based on search text."""
-
-    serializer_class = SearchProfileSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    queryset = Profile.objects.select_related('regularprofile', 'businessprofile').all()
-    pagination_class = SearchedProfilesPagination
-
-    def get(self, request, *args, **kwargs):
-        username = self.request.query_params.get("username", None)
-
-        if not username:
-            return Response(
-                {
-                    "message": "Must include username (for searched profile) query param."
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        return self.list(request, *args, **kwargs)
-
-    def get_queryset(self):
-        username = self.request.query_params.get("username", None)
-        profile_id = self.kwargs.get("id", None)
-        profiles = Profile.objects.filter(
-            Q(username__icontains=username) & ~Q(id=profile_id)
-        ).order_by("username")
-        return profiles
-
-    def get_serializer_context(self):
-        profile_id = self.kwargs.get("id", None)
-
-        return {
-            "profile_id": profile_id,
-            "request": self.request,
-        }
-
-
-@extend_schema_view(
-    post=extend_schema(parameters=[auth_profile_param]),
-)
-class CreateFollowView(generics.CreateAPIView):
-    """Create a follow."""
-
-    serializer_class = FollowSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    queryset = Follow.objects.all()
-
-    def create(self, request, *args, **kwargs):
-        auth_profile_id = self.kwargs.get("id")
-
-        # ensure that the profile sent belongs to the current authenticated user
-        current_profile = request.current_profile
-        if str(current_profile.id) != str(auth_profile_id):
-            logger.warning(
-                f"Profile mismatch in follow creation: "
-                f"current profile {current_profile.id}, auth profile {auth_profile_id}"
-            )
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
-        profile_to_follow_id = request.data.get("profileId")
-        profile_to_follow = get_object_or_404(Profile, pk=profile_to_follow_id)
-        
-        # profile cannot follow itself
-        if profile_to_follow.id == current_profile.id:
-            logger.warning(f"Profile {current_profile.id} attempted to follow itself")
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            new_follow_data = {
-                "followed": profile_to_follow_id,
-                "followed_by": current_profile.id,
-            }
-            serializer = self.get_serializer(data=new_follow_data)
-            serializer.is_valid(raise_exception=True)
-            self.perform_create(serializer)
-            headers = self.get_success_headers(serializer.data)
-            
-            logger.info(
-                f"Follow created: profile {current_profile.id} now follows {profile_to_follow_id}"
-            )
-            
-            return Response(
-                serializer.data, status=status.HTTP_201_CREATED, headers=headers
-            )
-        except Exception as e:
-            logger.error(
-                f"Error creating follow from {current_profile.id} to {profile_to_follow_id}: {str(e)}"
-            )
-            return Response(
-                {"error": "Failed to create follow"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-
-@extend_schema_view(get=extend_schema(parameters=[username_param]))
-class ListFollowersView(generics.ListAPIView):
-    """List Profiles that follow a given Profile."""
-
-    serializer_class = ProfileSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    queryset = Profile.objects.all()
-    pagination_class = FollowListPagination
-
-    def get_queryset(self):
-        profile_id = self.kwargs.get("id", None)
-        username = self.request.query_params.get("username", None)
-
-        try:
-            profile = Profile.objects.get(id=profile_id)
-            followers_objs = profile.following.all()
-            if username:
-                followers_objs = followers_objs.filter(
-                    Q(followed_by__username__icontains=username)
-                )
-            sorted_objs = followers_objs.order_by("followed_by__username")
-            followers = [obj.followed_by for obj in sorted_objs]
-            return followers
-        except Profile.DoesNotExist:
-            logger.error(f"Profile {profile_id} not found when listing followers")
-            return []
-
-
-@extend_schema_view(get=extend_schema(parameters=[username_param]))
-class ListFollowingView(generics.ListAPIView):
-    """List Profiles that a given Profile follows."""
-
-    serializer_class = ProfileSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    queryset = Profile.objects.all()
-    pagination_class = FollowListPagination
-
-    def get_queryset(self):
-        profile_id = self.kwargs.get("id", None)
-        username = self.request.query_params.get("username", None)
-
-        try:
-            profile = Profile.objects.get(id=profile_id)
-            following_objs = profile.followers.all()
-            if username:
-                following_objs = following_objs.filter(
-                    Q(followed__username__icontains=username)
-                )
-            sorted_objs = following_objs.order_by("followed__username")
-            following = [obj.followed for obj in sorted_objs]
-            return following
-        except Profile.DoesNotExist:
-            logger.error(f"Profile {profile_id} not found when listing following")
-            return []
-
-
-@extend_schema_view(
-    delete=extend_schema(parameters=[auth_profile_param]),
-)
-class DestroyFollowView(generics.DestroyAPIView):
-    """Delete a follow."""
-
-    serializer_class = FollowSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    queryset = Follow.objects.all()
-
-    def destroy(self, request, *args, **kwargs):
-        profile_id = self.kwargs.get("pk")  # profile id to unfollow
-        auth_profile_id = self.kwargs.get("auth_profile_id")
-
-        # ensure that the profile sent belongs to the current authenticated user
-        current_profile = request.current_profile
-        if str(auth_profile_id) != str(current_profile.id):
-            logger.warning(
-                f"Unauthorized unfollow attempt: profile mismatch "
-                f"{auth_profile_id} vs {current_profile.id}"
-            )
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
-        if profile_id:
-            try:
-                follow = get_object_or_404(
-                    Follow, followed_by=auth_profile_id, followed=profile_id
-                )
-                self.perform_destroy(follow)
-                logger.info(
-                    f"Unfollow: profile {auth_profile_id} unfollowed {profile_id}"
-                )
-                return Response(status=status.HTTP_204_NO_CONTENT)
-            except Exception as e:
-                logger.error(
-                    f"Error unfollowing: profile {auth_profile_id} -> {profile_id}: {str(e)}"
-                )
-                return Response(status=status.HTTP_400_BAD_REQUEST)
-        
-        logger.warning(f"Unfollow attempt with no profile_id by profile {auth_profile_id}")
-        return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 @extend_schema_view(

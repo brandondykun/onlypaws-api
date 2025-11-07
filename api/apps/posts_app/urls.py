@@ -75,44 +75,14 @@ urlpatterns = [
         views.CommentChainRetrieveView.as_view(),
         name="comment_chain_retrieve",
     ),
-    path(
-        "profile/<int:id>/follow/",
-        views.CreateFollowView.as_view(),
-        name="create_follow",
-    ),
-    path(
-        "profile/<int:id>/followers/",
-        views.ListFollowersView.as_view(),
-        name="list_followers",
-    ),
-    path(
-        "profile/<int:id>/following/",
-        views.ListFollowingView.as_view(),
-        name="list_following",
-    ),
-    path(
-        "profile/<int:auth_profile_id>/follow/<int:pk>/",
-        views.DestroyFollowView.as_view(),
-        name="destroy_follow",
-    ),
-    # TODO this should be changed to post/ or profile/post??
+    # Profile posts and feeds
     path(
         "profile/<int:id>/posts/",
         views.ListProfilePostsView.as_view(),
         name="list_profile_posts",
     ),
     path(
-        "profile/<int:pk>/",
-        views.RetrieveProfileView.as_view(),
-        name="retrieve_profile",
-    ),
-    path(
         "profile/<int:id>/feed/", views.RetrieveFeedView.as_view(), name="retrieve_feed"
-    ),
-    path(
-        "profile/<int:id>/search",
-        views.ListSearchedProfilesView.as_view(),
-        name="search_profiles",
     ),
     path(
         "profile/<int:id>/explore/",

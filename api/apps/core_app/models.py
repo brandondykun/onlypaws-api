@@ -18,6 +18,10 @@ from apps.user_app.models import (
     VerifyEmailToken,
     ResetPasswordToken,
     PendingEmailChange,
+)
+
+# Profile app models
+from apps.profile_app.models import (
     Profile,
     RegularProfile,
     BusinessProfile,

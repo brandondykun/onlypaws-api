@@ -5,11 +5,11 @@ Tests for the search profiles api.
 from rest_framework import status
 from django.db.models import Q
 
-from apps.user_app.models import Profile
-from .util import PostsAppTestHelper, create_user, create_profile, search_profiles_url
+from apps.profile_app.models import Profile
+from .util import ProfileAppTestHelper, create_user, create_profile, search_profiles_url
 
 
-class PrivateSearchProfilesApiTests(PostsAppTestHelper):
+class PrivateSearchProfilesApiTests(ProfileAppTestHelper):
     """Test the private features of the search profiles API."""
 
     def setUp(self):
@@ -47,7 +47,7 @@ class PrivateSearchProfilesApiTests(PostsAppTestHelper):
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
 
-class PublicSearchProfilesApiTests(PostsAppTestHelper):
+class PublicSearchProfilesApiTests(ProfileAppTestHelper):
     """Test the public features of the search profiles API."""
 
     def setUp(self):
@@ -62,3 +62,4 @@ class PublicSearchProfilesApiTests(PostsAppTestHelper):
         url = search_profiles_url(self.profile.id, "user")
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+

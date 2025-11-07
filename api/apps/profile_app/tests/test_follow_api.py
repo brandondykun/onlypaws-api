@@ -5,14 +5,14 @@ Tests for the Follow api.
 from rest_framework import status
 
 from .util import (
-    PostsAppTestHelper,
+    ProfileAppTestHelper,
     create_follow,
     create_follow_url,
     create_destroy_follow_url,
 )
 
 
-class PrivateFollowApiTests(PostsAppTestHelper):
+class PrivateFollowApiTests(ProfileAppTestHelper):
     """Test the private features of the Follow API."""
 
     def setUp(self):
@@ -121,3 +121,4 @@ class PrivateFollowApiTests(PostsAppTestHelper):
 
         current_follows_count = self.get_follows_count()
         self.assertEqual(current_follows_count, starting_follows_count + 1)
+

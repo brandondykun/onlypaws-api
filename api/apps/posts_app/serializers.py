@@ -1,10 +1,10 @@
 from rest_framework import serializers
-from apps.user_app.models import Profile
+from apps.profile_app.models import Profile
 from apps.posts_app.models import Post, PostImage, SavedPost
 from apps.interactions_app.models import Like, Comment, Follow, CommentLike
 from apps.moderation_app.models import ReportReason, PostReport
 from django.db.models import Q
-from ..user_app.serializers import ProfileSerializer, ProfileImageSerializer
+from apps.profile_app.serializers import ProfileSerializer, ProfileImageSerializer
 from drf_spectacular.utils import extend_schema_field
 
 
@@ -527,41 +527,6 @@ class PostDetailedSerializer(serializers.ModelSerializer):
     def get_is_reported(self, obj) -> bool:
         current_profile = self.context["request"].current_profile
         return obj.reports.filter(reporter=current_profile).exists()
-
-
-class SearchProfileSerializer(serializers.ModelSerializer):
-    """Serializer for Profiles when a user searches for profiles.
-    This adds the following attribute to the normal Profile serializer.
-    """
-
-    is_following = serializers.SerializerMethodField()
-    image = ProfileImageSerializer()
-    name = serializers.SerializerMethodField()
-    about = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Profile
-        fields = ["id", "username", "name", "about", "is_following", "image"]
-
-    def get_is_following(self, obj) -> bool:
-        requesting_profile = self.context.get("profile_id")
-        return obj.following.filter(followed_by=requesting_profile).exists()
-    
-    def get_name(self, obj):
-        """Get name from the specific profile type."""
-        if hasattr(obj, 'regularprofile'):
-            return obj.regularprofile.name
-        elif hasattr(obj, 'businessprofile'):
-            return obj.businessprofile.business_name
-        return ""
-    
-    def get_about(self, obj):
-        """Get about from the specific profile type."""
-        if hasattr(obj, 'regularprofile'):
-            return obj.regularprofile.about
-        elif hasattr(obj, 'businessprofile'):
-            return obj.businessprofile.about
-        return ""
 
 
 class CreateSavedPostSerializer(serializers.ModelSerializer):

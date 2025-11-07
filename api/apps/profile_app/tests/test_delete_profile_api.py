@@ -7,7 +7,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 from django.contrib.auth import get_user_model
-from apps.user_app.models import Profile, RegularProfile, ProfileImage
+from apps.profile_app.models import Profile, RegularProfile, ProfileImage
 from django.core.files.uploadedfile import SimpleUploadedFile
 import tempfile
 from PIL import Image
@@ -43,7 +43,7 @@ def create_profile_image(profile):
 
 def get_profile_detail_url(profile_id):
     """Return profile detail URL."""
-    return reverse("user_app:profile-detail", args=[profile_id])
+    return reverse("profile_app:update_destroy_profile", args=[profile_id])
 
 
 class DeleteProfileAPITests(TestCase):
@@ -120,3 +120,4 @@ class DeleteProfileAPITests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertTrue(Profile.objects.filter(id=self.profile1.id).exists())
+

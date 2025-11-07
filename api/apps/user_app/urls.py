@@ -15,34 +15,9 @@ urlpatterns = [
         views.RetrieveUpdateUserView.as_view(),
         name="retrieve_update_user",
     ),
-    path(
-        "profile/",
-        views.CreateProfileView.as_view(),
-        name="create_profile",
-    ),
-    path(
-        "profile/<int:pk>/",
-        views.UpdateDestroyProfileView.as_view(),
-        name="profile-detail",
-    ),
     path("login/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("my-info/", views.RetrieveUserInfoView.as_view(), name="my_info"),
-    path(
-        "profile-image/",
-        views.CreateProfileImageView.as_view(),
-        name="create_profile_image",
-    ),
-    path(
-        "profile-image/<int:pk>/",
-        views.UpdateProfileImageView.as_view(),
-        name="update_profile_image",
-    ),
-    path(
-        "pet-type-options/",
-        views.ListPetTypesView.as_view(),
-        name="list_pet_types",
-    ),
     path(
         "verify-email-token/",
         views.VerifyEmailView.as_view(),

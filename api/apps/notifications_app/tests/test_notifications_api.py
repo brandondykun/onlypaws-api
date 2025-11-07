@@ -5,7 +5,7 @@ from rest_framework.test import APIClient
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from apps.user_app.models import RegularProfile
+from apps.profile_app.models import RegularProfile
 from apps.posts_app.models import Post
 from apps.notifications_app.models import Notification, NotificationType
 

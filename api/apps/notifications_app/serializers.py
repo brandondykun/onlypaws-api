@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Notification
-from apps.user_app.serializers import ProfileSerializer
+from apps.profile_app.serializers import ProfileSerializer
 from drf_spectacular.utils import extend_schema_field
 
 

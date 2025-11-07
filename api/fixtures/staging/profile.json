@@ -1,6 +1,6 @@
 [
   {
-    "model": "user_app.profile",
+    "model": "profile_app.profile",
     "pk": 1,
     "fields": {
       "username": "admin_dog",
@@ -11,7 +11,7 @@
     }
   },
   {
-    "model": "user_app.profile",
+    "model": "profile_app.profile",
     "pk": 2,
     "fields": {
       "username": "hound_dog",
@@ -22,7 +22,7 @@
     }
   },
   {
-    "model": "user_app.profile",
+    "model": "profile_app.profile",
     "pk": 3,
     "fields": {
       "username": "chewyyy",
@@ -33,7 +33,7 @@
     }
   },
   {
-    "model": "user_app.profile",
+    "model": "profile_app.profile",
     "pk": 4,
     "fields": {
       "username": "pitbulpup",
@@ -44,7 +44,7 @@
     }
   },
   {
-    "model": "user_app.profile",
+    "model": "profile_app.profile",
     "pk": 5,
     "fields": {
       "username": "AIpets",
@@ -55,7 +55,7 @@
     }
   },
   {
-    "model": "user_app.profile",
+    "model": "profile_app.profile",
     "pk": 6,
     "fields": {
       "username": "catAI",

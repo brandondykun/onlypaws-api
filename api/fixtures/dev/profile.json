@@ -1,6 +1,6 @@
 [
   {
-    "model": "user_app.profile",
+    "model": "profile_app.profile",
     "pk": 2,
     "fields": {
       "username": "hound_dog",
@@ -11,7 +11,7 @@
     }
   },
   {
-    "model": "user_app.profile",
+    "model": "profile_app.profile",
     "pk": 3,
     "fields": {
       "username": "chewyyy",
@@ -22,7 +22,7 @@
     }
   },
   {
-    "model": "user_app.profile",
+    "model": "profile_app.profile",
     "pk": 4,
     "fields": {
       "username": "pitbulpup",
@@ -33,7 +33,7 @@
     }
   },
   {
-    "model": "user_app.profile",
+    "model": "profile_app.profile",
     "pk": 5,
     "fields": {
       "username": "AIpets",
@@ -44,7 +44,7 @@
     }
   },
   {
-    "model": "user_app.profile",
+    "model": "profile_app.profile",
     "pk": 6,
     "fields": {
       "username": "catAI",
@@ -55,7 +55,7 @@
     }
   },
   {
-    "model": "user_app.profile",
+    "model": "profile_app.profile",
     "pk": 7,
     "fields": {
       "username": "AllPets",
@@ -66,7 +66,7 @@
     }
   },
   {
-    "model": "user_app.profile",
+    "model": "profile_app.profile",
     "pk": 10,
     "fields": {
       "username": "SirDogsAlot",
@@ -77,7 +77,7 @@
     }
   },
   {
-    "model": "user_app.profile",
+    "model": "profile_app.profile",
     "pk": 11,
     "fields": {
       "username": "husky123",
@@ -88,7 +88,7 @@
     }
   },
   {
-    "model": "user_app.profile",
+    "model": "profile_app.profile",
     "pk": 12,
     "fields": {
       "username": "K9Historian",
@@ -99,7 +99,7 @@
     }
   },
   {
-    "model": "user_app.profile",
+    "model": "profile_app.profile",
     "pk": 13,
     "fields": {
       "username": "that_one_lab",
@@ -110,7 +110,7 @@
     }
   },
   {
-    "model": "user_app.profile",
+    "model": "profile_app.profile",
     "pk": 14,
     "fields": {
       "username": "bestpuppies",
@@ -121,7 +121,7 @@
     }
   },
   {
-    "model": "user_app.profile",
+    "model": "profile_app.profile",
     "pk": 15,
     "fields": {
       "username": "oldyeller",
@@ -132,7 +132,7 @@
     }
   },
   {
-    "model": "user_app.profile",
+    "model": "profile_app.profile",
     "pk": 16,
     "fields": {
       "username": "TheGreatOne",
@@ -143,7 +143,7 @@
     }
   },
   {
-    "model": "user_app.profile",
+    "model": "profile_app.profile",
     "pk": 17,
     "fields": {
       "username": "goldie",
@@ -154,7 +154,7 @@
     }
   },
   {
-    "model": "user_app.profile",
+    "model": "profile_app.profile",
     "pk": 18,
     "fields": {
       "username": "choco",
@@ -165,7 +165,7 @@
     }
   },
   {
-    "model": "user_app.profile",
+    "model": "profile_app.profile",
     "pk": 19,
     "fields": {
       "username": "SnortyPickles",
@@ -176,7 +176,7 @@
     }
   },
   {
-    "model": "user_app.profile",
+    "model": "profile_app.profile",
     "pk": 20,
     "fields": {
       "username": "GoldenMaple",
@@ -187,7 +187,7 @@
     }
   },
   {
-    "model": "user_app.profile",
+    "model": "profile_app.profile",
     "pk": 21,
     "fields": {
       "username": "GuardianTitan",
@@ -198,7 +198,7 @@
     }
   },
   {
-    "model": "user_app.profile",
+    "model": "profile_app.profile",
     "pk": 22,
     "fields": {
       "username": "AllAboutBeagles",
@@ -209,7 +209,7 @@
     }
   },
   {
-    "model": "user_app.profile",
+    "model": "profile_app.profile",
     "pk": 23,
     "fields": {
       "username": "MidnightThePoodle",
@@ -220,7 +220,7 @@
     }
   },
   {
-    "model": "user_app.profile",
+    "model": "profile_app.profile",
     "pk": 24,
     "fields": {
       "username": "tempaccount",
@@ -231,7 +231,7 @@
     }
   },
   {
-    "model": "user_app.profile",
+    "model": "profile_app.profile",
     "pk": 25,
     "fields": {
       "username": "tempuser2",
@@ -242,7 +242,7 @@
     }
   },
   {
-    "model": "user_app.profile",
+    "model": "profile_app.profile",
     "pk": 26,
     "fields": {
       "username": "LucyBelle",
@@ -253,7 +253,7 @@
     }
   },
   {
-    "model": "user_app.profile",
+    "model": "profile_app.profile",
     "pk": 1,
     "fields": {
       "username": "admin_dog",

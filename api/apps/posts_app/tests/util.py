@@ -2,7 +2,8 @@ from rest_framework.test import APIClient
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth import get_user_model
-from apps.user_app.models import Profile, RegularProfile, User
+from apps.user_app.models import User
+from apps.profile_app.models import Profile, RegularProfile
 from apps.posts_app.models import Post, PostImage
 from apps.interactions_app.models import Like, Follow, Comment
 from apps.moderation_app.models import ReportReason, PostReport
@@ -164,10 +165,21 @@ def get_explore_posts_url(profile_id: int):
 
     Parameters
     ----------
-    profile_id : str
+    profile_id : int
         The id of the profile that is used to fetch explore posts.
     """
     return reverse("posts_app:list_explore", args=[profile_id])
+
+
+def get_feed_url(profile_id: int):
+    """Create and return a get feed url.
+
+    Parameters
+    ----------
+    profile_id : int
+        The id of the profile that is used to fetch feed posts.
+    """
+    return reverse("posts_app:retrieve_feed", args=[profile_id])
 
 
 def create_like_url(post_id: int):
@@ -194,17 +206,6 @@ def destroy_like_url(post_id: int, profile_id: int):
     return reverse("posts_app:destroy_like", args=[post_id, profile_id])
 
 
-def get_feed_url(profile_id: int):
-    """Create and return a get feed url.
-
-    Parameters
-    ----------
-    profile_id : str
-        The id of the profile that is used to fetch feed posts.
-    """
-    return reverse("posts_app:retrieve_feed", args=[profile_id])
-
-
 def create_comment_url(post_id: int):
     """Create and return a create comment url.
 
@@ -225,46 +226,6 @@ def list_post_comments_url(post_id: int):
         The id of the Post to fetch comments.
     """
     return reverse("posts_app:list_post_comments", args=[post_id])
-
-
-def create_follow_url(auth_profile_id: int):
-    """Create and return a create follow url.
-
-    Parameters
-    ----------
-    auth_profile_id : int
-        The id of the authenticated user profile.
-    """
-    return reverse("posts_app:create_follow", args=[auth_profile_id])
-
-
-# profile id of authenticated user profile and profile id of profile being followed
-def create_destroy_follow_url(auth_profile_id: int, followed_profile_id: int):
-    """Create and return a destroy follow url.
-
-    Parameters
-    ----------
-    auth_profile_id : int
-        The id of the authenticated user profile.
-    followed_profile_id : int
-        The id of the profile being followed.
-    """
-    return reverse(
-        "posts_app:destroy_follow", args=[auth_profile_id, followed_profile_id]
-    )
-
-
-def search_profiles_url(profile_id: int, search_text: str):
-    """Create and return a search profiles url.
-
-    Parameters
-    ----------
-    profile_id : int
-        The id of the authenticated user profile performing the search.
-    search_text : str
-        Search text of username (partial or full) to be searched.
-    """
-    return f"{reverse("posts_app:search_profiles", args=[profile_id])}?username={search_text}"
 
 
 def retrieve_destroy_post_url(post_id: int):

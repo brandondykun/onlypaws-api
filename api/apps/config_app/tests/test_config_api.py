@@ -9,7 +9,7 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
 
-from apps.user_app.models import RegularProfile
+from apps.profile_app.models import RegularProfile
 from apps.config_app.models import AppConfiguration
 
 

@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from apps.user_app.models import PetType
+from apps.profile_app.models import PetType
 
 
 class Command(BaseCommand):

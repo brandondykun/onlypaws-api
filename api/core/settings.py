@@ -83,6 +83,7 @@ INSTALLED_APPS = [
     "channels",
     "apps.core_app",
     "apps.user_app",
+    "apps.profile_app",
     "apps.posts_app",
     "apps.interactions_app",
     "apps.moderation_app",
