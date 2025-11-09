@@ -29,7 +29,7 @@ class PrivateFollowApiTests(ProfileAppTestHelper):
         starting_follows_count = self.get_follows_count()
 
         new_follow = {"profileId": self.profile_3.id}
-        url = create_follow_url(self.profile.id)
+        url = create_follow_url()
 
         res = self.client.post(url, data=new_follow)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
@@ -45,7 +45,7 @@ class PrivateFollowApiTests(ProfileAppTestHelper):
         starting_follows_count = self.get_follows_count()
 
         new_follow = {"profileId": self.profile_2.id}
-        url = create_follow_url(self.profile.id)
+        url = create_follow_url()
 
         res = self.client.post(url, data=new_follow)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
@@ -61,7 +61,7 @@ class PrivateFollowApiTests(ProfileAppTestHelper):
         starting_follows_count = self.get_follows_count()
 
         new_follow = {"profileId": self.profile.id}
-        url = create_follow_url(self.profile.id)
+        url = create_follow_url()
 
         res = self.client.post(url, data=new_follow)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
@@ -77,7 +77,7 @@ class PrivateFollowApiTests(ProfileAppTestHelper):
         starting_follows_count = self.get_follows_count()
 
         new_follow = {"profileId": self.profile_2.id}
-        url = create_follow_url(self.profile_3.id)
+        url = create_follow_url()
 
         res = self.client.post(url, data=new_follow)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
@@ -97,7 +97,7 @@ class PrivateFollowApiTests(ProfileAppTestHelper):
         current_follows_count = self.get_follows_count()
         self.assertEqual(current_follows_count, starting_follows_count + 1)
 
-        url = create_destroy_follow_url(self.profile.id, self.profile_2.id)
+        url = create_destroy_follow_url(self.profile_2.id)
 
         res = self.client.delete(url)
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
@@ -107,14 +107,15 @@ class PrivateFollowApiTests(ProfileAppTestHelper):
 
     def test_destroy_follow_bad_profile_returns_error(self):
         """
-        Test removing a follow for a profile that does not belong to the authenticated user
+        Test removing a follow for a profile that the authenticated user is not following
         returns error and does not delete follow from database.
         """
         starting_follows_count = self.get_follows_count()
 
         create_follow(self.profile_2, self.profile_3)
 
-        url = create_destroy_follow_url(self.profile_3.id, self.profile_2.id)
+        # Try to unfollow profile_3, but self.profile is not following profile_3
+        url = create_destroy_follow_url(self.profile_3.id)
 
         res = self.client.delete(url)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)

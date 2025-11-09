@@ -49,7 +49,7 @@ logger = logging.getLogger(__name__)
 # schema parameter for auth profile id header
 auth_profile_param = OpenApiParameter(
     name="auth-profile-id",
-    description="Auth profile id",
+    description="ID of the profile making the request (must be authenticated)",
     required=True,
     type=str,
     location=OpenApiParameter.HEADER,
@@ -134,17 +134,20 @@ class CreatePostView(generics.CreateAPIView):
 
 @extend_schema_view(
     post=extend_schema(parameters=[auth_profile_param]),
+    delete=extend_schema(parameters=[auth_profile_param]),
 )
-class CreateLikeView(generics.CreateAPIView):
+class CreateDestroyLikeView(generics.GenericAPIView):
     """Create or delete a Like."""
 
     serializer_class = LikeSerializer
     permission_classes = [permissions.IsAuthenticated]
     queryset = Like.objects.all()
 
-    def create(self, request, *args, **kwargs):
-        post_id = self.kwargs.get("post_id", None)
-        profile_id = request.data["profileId"]
+    def post(self, request, *args, **kwargs):
+        """Create a like."""
+        post_id = self.kwargs.get("pk", None)
+        profile_id = request.data.get("profileId")
+        
         # ensure that the profile sent belongs to the current authenticated user
         current_profile = request.current_profile
         if str(profile_id) != str(current_profile.id):
@@ -162,37 +165,22 @@ class CreateLikeView(generics.CreateAPIView):
         }
         serializer = self.get_serializer(data=new_like_data)
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
+        serializer.save()
+        
         logger.info(f"Like created for post {post_id} by profile {current_profile.id}")
+        
         return Response(
-            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+            serializer.data, status=status.HTTP_201_CREATED
         )
 
-
-@extend_schema_view(
-    delete=extend_schema(parameters=[auth_profile_param]),
-)
-class DestroyLikeView(generics.DestroyAPIView):
-    """Delete a Like."""
-
-    serializer_class = LikeSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    queryset = Like.objects.all()
-
-    def destroy(self, request, *args, **kwargs):
+    def delete(self, request, *args, **kwargs):
+        """Delete a like."""
         post_id = self.kwargs.get("pk", None)
-        # TODO: don't need this anymore - need to remove from test
-        profile_id = self.kwargs.get("profile_id", None)
-
         current_profile = request.current_profile
-        if str(profile_id) != str(current_profile.id):
-            logger.error(f"Profile {profile_id} does not belong to current authenticated user {current_profile.id}")
-            return Response(status=status.HTTP_400_BAD_REQUEST)
 
         if post_id:
             like = get_object_or_404(Like, profile=current_profile, post=post_id)
-            self.perform_destroy(like)
+            like.delete()
             logger.info(f"Like deleted for post {post_id} by profile {current_profile.id}")
             return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -556,7 +544,7 @@ class CreateDestroyCommentLikeView(generics.GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         """Create a comment like."""
-        comment_id = self.kwargs.get("comment_id", None)
+        comment_id = self.kwargs.get("pk")
         profile_id = request.data.get("profileId")
 
         # ensure that the profile sent belongs to the current authenticated user
@@ -596,7 +584,7 @@ class CreateDestroyCommentLikeView(generics.GenericAPIView):
 
     def delete(self, request, *args, **kwargs):
         """Delete a comment like."""
-        comment_id = self.kwargs.get("comment_id", None)
+        comment_id = self.kwargs.get("pk", None)
 
         current_profile = request.current_profile
         if comment_id:

@@ -14,7 +14,7 @@ auth_profile_param = OpenApiParameter(
     "auth-profile-id",
     OpenApiTypes.STR,
     location=OpenApiParameter.HEADER,
-    description="Profile ID for authentication",
+    description="ID of the profile making the request (must be authenticated)",
     required=True,
 )
 

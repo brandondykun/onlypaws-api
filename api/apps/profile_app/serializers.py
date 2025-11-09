@@ -12,6 +12,7 @@ from apps.profile_app.models import (
     ProfileImage,
     PetType,
 )
+from apps.interactions_app.models import Follow
 from typing import Literal
 from django.db.models import Q
 
@@ -52,6 +53,75 @@ class AddressSerializer(serializers.ModelSerializer):
             "country",
             "full_address_text",
         ]
+
+
+# ============================================================================
+# Follow Serializers
+# ============================================================================
+
+
+class CreateFollowSerializer(serializers.Serializer):
+    profileId = serializers.IntegerField(
+        required=True,
+        help_text="The ID of the profile to follow."
+    )
+
+
+class FollowSerializer(serializers.ModelSerializer):
+    """Serializer for Follow."""
+
+    class Meta:
+        model = Follow
+        fields = ["id", "followed", "followed_by", "created_at"]
+        read_only_fields = ["id", "created_at"]
+
+
+class FollowDetailedSerializer(serializers.ModelSerializer):
+    """Detailed serializer for Follow."""
+
+    followed = serializers.SerializerMethodField()
+    followed_by = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Follow
+        fields = ["id", "followed", "followed_by", "created_at"]
+        read_only_fields = ["id", "created_at"]
+
+    def get_followed(self, obj):
+        """Forward reference to ProfileSerializer to avoid circular import."""
+        return ProfileSerializer(obj.followed).data
+
+    def get_followed_by(self, obj):
+        """Forward reference to ProfileSerializer to avoid circular import."""
+        return ProfileSerializer(obj.followed_by).data
+
+
+class FollowersSerializer(serializers.ModelSerializer):
+    """Serializer for Followers."""
+
+    followed_by = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Follow
+        fields = ["followed_by"]
+
+    def get_followed_by(self, obj):
+        """Forward reference to ProfileSerializer to avoid circular import."""
+        return ProfileSerializer(obj.followed_by).data
+
+
+class FollowingSerializer(serializers.ModelSerializer):
+    """Serializer for Following."""
+
+    followed = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Follow
+        fields = ["followed"]
+
+    def get_followed(self, obj):
+        """Forward reference to ProfileSerializer to avoid circular import."""
+        return ProfileSerializer(obj.followed).data
 
 
 # ============================================================================

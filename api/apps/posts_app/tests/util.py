@@ -203,20 +203,18 @@ def create_like_url(post_id: int):
     post_id : str
         The post id of the Post to like.
     """
-    return reverse("posts_app:create_like", args=[post_id])
+    return reverse("posts_app:like", args=[post_id])
 
 
-def destroy_like_url(post_id: int, profile_id: int):
+def destroy_like_url(post_id: int):
     """Create and return a destroy like url.
 
     Parameters
     ----------
     post_id : str
         The post id of post that is liked.
-    profile_id : str
-        The profile id requesting the delete.
     """
-    return reverse("posts_app:destroy_like", args=[post_id, profile_id])
+    return reverse("posts_app:like", args=[post_id])
 
 
 def create_comment_url(post_id: int):

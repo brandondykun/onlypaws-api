@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from apps.profile_app.models import Profile
 from apps.posts_app.models import Post, PostImage, SavedPost
-from apps.interactions_app.models import Like, Comment, Follow, CommentLike
+from apps.interactions_app.models import Like, Comment, CommentLike
 from apps.moderation_app.models import ReportReason, PostReport
 from django.db.models import Q
 from apps.profile_app.serializers import ProfileSerializer, ProfileImageSerializer
@@ -356,47 +356,6 @@ class CommentChainSerializer(serializers.ModelSerializer):
         return cache['omitted_count']
 
 
-
-
-class FollowersSerializer(serializers.ModelSerializer):
-    """Serializer for Followers."""
-
-    followed_by = ProfileSerializer()
-
-    class Meta:
-        model = Follow
-        fields = ["followed_by"]
-
-
-class FollowingSerializer(serializers.ModelSerializer):
-    """Serializer for Following."""
-
-    followed = ProfileSerializer()
-
-    class Meta:
-        model = Follow
-        fields = ["followed"]
-
-
-class FollowSerializer(serializers.ModelSerializer):
-    """Serializer for Follow."""
-
-    class Meta:
-        model = Follow
-        fields = ["id", "followed", "followed_by", "created_at"]
-        read_only_fields = ["id", "created_at"]
-
-
-class FollowDetailedSerializer(serializers.ModelSerializer):
-    """Detailed serializer for Follow."""
-
-    followed = ProfileSerializer()
-    followed_by = ProfileSerializer()
-
-    class Meta:
-        model = Follow
-        fields = ["id", "followed", "followed_by", "created_at"]
-        read_only_fields = ["id", "created_at"]
 
 
 class PostSerializer(serializers.ModelSerializer):

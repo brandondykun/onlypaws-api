@@ -45,7 +45,7 @@ from django.core.exceptions import ValidationError
 # schema parameter for auth profile id header
 auth_profile_param = OpenApiParameter(
     name="auth-profile-id",
-    description="Auth profile id",
+    description="ID of the profile making the request (must be authenticated)",
     required=True,
     type=str,
     location=OpenApiParameter.HEADER,

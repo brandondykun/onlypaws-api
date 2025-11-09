@@ -13,6 +13,8 @@ from .serializers import (
     ProfileDetailedSerializer,
     PetTypeSerializer,
     SearchProfileSerializer,
+    FollowSerializer,
+    CreateFollowSerializer
 )
 from rest_framework.response import Response
 import logging
@@ -35,7 +37,7 @@ logger = logging.getLogger(__name__)
 # schema parameter for auth profile id header
 auth_profile_param = OpenApiParameter(
     name="auth-profile-id",
-    description="Auth profile id",
+    description="ID of the profile making the request (must be authenticated)",
     required=True,
     type=str,
     location=OpenApiParameter.HEADER,
@@ -355,33 +357,21 @@ class ListSearchedProfilesView(generics.ListAPIView):
 
 
 @extend_schema_view(
-    post=extend_schema(parameters=[auth_profile_param]),
+    post=extend_schema(
+        request=CreateFollowSerializer,
+        parameters=[auth_profile_param],
+        summary="Create a follow",
+        description="Create a follow."),
 )
 class CreateFollowView(generics.CreateAPIView):
     """Create a follow."""
 
-    serializer_class = serializers.ModelSerializer
+    serializer_class = FollowSerializer
     permission_classes = [permissions.IsAuthenticated]
     queryset = Follow.objects.all()
 
-    class serializer_class(serializers.ModelSerializer):
-        class Meta:
-            model = Follow
-            fields = ['id', 'followed', 'followed_by', 'created_at']
-            read_only_fields = ['id', 'created_at']
-
     def create(self, request, *args, **kwargs):
-        auth_profile_id = self.kwargs.get("id")
-
-        # ensure that the profile sent belongs to the current authenticated user
         current_profile = request.current_profile
-        if str(current_profile.id) != str(auth_profile_id):
-            logger.warning(
-                f"Profile mismatch in follow creation: "
-                f"current profile {current_profile.id}, auth profile {auth_profile_id}"
-            )
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
         profile_to_follow_id = request.data.get("profileId")
         profile_to_follow = get_object_or_404(Profile, pk=profile_to_follow_id)
         
@@ -478,49 +468,38 @@ class  ListFollowingView(generics.ListAPIView):
 
 
 @extend_schema_view(
-    delete=extend_schema(parameters=[auth_profile_param]),
+    delete=extend_schema(
+        parameters=[auth_profile_param],
+        summary="Delete a follow",
+        description="Delete a follow. profile_id is the id of the profile to unfollow."),
 )
 class DestroyFollowView(generics.DestroyAPIView):
     """Delete a follow."""
 
-    serializer_class = serializers.ModelSerializer
+    serializer_class = FollowSerializer
     permission_classes = [permissions.IsAuthenticated]
     queryset = Follow.objects.all()
 
-    class serializer_class(serializers.ModelSerializer):
-        class Meta:
-            model = Follow
-            fields = ['id', 'followed', 'followed_by', 'created_at']
-
     def destroy(self, request, *args, **kwargs):
-        profile_id = self.kwargs.get("pk")  # profile id to unfollow
-        auth_profile_id = self.kwargs.get("auth_profile_id")
-
-        # ensure that the profile sent belongs to the current authenticated user
+        profile_id = self.kwargs.get("profile_id")  # profile id to unfollow
         current_profile = request.current_profile
-        if str(auth_profile_id) != str(current_profile.id):
-            logger.warning(
-                f"Unauthorized unfollow attempt: profile mismatch "
-                f"{auth_profile_id} vs {current_profile.id}"
-            )
-            return Response(status=status.HTTP_400_BAD_REQUEST)
 
         if profile_id:
             try:
                 follow = get_object_or_404(
-                    Follow, followed_by=auth_profile_id, followed=profile_id
+                    Follow, followed_by=current_profile, followed=profile_id
                 )
                 self.perform_destroy(follow)
                 logger.info(
-                    f"Unfollow: profile {auth_profile_id} unfollowed {profile_id}"
+                    f"Unfollow: profile {current_profile} unfollowed {profile_id}"
                 )
                 return Response(status=status.HTTP_204_NO_CONTENT)
             except Exception as e:
                 logger.error(
-                    f"Error unfollowing: profile {auth_profile_id} -> {profile_id}: {str(e)}"
+                    f"Error unfollowing: profile {current_profile} -> {profile_id}: {str(e)}"
                 )
                 return Response(status=status.HTTP_400_BAD_REQUEST)
         
-        logger.warning(f"Unfollow attempt with no profile_id by profile {auth_profile_id}")
+        logger.warning(f"Unfollow attempt with no profile_id by profile {current_profile}")
         return Response(status=status.HTTP_400_BAD_REQUEST)
 

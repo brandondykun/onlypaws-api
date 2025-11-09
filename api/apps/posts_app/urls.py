@@ -13,12 +13,12 @@ router.register(r"report", PostReportViewSet, basename="report")
 urlpatterns = [
     path("post/", views.CreatePostView.as_view(), name="create_post"),
     path(
-        "post/<int:pk>",
+        "post/<int:pk>/",
         views.RetrieveUpdateDestroyPostView.as_view(),
         name="retrieve_update_destroy_post",
     ),
     path(
-        "post/<int:pk>/similar",
+        "post/<int:pk>/similar/",
         views.ListSimilarPostsView.as_view(),
         name="lists_similar_posts",
     ),
@@ -28,12 +28,9 @@ urlpatterns = [
         name="destroy_post_image",
     ),
     path(
-        "post/<int:post_id>/like/", views.CreateLikeView.as_view(), name="create_like"
-    ),
-    path(
-        "post/<int:pk>/like/<int:profile_id>",
-        views.DestroyLikeView.as_view(),
-        name="destroy_like",
+        "post/<int:pk>/like/",
+        views.CreateDestroyLikeView.as_view(),
+        name="like",
     ),
     path(
         "post/<int:id>/comment/",
@@ -51,7 +48,7 @@ urlpatterns = [
         name="destroy_saved_post",
     ),
     path(
-        "comment/<int:comment_id>/like/",
+        "comment/<int:pk>/like/",
         views.CreateDestroyCommentLikeView.as_view(),
         name="comment_like",
     ),

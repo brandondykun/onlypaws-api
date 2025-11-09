@@ -81,29 +81,21 @@ def create_follow(followed_by: Profile, followed: Profile) -> Follow:
 #
 
 
-def create_follow_url(auth_profile_id: int):
-    """Create and return a create follow url.
-
-    Parameters
-    ----------
-    auth_profile_id : int
-        The id of the authenticated user profile.
-    """
-    return reverse("profile_app:create_follow", args=[auth_profile_id])
+def create_follow_url():
+    """Create and return a create follow url."""
+    return reverse("profile_app:create_follow")
 
 
-def create_destroy_follow_url(auth_profile_id: int, followed_profile_id: int):
+def create_destroy_follow_url(followed_profile_id: int):
     """Create and return a destroy follow url.
 
     Parameters
     ----------
-    auth_profile_id : int
-        The id of the authenticated user profile.
     followed_profile_id : int
         The id of the profile being followed.
     """
     return reverse(
-        "profile_app:destroy_follow", args=[auth_profile_id, followed_profile_id]
+        "profile_app:destroy_follow", args=[followed_profile_id]
     )
 
 
