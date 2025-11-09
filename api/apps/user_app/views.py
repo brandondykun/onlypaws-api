@@ -32,24 +32,12 @@ import logging
 from django.utils import timezone
 from django.db import transaction
 from datetime import timedelta
-from drf_spectacular.utils import (
-    extend_schema_view,
-    extend_schema,
-    OpenApiParameter,
-)
+from drf_spectacular.utils import extend_schema_view, extend_schema
 from django.contrib.auth import authenticate
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 
-
-# schema parameter for auth profile id header
-auth_profile_param = OpenApiParameter(
-    name="auth-profile-id",
-    description="ID of the profile making the request (must be authenticated)",
-    required=True,
-    type=str,
-    location=OpenApiParameter.HEADER,
-)
+from api.core.schema_params import auth_profile_param
 
 # Create a logger for this module
 logger = logging.getLogger(__name__)

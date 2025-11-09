@@ -25,30 +25,11 @@ from apps.posts_app.pagination import (
     SearchedProfilesPagination,
     FollowListPagination,
 )
-from drf_spectacular.utils import (
-    extend_schema_view,
-    extend_schema,
-    OpenApiParameter,
-    OpenApiTypes,
-)
+from drf_spectacular.utils import extend_schema_view, extend_schema
+
+from api.core.schema_params import auth_profile_param, username_param
 
 logger = logging.getLogger(__name__)
-
-# schema parameter for auth profile id header
-auth_profile_param = OpenApiParameter(
-    name="auth-profile-id",
-    description="ID of the profile making the request (must be authenticated)",
-    required=True,
-    type=str,
-    location=OpenApiParameter.HEADER,
-)
-
-# schema query param to search for username by text
-username_param = OpenApiParameter(
-    "username",
-    OpenApiTypes.STR,
-    description="Username string or substring to search.",
-)
 
 
 @extend_schema_view(

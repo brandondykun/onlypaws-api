@@ -4,7 +4,6 @@ Views for the posts api.
 
 from rest_framework import generics, permissions, mixins, status, viewsets
 from rest_framework.decorators import action
-from apps.profile_app.models import Profile
 from apps.posts_app.models import Post, PostImage, SavedPost
 from apps.interactions_app.models import Like, Comment, CommentLike
 from apps.moderation_app.models import ReportReason, PostReport
@@ -44,24 +43,9 @@ from drf_spectacular.utils import (
 )
 import logging
 
+from api.core.schema_params import auth_profile_param
+
 logger = logging.getLogger(__name__)
-
-# schema parameter for auth profile id header
-auth_profile_param = OpenApiParameter(
-    name="auth-profile-id",
-    description="ID of the profile making the request (must be authenticated)",
-    required=True,
-    type=str,
-    location=OpenApiParameter.HEADER,
-)
-
-# schema query param to search for username by text
-username_param = OpenApiParameter(
-    "username",
-    OpenApiTypes.STR,
-    description="Username string or substring to search.",
-)
-
 
 @extend_schema_view(
     post=extend_schema(parameters=[auth_profile_param]),

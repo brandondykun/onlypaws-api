@@ -2,21 +2,12 @@ from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from django.db.models import Count, Q
-from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
-from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema, extend_schema_view
 
+from api.core.schema_params import auth_profile_param
 from .models import Notification
 from .serializers import NotificationSerializer, NotificationUpdateSerializer
 from .pagination import NotificationsPagination
-
-# Reusable parameter for API documentation
-auth_profile_param = OpenApiParameter(
-    "auth-profile-id",
-    OpenApiTypes.STR,
-    location=OpenApiParameter.HEADER,
-    description="ID of the profile making the request (must be authenticated)",
-    required=True,
-)
 
 
 class BaseNotificationView(generics.ListAPIView):
