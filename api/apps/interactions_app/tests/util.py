@@ -236,6 +236,17 @@ def list_post_comments_url(post_id: int):
     return reverse("interactions_app:list_post_comments", args=[post_id])
 
 
+def comment_chain_url(comment_id: int):
+    """Create and return a comment chain url.
+
+    Parameters
+    ----------
+    comment_id : int
+        The id of the Comment to fetch with its parent chain.
+    """
+    return reverse("interactions_app:comment_chain_retrieve", args=[comment_id])
+
+
 def comment_like_url(comment_id: int):
     """Create and return a comment like url.
 
@@ -261,6 +272,28 @@ def create_destroy_follow_url(followed_profile_id: int):
         The id of the profile being followed.
     """
     return reverse("interactions_app:destroy_follow", args=[followed_profile_id])
+
+
+def list_followers_url(profile_id: int):
+    """Create and return a list followers url.
+
+    Parameters
+    ----------
+    profile_id : int
+        The id of the profile to fetch followers for.
+    """
+    return reverse("interactions_app:list_followers", args=[profile_id])
+
+
+def list_following_url(profile_id: int):
+    """Create and return a list following url.
+
+    Parameters
+    ----------
+    profile_id : int
+        The id of the profile to fetch following for.
+    """
+    return reverse("interactions_app:list_following", args=[profile_id])
 
 
 def retrieve_destroy_post_url(post_id: int):
