@@ -4,19 +4,7 @@ Tests for the comment like api.
 
 from rest_framework import status
 from apps.interactions_app.models import CommentLike
-from .util import PostsAppTestHelper
-
-
-def comment_like_url(comment_id: int):
-    """Create and return a comment like url.
-
-    Parameters
-    ----------
-    comment_id : int
-        The id of the Comment to like/unlike.
-    """
-    from django.urls import reverse
-    return reverse("posts_app:comment_like", args=[comment_id])
+from .util import PostsAppTestHelper, comment_like_url
 
 
 class PrivateCommentLikeApiTests(PostsAppTestHelper):

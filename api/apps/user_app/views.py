@@ -37,7 +37,7 @@ from django.contrib.auth import authenticate
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 
-from api.core.schema_params import auth_profile_param
+from core.schema_params import auth_profile_param
 
 # Create a logger for this module
 logger = logging.getLogger(__name__)

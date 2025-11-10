@@ -41,27 +41,5 @@ urlpatterns = [
         views.ListSearchedProfilesView.as_view(),
         name="search_profiles",
     ),
-    
-    # Follows
-    path(
-        "follow/",
-        views.CreateFollowView.as_view(),
-        name="create_follow",
-    ),
-    path(
-        "follow/<int:profile_id>/",
-        views.DestroyFollowView.as_view(),
-        name="destroy_follow",
-    ),
-    path(
-        "<int:id>/followers/",
-        views.ListFollowersView.as_view(),
-        name="list_followers",
-    ),
-    path(
-        "<int:id>/following/",
-        views.ListFollowingView.as_view(),
-        name="list_following",
-    ),
 ]
 

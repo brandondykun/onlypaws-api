@@ -4,7 +4,6 @@ Views for the profile api.
 
 from rest_framework import generics, permissions, status, serializers
 from apps.profile_app.models import Profile, ProfileImage, PetType
-from apps.interactions_app.models import Follow
 from .serializers import (
     ProfileSerializer,
     ProfileCreateSerializer,
@@ -13,21 +12,16 @@ from .serializers import (
     ProfileDetailedSerializer,
     PetTypeSerializer,
     SearchProfileSerializer,
-    FollowSerializer,
-    CreateFollowSerializer
 )
 from rest_framework.response import Response
 import logging
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from django.db import transaction
-from apps.posts_app.pagination import (
-    SearchedProfilesPagination,
-    FollowListPagination,
-)
+from apps.posts_app.pagination import SearchedProfilesPagination
 from drf_spectacular.utils import extend_schema_view, extend_schema
 
-from api.core.schema_params import auth_profile_param, username_param
+from core.schema_params import auth_profile_param, username_param
 
 logger = logging.getLogger(__name__)
 
@@ -335,152 +329,4 @@ class ListSearchedProfilesView(generics.ListAPIView):
             "profile_id": current_profile.id,
             "request": self.request,
         }
-
-
-@extend_schema_view(
-    post=extend_schema(
-        request=CreateFollowSerializer,
-        parameters=[auth_profile_param],
-        summary="Create a follow",
-        description="Create a follow."),
-)
-class CreateFollowView(generics.CreateAPIView):
-    """Create a follow."""
-
-    serializer_class = FollowSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    queryset = Follow.objects.all()
-
-    def create(self, request, *args, **kwargs):
-        current_profile = request.current_profile
-        profile_to_follow_id = request.data.get("profileId")
-        profile_to_follow = get_object_or_404(Profile, pk=profile_to_follow_id)
-        
-        # profile cannot follow itself
-        if profile_to_follow.id == current_profile.id:
-            logger.warning(f"Profile {current_profile.id} attempted to follow itself")
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            new_follow_data = {
-                "followed": profile_to_follow_id,
-                "followed_by": current_profile.id,
-            }
-            serializer = self.get_serializer(data=new_follow_data)
-            serializer.is_valid(raise_exception=True)
-            self.perform_create(serializer)
-            headers = self.get_success_headers(serializer.data)
-            
-            logger.info(
-                f"Follow created: profile {current_profile.id} now follows {profile_to_follow_id}"
-            )
-            
-            return Response(
-                serializer.data, status=status.HTTP_201_CREATED, headers=headers
-            )
-        except Exception as e:
-            logger.error(
-                f"Error creating follow from {current_profile.id} to {profile_to_follow_id}: {str(e)}"
-            )
-            return Response(
-                {"error": "Failed to create follow"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-
-@extend_schema_view(
-    get=extend_schema(parameters=[username_param, auth_profile_param]),
-)
-class ListFollowersView(generics.ListAPIView):
-    """List Profiles that follow a given Profile."""
-
-    serializer_class = ProfileSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    queryset = Profile.objects.all()
-    pagination_class = FollowListPagination
-
-    def get_queryset(self):
-        profile_id = self.kwargs.get("id", None)
-        username = self.request.query_params.get("username", None)
-
-        try:
-            profile = Profile.objects.get(id=profile_id)
-            followers_objs = profile.following.all()
-            if username:
-                followers_objs = followers_objs.filter(
-                    Q(followed_by__username__icontains=username)
-                )
-            sorted_objs = followers_objs.order_by("followed_by__username")
-            followers = [obj.followed_by for obj in sorted_objs]
-            return followers
-        except Profile.DoesNotExist:
-            logger.error(f"Profile {profile_id} not found when listing followers")
-            return []
-
-
-@extend_schema_view(
-    get=extend_schema(parameters=[username_param, auth_profile_param]),
-)
-class  ListFollowingView(generics.ListAPIView):
-    """List Profiles that a given Profile follows."""
-
-    serializer_class = ProfileSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    queryset = Profile.objects.all()
-    pagination_class = FollowListPagination
-
-    def get_queryset(self):
-        profile_id = self.kwargs.get("id", None)
-        username = self.request.query_params.get("username", None)
-
-        try:
-            profile = Profile.objects.get(id=profile_id)
-            following_objs = profile.followers.all()
-            if username:
-                following_objs = following_objs.filter(
-                    Q(followed__username__icontains=username)
-                )
-            sorted_objs = following_objs.order_by("followed__username")
-            following = [obj.followed for obj in sorted_objs]
-            return following
-        except Profile.DoesNotExist:
-            logger.error(f"Profile {profile_id} not found when listing following")
-            return []
-
-
-@extend_schema_view(
-    delete=extend_schema(
-        parameters=[auth_profile_param],
-        summary="Delete a follow",
-        description="Delete a follow. profile_id is the id of the profile to unfollow."),
-)
-class DestroyFollowView(generics.DestroyAPIView):
-    """Delete a follow."""
-
-    serializer_class = FollowSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    queryset = Follow.objects.all()
-
-    def destroy(self, request, *args, **kwargs):
-        profile_id = self.kwargs.get("profile_id")  # profile id to unfollow
-        current_profile = request.current_profile
-
-        if profile_id:
-            try:
-                follow = get_object_or_404(
-                    Follow, followed_by=current_profile, followed=profile_id
-                )
-                self.perform_destroy(follow)
-                logger.info(
-                    f"Unfollow: profile {current_profile} unfollowed {profile_id}"
-                )
-                return Response(status=status.HTTP_204_NO_CONTENT)
-            except Exception as e:
-                logger.error(
-                    f"Error unfollowing: profile {current_profile} -> {profile_id}: {str(e)}"
-                )
-                return Response(status=status.HTTP_400_BAD_REQUEST)
-        
-        logger.warning(f"Unfollow attempt with no profile_id by profile {current_profile}")
-        return Response(status=status.HTTP_400_BAD_REQUEST)
 

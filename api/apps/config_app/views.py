@@ -2,7 +2,7 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema_view, extend_schema
 
-from api.core.schema_params import auth_profile_param
+from core.schema_params import auth_profile_param
 from .models import AppConfiguration
 from .serializers import AdsConfigSerializer
 

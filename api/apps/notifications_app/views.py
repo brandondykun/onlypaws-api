@@ -4,7 +4,7 @@ from rest_framework.decorators import api_view, permission_classes
 from django.db.models import Count, Q
 from drf_spectacular.utils import extend_schema, extend_schema_view
 
-from api.core.schema_params import auth_profile_param
+from core.schema_params import auth_profile_param
 from .models import Notification
 from .serializers import NotificationSerializer, NotificationUpdateSerializer
 from .pagination import NotificationsPagination

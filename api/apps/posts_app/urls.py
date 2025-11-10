@@ -28,16 +28,6 @@ urlpatterns = [
         name="destroy_post_image",
     ),
     path(
-        "post/<int:pk>/like/",
-        views.CreateDestroyLikeView.as_view(),
-        name="like",
-    ),
-    path(
-        "post/<int:id>/comment/",
-        views.CreateCommentView.as_view(),
-        name="create_comment",
-    ),
-    path(
         "post/saved/",
         views.ListCreateSavedPostView.as_view(),
         name="list_create_saved_post",
@@ -46,26 +36,6 @@ urlpatterns = [
         "post/saved/<int:post_id>/",
         views.DestroySavedPostView.as_view(),
         name="destroy_saved_post",
-    ),
-    path(
-        "comment/<int:pk>/like/",
-        views.CreateDestroyCommentLikeView.as_view(),
-        name="comment_like",
-    ),
-    path(
-        "post/<int:pk>/comments/",
-        views.ListPostCommentsView.as_view(),
-        name="list_post_comments",
-    ),
-    path(
-        "post/<int:pk>/comments/<int:comment_id>/reply/",
-        views.ListCommentRepliesView.as_view(),
-        name="list_comment_replies",
-    ),
-    path(
-        "comment/<int:pk>/chain/",
-        views.CommentChainRetrieveView.as_view(),
-        name="comment_chain_retrieve",
     ),
     # Profile posts and feeds
     path(
