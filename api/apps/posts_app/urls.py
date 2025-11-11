@@ -1,14 +1,7 @@
-from django.urls import path, include
+from django.urls import path
 from . import views
-from rest_framework.routers import DefaultRouter
-from .views import ReportReasonViewSet, PostReportViewSet
 
 app_name = "posts_app"
-
-router = DefaultRouter()
-router.register(r"report-reason", ReportReasonViewSet, basename="report-reason")
-router.register(r"report", PostReportViewSet, basename="report")
-
 
 urlpatterns = [
     path("post/", views.CreatePostView.as_view(), name="create_post"),
@@ -51,5 +44,4 @@ urlpatterns = [
         views.ListExplorePostsView.as_view(),
         name="list_explore",
     ),
-    path("", include(router.urls)),
 ]

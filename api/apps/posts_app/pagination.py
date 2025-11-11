@@ -27,7 +27,3 @@ class PostCommentsPagination(PageNumberPagination):
 
 class CommentRepliesPagination(PageNumberPagination):
     page_size = 8
-
-
-class ReportPostsPagination(PageNumberPagination):
-    page_size = 50

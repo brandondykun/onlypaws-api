@@ -40,6 +40,7 @@ urlpatterns = [
     path("api/v1/", include("apps.feedback_app.urls")),
     path("api/v1/", include("apps.notifications_app.urls")),
     path("api/v1/config/", include("apps.config_app.urls")),
+    path("api/v1/moderation/", include("apps.moderation_app.urls")),
     path("api-auth/", include("rest_framework.urls")),
 ]
 

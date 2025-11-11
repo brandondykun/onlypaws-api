@@ -1,19 +1,17 @@
 from rest_framework import serializers
-from apps.profile_app.models import Profile
 from apps.posts_app.models import Post, PostImage, SavedPost
-from apps.moderation_app.models import ReportReason, PostReport
 from django.db.models import Q
-from apps.profile_app.serializers import ProfileSerializer, ProfileImageSerializer
+from apps.profile_app.serializers import ProfileSerializer
 from drf_spectacular.utils import extend_schema_field
 
 # Import interaction serializers from interactions_app
 from apps.interactions_app.serializers import (
     LikeSerializer,
-    CommentSerializer,
-    CommentDetailedSerializer,
-    CommentChainSerializer,
-    CommentLikeSerializer,
+    CommentSerializer
 )
+
+# Import moderation serializers
+from apps.moderation_app.serializers import PostReportPreviewSerializer
 
 
 class PostImageSerializer(serializers.ModelSerializer):
@@ -55,21 +53,6 @@ class PostUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = ["caption"]
-
-
-class ReportReasonSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ReportReason
-        fields = ["id", "name", "description"]
-
-
-class PostReportPreviewSerializer(serializers.ModelSerializer):
-
-    reason = ReportReasonSerializer()
-
-    class Meta:
-        model = PostReport
-        fields = ["id", "reason", "status"]
 
 
 class PostDetailedSerializer(serializers.ModelSerializer):
@@ -162,42 +145,3 @@ class CreateSavedPostSerializer(serializers.ModelSerializer):
     class Meta:
         model = SavedPost
         fields = ["id", "profile", "post"]
-
-
-class CreatePostReportSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PostReport
-        fields = ["post", "reason", "details"]
-
-    def validate(self, data):
-        # Check if user has already reported this post
-        request = self.context.get("request")
-        current_profile = request.current_profile
-        if PostReport.objects.filter(
-            post=data["post"], reporter=current_profile
-        ).exists():
-            raise serializers.ValidationError("You have already reported this post.")
-        return data
-
-    def create(self, validated_data):
-        request = self.context.get("request")
-        validated_data["reporter"] = request.current_profile
-        return super().create(validated_data)
-
-
-class PostReportDetailSerializer(serializers.ModelSerializer):
-    reason = ReportReasonSerializer()
-    reporter = serializers.StringRelatedField()
-
-    class Meta:
-        model = PostReport
-        fields = [
-            "id",
-            "post",
-            "reporter",
-            "reason",
-            "details",
-            "status",
-            "created_at",
-            "resolution_note",
-        ]
