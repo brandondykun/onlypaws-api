@@ -4,15 +4,12 @@ Tests for the Follow api.
 
 from rest_framework import status
 
-from .util import (
-    ProfileAppTestHelper,
-    create_follow,
-    create_follow_url,
-    create_destroy_follow_url,
-)
+from .util import create_follow_url, create_destroy_follow_url
+from core.test_utils.utils import create_follow
+from core.test_utils.helper_classes import BaseFixtureTestCase
 
 
-class PrivateFollowApiTests(ProfileAppTestHelper):
+class PrivateFollowApiTests(BaseFixtureTestCase):
     """Test the private features of the Follow API."""
 
     def setUp(self):

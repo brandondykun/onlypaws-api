@@ -2,48 +2,14 @@
 Tests for delete profile API.
 """
 
+import os
 from django.test import TestCase
-from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
-from django.contrib.auth import get_user_model
-from apps.profile_app.models import Profile, RegularProfile, ProfileImage
-from django.core.files.uploadedfile import SimpleUploadedFile
-import tempfile
-from PIL import Image
-import os
+from apps.profile_app.models import Profile, ProfileImage
 
-
-def create_user(email="user@example.com", password="testpass123"):
-    """Helper function to create a user."""
-    return get_user_model().objects.create_user(email=email, password=password)
-
-
-def create_profile(user, username="testuser"):
-    """Helper function to create a regular profile."""
-    return RegularProfile.objects.create(user=user, username=username)
-
-
-def create_profile_image(profile):
-    """Helper function to create a profile image."""
-    # Create a temporary image file
-    image_file = tempfile.NamedTemporaryFile(suffix=".jpg")
-    image = Image.new("RGB", (100, 100))
-    image.save(image_file, "JPEG")
-    image_file.seek(0)
-
-    # Create the profile image
-    return ProfileImage.objects.create(
-        profile=profile,
-        image=SimpleUploadedFile(
-            name="test_image.jpg", content=image_file.read(), content_type="image/jpeg"
-        ),
-    )
-
-
-def get_profile_detail_url(profile_id):
-    """Return profile detail URL."""
-    return reverse("profile_app:retrieve_update_destroy_profile", args=[profile_id])
+from .util import get_profile_detail_url
+from core.test_utils.utils import create_user, create_profile, create_profile_image
 
 
 class DeleteProfileAPITests(TestCase):
@@ -51,9 +17,9 @@ class DeleteProfileAPITests(TestCase):
 
     def setUp(self):
         self.client = APIClient()
-        self.user = create_user()
-        self.profile1 = create_profile(self.user, username="profile1")
-        self.profile2 = create_profile(self.user, username="profile2")
+        self.user = create_user(email="user@example.com", password="testpass123")
+        self.profile1 = create_profile(user=self.user, username="profile1")
+        self.profile2 = create_profile(user=self.user, username="profile2")
         self.client.force_authenticate(user=self.user)
 
     def test_delete_profile_success(self):
@@ -93,7 +59,7 @@ class DeleteProfileAPITests(TestCase):
     def test_delete_other_user_profile_fails(self):
         """Test attempting to delete another user's profile."""
         other_user = create_user(email="other@example.com")
-        other_profile = create_profile(other_user, username="otheruser")
+        other_profile = create_profile(user=other_user, username="otheruser")
         url = get_profile_detail_url(other_profile.id)
 
         res = self.client.delete(url)

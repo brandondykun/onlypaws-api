@@ -3,27 +3,13 @@ Tests for the config API endpoints.
 """
 
 from django.test import TestCase
-from django.contrib.auth import get_user_model
-from django.urls import reverse
 
 from rest_framework.test import APIClient
 from rest_framework import status
 
-from apps.profile_app.models import RegularProfile
+from .util import ADS_CONFIG_URL
 from apps.config_app.models import AppConfiguration
-
-
-ADS_CONFIG_URL = reverse("config_app:ads-config")
-
-
-def create_user(**params):
-    """Create and return a new User."""
-    return get_user_model().objects.create_user(**params)
-
-
-def create_profile(**params):
-    """Create and return a new RegularProfile."""
-    return RegularProfile.objects.create(**params)
+from core.test_utils.utils import create_user, create_profile
 
 
 class PublicAdsConfigApiTests(TestCase):
@@ -54,7 +40,7 @@ class PrivateAdsConfigApiTests(TestCase):
         )
         self.profile = create_profile(
             user=self.user,
-            username="testuser"
+            username="testuser",
         )
         
         # Authenticate the client

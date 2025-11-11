@@ -4,17 +4,13 @@ Tests for the password reset API endpoints.
 
 from datetime import timedelta
 from django.test import TestCase
-from django.urls import reverse
 from django.utils import timezone
 from django.contrib.auth import get_user_model
-
 from rest_framework.test import APIClient
 from rest_framework import status
 
 from apps.user_app.models import ResetPasswordToken
-
-REQUEST_RESET_URL = reverse("user_app:request_password_reset")
-RESET_PASSWORD_URL = reverse("user_app:reset_password")
+from .util import REQUEST_RESET_URL, RESET_PASSWORD_URL
 
 
 class PasswordResetApiTests(TestCase):

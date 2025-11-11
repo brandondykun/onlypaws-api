@@ -3,33 +3,12 @@ Tests for profile CRUD API operations.
 """
 
 from django.test import TestCase
-from django.contrib.auth import get_user_model
-from django.urls import reverse
-
 from rest_framework.test import APIClient
 from rest_framework import status
 
 from apps.profile_app.models import Profile, RegularProfile
-
-
-def create_user(**params):
-    """Create and return new User."""
-    return get_user_model().objects.create_user(**params)
-
-
-def create_profile(**params):
-    """Create and return new RegularProfile (which also creates a Profile)."""
-    return RegularProfile.objects.create(**params)
-
-
-def create_profile_url():
-    """Return URL for creating a profile."""
-    return reverse("profile_app:create_profile")
-
-
-def retrieve_update_profile_url(profile_id):
-    """Create and return a retrieve/update profile url."""
-    return reverse("profile_app:retrieve_update_destroy_profile", args=[profile_id])
+from .util import create_profile_url, retrieve_update_profile_url
+from core.test_utils.utils import create_user, create_profile
 
 
 class PrivateProfileApiTests(TestCase):
@@ -113,7 +92,11 @@ class PrivateProfileApiTests(TestCase):
     def test_update_other_user_profile_fails(self):
         """Test that users cannot update profiles they don't own."""
         other_user = create_user(email="other@example.com", password="testpass123")
-        other_profile = create_profile(user=other_user, username="other_profile")
+        other_profile = create_profile(
+            user=other_user, 
+            username="other_profile",
+            about="Test about text."
+        )
         
         updated_profile = {"name": "Hacked Name"}
         url = retrieve_update_profile_url(other_profile.id)
@@ -123,5 +106,4 @@ class PrivateProfileApiTests(TestCase):
         
         # Verify the profile was not updated
         other_profile.refresh_from_db()
-        self.assertNotEqual(other_profile.name, "Hacked Name")
-
+        self.assertNotEqual(other_profile.get_specific_profile().name, "Hacked Name")

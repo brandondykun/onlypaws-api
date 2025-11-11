@@ -3,11 +3,13 @@ Tests for the comment like api.
 """
 
 from rest_framework import status
+
+from .util import comment_like_url
 from apps.interactions_app.models import CommentLike
-from .util import PostsAppTestHelper, comment_like_url
+from core.test_utils.helper_classes import BaseFixtureTestCase
 
 
-class PrivateCommentLikeApiTests(PostsAppTestHelper):
+class PrivateCommentLikeApiTests(BaseFixtureTestCase):
     """Test the private features of the Comment Like API."""
 
     def setUp(self):
@@ -262,7 +264,7 @@ class PrivateCommentLikeApiTests(PostsAppTestHelper):
         )
 
 
-class PublicCommentLikeApiTests(PostsAppTestHelper):
+class PublicCommentLikeApiTests(BaseFixtureTestCase):
     """Test the public features of the Comment Like API."""
 
     def setUp(self):

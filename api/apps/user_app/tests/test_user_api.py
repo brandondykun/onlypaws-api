@@ -3,32 +3,13 @@ Tests for the user API (authentication and account management).
 """
 
 from django.test import TestCase
-from django.contrib.auth import get_user_model
-from django.urls import reverse
-
 from rest_framework.test import APIClient
 from rest_framework import status
 
 from apps.user_app.models import User
-from apps.profile_app.models import Profile, RegularProfile
-
-
-MY_INFO_URL = reverse("user_app:my_info")
-LOGIN_URL = reverse("user_app:token_obtain_pair")
-REFRESH_TOKEN_URL = reverse("user_app:token_refresh")
-CREATE_USER_URL = reverse("user_app:create_user")
-VERIFY_EMAIL_URL = reverse("user_app:verify_email_token")
-REQUEST_NEW_VERIFY_EMAIL_TOKEN_URL = reverse("user_app:request_new_verify_email_token")
-
-
-def create_user(**params):
-    """Create and return new User."""
-    return get_user_model().objects.create_user(**params)
-
-
-def create_profile(**params):
-    """Create and return new RegularProfile (which also creates a Profile)."""
-    return RegularProfile.objects.create(**params)
+from apps.profile_app.models import Profile
+from .util import MY_INFO_URL, CREATE_USER_URL
+from core.test_utils.utils import create_user, create_profile
 
 
 class PublicUserApiTests(TestCase):

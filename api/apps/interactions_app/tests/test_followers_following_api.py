@@ -4,17 +4,12 @@ Tests for the ListFollowersView and ListFollowingView API endpoints.
 
 from rest_framework import status
 
-from .util import (
-    ProfileAppTestHelper,
-    create_follow,
-    create_user,
-    create_profile,
-    list_followers_url,
-    list_following_url,
-)
+from .util import list_followers_url, list_following_url
+from core.test_utils.utils import create_user, create_profile, create_follow
+from core.test_utils.helper_classes import BaseFixtureTestCase
 
 
-class PrivateListFollowersApiTests(ProfileAppTestHelper):
+class PrivateListFollowersApiTests(BaseFixtureTestCase):
     """Test the private features of the ListFollowersView API."""
 
     def setUp(self):
@@ -61,11 +56,11 @@ class PrivateListFollowersApiTests(ProfileAppTestHelper):
         """Test listing followers with username filter returns matching profiles."""
         # Create profiles with specific usernames
         user_5 = create_user("test5@example.com", "user5-password-123")
-        profile_5 = create_profile("alice_smith", "About alice.", user_5)
+        profile_5 = create_profile("alice_smith", user_5, "About alice.")
         user_6 = create_user("test6@example.com", "user6-password-123")
-        profile_6 = create_profile("alice_jones", "About alice j.", user_6)
+        profile_6 = create_profile("alice_jones", user_6, "About alice j.")
         user_7 = create_user("test7@example.com", "user7-password-123")
-        profile_7 = create_profile("bob_williams", "About bob.", user_7)
+        profile_7 = create_profile("bob_williams", user_7, "About bob.")
 
         # All three follow profile_2
         create_follow(profile_5, self.profile_2)
@@ -87,7 +82,7 @@ class PrivateListFollowersApiTests(ProfileAppTestHelper):
     def test_list_followers_with_username_filter_case_insensitive(self):
         """Test listing followers with username filter is case insensitive."""
         user_5 = create_user("test5@example.com", "user5-password-123")
-        profile_5 = create_profile("AliceSmith", "About alice.", user_5)
+        profile_5 = create_profile("AliceSmith", user_5, "About alice.")
 
         create_follow(profile_5, self.profile_2)
 
@@ -122,7 +117,7 @@ class PrivateListFollowersApiTests(ProfileAppTestHelper):
         # Create 20 profiles that follow profile_2 (more than page_size of 15)
         for i in range(20):
             user = create_user(f"test{i+10}@example.com", f"password{i+10}")
-            profile = create_profile(f"user_{i+10:02d}", f"About user {i+10}", user)
+            profile = create_profile(f"user_{i+10:02d}", user, f"About user {i+10}")
             create_follow(profile, self.profile_2)
 
         # profile_2 now has 21 followers (20 new + self.profile)
@@ -142,7 +137,7 @@ class PrivateListFollowersApiTests(ProfileAppTestHelper):
         # Create 20 profiles that follow profile_2
         for i in range(20):
             user = create_user(f"test{i+10}@example.com", f"password{i+10}")
-            profile = create_profile(f"user_{i+10:02d}", f"About user {i+10}", user)
+            profile = create_profile(f"user_{i+10:02d}", user, f"About user {i+10}")
             create_follow(profile, self.profile_2)
 
         # Get second page
@@ -172,7 +167,7 @@ class PrivateListFollowersApiTests(ProfileAppTestHelper):
         self.assertIn("about", follower)
 
 
-class PublicListFollowersApiTests(ProfileAppTestHelper):
+class PublicListFollowersApiTests(BaseFixtureTestCase):
     """Test the public features of the ListFollowersView API."""
 
     def setUp(self):
@@ -187,7 +182,7 @@ class PublicListFollowersApiTests(ProfileAppTestHelper):
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
-class PrivateListFollowingApiTests(ProfileAppTestHelper):
+class PrivateListFollowingApiTests(BaseFixtureTestCase):
     """Test the private features of the ListFollowingView API."""
 
     def setUp(self):
@@ -233,11 +228,11 @@ class PrivateListFollowingApiTests(ProfileAppTestHelper):
         """Test listing following with username filter returns matching profiles."""
         # Create profiles with specific usernames
         user_5 = create_user("test5@example.com", "user5-password-123")
-        profile_5 = create_profile("charlie_smith", "About charlie.", user_5)
+        profile_5 = create_profile("charlie_smith", user_5,"About charlie.")
         user_6 = create_user("test6@example.com", "user6-password-123")
-        profile_6 = create_profile("charlie_jones", "About charlie j.", user_6)
+        profile_6 = create_profile("charlie_jones", user_6, "About charlie j.")
         user_7 = create_user("test7@example.com", "user7-password-123")
-        profile_7 = create_profile("david_williams", "About david.", user_7)
+        profile_7 = create_profile("david_williams", user_7, "About david.")
 
         # profile_2 follows all three
         create_follow(self.profile_2, profile_5)
@@ -259,7 +254,7 @@ class PrivateListFollowingApiTests(ProfileAppTestHelper):
     def test_list_following_with_username_filter_case_insensitive(self):
         """Test listing following with username filter is case insensitive."""
         user_5 = create_user("test5@example.com", "user5-password-123")
-        profile_5 = create_profile("CharlieSmith", "About charlie.", user_5)
+        profile_5 = create_profile("CharlieSmith", user_5,"About charlie.")
 
         create_follow(self.profile_2, profile_5)
 
@@ -294,7 +289,7 @@ class PrivateListFollowingApiTests(ProfileAppTestHelper):
         # Create 20 profiles that profile_2 follows (more than page_size of 15)
         for i in range(20):
             user = create_user(f"test{i+10}@example.com", f"password{i+10}")
-            profile = create_profile(f"user_{i+10:02d}", f"About user {i+10}", user)
+            profile = create_profile(f"user_{i+10:02d}", user, f"About user {i+10}")
             create_follow(self.profile_2, profile)
 
         # profile_2 now follows 20 profiles
@@ -314,7 +309,7 @@ class PrivateListFollowingApiTests(ProfileAppTestHelper):
         # Create 20 profiles that profile_2 follows
         for i in range(20):
             user = create_user(f"test{i+10}@example.com", f"password{i+10}")
-            profile = create_profile(f"user_{i+10:02d}", f"About user {i+10}", user)
+            profile = create_profile(f"user_{i+10:02d}", user, f"About user {i+10}")
             create_follow(self.profile_2, profile)
 
         # Get second page
@@ -376,7 +371,7 @@ class PrivateListFollowingApiTests(ProfileAppTestHelper):
         self.assertIn(self.profile_3.id, following_ids)
 
 
-class PublicListFollowingApiTests(ProfileAppTestHelper):
+class PublicListFollowingApiTests(BaseFixtureTestCase):
     """Test the public features of the ListFollowingView API."""
 
     def setUp(self):

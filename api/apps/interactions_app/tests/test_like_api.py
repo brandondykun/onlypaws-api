@@ -4,10 +4,11 @@ Tests for the Likes api.
 
 from rest_framework import status
 
-from .util import PostsAppTestHelper, create_like_url, destroy_like_url, create_like
+from .util import create_like_url, destroy_like_url
+from core.test_utils.utils import create_like
+from core.test_utils.helper_classes import BaseFixtureTestCase
 
-
-class PrivateLikeApiTests(PostsAppTestHelper):
+class PrivateLikeApiTests(BaseFixtureTestCase):
     """Test the private features of the Like API."""
 
     def setUp(self):
@@ -117,7 +118,7 @@ class PrivateLikeApiTests(PostsAppTestHelper):
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
 
 
-class PublicLikeApiTests(PostsAppTestHelper):
+class PublicLikeApiTests(BaseFixtureTestCase):
     """Test the public features of the Like API."""
 
     def setUp(self):

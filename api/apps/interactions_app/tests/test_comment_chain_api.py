@@ -3,10 +3,13 @@ Tests for the comment chain retrieval API.
 """
 
 from rest_framework import status
-from .util import PostsAppTestHelper, comment_chain_url, create_comment
+
+from .util import comment_chain_url
+from core.test_utils.utils import create_comment
+from core.test_utils.helper_classes import BaseFixtureTestCase
 
 
-class PrivateCommentChainApiTests(PostsAppTestHelper):
+class PrivateCommentChainApiTests(BaseFixtureTestCase):
     """Test the private features of the Comment Chain API."""
 
     def setUp(self):
@@ -403,7 +406,7 @@ class PrivateCommentChainApiTests(PostsAppTestHelper):
         self.assertEqual(timestamps, sorted(timestamps))
 
 
-class PublicCommentChainApiTests(PostsAppTestHelper):
+class PublicCommentChainApiTests(BaseFixtureTestCase):
     """Test the public features of the Comment Chain API."""
 
     def setUp(self):

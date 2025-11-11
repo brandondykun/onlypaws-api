@@ -6,17 +6,19 @@ from rest_framework import status
 from django.db.models import Q
 
 from apps.profile_app.models import Profile
-from .util import ProfileAppTestHelper, create_user, create_profile, search_profiles_url
+from .util import search_profiles_url
+from core.test_utils.utils import create_user, create_profile
+from core.test_utils.helper_classes import BaseFixtureTestCase
 
 
-class PrivateSearchProfilesApiTests(ProfileAppTestHelper):
+class PrivateSearchProfilesApiTests(BaseFixtureTestCase):
     """Test the private features of the search profiles API."""
 
     def setUp(self):
         super(self.__class__, self).setUp()
         # create fourth user and profile - this profile username should not contain "user"
         self.user_5 = create_user("test5@example.com", "user5-password-123")
-        self.profile_5 = create_profile("different", "Test about text.", self.user_5)
+        self.profile_5 = create_profile("different", self.user_5,"Test about text.")
         # extend setUp by authenticating self.profile
         self.client.force_authenticate(user=self.user)
         self.client.credentials(HTTP_AUTH_PROFILE_ID=self.profile.id)
@@ -47,7 +49,7 @@ class PrivateSearchProfilesApiTests(ProfileAppTestHelper):
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
 
-class PublicSearchProfilesApiTests(ProfileAppTestHelper):
+class PublicSearchProfilesApiTests(BaseFixtureTestCase):
     """Test the public features of the search profiles API."""
 
     def setUp(self):

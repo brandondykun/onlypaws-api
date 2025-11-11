@@ -4,18 +4,13 @@ Tests for the email verification API endpoints.
 
 from datetime import timedelta
 from django.test import TestCase
-from django.urls import reverse
 from django.utils import timezone
 from django.contrib.auth import get_user_model
-
 from rest_framework.test import APIClient
 from rest_framework import status
 
 from apps.user_app.models import VerifyEmailToken
-
-CREATE_USER_URL = reverse("user_app:create_user")
-VERIFY_EMAIL_URL = reverse("user_app:verify_email_token")
-REQUEST_NEW_VERIFY_EMAIL_TOKEN_URL = reverse("user_app:request_new_verify_email_token")
+from .util import CREATE_USER_URL, VERIFY_EMAIL_URL, REQUEST_NEW_VERIFY_EMAIL_TOKEN_URL
 
 
 class EmailVerificationApiTests(TestCase):

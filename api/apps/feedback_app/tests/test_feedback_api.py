@@ -2,8 +2,17 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 from rest_framework import status
-from django.urls import reverse
 from apps.feedback_app.models import Feedback, FeedbackComment
+
+from .util import (
+    FEEDBACK_LIST_URL,
+    FEEDBACK_MY_TICKETS_URL,
+    FEEDBACK_ASSIGNED_TO_ME_URL,
+    FEEDBACK_COMMENTS_LIST_URL,
+    feedback_detail_url,
+    feedback_comments_detail_url,
+    )
+
 
 User = get_user_model()
 
@@ -40,7 +49,7 @@ class FeedbackAPITest(TestCase):
             "device_info": {"platform": "iOS", "version": "15.0"},
         }
 
-        response = self.client.post(reverse("feedback_app:feedback-list"), data, format="json")
+        response = self.client.post(FEEDBACK_LIST_URL, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Feedback.objects.count(), 2)
 
@@ -56,7 +65,7 @@ class FeedbackAPITest(TestCase):
             "ticket_type": "feature",
         }
 
-        response = self.client.post(reverse("feedback_app:feedback-list"), data, format="json")
+        response = self.client.post(FEEDBACK_LIST_URL, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_list_feedback_regular_user(self):
@@ -73,7 +82,7 @@ class FeedbackAPITest(TestCase):
         )
 
         self.client.force_authenticate(user=self.regular_user)
-        response = self.client.get(reverse("feedback_app:feedback-list"))
+        response = self.client.get(FEEDBACK_LIST_URL)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
@@ -93,7 +102,7 @@ class FeedbackAPITest(TestCase):
         )
 
         self.client.force_authenticate(user=self.staff_user)
-        response = self.client.get(reverse("feedback_app:feedback-list"))
+        response = self.client.get(FEEDBACK_LIST_URL)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 2)
@@ -103,7 +112,7 @@ class FeedbackAPITest(TestCase):
         self.client.force_authenticate(user=self.regular_user)
 
         data = {"status": "resolved"}
-        response = self.client.patch(reverse("feedback_app:feedback-detail", args=[self.feedback.id]), data)
+        response = self.client.patch(feedback_detail_url(self.feedback.id), data)
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -116,7 +125,7 @@ class FeedbackAPITest(TestCase):
             "priority": "high",
             "assignee": self.staff_user.id,
         }
-        response = self.client.patch(reverse("feedback_app:feedback-detail", args=[self.feedback.id]), data)
+        response = self.client.patch(feedback_detail_url(self.feedback.id), data)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -136,7 +145,7 @@ class FeedbackAPITest(TestCase):
             "ticket_type": "feature",
             "status": "resolved",
         }
-        response = self.client.put(reverse("feedback_app:feedback-detail", args=[self.feedback.id]), data)
+        response = self.client.put(feedback_detail_url(self.feedback.id), data)
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -144,7 +153,7 @@ class FeedbackAPITest(TestCase):
         """Test that regular users cannot delete feedback"""
         self.client.force_authenticate(user=self.regular_user)
 
-        response = self.client.delete(reverse("feedback_app:feedback-detail", args=[self.feedback.id]))
+        response = self.client.delete(feedback_detail_url(self.feedback.id))
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         # Verify feedback still exists
@@ -155,7 +164,7 @@ class FeedbackAPITest(TestCase):
         self.client.force_authenticate(user=self.staff_user)
 
         feedback_id = self.feedback.id
-        response = self.client.delete(reverse("feedback_app:feedback-detail", args=[feedback_id]))
+        response = self.client.delete(feedback_detail_url(feedback_id))
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         # Verify feedback is deleted
@@ -180,13 +189,13 @@ class FeedbackAPITest(TestCase):
         self.client.force_authenticate(user=self.regular_user)
 
         # Filter by bug
-        response = self.client.get(reverse("feedback_app:feedback-list"), {"ticket_type": "bug"})
+        response = self.client.get(FEEDBACK_LIST_URL, {"ticket_type": "bug"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
         self.assertEqual(response.data["results"][0]["ticket_type"], "bug")
 
         # Filter by feature
-        response = self.client.get(reverse("feedback_app:feedback-list"), {"ticket_type": "feature"})
+        response = self.client.get(FEEDBACK_LIST_URL, {"ticket_type": "feature"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
         self.assertEqual(response.data["results"][0]["ticket_type"], "feature")
@@ -205,13 +214,13 @@ class FeedbackAPITest(TestCase):
         )
 
         # Filter by open
-        response = self.client.get(reverse("feedback_app:feedback-list"), {"status": "open"})
+        response = self.client.get(FEEDBACK_LIST_URL, {"status": "open"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
         self.assertEqual(response.data["results"][0]["status"], "open")
 
         # Filter by in_progress
-        response = self.client.get(reverse("feedback_app:feedback-list"), {"status": "in_progress"})
+        response = self.client.get(FEEDBACK_LIST_URL, {"status": "in_progress"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
         self.assertEqual(response.data["results"][0]["status"], "in_progress")
@@ -237,13 +246,13 @@ class FeedbackAPITest(TestCase):
         )
 
         # Filter by high priority
-        response = self.client.get(reverse("feedback_app:feedback-list"), {"priority": "high"})
+        response = self.client.get(FEEDBACK_LIST_URL, {"priority": "high"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
         self.assertEqual(response.data["results"][0]["priority"], "high")
 
         # Filter by medium priority (default for self.feedback)
-        response = self.client.get(reverse("feedback_app:feedback-list"), {"priority": "medium"})
+        response = self.client.get(FEEDBACK_LIST_URL, {"priority": "medium"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
         self.assertEqual(response.data["results"][0]["priority"], "medium")
@@ -271,7 +280,7 @@ class FeedbackAPITest(TestCase):
 
         # Filter by staff_user
         response = self.client.get(
-            reverse("feedback_app:feedback-list"), {"assignee": str(self.staff_user.id)}
+            FEEDBACK_LIST_URL, {"assignee": str(self.staff_user.id)}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
@@ -279,7 +288,7 @@ class FeedbackAPITest(TestCase):
 
         # Filter by staff_user2
         response = self.client.get(
-            reverse("feedback_app:feedback-list"), {"assignee": str(staff_user2.id)}
+            FEEDBACK_LIST_URL, {"assignee": str(staff_user2.id)}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
@@ -290,12 +299,12 @@ class FeedbackAPITest(TestCase):
         self.client.force_authenticate(user=self.staff_user)
 
         # Try with non-numeric assignee
-        response = self.client.get(reverse("feedback_app:feedback-list"), {"assignee": "invalid"})
+        response = self.client.get(FEEDBACK_LIST_URL, {"assignee": "invalid"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 0)
 
         # Try with non-existent ID
-        response = self.client.get(reverse("feedback_app:feedback-list"), {"assignee": "99999"})
+        response = self.client.get(FEEDBACK_LIST_URL, {"assignee": "99999"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # Should return results if there are any tickets with that assignee (none in this case)
         self.assertEqual(len(response.data["results"]), 0)
@@ -322,7 +331,7 @@ class FeedbackAPITest(TestCase):
         )
 
         self.client.force_authenticate(user=self.regular_user)
-        response = self.client.get(reverse("feedback_app:feedback-my-tickets"))
+        response = self.client.get(FEEDBACK_MY_TICKETS_URL)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # Should only see own tickets (2 total)
@@ -341,7 +350,7 @@ class FeedbackAPITest(TestCase):
         )
 
         self.client.force_authenticate(user=self.staff_user)
-        response = self.client.get(reverse("feedback_app:feedback-my-tickets"))
+        response = self.client.get(FEEDBACK_MY_TICKETS_URL)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # Should only see their own ticket
@@ -376,7 +385,7 @@ class FeedbackAPITest(TestCase):
         )
 
         self.client.force_authenticate(user=self.staff_user)
-        response = self.client.get(reverse("feedback_app:feedback-assigned-to-me"))
+        response = self.client.get(FEEDBACK_ASSIGNED_TO_ME_URL)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # Should only see tickets assigned to staff_user
@@ -387,14 +396,14 @@ class FeedbackAPITest(TestCase):
     def test_assigned_to_me_regular_user_forbidden(self):
         """Test that regular users cannot access assigned_to_me action"""
         self.client.force_authenticate(user=self.regular_user)
-        response = self.client.get(reverse("feedback_app:feedback-assigned-to-me"))
+        response = self.client.get(FEEDBACK_ASSIGNED_TO_ME_URL)
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_assigned_to_me_no_assignments(self):
         """Test assigned_to_me when staff user has no assigned tickets"""
         self.client.force_authenticate(user=self.staff_user)
-        response = self.client.get(reverse("feedback_app:feedback-assigned-to-me"))
+        response = self.client.get(FEEDBACK_ASSIGNED_TO_ME_URL)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # Should return empty results
@@ -426,7 +435,7 @@ class FeedbackAPITest(TestCase):
 
         # Filter by multiple parameters
         response = self.client.get(
-            reverse("feedback_app:feedback-list"),
+            FEEDBACK_LIST_URL,
             {
                 "ticket_type": "bug",
                 "priority": "high",
@@ -477,7 +486,7 @@ class FeedbackCommentAPITest(TestCase):
             "is_internal": False,
         }
 
-        response = self.client.post(reverse("feedback_app:feedback-comments-list"), data)
+        response = self.client.post(FEEDBACK_COMMENTS_LIST_URL, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(FeedbackComment.objects.count(), 2)
 
@@ -491,7 +500,7 @@ class FeedbackCommentAPITest(TestCase):
             "is_internal": False,
         }
 
-        response = self.client.post(reverse("feedback_app:feedback-comments-list"), data)
+        response = self.client.post(FEEDBACK_COMMENTS_LIST_URL, data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         # Verify error message is present
         self.assertIn("detail", response.data)
@@ -509,7 +518,7 @@ class FeedbackCommentAPITest(TestCase):
         )
 
         self.client.force_authenticate(user=self.regular_user)
-        response = self.client.get(reverse("feedback_app:feedback-comments-list"))
+        response = self.client.get(FEEDBACK_COMMENTS_LIST_URL)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # Should only see the non-internal comment
@@ -529,7 +538,7 @@ class FeedbackCommentAPITest(TestCase):
         )
 
         self.client.force_authenticate(user=self.staff_user)
-        response = self.client.get(reverse("feedback_app:feedback-comments-list"))
+        response = self.client.get(FEEDBACK_COMMENTS_LIST_URL)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # Should see both comments
@@ -555,7 +564,7 @@ class FeedbackCommentAPITest(TestCase):
 
         # Filter by first ticket
         response = self.client.get(
-            reverse("feedback_app:feedback-comments-list"),
+            FEEDBACK_COMMENTS_LIST_URL,
             {"ticket": str(self.feedback.id)}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -564,7 +573,7 @@ class FeedbackCommentAPITest(TestCase):
 
         # Filter by second ticket
         response = self.client.get(
-            reverse("feedback_app:feedback-comments-list"),
+            FEEDBACK_COMMENTS_LIST_URL,
             {"ticket": str(other_feedback.id)}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -577,7 +586,7 @@ class FeedbackCommentAPITest(TestCase):
 
         # Try with non-numeric ticket ID
         response = self.client.get(
-            reverse("feedback_app:feedback-comments-list"),
+            FEEDBACK_COMMENTS_LIST_URL,
             {"ticket": "invalid"}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -585,7 +594,7 @@ class FeedbackCommentAPITest(TestCase):
 
         # Try with non-existent ticket ID
         response = self.client.get(
-            reverse("feedback_app:feedback-comments-list"),
+            FEEDBACK_COMMENTS_LIST_URL,
             {"ticket": "99999"}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -606,7 +615,7 @@ class FeedbackCommentAPITest(TestCase):
         
         # Filter for non-internal comments
         response = self.client.get(
-            reverse("feedback_app:feedback-comments-list"),
+            FEEDBACK_COMMENTS_LIST_URL,
             {"is_internal": "false"}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -615,7 +624,7 @@ class FeedbackCommentAPITest(TestCase):
 
         # Filter for internal comments
         response = self.client.get(
-            reverse("feedback_app:feedback-comments-list"),
+            FEEDBACK_COMMENTS_LIST_URL,
             {"is_internal": "true"}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -636,7 +645,7 @@ class FeedbackCommentAPITest(TestCase):
 
         # Regular user tries to filter by is_internal, but should still only see non-internal
         response = self.client.get(
-            reverse("feedback_app:feedback-comments-list"),
+            FEEDBACK_COMMENTS_LIST_URL,
             {"is_internal": "true"}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -652,7 +661,7 @@ class FeedbackCommentAPITest(TestCase):
             "content": "Updated content",
         }
         response = self.client.put(
-            reverse("feedback_app:feedback-comments-detail", args=[self.comment.id]),
+            feedback_comments_detail_url(self.comment.id),
             data
         )
 
@@ -671,7 +680,7 @@ class FeedbackCommentAPITest(TestCase):
             "is_internal": False,
         }
         response = self.client.put(
-            reverse("feedback_app:feedback-comments-detail", args=[self.comment.id]),
+            feedback_comments_detail_url(self.comment.id),
             data
         )
 
@@ -688,7 +697,7 @@ class FeedbackCommentAPITest(TestCase):
             "content": "Partially updated content",
         }
         response = self.client.patch(
-            reverse("feedback_app:feedback-comments-detail", args=[self.comment.id]),
+            feedback_comments_detail_url(self.comment.id),
             data
         )
 
@@ -705,7 +714,7 @@ class FeedbackCommentAPITest(TestCase):
             "content": "Partially updated: Still investigating",
         }
         response = self.client.patch(
-            reverse("feedback_app:feedback-comments-detail", args=[self.comment.id]),
+            feedback_comments_detail_url(self.comment.id),
             data
         )
 
@@ -720,7 +729,7 @@ class FeedbackCommentAPITest(TestCase):
 
         comment_id = self.comment.id
         response = self.client.delete(
-            reverse("feedback_app:feedback-comments-detail", args=[comment_id])
+            feedback_comments_detail_url(comment_id)
         )
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -733,7 +742,7 @@ class FeedbackCommentAPITest(TestCase):
 
         comment_id = self.comment.id
         response = self.client.delete(
-            reverse("feedback_app:feedback-comments-detail", args=[comment_id])
+            feedback_comments_detail_url(comment_id)
         )
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -761,7 +770,7 @@ class FeedbackCommentAPITest(TestCase):
 
         # Regular user should not see comments on other users' tickets
         self.client.force_authenticate(user=self.regular_user)
-        response = self.client.get(reverse("feedback_app:feedback-comments-list"))
+        response = self.client.get(FEEDBACK_COMMENTS_LIST_URL)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # Should only see comments on their own ticket
@@ -796,7 +805,7 @@ class FeedbackCommentAPITest(TestCase):
 
         # Filter by ticket and is_internal
         response = self.client.get(
-            reverse("feedback_app:feedback-comments-list"),
+            FEEDBACK_COMMENTS_LIST_URL,
             {
                 "ticket": str(self.feedback.id),
                 "is_internal": "true",

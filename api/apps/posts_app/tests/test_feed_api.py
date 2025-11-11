@@ -4,10 +4,11 @@ Tests for the Feed api.
 
 from rest_framework import status
 
-from .util import get_feed_url, PostsAppTestHelper
+from .util import get_feed_url
+from core.test_utils.helper_classes import BaseFixtureTestCase
 
 
-class PrivateFeedApiTests(PostsAppTestHelper):
+class PrivateFeedApiTests(BaseFixtureTestCase):
     """Test the private features of the Feed API."""
 
     def setUp(self):
@@ -28,7 +29,7 @@ class PrivateFeedApiTests(PostsAppTestHelper):
         self.assertEqual(len(res.data["results"]), 2)
 
 
-class PublicFeedApiTests(PostsAppTestHelper):
+class PublicFeedApiTests(BaseFixtureTestCase):
     """Test the public, unauthenticated features of the Feed API."""
 
     def setUp(self):

@@ -4,10 +4,11 @@ Tests for the Explore api.
 
 from rest_framework import status
 
-from .util import PostsAppTestHelper, get_explore_posts_url
+from .util import get_explore_posts_url
+from core.test_utils.helper_classes import BaseFixtureTestCase
 
 
-class PrivateExploreApiTests(PostsAppTestHelper):
+class PrivateExploreApiTests(BaseFixtureTestCase):
     """Test the private features of the Explore API."""
 
     def setUp(self):
@@ -28,7 +29,7 @@ class PrivateExploreApiTests(PostsAppTestHelper):
         self.assertEqual(len(res.data["results"]), 4)
 
 
-class PublicExploreApiTests(PostsAppTestHelper):
+class PublicExploreApiTests(BaseFixtureTestCase):
     """Test the public, unauthenticated features of the Explore API."""
 
     def setUp(self):
