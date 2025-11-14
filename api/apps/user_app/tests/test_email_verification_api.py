@@ -24,12 +24,11 @@ class EmailVerificationApiTests(TestCase):
         new_user = {
             "email": "test@example2.com",
             "password": "test-user-password-123",
-            "username": "test_username_2",
         }
         res = self.client.post(CREATE_USER_URL, new_user)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         self.assertEqual(res.data["email"], new_user["email"])
-        self.assertEqual(res.data["profiles"][0]["username"], new_user["username"])
+        self.assertEqual(res.data["profiles"], [])
 
         users_filtered = get_user_model().objects.filter(id=res.data["id"])
         new_user = users_filtered[0]
@@ -50,7 +49,6 @@ class EmailVerificationApiTests(TestCase):
         new_user = {
             "email": "test@example3.com",
             "password": "test-user-password-123",
-            "username": "test_username_3",
         }
         res = self.client.post(CREATE_USER_URL, new_user)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
@@ -85,7 +83,6 @@ class EmailVerificationApiTests(TestCase):
         new_user = {
             "email": "test@example4.com",
             "password": "test-user-password-123",
-            "username": "test_username_4",
         }
         res = self.client.post(CREATE_USER_URL, new_user)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
@@ -110,7 +107,6 @@ class EmailVerificationApiTests(TestCase):
         new_user = {
             "email": "test@example5.com",
             "password": "test-user-password-123",
-            "username": "test_username_5",
         }
         res = self.client.post(CREATE_USER_URL, new_user)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
@@ -131,7 +127,6 @@ class EmailVerificationApiTests(TestCase):
         new_user = {
             "email": "test@example6.com",
             "password": "test-user-password-123",
-            "username": "test_username_6",
         }
         res = self.client.post(CREATE_USER_URL, new_user)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
@@ -161,7 +156,6 @@ class EmailVerificationApiTests(TestCase):
         new_user = {
             "email": "test@example7.com",
             "password": "test-user-password-123",
-            "username": "test_username_7",
         }
         res = self.client.post(CREATE_USER_URL, new_user)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
@@ -185,7 +179,6 @@ class EmailVerificationApiTests(TestCase):
         new_user = {
             "email": "test@example8.com",
             "password": "test-user-password-123",
-            "username": "test_username_8",
         }
         res = self.client.post(CREATE_USER_URL, new_user)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
@@ -211,7 +204,6 @@ class EmailVerificationApiTests(TestCase):
         new_user = {
             "email": "test@example9.com",
             "password": "test-user-password-123",
-            "username": "test_username_9",
         }
         res = self.client.post(CREATE_USER_URL, new_user)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
@@ -235,7 +227,6 @@ class EmailVerificationApiTests(TestCase):
         new_user = {
             "email": "test@example10.com",
             "password": "test-user-password-123",
-            "username": "test_username_10",
         }
         res = self.client.post(CREATE_USER_URL, new_user)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)

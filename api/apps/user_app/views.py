@@ -9,7 +9,6 @@ from apps.user_app.models import (
     ResetPasswordToken,
     PendingEmailChange,
 )
-from apps.profile_app.serializers import ProfileCreateSerializer
 from apps.core_app.utils import generate_verification_code
 from .tasks import (
     send_verification_email_task,
@@ -84,14 +83,13 @@ class CreateUserView(generics.CreateAPIView):
     allowed_methods = ["POST"]
 
     def create(self, request, *args, **kwargs):
-        username = request.data.get("username", None)
         email = request.data.get("email", None)
         password = request.data.get("password", None)
 
-        logger.info(f"Creating user with username: {username}, email: {email}")
+        logger.info(f"Creating user with email: {email}")
 
-        if not username or not email or not password:
-            logger.error("Username, email, or password is required to create a user.")
+        if not email or not password:
+            logger.error("Email and password is required to create a user.")
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         try:
@@ -103,20 +101,6 @@ class CreateUserView(generics.CreateAPIView):
                 user_serializer.is_valid(raise_exception=True)
                 self.perform_create(user_serializer)
                 logger.info(f"User created successfully: {user_serializer.data}")
-                
-                # create Profile
-                profile_serializer = ProfileCreateSerializer(
-                    data={
-                        "username": username,
-                        "user": user_serializer.data["id"],
-                        "about": "",
-                        "name": "",
-                        "breed": "",
-                    }
-                )
-                profile_serializer.is_valid(raise_exception=True)
-                self.perform_create(profile_serializer)
-                logger.info(f"Profile created successfully: {profile_serializer.data}")
 
                 user = User.objects.get(id=user_serializer.data["id"])
 
@@ -155,11 +139,6 @@ class CreateUserView(generics.CreateAPIView):
                     errors["email"] = ["A user with that email already exists."]
                 if "password" in str(e):
                     errors["password"] = e.detail["password"]
-                # handle unique username constraint error
-                if "username" in str(e):
-                    errors["username"] = [
-                        "A profile with that username already exists."
-                    ]
 
                 if len(errors):
                     return Response(errors, status=status.HTTP_400_BAD_REQUEST)

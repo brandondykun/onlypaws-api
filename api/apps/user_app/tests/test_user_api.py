@@ -20,32 +20,22 @@ class PublicUserApiTests(TestCase):
 
     def test_creates_user_and_profile(self):
         """
-        Creating a new user creates a user object and profile
-        object in database and returns user info.
+        Creating a new user creates a user object but no profile.
+        Returns user info with empty profiles list.
         """
         new_user = {
             "email": "test@example.com",
             "password": "test-user-password-123",
-            "username": "test_username",
         }
         res = self.client.post(CREATE_USER_URL, new_user)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         self.assertEqual(res.data["email"], new_user["email"])
-        self.assertEqual(res.data["profiles"][0]["username"], new_user["username"])
+        self.assertEqual(res.data["profiles"], [])
         users = User.objects.all()
         profiles = Profile.objects.all()
 
         self.assertEqual(len(users), 1)
-        self.assertEqual(len(profiles), 1)
-
-    def test_returns_error_if_no_username(self):
-        """Returns error if username is not sent."""
-        new_user = {
-            "email": "test@example.com",
-            "password": "test-user-password-123",
-        }
-        res = self.client.post(CREATE_USER_URL, new_user)
-        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(len(profiles), 0)
 
     def test_returns_error_if_no_email(self):
         """Returns error if email is not sent."""
