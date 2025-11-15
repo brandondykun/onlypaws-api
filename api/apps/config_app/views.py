@@ -1,21 +1,10 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema_view, extend_schema
+
+from core.schema_params import auth_profile_param
 from .models import AppConfiguration
 from .serializers import AdsConfigSerializer
-from drf_spectacular.utils import (
-    extend_schema_view,
-    extend_schema,
-    OpenApiParameter,
-)
-
-# schema parameter for auth profile id header
-auth_profile_param = OpenApiParameter(
-    name="auth-profile-id",
-    description="Auth profile id",
-    required=True,
-    type=str,
-    location=OpenApiParameter.HEADER,
-)
 
 @extend_schema_view(
     get=extend_schema(parameters=[auth_profile_param]),

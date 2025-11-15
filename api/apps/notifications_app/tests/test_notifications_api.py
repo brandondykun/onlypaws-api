@@ -1,15 +1,17 @@
 from django.test import TestCase
-from django.urls import reverse
-from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from apps.user_app.models import RegularProfile
-from apps.posts_app.models import Post
 from apps.notifications_app.models import Notification, NotificationType
-
-User = get_user_model()
+from core.test_utils.utils import create_user, create_profile, create_post
+from .util import (
+    NOTIFICATIONS_LIST_URL,
+    NOTIFICATIONS_UNREAD_LIST_URL,
+    NOTIFICATIONS_MARK_ALL_READ_URL,
+    NOTIFICATIONS_GET_COUNTS_URL,
+    retrieve_update_notification_url
+)
 
 
 class NotificationAPITestCase(TestCase):
@@ -18,28 +20,28 @@ class NotificationAPITestCase(TestCase):
     def setUp(self):
         """Set up test data."""
         # Create users and profiles
-        self.user1 = User.objects.create_user(
+        self.user1 = create_user(
             email="user1@example.com",
             password="testpass123"
         )
-        self.user2 = User.objects.create_user(
+        self.user2 = create_user(
             email="user2@example.com", 
             password="testpass123"
         )
         
-        self.profile1 = RegularProfile.objects.create(
+        self.profile1 = create_profile(
             user=self.user1,
             username="user1",
             name="User One"
         )
-        self.profile2 = RegularProfile.objects.create(
+        self.profile2 = create_profile(
             user=self.user2,
             username="user2",
             name="User Two"
         )
         
         # Create a post
-        self.post = Post.objects.create(
+        self.post = create_post(
             caption="Test post",
             profile=self.profile1
         )
@@ -87,7 +89,7 @@ class NotificationAPITestCase(TestCase):
         )
         
         self.authenticate(self.profile1.id)
-        url = reverse('notifications_app:list_notifications')
+        url = NOTIFICATIONS_LIST_URL
         response = self.client.get(url)
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -117,7 +119,7 @@ class NotificationAPITestCase(TestCase):
         )
         
         self.authenticate(self.profile1.id)
-        url = reverse('notifications_app:list_unread_notifications')
+        url = NOTIFICATIONS_UNREAD_LIST_URL
         response = self.client.get(url)
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -137,7 +139,7 @@ class NotificationAPITestCase(TestCase):
         )
         
         self.authenticate(self.profile1.id)
-        url = reverse('notifications_app:retrieve_update_notification', args=[notification.id])
+        url = retrieve_update_notification_url(notification.id)
         response = self.client.patch(url, {'is_read': True})
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -167,7 +169,7 @@ class NotificationAPITestCase(TestCase):
         )
         
         self.authenticate(self.profile1.id)
-        url = reverse('notifications_app:get_notification_counts')
+        url = NOTIFICATIONS_GET_COUNTS_URL
         response = self.client.get(url)
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -197,7 +199,7 @@ class NotificationAPITestCase(TestCase):
         )
         
         self.authenticate(self.profile1.id)
-        url = reverse('notifications_app:mark_all_notifications_read')
+        url = NOTIFICATIONS_MARK_ALL_READ_URL
         response = self.client.post(url)
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)

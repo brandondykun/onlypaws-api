@@ -4,12 +4,12 @@ Tests for the comment api.
 
 from rest_framework import status
 
+from .util import create_comment_url, list_post_comments_url
 from apps.interactions_app.models import Comment
+from core.test_utils.helper_classes import BaseFixtureTestCase
 
-from .util import PostsAppTestHelper, create_comment_url, list_post_comments_url
 
-
-class PrivateCommentApiTests(PostsAppTestHelper):
+class PrivateCommentApiTests(BaseFixtureTestCase):
     """Test the private features of the Comment API."""
 
     def setUp(self):
@@ -97,7 +97,7 @@ class PrivateCommentApiTests(PostsAppTestHelper):
         self.assertEqual(len(db_comments), starting_comment_count)
 
 
-class PublicCommentApiTests(PostsAppTestHelper):
+class PublicCommentApiTests(BaseFixtureTestCase):
     """Test the public features of the Comment API."""
 
     def setUp(self):

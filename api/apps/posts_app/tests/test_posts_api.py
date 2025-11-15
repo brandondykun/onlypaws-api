@@ -6,17 +6,12 @@ from rest_framework import status
 from django.core.exceptions import ValidationError
 from apps.posts_app.models import Post, PostImage
 
-from .util import (
-    CREATE_POST_URL,
-    PostsAppTestHelper,
-    retrieve_destroy_post_url,
-    destroy_post_image_url,
-    create_post,
-    create_post_image,
-)
+from .util import CREATE_POST_URL, destroy_post_image_url, retrieve_destroy_post_url
+from core.test_utils.helper_classes import BaseFixtureTestCase
+from core.test_utils.utils import create_post, create_post_image
 
 
-class PrivatePostsApiTests(PostsAppTestHelper):
+class PrivatePostsApiTests(BaseFixtureTestCase):
     """Test the private features of the Posts API."""
 
     def setUp(self):

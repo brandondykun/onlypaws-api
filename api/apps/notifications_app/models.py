@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from apps.user_app.models import Profile
+from apps.profile_app.models import Profile
 from apps.posts_app.models import Post
 from apps.interactions_app.models import Comment
 

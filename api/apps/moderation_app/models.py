@@ -35,7 +35,7 @@ class PostReport(models.Model):
 
     post = models.ForeignKey("posts_app.Post", on_delete=models.CASCADE, related_name="reports")
     reporter = models.ForeignKey(
-        "user_app.Profile", on_delete=models.SET_NULL, null=True, related_name="reported_posts"
+        "profile_app.Profile", on_delete=models.SET_NULL, null=True, related_name="reported_posts"
     )
     reason = models.ForeignKey("moderation_app.ReportReason", on_delete=models.PROTECT)
     details = models.TextField(blank=True, default="")
@@ -45,7 +45,7 @@ class PostReport(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     resolved_by = models.ForeignKey(
-        "user_app.Profile",
+        "profile_app.Profile",
         on_delete=models.SET_NULL,
         null=True,
         related_name="resolved_reports",

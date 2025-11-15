@@ -5,7 +5,8 @@ from channels.db import database_sync_to_async
 from django.contrib.auth.models import AnonymousUser
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
-from apps.user_app.models import Profile, User
+from apps.user_app.models import User
+from apps.profile_app.models import Profile
 
 logger = logging.getLogger(__name__)
 

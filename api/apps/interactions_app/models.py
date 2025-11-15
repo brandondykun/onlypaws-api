@@ -5,7 +5,7 @@ from django.db import models
 
 
 class Like(models.Model):
-    profile = models.ForeignKey("user_app.Profile", on_delete=models.CASCADE, related_name="likes")
+    profile = models.ForeignKey("profile_app.Profile", on_delete=models.CASCADE, related_name="likes")
     post = models.ForeignKey("posts_app.Post", on_delete=models.CASCADE, related_name="likes")
     liked_at = models.DateTimeField(auto_now_add=True)
 
@@ -19,7 +19,7 @@ class Like(models.Model):
 class Comment(models.Model):
     text = models.CharField(max_length=1000)
     profile = models.ForeignKey(
-        "user_app.Profile", on_delete=models.CASCADE, related_name="comments"
+        "profile_app.Profile", on_delete=models.CASCADE, related_name="comments"
     )
     post = models.ForeignKey("posts_app.Post", on_delete=models.CASCADE, related_name="comments")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -40,7 +40,7 @@ class Comment(models.Model):
 
 class CommentLike(models.Model):
     profile = models.ForeignKey(
-        "user_app.Profile", on_delete=models.CASCADE, related_name="comment_likes"
+        "profile_app.Profile", on_delete=models.CASCADE, related_name="comment_likes"
     )
     comment = models.ForeignKey("interactions_app.Comment", on_delete=models.CASCADE, related_name="likes")
     liked_at = models.DateTimeField(auto_now_add=True)
@@ -54,10 +54,10 @@ class CommentLike(models.Model):
 
 class Follow(models.Model):
     followed = models.ForeignKey(
-        "user_app.Profile", on_delete=models.CASCADE, related_name="following"
+        "profile_app.Profile", on_delete=models.CASCADE, related_name="following"
     )
     followed_by = models.ForeignKey(
-        "user_app.Profile", on_delete=models.CASCADE, related_name="followers"
+        "profile_app.Profile", on_delete=models.CASCADE, related_name="followers"
     )
     created_at = models.DateTimeField(auto_now_add=True)
 

@@ -4,10 +4,11 @@ Tests for the Likes api.
 
 from rest_framework import status
 
-from .util import PostsAppTestHelper, create_like_url, destroy_like_url, create_like
+from .util import create_like_url, destroy_like_url
+from core.test_utils.utils import create_like
+from core.test_utils.helper_classes import BaseFixtureTestCase
 
-
-class PrivateLikeApiTests(PostsAppTestHelper):
+class PrivateLikeApiTests(BaseFixtureTestCase):
     """Test the private features of the Like API."""
 
     def setUp(self):
@@ -61,7 +62,7 @@ class PrivateLikeApiTests(PostsAppTestHelper):
         current_likes_count = self.get_likes_count()
         self.assertEqual(current_likes_count, starting_likes_count + 1)
 
-        url = destroy_like_url(self.post_2.id, self.profile.id)
+        url = destroy_like_url(self.post_2.id)
         res = self.client.delete(url)
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         current_likes_count = self.get_likes_count()
@@ -83,19 +84,25 @@ class PrivateLikeApiTests(PostsAppTestHelper):
         current_likes_count = self.get_likes_count()
         self.assertEqual(current_likes_count, starting_likes_count)
 
-    def test_unlike_post_from_another_users_auth_profile_returns_error(self):
+    def test_unlike_post_where_authenticated_user_has_not_liked_returns_error(self):
         """
-        Test un-liking a post using a profile id from a profile that
-        does not belong to the authenticated user returns a 400 error.
+        Test un-liking a post where the authenticated user has not liked
+        the post returns a 404 error.
         """
-        create_like(self.profile, self.post_2)
+        # Create a like from a different profile
+        create_like(self.profile_2, self.post_2)
 
         starting_likes_count = self.get_likes_count()
         self.assertEqual(starting_likes_count, 1)
 
-        url = destroy_like_url(self.post_2.id, self.profile_3.id)
+        # Try to unlike as self.profile (who hasn't liked the post)
+        url = destroy_like_url(self.post_2.id)
         res = self.client.delete(url)
-        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+        
+        # Verify the like still exists
+        current_likes_count = self.get_likes_count()
+        self.assertEqual(current_likes_count, starting_likes_count)
 
     def test_unlike_post_where_like_does_not_exist_returns_error(self):
         """
@@ -106,12 +113,12 @@ class PrivateLikeApiTests(PostsAppTestHelper):
         self.assertEqual(starting_likes_count, 0)  # ensure no likes exist
 
         # try to unlike a post without the like being created
-        url = destroy_like_url(self.post_2.id, self.profile.id)
+        url = destroy_like_url(self.post_2.id)
         res = self.client.delete(url)
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
 
 
-class PublicLikeApiTests(PostsAppTestHelper):
+class PublicLikeApiTests(BaseFixtureTestCase):
     """Test the public features of the Like API."""
 
     def setUp(self):

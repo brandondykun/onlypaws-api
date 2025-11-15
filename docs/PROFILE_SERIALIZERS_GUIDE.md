@@ -25,7 +25,7 @@ Used for returning regular profile data.
 
 **Usage:**
 ```python
-from apps.user_app.serializers import RegularProfileSerializer
+from apps.profile_app.serializers import RegularProfileSerializer
 
 regular_profile = RegularProfile.objects.get(id=profile_id)
 serializer = RegularProfileSerializer(regular_profile)
@@ -42,7 +42,7 @@ Used for creating new regular profiles.
 
 **Usage:**
 ```python
-from apps.user_app.serializers import RegularProfileCreateSerializer
+from apps.profile_app.serializers import RegularProfileCreateSerializer
 
 data = {
     'username': 'fluffy_cat',
@@ -67,7 +67,7 @@ Used for updating regular profiles.
 
 **Usage:**
 ```python
-from apps.user_app.serializers import RegularProfileUpdateSerializer
+from apps.profile_app.serializers import RegularProfileUpdateSerializer
 
 regular_profile = RegularProfile.objects.get(id=profile_id)
 serializer = RegularProfileUpdateSerializer(
@@ -91,7 +91,7 @@ Used for detailed profile views with counts and relationships.
 
 **Usage:**
 ```python
-from apps.user_app.serializers import RegularProfileDetailedSerializer
+from apps.profile_app.serializers import RegularProfileDetailedSerializer
 
 regular_profile = RegularProfile.objects.get(id=profile_id)
 serializer = RegularProfileDetailedSerializer(
@@ -119,7 +119,7 @@ Used for returning business profile data.
 
 **Usage:**
 ```python
-from apps.user_app.serializers import BusinessProfileSerializer
+from apps.profile_app.serializers import BusinessProfileSerializer
 
 business_profile = BusinessProfile.objects.get(id=profile_id)
 serializer = BusinessProfileSerializer(business_profile)
@@ -138,7 +138,7 @@ Used for creating new business profiles.
 
 **Usage:**
 ```python
-from apps.user_app.serializers import BusinessProfileCreateSerializer
+from apps.profile_app.serializers import BusinessProfileCreateSerializer
 
 data = {
     'username': 'pawsome_vet',
@@ -179,7 +179,7 @@ Generic serializer that works with both profile types using conditional logic.
 
 **Usage:**
 ```python
-from apps.user_app.serializers import ProfileSerializer
+from apps.profile_app.serializers import ProfileSerializer
 
 # Works with mixed profile types
 profiles = Profile.objects.select_related('regularprofile', 'businessprofile').all()
@@ -272,29 +272,29 @@ BusinessProfile.objects.select_related('profile_ptr', 'address')
 
 ### Current Structure (Backward Compatible)
 ```
-POST   /api/profiles/          - Create profile (defaults to regular)
-PATCH  /api/profiles/{id}/     - Update profile (any type)
-DELETE /api/profiles/{id}/     - Delete profile
-GET    /api/profiles/{id}/     - Get profile details
+POST   /api/profile/          - Create profile (defaults to regular)
+PATCH  /api/profile/{id}/     - Update profile (any type)
+DELETE /api/profile/{id}/     - Delete profile
+GET    /api/profile/{id}/     - Get profile details
 ```
 
 ### Recommended Future Structure
 ```
 # Regular Profiles
-POST   /api/profiles/regular/           - Create regular profile
-GET    /api/profiles/regular/{id}/      - Get regular profile
-PATCH  /api/profiles/regular/{id}/      - Update regular profile
-DELETE /api/profiles/regular/{id}/      - Delete regular profile
+POST   /api/profile/regular/           - Create regular profile
+GET    /api/profile/regular/{id}/      - Get regular profile
+PATCH  /api/profile/regular/{id}/      - Update regular profile
+DELETE /api/profile/regular/{id}/      - Delete regular profile
 
 # Business Profiles
-POST   /api/profiles/business/          - Create business profile
-GET    /api/profiles/business/{id}/     - Get business profile
-PATCH  /api/profiles/business/{id}/     - Update business profile
-DELETE /api/profiles/business/{id}/     - Delete business profile
+POST   /api/profile/business/          - Create business profile
+GET    /api/profile/business/{id}/     - Get business profile
+PATCH  /api/profile/business/{id}/     - Update business profile
+DELETE /api/profile/business/{id}/     - Delete business profile
 
 # Generic (polymorphic)
-GET    /api/profiles/                   - List all profiles
-GET    /api/profiles/{id}/              - Get any profile type
+GET    /api/profile/                   - List all profiles
+GET    /api/profile/{id}/              - Get any profile type
 ```
 
 ---
@@ -315,8 +315,8 @@ Legacy serializers (`ProfileSerializer`, `ProfileCreateSerializer`, `ProfileUpda
 
 ### Testing Regular Profiles
 ```python
-from apps.user_app.models import RegularProfile
-from apps.user_app.serializers import RegularProfileCreateSerializer
+from apps.profile_app.models import RegularProfile
+from apps.profile_app.serializers import RegularProfileCreateSerializer
 
 def test_create_regular_profile(self):
     data = {
@@ -334,8 +334,8 @@ def test_create_regular_profile(self):
 
 ### Testing Business Profiles
 ```python
-from apps.user_app.models import BusinessProfile
-from apps.user_app.serializers import BusinessProfileCreateSerializer
+from apps.profile_app.models import BusinessProfile
+from apps.profile_app.serializers import BusinessProfileCreateSerializer
 
 def test_create_business_profile(self):
     data = {

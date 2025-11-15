@@ -7,7 +7,7 @@ services:
     volumes:
       - ../api:/api
       - ../api/media:/api/media # Local media storage
-      - ../logs/django-dev.log:/vol/log/django.log
+      - ../logs:/vol/log # Mount entire logs directory for multiple log files
     env_file:
       - dev/.env.dev.local
     command: >
@@ -35,7 +35,7 @@ services:
       - redis
     volumes:
       - ../api:/api
-      - ../logs/django-dev.log:/vol/log/django.log
+      - ../logs:/vol/log # Mount entire logs directory
     env_file:
       - dev/.env.dev.local
     environment:
@@ -55,7 +55,7 @@ services:
       - redis
     volumes:
       - ../api:/api
-      - ../logs/django-dev.log:/vol/log/django.log
+      - ../logs:/vol/log # Mount entire logs directory
     env_file:
       - dev/.env.dev.local
     environment:
@@ -75,7 +75,7 @@ services:
       - redis
     volumes:
       - ../api:/api
-      - ../logs/django-dev.log:/vol/log/django.log
+      - ../logs:/vol/log # Mount entire logs directory
       - celery_beat_schedule:/tmp
     env_file:
       - dev/.env.dev.local

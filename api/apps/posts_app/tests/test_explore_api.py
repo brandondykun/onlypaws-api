@@ -4,10 +4,11 @@ Tests for the Explore api.
 
 from rest_framework import status
 
-from .util import PostsAppTestHelper, get_explore_posts_url
+from .util import get_explore_posts_url
+from core.test_utils.helper_classes import BaseFixtureTestCase
 
 
-class PrivateExploreApiTests(PostsAppTestHelper):
+class PrivateExploreApiTests(BaseFixtureTestCase):
     """Test the private features of the Explore API."""
 
     def setUp(self):
@@ -20,7 +21,7 @@ class PrivateExploreApiTests(PostsAppTestHelper):
         """
         Test fetching a profiles explore posts returns posts from profiles that they do not follow.
         """
-        url = get_explore_posts_url(self.profile.id)
+        url = get_explore_posts_url()
 
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -28,7 +29,7 @@ class PrivateExploreApiTests(PostsAppTestHelper):
         self.assertEqual(len(res.data["results"]), 4)
 
 
-class PublicExploreApiTests(PostsAppTestHelper):
+class PublicExploreApiTests(BaseFixtureTestCase):
     """Test the public, unauthenticated features of the Explore API."""
 
     def setUp(self):
@@ -40,7 +41,7 @@ class PublicExploreApiTests(PostsAppTestHelper):
         Test fetching a profiles explore posts while not being authenticated
         returns a 401 error.
         """
-        url = get_explore_posts_url(self.profile.id)
+        url = get_explore_posts_url()
 
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)

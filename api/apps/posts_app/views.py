@@ -2,44 +2,24 @@
 Views for the posts api.
 """
 
-from rest_framework import generics, permissions, mixins, status, viewsets
-from rest_framework.decorators import action
-from apps.user_app.models import Profile
+from rest_framework import generics, permissions, status
 from apps.posts_app.models import Post, PostImage, SavedPost
-from apps.interactions_app.models import Like, Comment, Follow, CommentLike
-from apps.moderation_app.models import ReportReason, PostReport
 from .serializers import (
     PostSerializer,
     PostUpdateSerializer,
     PostImageSerializer,
-    LikeSerializer,
-    CommentSerializer,
     PostDetailedSerializer,
-    CommentDetailedSerializer,
-    CommentChainSerializer,
-    SearchProfileSerializer,
-    FollowSerializer,
-    CommentLikeSerializer,
     CreateSavedPostSerializer,
-    PostReportDetailSerializer,
-    CreatePostReportSerializer,
-    ReportReasonSerializer,
 )
-from ..user_app.serializers import ProfileSerializer, ProfileDetailedSerializer
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from django.db import transaction
 from .pagination import (
-    SearchedProfilesPagination,
     ListExplorePostsPagination,
     ListProfilePostsPagination,
     ListSimilarPostsPagination,
-    FollowListPagination,
-    PostCommentsPagination,
-    CommentRepliesPagination,
-    ReportPostsPagination,
 )
 from drf_spectacular.utils import (
     extend_schema_view,
@@ -49,24 +29,9 @@ from drf_spectacular.utils import (
 )
 import logging
 
+from core.schema_params import auth_profile_param
+
 logger = logging.getLogger(__name__)
-
-# schema parameter for auth profile id header
-auth_profile_param = OpenApiParameter(
-    name="auth-profile-id",
-    description="Auth profile id",
-    required=True,
-    type=str,
-    location=OpenApiParameter.HEADER,
-)
-
-# schema query param to search for username by text
-username_param = OpenApiParameter(
-    "username",
-    OpenApiTypes.STR,
-    description="Username string or substring to search.",
-)
-
 
 @extend_schema_view(
     post=extend_schema(parameters=[auth_profile_param]),
@@ -137,68 +102,6 @@ class CreatePostView(generics.CreateAPIView):
             )
 
 
-@extend_schema_view(
-    post=extend_schema(parameters=[auth_profile_param]),
-)
-class CreateLikeView(generics.CreateAPIView):
-    """Create or delete a Like."""
-
-    serializer_class = LikeSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    queryset = Like.objects.all()
-
-    def create(self, request, *args, **kwargs):
-        post_id = self.kwargs.get("post_id", None)
-        profile_id = request.data["profileId"]
-        # ensure that the profile sent belongs to the current authenticated user
-        current_profile = request.current_profile
-        if str(profile_id) != str(current_profile.id):
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
-        # prevent profile from liking own post
-        post = get_object_or_404(Post, pk=post_id)
-        if post.profile.id == current_profile.id:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-
-        new_like_data = {
-            "post": post_id,
-            "profile": current_profile.id,
-        }
-        serializer = self.get_serializer(data=new_like_data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(
-            serializer.data, status=status.HTTP_201_CREATED, headers=headers
-        )
-
-
-@extend_schema_view(
-    delete=extend_schema(parameters=[auth_profile_param]),
-)
-class DestroyLikeView(generics.DestroyAPIView):
-    """Delete a Like."""
-
-    serializer_class = LikeSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    queryset = Like.objects.all()
-
-    def destroy(self, request, *args, **kwargs):
-        post_id = self.kwargs.get("pk", None)
-        # TODO: don't need this anymore - need to remove from test
-        profile_id = self.kwargs.get("profile_id", None)
-
-        current_profile = request.current_profile
-        if str(profile_id) != str(current_profile.id):
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
-        if post_id:
-            like = get_object_or_404(Like, profile=current_profile, post=post_id)
-            self.perform_destroy(like)
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-
-
 class ListProfilePostsView(generics.ListAPIView):
     """List all posts from a profile."""
 
@@ -220,19 +123,6 @@ class ListProfilePostsView(generics.ListAPIView):
         return profile_posts.filter(~Q(reports__reason__id=1)).order_by("-created_at")
 
 
-class RetrieveProfileView(generics.RetrieveAPIView):
-    """Get details of a Profile."""
-
-    serializer_class = ProfileDetailedSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    queryset = Profile.objects.all()
-
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, context={"request": request})
-        return Response(serializer.data)
-
-
 @extend_schema_view(
     get=extend_schema(parameters=[auth_profile_param]),
 )
@@ -243,86 +133,14 @@ class RetrieveFeedView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     queryset = Post.objects.all()
 
-    def get(self, request, *args, **kwargs):
-        profile_id = self.kwargs.get("id", None)
-        # ensure that the profile sent belongs to the current authenticated user
-        current_profile = request.current_profile
-        if str(profile_id) != str(current_profile.id):
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
-        return self.list(request, *args, **kwargs)
-
     def get_queryset(self):
-        requesting_profile_id = self.kwargs.get("id", None)
+        current_profile = self.request.current_profile
+
         posts = Post.objects.filter(
-            Q(profile__following__followed_by=requesting_profile_id)
+            Q(profile__following__followed_by=current_profile)
             & ~Q(reports__reason__id=1)  # filter reported inappropriate content
         ).order_by("-created_at")
         return posts
-
-
-@extend_schema_view(
-    post=extend_schema(parameters=[auth_profile_param]),
-)
-class CreateCommentView(generics.CreateAPIView):
-    """Create a Comment."""
-
-    serializer_class = CommentSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    queryset = Comment.objects.all()
-
-    def create(self, request, *args, **kwargs):
-        post_id = self.kwargs.get("id")
-        text = request.data["text"]
-        profile_id = request.data["profileId"]
-        parent_comment = request.data["parent_comment"]
-        reply_to_comment = request.data["reply_to_comment"]
-
-        # TODO: make sure reply_to_comment is a child comment at some level of parent_comment
-
-        current_profile = request.current_profile
-
-        # ensure that the profile id sent belongs to the current authenticated user profile
-        if str(profile_id) != str(current_profile.id):
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
-        serializer = self.get_serializer(
-            data={
-                "text": text,
-                "post": post_id,
-                "profile": profile_id,
-                "parent_comment": parent_comment,
-                "reply_to_comment": reply_to_comment,
-            },
-            context={"request": request},
-        )
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        comment = Comment.objects.get(id=serializer.data["id"])
-
-        res_serializer = CommentDetailedSerializer(
-            comment, context={"request": request}
-        )
-        headers = self.get_success_headers(res_serializer.data)
-        return Response(
-            res_serializer.data, status=status.HTTP_201_CREATED, headers=headers
-        )
-
-
-class ListPostCommentsView(generics.ListAPIView):
-    """List Comments for a Post."""
-
-    serializer_class = CommentDetailedSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    queryset = Comment.objects.all()
-    pagination_class = PostCommentsPagination
-
-    def get_queryset(self):
-        post_id = self.kwargs.get("pk")
-        comments = self.queryset.filter(
-            Q(post=post_id) & Q(parent_comment=None)
-        ).order_by("-created_at")
-        return comments
 
 
 @extend_schema_view(
@@ -339,9 +157,14 @@ class RetrieveUpdateDestroyPostView(generics.RetrieveUpdateDestroyAPIView):
 
     def get(self, request, *args, **kwargs):
         post_id = self.kwargs.get("pk")
-        post = self.queryset.get(id=post_id)
-        serializer = self.serializer_class(post, context={"request": request})
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        try:
+            post = self.queryset.get(id=post_id)
+            logger.debug(f"Post {post_id} retrieved by user {request.user.id}")
+            serializer = self.serializer_class(post, context={"request": request})
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Post.DoesNotExist:
+            logger.warning(f"Post {post_id} not found")
+            return Response({"error": "Post not found"}, status=status.HTTP_404_NOT_FOUND)
 
     def update(self, request, *args, **kwargs):
         current_profile = request.current_profile
@@ -349,6 +172,10 @@ class RetrieveUpdateDestroyPostView(generics.RetrieveUpdateDestroyAPIView):
         
         # check that the user requesting the update owns the post
         if instance.profile.user != self.request.user:
+            logger.warning(
+                f"Unauthorized post update attempt: user {request.user.id} "
+                f"attempted to update post {instance.id} owned by user {instance.profile.user.id}"
+            )
             return Response(
                 {"error": "Requesting user does not own this resource."},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -356,6 +183,10 @@ class RetrieveUpdateDestroyPostView(generics.RetrieveUpdateDestroyAPIView):
 
         # check that the profile requesting the update owns the post
         if instance.profile.id != int(current_profile.id):
+            logger.warning(
+                f"Unauthorized post update attempt: profile {current_profile.id} "
+                f"attempted to update post {instance.id} owned by profile {instance.profile.id}"
+            )
             return Response(
                 {"error": "Requesting profile does not own this resource."},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -383,15 +214,19 @@ class RetrieveUpdateDestroyPostView(generics.RetrieveUpdateDestroyAPIView):
 
         # Return the updated post using PostDetailedSerializer
         response_serializer = PostDetailedSerializer(updated_instance, context={"request": request})
+        logger.info(f"Post {updated_instance.id} updated successfully by profile {current_profile.id}")
         return Response(response_serializer.data, status=status.HTTP_200_OK)
 
     def destroy(self, request, *args, **kwargs):
-        # auth_profile_id = request.headers["auth-profile-id"]
         current_profile = request.current_profile
         instance = self.get_object()
 
         # check that the user requesting the delete owns the post
         if instance.profile.user != self.request.user:
+            logger.warning(
+                f"Unauthorized post deletion attempt: user {request.user.id} "
+                f"attempted to delete post {instance.id} owned by user {instance.profile.user.id}"
+            )
             return Response(
                 {"error": "Requesting user does not own this resource."},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -399,163 +234,18 @@ class RetrieveUpdateDestroyPostView(generics.RetrieveUpdateDestroyAPIView):
 
         # check that the profile requesting the delete owns the post
         if instance.profile.id != int(current_profile.id):
+            logger.warning(
+                f"Unauthorized post deletion attempt: profile {current_profile.id} "
+                f"attempted to delete post {instance.id} owned by profile {instance.profile.id}"
+            )
             return Response(
                 {"error": "Requesting profile does not own this resource."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        logger.info(f"Post {instance.id} deleted by profile {current_profile.id}")
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-@extend_schema_view(get=extend_schema(parameters=[username_param]))
-class ListSearchedProfilesView(generics.ListAPIView):
-    """List Profiles based on search text."""
-
-    serializer_class = SearchProfileSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    queryset = Profile.objects.select_related('regularprofile', 'businessprofile').all()
-    pagination_class = SearchedProfilesPagination
-
-    def get(self, request, *args, **kwargs):
-        username = self.request.query_params.get("username", None)
-
-        if not username:
-            return Response(
-                {
-                    "message": "Must include username (for searched profile) query param."
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        return self.list(request, *args, **kwargs)
-
-    def get_queryset(self):
-        username = self.request.query_params.get("username", None)
-        profile_id = self.kwargs.get("id", None)
-        profiles = Profile.objects.filter(
-            Q(username__icontains=username) & ~Q(id=profile_id)
-        ).order_by("username")
-        return profiles
-
-    def get_serializer_context(self):
-        profile_id = self.kwargs.get("id", None)
-
-        return {
-            "profile_id": profile_id,
-            "request": self.request,
-        }
-
-
-@extend_schema_view(
-    post=extend_schema(parameters=[auth_profile_param]),
-)
-class CreateFollowView(generics.CreateAPIView):
-    """Create a follow."""
-
-    serializer_class = FollowSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    queryset = Follow.objects.all()
-
-    def create(self, request, *args, **kwargs):
-        auth_profile_id = self.kwargs.get("id")
-
-        # ensure that the profile sent belongs to the current authenticated user
-        current_profile = request.current_profile
-        if str(current_profile.id) != str(auth_profile_id):
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
-        profile_to_follow = get_object_or_404(Profile, pk=request.data["profileId"])
-        # profile cannot follow itself
-        if profile_to_follow.id == current_profile.id:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
-        new_follow_data = {
-            "followed": request.data["profileId"],
-            "followed_by": current_profile.id,
-        }
-        serializer = self.get_serializer(data=new_follow_data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(
-            serializer.data, status=status.HTTP_201_CREATED, headers=headers
-        )
-
-
-@extend_schema_view(get=extend_schema(parameters=[username_param]))
-class ListFollowersView(generics.ListAPIView):
-    """List Profiles that follow a given Profile."""
-
-    serializer_class = ProfileSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    queryset = Profile.objects.all()
-    pagination_class = FollowListPagination
-
-    def get_queryset(self):
-        profile_id = self.kwargs.get("id", None)
-        username = self.request.query_params.get("username", None)
-
-        profile = Profile.objects.get(id=profile_id)
-        followers_objs = profile.following.all()
-        if username:
-            followers_objs = followers_objs.filter(
-                Q(followed_by__username__icontains=username)
-            )
-        sorted = followers_objs.order_by("followed_by__username")
-        followers = [obj.followed_by for obj in sorted]
-        return followers
-
-
-@extend_schema_view(get=extend_schema(parameters=[username_param]))
-class ListFollowingView(generics.ListAPIView):
-    """List Profiles that a given Profile follows."""
-
-    serializer_class = ProfileSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    queryset = Profile.objects.all()
-    pagination_class = FollowListPagination
-
-    def get_queryset(self):
-        profile_id = self.kwargs.get("id", None)
-        username = self.request.query_params.get("username", None)
-
-        profile = Profile.objects.get(id=profile_id)
-        following_objs = profile.followers.all()
-        if username:
-            following_objs = following_objs.filter(
-                Q(followed__username__icontains=username)
-            )
-        sorted = following_objs.order_by("followed__username")
-        following = [obj.followed for obj in sorted]
-        return following
-
-
-@extend_schema_view(
-    delete=extend_schema(parameters=[auth_profile_param]),
-)
-class DestroyFollowView(generics.DestroyAPIView):
-    """Delete a follow."""
-
-    serializer_class = FollowSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    queryset = Follow.objects.all()
-
-    def destroy(self, request, *args, **kwargs):
-        profile_id = self.kwargs.get("pk")  # profile id to unfollow
-        auth_profile_id = self.kwargs.get("auth_profile_id")
-
-        # ensure that the profile sent belongs to the current authenticated user
-        current_profile = request.current_profile
-        if str(auth_profile_id) != str(current_profile.id):
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
-        if profile_id:
-            follow = get_object_or_404(
-                Follow, followed_by=auth_profile_id, followed=profile_id
-            )
-            self.perform_destroy(follow)
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 @extend_schema_view(
@@ -570,10 +260,10 @@ class ListExplorePostsView(generics.ListAPIView):
     pagination_class = ListExplorePostsPagination
 
     def get_queryset(self):
-        requesting_profile_id = self.kwargs.get("id")
+        current_profile = self.request.current_profile
 
         posts = Post.objects.filter(
-            ~Q(profile__following__followed_by=requesting_profile_id)
+            ~Q(profile__following__followed_by=current_profile)
             & ~Q(profile__user=self.request.user)
             & ~Q(reports__gt=0)  # filter all reported posts for explore screen
         ).order_by("-created_at")
@@ -673,186 +363,6 @@ class ListSimilarPostsView(generics.ListAPIView):
 
 
 @extend_schema_view(
-    post=extend_schema(parameters=[auth_profile_param]),
-)
-class CreateCommentLikeView(generics.CreateAPIView):
-    """Create or delete a Comment Like."""
-
-    serializer_class = CommentLikeSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    queryset = CommentLike.objects.all()
-
-    def create(self, request, *args, **kwargs):
-        comment_id = self.kwargs.get("comment_id", None)
-        profile_id = request.data["profileId"]
-
-        # ensure that the profile sent belongs to the current authenticated user
-        current_profile = request.current_profile
-
-        if str(profile_id) != str(current_profile.id):
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
-        new_like_data = {
-            "comment": comment_id,
-            "profile": current_profile.id,
-        }
-        serializer = self.get_serializer(
-            data=new_like_data, context={"request": request}
-        )
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(
-            serializer.data, status=status.HTTP_201_CREATED, headers=headers
-        )
-
-
-@extend_schema_view(
-    delete=extend_schema(parameters=[auth_profile_param]),
-)
-class DestroyCommentLikeView(generics.DestroyAPIView):
-    """Delete a Comment Like."""
-
-    serializer_class = CommentLikeSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    queryset = CommentLike.objects.all()
-
-    def destroy(self, request, *args, **kwargs):
-        comment_id = self.kwargs.get("comment_id", None)
-        profile_id = self.kwargs.get("profile_id", None)
-
-        current_profile = request.current_profile
-        if str(current_profile.id) != str(profile_id):
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
-        if comment_id:
-            like = get_object_or_404(
-                CommentLike, profile=current_profile, comment=comment_id
-            )
-            self.perform_destroy(like)
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-
-
-@extend_schema_view(
-    get=extend_schema(parameters=[auth_profile_param]),
-)
-class ListCommentRepliesView(generics.ListAPIView):
-    """Get replies to a comment."""
-
-    serializer_class = CommentDetailedSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    queryset = Comment.objects.all()
-    pagination_class = CommentRepliesPagination
-
-    def get_queryset(self):
-        comment_id = self.kwargs.get("comment_id")
-        replies = Comment.objects.filter(Q(parent_comment=comment_id)).order_by(
-            "created_at"
-        )
-        return replies
-
-
-@extend_schema_view(
-    get=extend_schema(parameters=[auth_profile_param]),
-)
-class CommentChainRetrieveView(generics.GenericAPIView):
-    """
-    Retrieve a comment with its entire parent comment chain.
-    
-    This view optimizes database queries by:
-    1. Fetching the target comment with select_related for profile and post
-    2. Collecting all parent comment IDs in a single traversal using only('parent_comment_id')
-    3. Fetching all parent comments in a single query with select_related('profile')
-    4. Including circular reference protection to handle data corruption
-    
-    The response includes the target comment and a parent_chain field containing
-    all ancestor comments ordered from root (oldest) to immediate parent.
-    
-    Endpoint: GET /api/comments/<pk>/chain/
-    """
-
-    serializer_class = CommentChainSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    queryset = Comment.objects.all()
-
-    def get(self, request, *args, **kwargs):
-        """
-        Handle GET request to retrieve comment with parent chain.
-        
-        Query optimization strategy:
-        - Query 1: Fetch target comment with profile and post
-        - Query 2: Collect parent IDs using only('reply_to_comment_id') - minimal data transfer
-        - Query 3: Bulk fetch all parents with select_related('profile')
-        
-        This results in exactly 3 queries regardless of chain depth.
-        """
-        comment_id = self.kwargs.get("pk")
-        
-        # Step 1: Fetch the target comment with related profile and post
-        # This is Query #1
-        comment = get_object_or_404(
-            Comment.objects.select_related("profile", "post"),
-            pk=comment_id
-        )
-        
-        # Step 2: Collect all parent comment IDs by traversing up the chain
-        # This is Query #2 - uses only() to minimize data transfer
-        # NOTE: We traverse via reply_to_comment (immediate parent), not parent_comment (top-level root)
-        parent_ids = []
-        current_id = comment.reply_to_comment_id
-        seen_ids = set([comment.id])  # Circular reference protection
-        max_depth = 100  # Safety limit to prevent infinite loops
-        depth = 0
-        
-        while current_id and depth < max_depth:
-            if current_id in seen_ids:
-                # Circular reference detected - log and break
-                logger.warning(
-                    f"Circular reference detected in comment chain at comment_id={current_id}"
-                )
-                break
-            
-            seen_ids.add(current_id)
-            parent_ids.append(current_id)
-            
-            # Fetch only the reply_to_comment_id field to minimize data transfer
-            parent = Comment.objects.filter(id=current_id).only("reply_to_comment_id").first()
-            
-            if not parent:
-                # Parent comment doesn't exist (data inconsistency)
-                logger.warning(
-                    f"Parent comment {current_id} not found - possible data inconsistency"
-                )
-                break
-            
-            current_id = parent.reply_to_comment_id
-            depth += 1
-        
-        # Step 3: Bulk fetch all parent comments in a single query
-        # This is Query #3 - fetches all parents with their profiles
-        if parent_ids:
-            parent_comments = Comment.objects.filter(
-                id__in=parent_ids
-            ).select_related("profile", "post")
-            
-            # Create a lookup dictionary for efficient access
-            parent_lookup = {p.id: p for p in parent_comments}
-            
-            # Attach parent comments to the target comment for serializer access
-            # This allows the serializer to access prefetched data efficiently
-            current = comment
-            for parent_id in parent_ids:
-                if parent_id in parent_lookup:
-                    current.parent_comment = parent_lookup[parent_id]
-                    current = current.parent_comment
-        
-        # Serialize and return the comment with its parent chain
-        serializer = self.get_serializer(comment)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-@extend_schema_view(
     get=extend_schema(parameters=[auth_profile_param]),
     post=extend_schema(parameters=[auth_profile_param]),
 )
@@ -863,10 +373,8 @@ class ListCreateSavedPostView(generics.ListCreateAPIView):
     pagination_class = ListProfilePostsPagination
 
     def get_queryset(self):
-        profile_id = self.request.headers["auth-profile-id"]
-        profile = Profile.objects.get(id=profile_id)
-
-        saved_posts = profile.saved_posts.all()
+        current_profile = self.request.current_profile
+        saved_posts = current_profile.saved_posts.all()
         saved_posts_ordered = saved_posts.order_by("-saved_at")
         posts = [obj.post for obj in saved_posts_ordered]
         return posts
@@ -876,27 +384,25 @@ class ListCreateSavedPostView(generics.ListCreateAPIView):
             return PostDetailedSerializer
         return CreateSavedPostSerializer
 
-    def get(self, request, *args, **kwargs):
-        profile_id = self.request.headers["auth-profile-id"]
-        user_profile_match = self.request.user.profiles.filter(id=profile_id).first()
-
-        if not user_profile_match:
-            return Response(
-                {"message": "Profile does not belong to the authenticated user."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        return super().get(request, *args, **kwargs)
-
     def post(self, request, *args, **kwargs):
-        profile_id = request.data["profile"]
-        user_profile_match = self.request.user.profiles.filter(id=profile_id).first()
+        current_profile = request.current_profile
+        profile_id = request.data.get("profile")
         # ensure profile creating saved post belongs to the authenticated user
-        if not user_profile_match:
+        if str(profile_id) != str(current_profile.id):
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            response = super().post(request, *args, **kwargs)
+            if response.status_code == 201:
+                post_id = request.data.get("post")
+                logger.info(f"Post {post_id} saved by profile {profile_id}")
+            return response
+        except Exception as e:
+            logger.error(f"Error saving post for profile {profile_id}: {str(e)}")
             return Response(
-                {"message": "Profile does not belong to the authenticated user."},
-                status=status.HTTP_400_BAD_REQUEST,
+                {"error": "Failed to save post"},
+                status=status.HTTP_400_BAD_REQUEST
             )
-        return super().post(request, *args, **kwargs)
 
 
 @extend_schema_view(
@@ -911,168 +417,24 @@ class DestroySavedPostView(generics.DestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         post_id = self.kwargs.get("post_id", None)
-        profile_id = self.request.headers["auth-profile-id"]
-
-        user_profile_match = self.request.user.profiles.filter(id=profile_id).first()
-
-        if not user_profile_match:
-            return Response(
-                {"message": "Profile does not belong to the authenticated user."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        current_profile = request.current_profile
 
         if post_id:
-            like = get_object_or_404(
-                SavedPost, profile=user_profile_match, post=post_id
-            )
-            self.perform_destroy(like)
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            try:
+                saved_post = get_object_or_404(
+                    SavedPost, profile=current_profile, post=post_id
+                )
+                self.perform_destroy(saved_post)
+                logger.info(f"Post {post_id} unsaved by profile {current_profile.id}")
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            except Exception as e:
+                logger.error(
+                    f"Error unsaving post {post_id} for profile {current_profile.id}: {str(e)}"
+                )
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+        
+        logger.warning(f"Unsave attempt with no post_id by profile {current_profile.id}")
         return Response(status=status.HTTP_400_BAD_REQUEST)
-
-
-@extend_schema_view(
-    list=extend_schema(parameters=[auth_profile_param]),
-    retrieve=extend_schema(parameters=[auth_profile_param]),
-)
-class ReportReasonViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    ViewSet for listing active report reasons.
-    Only GET methods are allowed as reasons should be managed via admin.
-    """
-
-    queryset = ReportReason.objects.filter(is_active=True)
-    serializer_class = ReportReasonSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    pagination_class = None
-
-    def list(self, request, *args, **kwargs):
-        if not request.current_profile:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-        queryset = self.filter_queryset(self.get_queryset())
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
-
-
-@extend_schema_view(
-    list=extend_schema(parameters=[auth_profile_param]),
-    retrieve=extend_schema(
-        parameters=[
-            auth_profile_param,
-            OpenApiParameter(
-                name="id",
-                description="Report ID",
-                required=True,
-                type=int,
-                location=OpenApiParameter.PATH,
-            ),
-        ]
-    ),
-    create=extend_schema(parameters=[auth_profile_param]),
-)
-class PostReportViewSet(
-    mixins.CreateModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.ListModelMixin,
-    viewsets.GenericViewSet,
-):
-    """
-    ViewSet for managing post reports.
-    Users can create reports and view their own reports.
-    Staff can view and manage all reports.
-    """
-
-    permission_classes = [permissions.IsAuthenticated]
-    pagination_class = ReportPostsPagination
-    # Provide base queryset for schema introspection
-    queryset = PostReport.objects.all()
-
-    def get_queryset(self):
-        requesting_profile = self.request.current_profile
-        if self.request.user.is_staff:
-            return PostReport.objects.all().order_by("created_at")
-        return PostReport.objects.filter(reporter=requesting_profile).order_by(
-            "-created_at"
-        )
-
-    def get_serializer_class(self):
-        if self.action == "create":
-            return CreatePostReportSerializer
-        return PostReportDetailSerializer
-
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context["request"] = self.request
-        return context
-
-    @extend_schema(parameters=[auth_profile_param])
-    @action(
-        detail=True, methods=["patch"], permission_classes=[permissions.IsAdminUser]
-    )
-    def resolve(self, request, pk=None):
-        """
-        Endpoint for staff to resolve a report
-        """
-        resolving_profile = request.current_profile
-
-        report = self.get_object()
-        resolution_note = request.data.get("resolution_note", "")
-        request_status = request.data.get("status", PostReport.ReportStatus.RESOLVED)
-
-        if request_status not in dict(PostReport.ReportStatus.choices):
-            return Response(
-                {"error": "Invalid status"}, status=status.HTTP_400_BAD_REQUEST
-            )
-
-        report.status = request_status
-        report.resolution_note = resolution_note
-        report.resolved_by = resolving_profile
-        report.save()
-
-        return Response(PostReportDetailSerializer(report).data)
-
-    @extend_schema(parameters=[auth_profile_param])
-    @action(detail=False, methods=["get"])
-    def my_reports(self, request):
-        """
-        Endpoint for users to view their own reports
-        """
-        requesting_profile = request.current_profile
-
-        queryset = PostReport.objects.filter(reporter=requesting_profile)
-        page = self.paginate_queryset(queryset)
-
-        if page is not None:
-            serializer = PostReportDetailSerializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        # If pagination is disabled, serialize and return all results
-        serializer = PostReportDetailSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-    @extend_schema(parameters=[auth_profile_param])
-    @action(detail=False, methods=["get"])
-    def reported_posts(self, request):
-        """
-        Endpoint for users to view reports on their posts
-        """
-        requesting_profile = request.current_profile
-
-        queryset = PostReport.objects.filter(post__profile=requesting_profile)
-        page = self.paginate_queryset(queryset)
-
-        if page is not None:
-            serializer = PostReportDetailSerializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        # If pagination is disabled, serialize and return all results
-        serializer = PostReportDetailSerializer(queryset, many=True)
-        return Response(serializer.data)
 
 
 @extend_schema_view(

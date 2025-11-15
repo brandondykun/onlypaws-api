@@ -3,18 +3,11 @@ Tests for the change password API endpoint.
 """
 
 from django.test import TestCase
-from django.urls import reverse
-from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 from rest_framework import status
 
-
-CHANGE_PASSWORD_URL = reverse("user_app:change_password")
-
-
-def create_user(**params):
-    """Create and return a new user."""
-    return get_user_model().objects.create_user(**params)
+from .util import CHANGE_PASSWORD_URL
+from core.test_utils.utils import create_user
 
 
 class PublicChangePasswordAPITests(TestCase):

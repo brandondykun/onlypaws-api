@@ -35,9 +35,12 @@ urlpatterns = [
     path(admin_url, admin.site.urls),
     path("api/v1/", include("apps.posts_app.urls")),
     path("api/v1/auth/", include("apps.user_app.urls")),
+    path("api/v1/profile/", include("apps.profile_app.urls")),
+    path("api/v1/interactions/", include("apps.interactions_app.urls")),
     path("api/v1/", include("apps.feedback_app.urls")),
     path("api/v1/", include("apps.notifications_app.urls")),
     path("api/v1/config/", include("apps.config_app.urls")),
+    path("api/v1/moderation/", include("apps.moderation_app.urls")),
     path("api-auth/", include("rest_framework.urls")),
 ]
 

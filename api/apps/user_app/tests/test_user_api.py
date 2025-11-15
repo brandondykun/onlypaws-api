@@ -1,38 +1,15 @@
 """
-Tests for the user and profile api.
+Tests for the user API (authentication and account management).
 """
 
 from django.test import TestCase
-from django.contrib.auth import get_user_model
-from django.urls import reverse
-
 from rest_framework.test import APIClient
 from rest_framework import status
 
-from apps.user_app.models import Profile, RegularProfile, User
-
-MY_INFO_URL = reverse("user_app:my_info")
-LOGIN_URL = reverse("user_app:token_obtain_pair")
-REFRESH_TOKEN_URL = reverse("user_app:token_refresh")
-CREATE_USER_URL = reverse("user_app:create_user")
-CREATE_PROFILE_URL = reverse("user_app:create_profile")
-VERIFY_EMAIL_URL = reverse("user_app:verify_email_token")
-REQUEST_NEW_VERIFY_EMAIL_TOKEN_URL = reverse("user_app:request_new_verify_email_token")
-
-
-def create_user(**params):
-    """Create and return new User."""
-    return get_user_model().objects.create_user(**params)
-
-
-def create_profile(**params):
-    """Create and return new RegularProfile (which also creates a Profile)."""
-    return RegularProfile.objects.create(**params)
-
-
-def retrieve_update_profile_url(profile_id):
-    """Create and return a retrieve/update profile url."""
-    return reverse("user_app:profile-detail", args=[profile_id])
+from apps.user_app.models import User
+from apps.profile_app.models import Profile
+from .util import MY_INFO_URL, CREATE_USER_URL
+from core.test_utils.utils import create_user, create_profile
 
 
 class PublicUserApiTests(TestCase):
@@ -43,32 +20,42 @@ class PublicUserApiTests(TestCase):
 
     def test_creates_user_and_profile(self):
         """
-        Creating a new user creates a user object and profile
-        object in database and returns user info.
+        Creating a new user creates a user object but no profile.
+        Returns user info with empty profiles list.
         """
         new_user = {
             "email": "test@example.com",
             "password": "test-user-password-123",
-            "username": "test_username",
         }
         res = self.client.post(CREATE_USER_URL, new_user)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         self.assertEqual(res.data["email"], new_user["email"])
-        self.assertEqual(res.data["profiles"][0]["username"], new_user["username"])
+        self.assertEqual(res.data["profiles"], [])
         users = User.objects.all()
         profiles = Profile.objects.all()
 
         self.assertEqual(len(users), 1)
-        self.assertEqual(len(profiles), 1)
+        self.assertEqual(len(profiles), 0)
 
-    def test_returns_error_if_no_username(self):
-        """Returns error if username is not sent."""
+    def test_new_user_has_onboarding_fields_default_to_false(self):
+        """Test that new users have onboarding fields defaulting to False."""
         new_user = {
             "email": "test@example.com",
             "password": "test-user-password-123",
         }
         res = self.client.post(CREATE_USER_URL, new_user)
-        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        
+        # Check response includes onboarding fields with False values
+        self.assertIn("regular_profile_onboarding_completed", res.data)
+        self.assertIn("business_profile_onboarding_completed", res.data)
+        self.assertFalse(res.data["regular_profile_onboarding_completed"])
+        self.assertFalse(res.data["business_profile_onboarding_completed"])
+        
+        # Verify in database
+        user = User.objects.get(email=new_user["email"])
+        self.assertFalse(user.regular_profile_onboarding_completed)
+        self.assertFalse(user.business_profile_onboarding_completed)
 
     def test_returns_error_if_no_email(self):
         """Returns error if email is not sent."""
@@ -125,47 +112,39 @@ class PrivateUserApiTests(TestCase):
                 }
             ],
             "is_email_verified": False,
+            "regular_profile_onboarding_completed": False,
+            "business_profile_onboarding_completed": False,
         }
         self.assertEqual(res.data, expected_info)
 
-    def test_create_new_profile_successful(self):
-        """
-        Test creating a new profile is successful and creates a new profile object in the
-        database that is associated with the authenticated user.
-        """
-        new_profile = {
-            "username": "profile_2",
-            "name": "Test Name",
-            "about": "Test about text.",
-        }
-        res = self.client.post(CREATE_PROFILE_URL, new_profile)
-        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(res.data["username"], new_profile["username"])
-        self.assertEqual(res.data["name"], new_profile["name"])
-        self.assertEqual(res.data["about"], new_profile["about"])
-        self.assertEqual(res.data["user"], self.user.id)
-
-        profiles = Profile.objects.filter(username=new_profile["username"])
-        self.assertEqual(len(profiles), 1)
-
-    def test_update_profile_successful(self):
-        """
-        Test updating a profile is successful and updates
-        the profile object in the database.
-        """
-        updated_profile = {
-            "name": "Updated Name",
-            "about": "Updated about text.",
-        }
-        url = retrieve_update_profile_url(self.profile.id)
-        res = self.client.patch(url, updated_profile)
+    def test_onboarding_fields_included_in_user_info(self):
+        """Test that onboarding fields are included in user info response."""
+        res = self.client.get(MY_INFO_URL)
+        
         self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn("regular_profile_onboarding_completed", res.data)
+        self.assertIn("business_profile_onboarding_completed", res.data)
+        self.assertFalse(res.data["regular_profile_onboarding_completed"])
+        self.assertFalse(res.data["business_profile_onboarding_completed"])
 
-        self.assertEqual(res.data["id"], self.profile.id)
-        self.assertEqual(res.data["username"], self.profile.username)
-        self.assertEqual(res.data["name"], updated_profile["name"])
-        self.assertEqual(res.data["about"], updated_profile["about"])
-
-        profile = RegularProfile.objects.get(id=self.profile.id)
-        self.assertEqual(profile.name, updated_profile["name"])
-        self.assertEqual(profile.about, updated_profile["about"])
+    def test_onboarding_fields_can_be_updated(self):
+        """Test that onboarding fields can be updated and persist."""
+        # Initially False
+        self.assertFalse(self.user.regular_profile_onboarding_completed)
+        self.assertFalse(self.user.business_profile_onboarding_completed)
+        
+        # Update via model
+        self.user.regular_profile_onboarding_completed = True
+        self.user.business_profile_onboarding_completed = True
+        self.user.save()
+        
+        # Verify update persisted
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.regular_profile_onboarding_completed)
+        self.assertTrue(self.user.business_profile_onboarding_completed)
+        
+        # Verify in API response
+        res = self.client.get(MY_INFO_URL)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertTrue(res.data["regular_profile_onboarding_completed"])
+        self.assertTrue(res.data["business_profile_onboarding_completed"])

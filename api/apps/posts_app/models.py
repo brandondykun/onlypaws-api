@@ -15,7 +15,7 @@ class Post(models.Model):
     """Post with image and text."""
 
     caption = models.TextField(validators=[MaxLengthValidator(1000, message="Caption cannot exceed 1000 characters.")])
-    profile = models.ForeignKey("user_app.Profile", on_delete=models.CASCADE, related_name="posts")
+    profile = models.ForeignKey("profile_app.Profile", on_delete=models.CASCADE, related_name="posts")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     contains_ai = models.BooleanField(blank=True, default=False)
@@ -165,7 +165,7 @@ class PostImage(models.Model):
 
 class SavedPost(models.Model):
     profile = models.ForeignKey(
-        "user_app.Profile", on_delete=models.CASCADE, related_name="saved_posts"
+        "profile_app.Profile", on_delete=models.CASCADE, related_name="saved_posts"
     )
     post = models.ForeignKey("posts_app.Post", on_delete=models.CASCADE, related_name="saved_by")
     saved_at = models.DateTimeField(auto_now_add=True)

@@ -1,6 +1,6 @@
 [
   {
-    "model": "user_app.regularprofile",
+    "model": "profile_app.regularprofile",
     "pk": 1,
     "fields": {
       "about": "I am the admin dog.",
@@ -10,7 +10,7 @@
     }
   },
   {
-    "model": "user_app.regularprofile",
+    "model": "profile_app.regularprofile",
     "pk": 2,
     "fields": {
       "about": "I pull like a freight train on a leash. But I can smell a rabbit from half a mile.",
@@ -20,7 +20,7 @@
     }
   },
   {
-    "model": "user_app.regularprofile",
+    "model": "profile_app.regularprofile",
     "pk": 3,
     "fields": {
       "about": "I’m Linus’s cousin!",
@@ -30,7 +30,7 @@
     }
   },
   {
-    "model": "user_app.regularprofile",
+    "model": "profile_app.regularprofile",
     "pk": 4,
     "fields": {
       "about": "People think my breed is mean but I don’t have a mean bone in my body!",
@@ -40,7 +40,7 @@
     }
   },
   {
-    "model": "user_app.regularprofile",
+    "model": "profile_app.regularprofile",
     "pk": 5,
     "fields": {
       "about": "The best AI pet account.\n\nUsing generative AI to create lifelike portrayals of pets of all kinds.",
@@ -50,7 +50,7 @@
     }
   },
   {
-    "model": "user_app.regularprofile",
+    "model": "profile_app.regularprofile",
     "pk": 6,
     "fields": {
       "about": "All the best of AI cats. \n\nIf you want to see your favorite cat breed as AI, let me know. I take requests.\n\nNote: none of the pictures are real. They’re all created using AI.\n\n🐈🐈‍⬛❤️",

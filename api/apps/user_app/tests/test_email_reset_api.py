@@ -3,19 +3,16 @@ Tests for email change functionality.
 """
 
 from django.test import TestCase
-from django.urls import reverse
 from django.core import mail
 from django.utils import timezone
 from datetime import timedelta
 from rest_framework.test import APIClient
 from rest_framework import status
-from apps.user_app.models import User, PendingEmailChange
+
+from apps.user_app.models import PendingEmailChange
 from apps.core_app.utils import generate_verification_code
-
-
-def create_user(email="test@example.com", password="testpass123"):
-    """Helper function to create a test user."""
-    return User.objects.create_user(email=email, password=password)
+from .util import REQUEST_EMAIL_CHANGE_URL, VERIFY_EMAIL_CHANGE_URL
+from core.test_utils.utils import create_user
 
 
 class PublicEmailChangeAPITests(TestCase):
@@ -26,12 +23,12 @@ class PublicEmailChangeAPITests(TestCase):
 
     def test_request_email_change_auth_required(self):
         """Test authentication is required for requesting email change."""
-        res = self.client.post(reverse("user_app:request-email-change"))
+        res = self.client.post(REQUEST_EMAIL_CHANGE_URL)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_verify_email_change_auth_required(self):
         """Test authentication is required for verifying email change."""
-        res = self.client.post(reverse("user_app:verify-email-change"))
+        res = self.client.post(VERIFY_EMAIL_CHANGE_URL)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
@@ -40,10 +37,10 @@ class PrivateEmailChangeAPITests(TestCase):
 
     def setUp(self):
         self.client = APIClient()
-        self.user = create_user()
+        self.user = create_user(email="test@example.com", password="testpass123")
         self.client.force_authenticate(user=self.user)
-        self.request_url = reverse("user_app:request-email-change")
-        self.verify_url = reverse("user_app:verify-email-change")
+        self.request_url = REQUEST_EMAIL_CHANGE_URL
+        self.verify_url = VERIFY_EMAIL_CHANGE_URL
 
     def test_request_email_change_success(self):
         """Test successful email change request."""

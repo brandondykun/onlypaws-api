@@ -1,6 +1,6 @@
 [
   {
-    "model": "user_app.profileimage",
+    "model": "profile_app.profileimage",
     "pk": 1,
     "fields": {
       "profile": 4,
@@ -10,7 +10,7 @@
     }
   },
   {
-    "model": "user_app.profileimage",
+    "model": "profile_app.profileimage",
     "pk": 2,
     "fields": {
       "profile": 5,
@@ -20,7 +20,7 @@
     }
   },
   {
-    "model": "user_app.profileimage",
+    "model": "profile_app.profileimage",
     "pk": 3,
     "fields": {
       "profile": 6,

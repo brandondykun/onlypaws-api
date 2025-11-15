@@ -4,18 +4,13 @@ Tests for the email verification API endpoints.
 
 from datetime import timedelta
 from django.test import TestCase
-from django.urls import reverse
 from django.utils import timezone
 from django.contrib.auth import get_user_model
-
 from rest_framework.test import APIClient
 from rest_framework import status
 
 from apps.user_app.models import VerifyEmailToken
-
-CREATE_USER_URL = reverse("user_app:create_user")
-VERIFY_EMAIL_URL = reverse("user_app:verify_email_token")
-REQUEST_NEW_VERIFY_EMAIL_TOKEN_URL = reverse("user_app:request_new_verify_email_token")
+from .util import CREATE_USER_URL, VERIFY_EMAIL_URL, REQUEST_NEW_VERIFY_EMAIL_TOKEN_URL
 
 
 class EmailVerificationApiTests(TestCase):
@@ -29,12 +24,11 @@ class EmailVerificationApiTests(TestCase):
         new_user = {
             "email": "test@example2.com",
             "password": "test-user-password-123",
-            "username": "test_username_2",
         }
         res = self.client.post(CREATE_USER_URL, new_user)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         self.assertEqual(res.data["email"], new_user["email"])
-        self.assertEqual(res.data["profiles"][0]["username"], new_user["username"])
+        self.assertEqual(res.data["profiles"], [])
 
         users_filtered = get_user_model().objects.filter(id=res.data["id"])
         new_user = users_filtered[0]
@@ -55,7 +49,6 @@ class EmailVerificationApiTests(TestCase):
         new_user = {
             "email": "test@example3.com",
             "password": "test-user-password-123",
-            "username": "test_username_3",
         }
         res = self.client.post(CREATE_USER_URL, new_user)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
@@ -90,7 +83,6 @@ class EmailVerificationApiTests(TestCase):
         new_user = {
             "email": "test@example4.com",
             "password": "test-user-password-123",
-            "username": "test_username_4",
         }
         res = self.client.post(CREATE_USER_URL, new_user)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
@@ -115,7 +107,6 @@ class EmailVerificationApiTests(TestCase):
         new_user = {
             "email": "test@example5.com",
             "password": "test-user-password-123",
-            "username": "test_username_5",
         }
         res = self.client.post(CREATE_USER_URL, new_user)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
@@ -136,7 +127,6 @@ class EmailVerificationApiTests(TestCase):
         new_user = {
             "email": "test@example6.com",
             "password": "test-user-password-123",
-            "username": "test_username_6",
         }
         res = self.client.post(CREATE_USER_URL, new_user)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
@@ -166,7 +156,6 @@ class EmailVerificationApiTests(TestCase):
         new_user = {
             "email": "test@example7.com",
             "password": "test-user-password-123",
-            "username": "test_username_7",
         }
         res = self.client.post(CREATE_USER_URL, new_user)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
@@ -190,7 +179,6 @@ class EmailVerificationApiTests(TestCase):
         new_user = {
             "email": "test@example8.com",
             "password": "test-user-password-123",
-            "username": "test_username_8",
         }
         res = self.client.post(CREATE_USER_URL, new_user)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
@@ -216,7 +204,6 @@ class EmailVerificationApiTests(TestCase):
         new_user = {
             "email": "test@example9.com",
             "password": "test-user-password-123",
-            "username": "test_username_9",
         }
         res = self.client.post(CREATE_USER_URL, new_user)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
@@ -240,7 +227,6 @@ class EmailVerificationApiTests(TestCase):
         new_user = {
             "email": "test@example10.com",
             "password": "test-user-password-123",
-            "username": "test_username_10",
         }
         res = self.client.post(CREATE_USER_URL, new_user)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
