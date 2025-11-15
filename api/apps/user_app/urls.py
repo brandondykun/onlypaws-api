@@ -51,4 +51,9 @@ urlpatterns = [
         views.VerifyEmailChangeView.as_view(),
         name="verify-email-change",
     ),
+    path(
+        "complete-onboarding/",
+        views.CompleteOnboardingView.as_view(),
+        name="complete-onboarding",
+    ),
 ]

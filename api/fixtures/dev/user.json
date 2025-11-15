@@ -10,6 +10,8 @@
       "is_active": true,
       "is_staff": true,
       "is_email_verified": true,
+      "regular_profile_onboarding_completed": true,
+      "business_profile_onboarding_completed": false,
       "groups": [],
       "user_permissions": []
     }
@@ -25,6 +27,8 @@
       "is_active": true,
       "is_staff": false,
       "is_email_verified": true,
+      "regular_profile_onboarding_completed": true,
+      "business_profile_onboarding_completed": false,
       "groups": [],
       "user_permissions": []
     }
@@ -40,6 +44,8 @@
       "is_active": true,
       "is_staff": false,
       "is_email_verified": true,
+      "regular_profile_onboarding_completed": true,
+      "business_profile_onboarding_completed": false,
       "groups": [],
       "user_permissions": []
     }
@@ -55,6 +61,8 @@
       "is_active": true,
       "is_staff": false,
       "is_email_verified": true,
+      "regular_profile_onboarding_completed": true,
+      "business_profile_onboarding_completed": false,
       "groups": [],
       "user_permissions": []
     }
@@ -70,6 +78,8 @@
       "is_active": true,
       "is_staff": false,
       "is_email_verified": true,
+      "regular_profile_onboarding_completed": true,
+      "business_profile_onboarding_completed": false,
       "groups": [],
       "user_permissions": []
     }
@@ -85,6 +95,8 @@
       "is_active": true,
       "is_staff": false,
       "is_email_verified": true,
+      "regular_profile_onboarding_completed": true,
+      "business_profile_onboarding_completed": false,
       "groups": [],
       "user_permissions": []
     }
@@ -100,6 +112,8 @@
       "is_active": true,
       "is_staff": false,
       "is_email_verified": true,
+      "regular_profile_onboarding_completed": true,
+      "business_profile_onboarding_completed": false,
       "groups": [],
       "user_permissions": []
     }
@@ -115,6 +129,8 @@
       "is_active": true,
       "is_staff": false,
       "is_email_verified": true,
+      "regular_profile_onboarding_completed": true,
+      "business_profile_onboarding_completed": false,
       "groups": [],
       "user_permissions": []
     }
@@ -130,6 +146,8 @@
       "is_active": true,
       "is_staff": false,
       "is_email_verified": true,
+      "regular_profile_onboarding_completed": true,
+      "business_profile_onboarding_completed": false,
       "groups": [],
       "user_permissions": []
     }
@@ -145,6 +163,8 @@
       "is_active": true,
       "is_staff": false,
       "is_email_verified": true,
+      "regular_profile_onboarding_completed": true,
+      "business_profile_onboarding_completed": false,
       "groups": [],
       "user_permissions": []
     }
@@ -160,6 +180,8 @@
       "is_active": true,
       "is_staff": false,
       "is_email_verified": true,
+      "regular_profile_onboarding_completed": true,
+      "business_profile_onboarding_completed": false,
       "groups": [],
       "user_permissions": []
     }
@@ -190,6 +212,8 @@
       "is_active": true,
       "is_staff": false,
       "is_email_verified": true,
+      "regular_profile_onboarding_completed": true,
+      "business_profile_onboarding_completed": false,
       "groups": [],
       "user_permissions": []
     }
@@ -205,6 +229,8 @@
       "is_active": true,
       "is_staff": false,
       "is_email_verified": true,
+      "regular_profile_onboarding_completed": true,
+      "business_profile_onboarding_completed": false,
       "groups": [],
       "user_permissions": []
     }
@@ -220,6 +246,8 @@
       "is_active": true,
       "is_staff": false,
       "is_email_verified": true,
+      "regular_profile_onboarding_completed": true,
+      "business_profile_onboarding_completed": false,
       "groups": [],
       "user_permissions": []
     }
@@ -235,6 +263,8 @@
       "is_active": true,
       "is_staff": false,
       "is_email_verified": true,
+      "regular_profile_onboarding_completed": true,
+      "business_profile_onboarding_completed": false,
       "groups": [],
       "user_permissions": []
     }
@@ -250,6 +280,8 @@
       "is_active": true,
       "is_staff": false,
       "is_email_verified": true,
+      "regular_profile_onboarding_completed": true,
+      "business_profile_onboarding_completed": false,
       "groups": [],
       "user_permissions": []
     }
@@ -265,6 +297,8 @@
       "is_active": true,
       "is_staff": false,
       "is_email_verified": true,
+      "regular_profile_onboarding_completed": true,
+      "business_profile_onboarding_completed": false,
       "groups": [],
       "user_permissions": []
     }
@@ -280,6 +314,8 @@
       "is_active": true,
       "is_staff": false,
       "is_email_verified": true,
+      "regular_profile_onboarding_completed": true,
+      "business_profile_onboarding_completed": false,
       "groups": [],
       "user_permissions": []
     }
@@ -295,6 +331,8 @@
       "is_active": true,
       "is_staff": false,
       "is_email_verified": true,
+      "regular_profile_onboarding_completed": true,
+      "business_profile_onboarding_completed": false,
       "groups": [],
       "user_permissions": []
     }
@@ -310,6 +348,8 @@
       "is_active": true,
       "is_staff": false,
       "is_email_verified": true,
+      "regular_profile_onboarding_completed": true,
+      "business_profile_onboarding_completed": false,
       "groups": [],
       "user_permissions": []
     }

@@ -42,6 +42,14 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_email_verified = models.BooleanField(default=False)
+    regular_profile_onboarding_completed = models.BooleanField(
+        default=False,
+        help_text="Whether the user has completed onboarding for RegularProfile type"
+    )
+    business_profile_onboarding_completed = models.BooleanField(
+        default=False,
+        help_text="Whether the user has completed onboarding for BusinessProfile type"
+    )
 
     objects = UserManager()
 

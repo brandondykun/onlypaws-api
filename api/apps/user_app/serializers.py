@@ -52,8 +52,19 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = ["id", "email", "profiles", "is_email_verified"]
-        read_only_fields = ["is_email_verified"]
+        fields = [
+            "id",
+            "email",
+            "profiles",
+            "is_email_verified",
+            "regular_profile_onboarding_completed",
+            "business_profile_onboarding_completed",
+        ]
+        read_only_fields = [
+            "is_email_verified",
+            "regular_profile_onboarding_completed",
+            "business_profile_onboarding_completed",
+        ]
 
 
 # ============================================================================
@@ -113,4 +124,20 @@ class ResetPasswordSerializer(serializers.Serializer):
     def validate_password(self, value):
         """Validate the password."""
         validate_password(value)
+        return value
+
+
+class CompleteOnboardingSerializer(serializers.Serializer):
+    """Serializer for completing onboarding."""
+
+    profile_type = serializers.ChoiceField(
+        choices=["regular", "business"],
+        required=True,
+        help_text="Type of profile onboarding to complete: 'regular' or 'business'"
+    )
+
+    def validate_profile_type(self, value):
+        """Validate profile type."""
+        if value not in ["regular", "business"]:
+            raise serializers.ValidationError("profile_type must be 'regular' or 'business'")
         return value

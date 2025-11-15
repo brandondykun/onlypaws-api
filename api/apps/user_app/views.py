@@ -25,6 +25,7 @@ from .serializers import (
     RequestEmailChangeSerializer,
     VerifyEmailChangeSerializer,
     ResetPasswordSerializer,
+    CompleteOnboardingSerializer,
 )
 from rest_framework.response import Response
 import logging
@@ -600,3 +601,59 @@ class VerifyEmailChangeView(generics.GenericAPIView):
         return Response(
             {"message": "Email updated successfully."}, status=status.HTTP_200_OK
         )
+
+
+@extend_schema_view(post=extend_schema(parameters=[auth_profile_param]))
+class CompleteOnboardingView(generics.GenericAPIView):
+    """
+    API View to mark onboarding as complete for a profile type.
+    Once completed, the onboarding will not be shown again even if the user
+    creates additional profiles of the same type.
+    """
+
+    serializer_class = CompleteOnboardingSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        """Mark onboarding as complete for the specified profile type."""
+        serializer = self.serializer_class(data=request.data)
+
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        user = request.user
+        profile_type = serializer.validated_data["profile_type"]
+
+        try:
+            with transaction.atomic():
+                if profile_type == "regular":
+                    user.regular_profile_onboarding_completed = True
+                elif profile_type == "business":
+                    user.business_profile_onboarding_completed = True
+                
+                user.save()
+
+            logger.info(
+                f"Onboarding marked as complete for user {user.email}, "
+                f"profile_type: {profile_type}"
+            )
+            
+            # Return updated user info
+            user_serializer = UserProfileSerializer(user, context={"request": request})
+            return Response(
+                {
+                    "message": f"{profile_type.capitalize()} profile onboarding marked as complete.",
+                    "user": user_serializer.data
+                },
+                status=status.HTTP_200_OK
+            )
+
+        except Exception as e:
+            logger.error(
+                f"Error completing onboarding for user {user.email}, "
+                f"profile_type: {profile_type}: {str(e)}"
+            )
+            return Response(
+                {"error": "Failed to complete onboarding. Please try again."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
