@@ -1,1 +1,38 @@
-[]
+[
+  {
+    "model": "interactions_app.commentlike",
+    "pk": 1,
+    "fields": {
+      "profile": 1,
+      "comment": 1,
+      "liked_at": "2025-02-04T04:15:30.443Z"
+    }
+  },
+  {
+    "model": "interactions_app.commentlike",
+    "pk": 2,
+    "fields": {
+      "profile": 3,
+      "comment": 2,
+      "liked_at": "2025-10-17T00:03:28.763Z"
+    }
+  },
+  {
+    "model": "interactions_app.commentlike",
+    "pk": 4,
+    "fields": {
+      "profile": 17,
+      "comment": 12,
+      "liked_at": "2025-10-18T15:57:51.420Z"
+    }
+  },
+  {
+    "model": "interactions_app.commentlike",
+    "pk": 5,
+    "fields": {
+      "profile": 17,
+      "comment": 13,
+      "liked_at": "2025-10-18T23:56:56.538Z"
+    }
+  }
+]
