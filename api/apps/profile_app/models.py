@@ -225,6 +225,8 @@ def profile_image_path(instance, filename):
         path = "images/test/{0}/{1}/{2}".format(user_id, profile_id, filename)
     if os.environ.get("DJANGO_ENV") == "dev":
         path = "images/dev/{0}/{1}/{2}".format(user_id, profile_id, filename)
+    elif os.environ.get("DJANGO_ENV") == "e2e":
+        path = "images/e2e/{0}/{1}/{2}".format(user_id, profile_id, filename)
     return path
 
 
@@ -237,7 +239,20 @@ class ProfileImage(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
-        self.image = crop_square_and_resize(self.image, image_size=320)
+        # Only process image if:
+        # 1. This is a new instance (self.pk is None), OR
+        # 2. update_fields is not specified (full save), OR
+        # 3. update_fields includes 'image'
+        update_fields = kwargs.get("update_fields", None)
+        should_process_image = (
+            self.pk is None  # New instance
+            or update_fields is None  # Full save without update_fields
+            or (update_fields is not None and "image" in update_fields)  # Explicitly updating image
+        )
+        
+        if should_process_image:
+            self.image = crop_square_and_resize(self.image, image_size=320)
+        
         super().save(*args, **kwargs)
 
     def __str__(self):

@@ -5,19 +5,19 @@
 # Check if argument is provided
 if [ $# -ne 1 ]; then
     echo "Error: Exactly one argument is required"
-    echo "You must specify either 'dev', 'test' or 'staging' environment as an argument"
-    echo "Usage: ./load_db.sh <dev|test|staging>"
+    echo "You must specify either 'dev', 'e2e' or 'staging' environment as an argument"
+    echo "Usage: ./load_db.sh <dev|e2e|staging>"
     exit 1
 fi
 
 # Validate the argument
 case $1 in
-    dev|test|staging)
+    dev|e2e|staging)
         environment=$1
         ;;
     *)
         echo "Error: Invalid environment specified"
-        echo "Valid options are: dev, test, staging"
+        echo "Valid options are: dev, e2e, staging"
         exit 1
         ;;
 esac

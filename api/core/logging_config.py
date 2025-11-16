@@ -148,7 +148,7 @@ class JSONFormatter(logging.Formatter):
 
 
 def get_logging_config(
-    environment: Literal["dev", "test", "staging", "prod"],
+    environment: Literal["dev", "test", "e2e", "staging", "prod"],
     log_dir: str = "/vol/log"
 ) -> dict:
     """
@@ -200,6 +200,8 @@ def get_logging_config(
         return _get_dev_config(log_dir, formatters, filters)
     elif environment == "test":
         return _get_test_config(log_dir, formatters, filters)
+    elif environment == "e2e":
+        return _get_e2e_test_config(log_dir, formatters, filters)
     elif environment == "staging":
         return _get_staging_config(log_dir, formatters, filters)
     elif environment == "prod":
@@ -373,6 +375,79 @@ def _get_test_config(log_dir: str, formatters: dict, filters: dict) -> dict:
         'root': {
             'level': 'INFO',
             'handlers': ['file_test'],
+        },
+    }
+
+
+def _get_e2e_test_config(log_dir: str, formatters: dict, filters: dict) -> dict:
+    """E2E Test environment: Logging with console output for debugging test runs."""
+    
+    return {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': formatters,
+        'filters': filters,
+        'handlers': {
+            'console': {
+                'level': 'INFO',
+                'class': 'logging.StreamHandler',
+                'formatter': 'verbose',
+            },
+            'console_request': {
+                'level': 'INFO',
+                'class': 'logging.StreamHandler',
+                'formatter': 'request',  # Clean format for HTTP requests in console
+            },
+            'file_all': {
+                'level': 'INFO',
+                'class': 'logging.handlers.RotatingFileHandler',
+                'filename': f'{log_dir}/django-e2e-all.log',
+                'formatter': 'verbose',  # Verbose format for detailed debugging
+                'maxBytes': 10485760,  # 10MB
+                'backupCount': 5,
+            },
+            'file_requests': {
+                'level': 'INFO',
+                'class': 'logging.handlers.RotatingFileHandler',
+                'filename': f'{log_dir}/django-e2e-all.log',
+                'formatter': 'request',  # Clean format for HTTP requests
+                'maxBytes': 10485760,  # 10MB
+                'backupCount': 5,
+            },
+            'file_error': {
+                'level': 'ERROR',
+                'class': 'logging.handlers.RotatingFileHandler',
+                'filename': f'{log_dir}/django-e2e-error.log',
+                'formatter': 'verbose',
+                'maxBytes': 10485760,  # 10MB
+                'backupCount': 5,
+            },
+        },
+        'loggers': {
+            'django': {
+                'handlers': ['console', 'file_all', 'file_error'],
+                'level': 'INFO',
+                'propagate': False,
+            },
+            'django.request': {
+                'handlers': ['console_request', 'file_requests', 'file_error'],
+                'level': 'INFO',
+                'propagate': False,
+            },
+            'django.db.backends': {
+                'handlers': [],  # Don't log SQL queries in tests
+                'level': 'WARNING',
+                'propagate': False,
+            },
+            'apps': {
+                'handlers': ['console', 'file_all', 'file_error'],
+                'level': 'INFO',
+                'propagate': False,
+            },
+        },
+        'root': {
+            'level': 'INFO',
+            'handlers': ['console', 'file_all'],
         },
     }
 

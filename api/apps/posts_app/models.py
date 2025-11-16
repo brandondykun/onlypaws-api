@@ -37,6 +37,8 @@ def post_image_path(instance, filename):
         path = "images/test/" + path
     elif os.environ.get("DJANGO_ENV") == "dev":
         path = "images/dev/" + path
+    elif os.environ.get("DJANGO_ENV") == "e2e":
+        path = "images/e2e/" + path
     else:
         path = "images/" + path
 
@@ -65,8 +67,20 @@ class PostImage(models.Model):
     )
 
     def save(self, *args, **kwargs):
-        # Process image
-        self.image = crop_square_and_resize(self.image, image_size=1080)
+        # Only process image if:
+        # 1. This is a new instance (self.pk is None), OR
+        # 2. update_fields is not specified (full save), OR
+        # 3. update_fields includes 'image'
+        update_fields = kwargs.get("update_fields", None)
+        should_process_image = (
+            self.pk is None  # New instance
+            or update_fields is None  # Full save without update_fields
+            or (update_fields is not None and "image" in update_fields)  # Explicitly updating image
+        )
+        
+        if should_process_image:
+            # Process image
+            self.image = crop_square_and_resize(self.image, image_size=1080)
 
         # Check if we need to generate embedding
         should_generate_embedding = (

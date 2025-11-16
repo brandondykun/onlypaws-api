@@ -27,7 +27,7 @@ environment = os.environ.get("DJANGO_ENV")
 
 admin_url = (
     "admin/"
-    if environment == "dev" or environment == "staging" or environment == "test"
+    if environment == "dev" or environment == "staging" or environment == "test" or environment == "e2e"
     else "hidden/admin/"
 )
 
@@ -44,7 +44,7 @@ urlpatterns = [
     path("api-auth/", include("rest_framework.urls")),
 ]
 
-if environment == "dev" or environment == "staging" or environment == "test":
+if environment == "dev" or environment == "staging" or environment == "test" or environment == "e2e":
     urlpatterns += [
         path("schema/", SpectacularAPIView.as_view(), name="schema"),
         path(

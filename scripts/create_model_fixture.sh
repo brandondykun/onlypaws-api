@@ -1,24 +1,24 @@
 #!/bin/bash
 
 # This script creates a fixture for a specific model in a specified app
-# Depending on the environment, it will create the fixture in the dev, test, or staging folder
+# Depending on the environment, it will create the fixture in the dev, e2e, or staging folder
 
 # Check if arguments are provided
 if [ $# -ne 3 ]; then
     echo "Error: Exactly three arguments are required"
-    echo "Usage: ./create_model_fixture.sh <dev|test|staging> <app_name> <model_name>"
+    echo "Usage: ./create_model_fixture.sh <dev|e2e|staging> <app_name> <model_name>"
     echo "Example: ./create_model_fixture.sh dev feedback_app feedback"
     exit 1
 fi
 
 # Validate the first argument (environment)
 case $1 in
-    dev|test|staging)
+    dev|e2e|staging)
         environment=$1
         ;;
     *)
         echo "Error: Invalid environment specified"
-        echo "Valid options are: dev, test, staging"
+        echo "Valid options are: dev, e2e, staging"
         exit 1
         ;;
 esac

@@ -5,18 +5,18 @@
 # Check if argument is provided
 if [ $# -ne 1 ]; then
     echo "Error: Exactly one argument is required"
-    echo "Usage: ./stop.sh <dev|staging|test|prod>"
+    echo "Usage: ./stop.sh <dev|staging|test|e2e|prod>"
     exit 1
 fi
 
 # Validate the argument
 case $1 in
-    dev|staging|test|prod)
+    dev|staging|test|e2e|prod)
         environment=$1
         ;;
     *)
         echo "Error: Invalid environment specified"
-        echo "Valid options are: dev, staging, test, prod"
+        echo "Valid options are: dev, staging, test, e2e, prod"
         exit 1
         ;;
 esac

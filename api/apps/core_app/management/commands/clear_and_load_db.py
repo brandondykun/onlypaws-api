@@ -10,10 +10,10 @@ class Command(BaseCommand):
 
         environment = os.environ.get("DJANGO_ENV")
         # Clear the database
-        if environment != "test" and environment != "dev" and environment != "staging":
+        if environment != "dev" and environment != "staging" and environment != "e2e":
             self.stdout.write(
                 self.style.ERROR(
-                    "This command can only be run in a test, staging or local dev environment!"
+                    "This command can only be run in a staging, e2e or local dev environment!"
                 )
             )
             return
@@ -49,7 +49,7 @@ class Command(BaseCommand):
             "appconfiguration.json"
         ]
 
-        path_prefix = "fixtures/test"
+        path_prefix = "fixtures/e2e"
 
         if environment == "dev":
             path_prefix = "fixtures/dev"

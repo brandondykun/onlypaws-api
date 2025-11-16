@@ -25,7 +25,7 @@ _The unapologetically pet friendly social media app._
 12. [Image Data](#image-data)
 13. [Commits](#commits)
 14. [Environment Variables](#environment-variables)
-15. [Dev and Test Images](#dev-and-test-images)
+15. [Dev and E2E Images](#dev-and-e2e-images)
 
 ---
 
@@ -56,13 +56,13 @@ To start the docker containers and run the API, use the `run.sh` script followed
 
 ```bash
 # base command example
-scripts/run.sh <dev|staging|test|prod>
+scripts/run.sh <dev|staging|test|e2e|prod>
 
 # run the api in dev environment
 scripts/run.sh dev
 
-# run the api in test environment
-scripts/run.sh test
+# run the api in e2e environment (for frontend e2e tests)
+scripts/run.sh e2e
 
 # run the api in staging environment
 scripts/run.sh staging
@@ -71,7 +71,14 @@ scripts/run.sh staging
 scripts/run.sh prod
 ```
 
-_Note: The test environment is not for testing the API. The testing environment should be used when running the front end integration tests._
+**Environment Overview:**
+- **dev**: Local development environment
+- **e2e**: End-to-end testing environment for running frontend e2e tests
+- **test**: Backend testing environment (used internally by the test suite)
+- **staging**: Pre-production environment
+- **prod**: Production environment
+
+_Note: Developers rarely need to run `scripts/run.sh test` manually as it's used by the backend test suite. For frontend e2e tests, use the e2e environment instead._
 
 
 ## Restarting the API
@@ -80,13 +87,13 @@ To restart the API service without stopping and starting all containers, use the
 
 ```bash
 # base command example
-scripts/restart.sh <dev|staging|test|prod>
+scripts/restart.sh <dev|staging|test|e2e|prod>
 
 # restart the api in dev environment
 scripts/restart.sh dev
 
-# restart the api in test environment
-scripts/restart.sh test
+# restart the api in e2e environment
+scripts/restart.sh e2e
 
 # restart the api in staging environment
 scripts/restart.sh staging
@@ -112,13 +119,13 @@ To stop the docker containers and shut down the API, use the `stop.sh` script fo
 
 ```bash
 # base command example
-scripts/stop.sh <dev|staging|test|prod>
+scripts/stop.sh <dev|staging|test|e2e|prod>
 
 # stop the api in dev environment
 scripts/stop.sh dev
 
-# stop the api in test environment
-scripts/stop.sh test
+# stop the api in e2e environment
+scripts/stop.sh e2e
 
 # stop the api in staging environment
 scripts/stop.sh staging
@@ -129,32 +136,53 @@ scripts/stop.sh prod
 
 ## Tests
 
-Tests can be run with or without coverage using the following commands:
+### Backend Tests
+
+Backend tests can be run with or without coverage using the following commands:
 
 ```bash
-# run tests without coverage
+# run backend tests without coverage
 scripts/test.sh
 
-# run tests with coverage
+# run backend tests with coverage
 scripts/test.sh coverage
 # report will automatically open in browser
 ```
 Running the test script with coverage will automatically open the coverage report in the browser.
 
+_Note: The backend test suite uses the test environment internally. Developers don't need to manually start the API with `scripts/run.sh test` to run these tests._
+
+### E2E Tests
+
+For frontend end-to-end (e2e) tests, the backend API must be running in the e2e environment:
+
+```bash
+# start the api in e2e mode
+scripts/run.sh e2e
+
+# run your frontend e2e tests (from frontend repo)
+# ... 
+
+# reset the e2e database after test runs
+scripts/load_db.sh e2e
+```
+
+The e2e environment provides a stable backend for frontend integration testing with fixtures that can be reset between test runs.
+
 ## Creating Fixture for Individual Model
 
-Fixtures can only be created in dev, test, or staging environment.
+Fixtures can only be created in dev, e2e, or staging environment.
 
 To create a fixture for an individual model, run the following command:
 ```bash
 # base command example
-scripts/create_model_fixture.sh <dev|test|staging> <app_name> <model_name>
+scripts/create_model_fixture.sh <dev|e2e|staging> <app_name> <model_name>
 
 # create fixture for dev environment User model from core_app
 scripts/create_model_fixture.sh dev core_app user
 
-# create fixture for test environment Profile model from core_app
-scripts/create_model_fixture.sh test core_app profile
+# create fixture for e2e environment Post model from core_app
+scripts/create_model_fixture.sh e2e core_app post
 
 # create fixture for staging environment Post model from core_app
 scripts/create_model_fixture.sh staging core_app post
@@ -167,18 +195,18 @@ scripts/create_model_fixture.sh dev feedback_app feedback
 
 These commands will create fixtures for all models.
 Prefer using the create_model_fixture.sh script to create a fixture for an individual model if possible.
-Creating fixtures can only be done in dev, test, or staging environment.
+Creating fixtures can only be done in dev, e2e, or staging environment.
 
 To create fixtures for all models, run the following command:
 ```bash
 # base command example
-scripts/create_fixtures.sh <dev|test|staging>
+scripts/create_fixtures.sh <dev|e2e|staging>
 
 # create fixtures for dev environment
 scripts/create_fixtures.sh dev
 
-# create fixtures for test environment
-scripts/create_fixtures.sh test
+# create fixtures for e2e environment
+scripts/create_fixtures.sh e2e
 
 # create fixtures for staging environment
 scripts/create_fixtures.sh staging
@@ -187,25 +215,30 @@ scripts/create_fixtures.sh staging
 
 ## Clear and Reload Database
 
-These are commands to help clear and reload the DB with data for dev, test, or staging environment.
+These are commands to help clear and reload the DB with data for dev, e2e, or staging environment.
 
 - The DB will first be cleared of all data.
-- Then the fixtures for the given environment from either the fixtures/dev or fixtures/test folder will be loaded into the DB.
-- This is for dev, test, or staging ENV only.
+- Then the fixtures for the given environment will be loaded into the DB from the corresponding fixtures folder (e.g., fixtures/dev, fixtures/e2e).
+- This is for dev, e2e, or staging ENV only.
 
 ```bash
 # base command example
-scripts/load_db.sh <dev|test|staging>
+scripts/load_db.sh <dev|e2e|staging>
 
 # clear and reload dev db
 scripts/load_db.sh dev
 
-# clear and reload test db
-scripts/load_db.sh test
+# clear and reload e2e db (useful after running frontend e2e tests)
+scripts/load_db.sh e2e
 
 # clear and reload staging db
 scripts/load_db.sh staging
 ```
+
+**Common Use Cases:**
+- **dev**: Reset development database to a known state
+- **e2e**: Reset database between frontend e2e test runs to ensure consistent test conditions
+- **staging**: Refresh staging environment data
 
 
 ## Generate Image Embeddings
@@ -317,7 +350,7 @@ This is useful when:
 
 ```bash
 # base command example
-scripts/assign_postimage_order.sh <dev|test|staging> [--dry-run]
+scripts/assign_postimage_order.sh <dev|e2e|staging> [--dry-run]
 
 # Preview changes without making them (recommended first step)
 scripts/assign_postimage_order.sh dev --dry-run
@@ -325,8 +358,8 @@ scripts/assign_postimage_order.sh dev --dry-run
 # Assign order values in dev environment
 scripts/assign_postimage_order.sh dev
 
-# Assign order values in test environment
-scripts/assign_postimage_order.sh test
+# Assign order values in e2e environment
+scripts/assign_postimage_order.sh e2e
 
 # Preview changes in staging environment
 scripts/assign_postimage_order.sh staging --dry-run
@@ -422,11 +455,11 @@ cp docker/dev/.env.dev.local.db.template docker/dev/.env.dev.local.db
 Once the files are renamed, a value must be set for each variable in the file.
 
 
-## Dev and Test Images
+## Dev and E2E Images
 
 The images for this project are not committed to the repo and must be downloaded separately.
 
-Images for the dev and test environments are hosted on google drive. The image folder at the link below should be downloaded and placed in a media folder inside the api folder.
+Images for the dev and e2e test environments are hosted on google drive. The image folder at the link below should be downloaded and placed in a media folder inside the api folder.
 
 To create the media folder, from the root of the project run: 
 
@@ -445,5 +478,5 @@ api/
   media/
     images/
       dev/
-      test/
+      e2e/
 ```
