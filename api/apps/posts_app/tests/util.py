@@ -53,13 +53,33 @@ def destroy_post_image_url(post_image_id: int):
     """
     return reverse("posts_app:destroy_post_image", args=[post_image_id])
 
-def destroy_post_image_url(post_image_id: int):
+
+def list_similar_posts_url(post_id: int):
     """
-    Create and return a destroy post image url.
+    Create and return a list similar posts url.
 
     Parameters
     ----------
-    post_image_id : int
-        The id of the post image that is used to build the url.
+    post_id : int
+        The id of the post to find similar posts for.
     """
-    return reverse("posts_app:destroy_post_image", args=[post_image_id])
+    return reverse("posts_app:lists_similar_posts", args=[post_id])
+
+
+def list_create_saved_post_url():
+    """
+    Create and return a list/create saved posts url.
+    """
+    return reverse("posts_app:list_create_saved_post")
+
+
+def destroy_saved_post_url(post_id: int):
+    """
+    Create and return a destroy saved post url.
+
+    Parameters
+    ----------
+    post_id : int
+        The id of the post to unsave.
+    """
+    return reverse("posts_app:destroy_saved_post", args=[post_id])

@@ -12,10 +12,10 @@ class Command(BaseCommand):
         environment = os.environ.get("DJANGO_ENV")
 
         # Check if the environment is test or dev
-        if environment != "test" and environment != "dev" and environment != "staging":
+        if environment != "dev" and environment != "staging" and environment != "e2e":
             self.stdout.write(
                 self.style.ERROR(
-                    "This command can only be run in a test, staging or local dev environment!"
+                    "This command can only be run in a staging, e2e or local dev environment!"
                 )
             )
             return
@@ -48,7 +48,7 @@ class Command(BaseCommand):
         ]
 
         # default fixture path
-        fixture_path = "fixtures/test"
+        fixture_path = "fixtures/e2e"
 
         # override fixture path for dev environment
         if environment == "dev":

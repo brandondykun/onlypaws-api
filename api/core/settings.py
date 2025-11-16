@@ -298,11 +298,14 @@ CHANNEL_LAYERS = {
 }
 
 # Get the current environment
-environment: Literal["test", "dev", "staging", "prod"] = os.environ.get("DJANGO_ENV")
+environment: Literal["test", "e2e", "dev", "staging", "prod"] = os.environ.get("DJANGO_ENV")
 
 # Load the correct settings file based on the environment
 if environment == "test":
     from core.settings_test import *
+    print_environment_banner(environment)
+elif environment == "e2e":
+    from core.settings_e2e import *
     print_environment_banner(environment)
 elif environment == "dev":
     from core.settings_dev import *

@@ -4,7 +4,7 @@ def print_environment_banner(env):
     Print a large ASCII art banner for the specified environment.
     
     Args:
-        env (str): Environment name - 'DEV', 'TEST', 'STAGING', or 'PROD'
+        env (str): Environment name - 'DEV', 'TEST', 'E2E', 'STAGING', or 'PROD'
     """
     env = env.upper()
     
@@ -40,6 +40,14 @@ def print_environment_banner(env):
 ██╔═════╝  ██╔══██╗  ██║    ██║  ██║   ██║
 ██║        ██║  ██║  ╚██████╔═╝  ██████╔╝ 
 ╚═╝        ╚═╝  ╚═╝   ╚═════╝    ╚═════╝  
+""",
+        'E2E': """
+██████╗  ██████╗   ██████╗
+██╔═══╝  ╚════██╗  ██╔═══╝
+██████╗   █████╔╝  ██████╗
+██╔═══╝  ██╔═══╝   ██╔═══╝
+██████╗  ███████╗  ██████╗
+╚═════╝  ╚══════╝  ╚═════╝
 """
     }
     
@@ -47,4 +55,4 @@ def print_environment_banner(env):
         print(banners[env])
     else:
         print(f"Unknown environment: {env}")
-        print("Valid options: DEV, TEST, STAGING, PROD")
+        print("Valid options: DEV, TEST, E2E, STAGING, PROD")

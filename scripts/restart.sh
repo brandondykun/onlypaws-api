@@ -57,12 +57,12 @@ ENVIRONMENT="$1"
 
 # Validate environment argument
 case "$ENVIRONMENT" in
-    dev|staging|test|prod)
+    dev|staging|test|e2e|prod)
         print_info "Environment: $ENVIRONMENT"
         ;;
     *)
         print_error "Invalid environment: $ENVIRONMENT"
-        print_error "Valid environments are: dev, staging, test, prod"
+        print_error "Valid environments are: dev, staging, test, e2e, prod"
         echo ""
         usage
         exit 1

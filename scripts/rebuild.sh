@@ -3,7 +3,7 @@
 # Check if argument is provided, default to dev if not
 if [ $# -gt 1 ]; then
     echo "Error: Too many arguments provided"
-    echo "Usage: ./rebuild.sh [dev|test|staging|prod]"
+    echo "Usage: ./rebuild.sh [dev|test|staging|e2e|prod]"
     echo "If no argument is passed, defaults to dev"
     exit 1
 fi
@@ -12,11 +12,11 @@ ENV=${1:-dev}  # Default to dev if no environment specified
 
 # Validate the environment argument
 case $ENV in
-    dev|test|staging|prod)
+    dev|test|staging|e2e|prod)
         ;;
     *)
         echo "Error: Invalid environment specified"
-        echo "Valid options are: dev, test, staging, prod"
+        echo "Valid options are: dev, test, staging, e2e, prod"
         exit 1
         ;;
 esac

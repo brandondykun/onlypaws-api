@@ -8,7 +8,7 @@ from apps.posts_app.models import Post
 from apps.interactions_app.models import Like, Follow
 from apps.moderation_app.models import ReportReason, PostReport
 
-from core.test_utils.utils import create_user, create_profile, create_post, create_follow, create_comment
+from core.test_utils.utils import create_user, create_profile, create_post, create_follow, create_comment, create_post_image, create_test_image
 
 
 class BaseFixtureTestCase(TestCase):
@@ -24,6 +24,18 @@ class BaseFixtureTestCase(TestCase):
     self.client.force_authenticate(user=self.user)
     self.client.credentials(HTTP_AUTH_PROFILE_ID=self.profile.id)
     """
+
+    @classmethod
+    def setUpClass(cls):
+        """Clear in-memory storage before running tests."""
+        super().setUpClass()
+        # Clear in-memory storage to ensure clean state
+        try:
+            from core.storage import InMemoryStorage
+            InMemoryStorage.clear()
+        except ImportError:
+            # Storage backend not configured for tests
+            pass
 
     def setUp(self):
         # Profile 1
@@ -77,6 +89,20 @@ class BaseFixtureTestCase(TestCase):
         self.report2 = PostReport.objects.create(
             post=self.post_1, reporter=self.profile_2, reason=self.reason1
         )
+
+        # Add images to posts for testing similar posts functionality
+        # Post 1 - has image (reported post)
+        self.post_1_image = create_post_image(self.post_1, create_test_image('post_1_image.jpg', color='red'))
+        # Post 2 - has image
+        self.post_2_image = create_post_image(self.post_2, create_test_image('post_2_image.jpg', color='blue'))
+        # Post 3 - has image
+        self.post_3_image = create_post_image(self.post_3, create_test_image('post_3_image.jpg', color='green'))
+        # Post 4 - has image (reported post)
+        self.post_4_image = create_post_image(self.post_4, create_test_image('post_4_image.jpg', color='yellow'))
+        # Post 5 - has image
+        self.post_5_image = create_post_image(self.post_5, create_test_image('post_5_image.jpg', color='purple'))
+        # Post 6 - has image
+        self.post_6_image = create_post_image(self.post_6, create_test_image('post_6_image.jpg', color='orange'))
 
         self.client = APIClient()
 
