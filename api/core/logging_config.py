@@ -11,7 +11,7 @@ This module provides:
 import logging
 import random
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Literal
 
 
@@ -82,7 +82,6 @@ class RequestContextFilter(logging.Filter):
     def filter(self, record: logging.LogRecord) -> bool:
         # Try to get request from Django's current thread
         try:
-            from django.utils.deprecation import MiddlewareMixin
             from threading import current_thread
             
             # Add request ID if available (you can add middleware to generate this)
@@ -111,7 +110,7 @@ class JSONFormatter(logging.Formatter):
     
     def format(self, record: logging.LogRecord) -> str:
         log_data = {
-            'timestamp': datetime.now(datetime.timezone.utc).isoformat(),
+            'timestamp': datetime.now(timezone.utc).isoformat(),
             'level': record.levelname,
             'logger': record.name,
             'module': record.module,

@@ -4,6 +4,11 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Proxy/HTTPS Configuration
+# Trust X-Forwarded-Proto header from proxy to generate correct HTTPS URLs
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
