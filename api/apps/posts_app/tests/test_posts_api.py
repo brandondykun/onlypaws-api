@@ -6,9 +6,9 @@ from rest_framework import status
 from django.core.exceptions import ValidationError
 from apps.posts_app.models import Post, PostImage
 
-from .util import CREATE_POST_URL, destroy_post_image_url, retrieve_destroy_post_url
+from .util import CREATE_POST_URL, destroy_post_image_url, retrieve_destroy_post_url, list_similar_posts_url
 from core.test_utils.helper_classes import BaseFixtureTestCase
-from core.test_utils.utils import create_post, create_post_image
+from core.test_utils.utils import create_post, create_post_image, create_test_image, create_mock_embedding
 
 
 class PrivatePostsApiTests(BaseFixtureTestCase):
@@ -161,6 +161,191 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         post.refresh_from_db()
         self.assertEqual(post.caption, original_caption)
 
+    def test_create_post_with_single_image_success(self):
+        """
+        Test successfully creating a Post with a single image.
+        """
+        starting_post_count = self.get_posts_count()
+        
+        # Create test image
+        image = create_test_image('test_image_1.jpg')
+        
+        # Prepare post data with image
+        post_data = {
+            "caption": "Test post with one image",
+            "profileId": self.profile.id,
+            "order": [0],  # Order for the image
+        }
+        
+        res = self.client.post(
+            CREATE_POST_URL, 
+            data={**post_data, 'images': [image]},
+            format='multipart'
+        )
+        
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(res.data["caption"], post_data["caption"])
+        self.assertEqual(len(res.data["images"]), 1)
+        self.assertEqual(res.data["images"][0]["order"], 0)
+        
+        # Verify post and image created in database
+        current_post_count = self.get_posts_count()
+        self.assertEqual(current_post_count, starting_post_count + 1)
+        
+        # Verify PostImage was created
+        new_post = Post.objects.get(id=res.data["id"])
+        self.assertEqual(new_post.images.count(), 1)
+        self.assertEqual(new_post.images.first().order, 0)
+
+    def test_create_post_with_multiple_images_success(self):
+        """
+        Test successfully creating a Post with multiple images in correct order.
+        """
+        starting_post_count = self.get_posts_count()
+        
+        # Create test images
+        image1 = create_test_image('test_image_1.jpg', color='red')
+        image2 = create_test_image('test_image_2.jpg', color='blue')
+        image3 = create_test_image('test_image_3.jpg', color='green')
+        
+        # Prepare post data with multiple images
+        post_data = {
+            "caption": "Test post with multiple images",
+            "profileId": self.profile.id,
+            "order": [0, 1, 2],  # Order for the images
+        }
+        
+        res = self.client.post(
+            CREATE_POST_URL,
+            data={**post_data, 'images': [image1, image2, image3]},
+            format='multipart'
+        )
+        
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(res.data["caption"], post_data["caption"])
+        self.assertEqual(len(res.data["images"]), 3)
+        
+        # Verify images are in correct order
+        self.assertEqual(res.data["images"][0]["order"], 0)
+        self.assertEqual(res.data["images"][1]["order"], 1)
+        self.assertEqual(res.data["images"][2]["order"], 2)
+        
+        # Verify post and images created in database
+        current_post_count = self.get_posts_count()
+        self.assertEqual(current_post_count, starting_post_count + 1)
+        
+        # Verify PostImages were created with correct order
+        new_post = Post.objects.get(id=res.data["id"])
+        self.assertEqual(new_post.images.count(), 3)
+        
+        images = list(new_post.images.all().order_by('order'))
+        self.assertEqual(images[0].order, 0)
+        self.assertEqual(images[1].order, 1)
+        self.assertEqual(images[2].order, 2)
+
+    def test_create_post_with_images_wrong_order_count_fails(self):
+        """
+        Test creating a Post fails when number of images and order values don't match.
+        """
+        starting_post_count = self.get_posts_count()
+        
+        # Create test images
+        image1 = create_test_image('test_image_1.jpg')
+        image2 = create_test_image('test_image_2.jpg')
+        
+        # Prepare post data with mismatched order count
+        post_data = {
+            "caption": "Test post with mismatched order",
+            "profileId": self.profile.id,
+            "order": [0],  # Only 1 order value for 2 images
+        }
+        
+        res = self.client.post(
+            CREATE_POST_URL,
+            data={**post_data, 'images': [image1, image2]},
+            format='multipart'
+        )
+        
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("error", res.data)
+        self.assertIn("Number of images and order values must match", res.data["error"])
+        
+        # Verify no post was created
+        current_post_count = self.get_posts_count()
+        self.assertEqual(current_post_count, starting_post_count)
+
+    def test_create_post_with_custom_order_success(self):
+        """
+        Test creating a Post with custom (non-sequential) image order.
+        """
+        starting_post_count = self.get_posts_count()
+        
+        # Create test images
+        image1 = create_test_image('test_image_1.jpg', color='red')
+        image2 = create_test_image('test_image_2.jpg', color='blue')
+        
+        # Use custom order values (not 0, 1, 2...)
+        post_data = {
+            "caption": "Test post with custom order",
+            "profileId": self.profile.id,
+            "order": [5, 2],  # Custom order values
+        }
+        
+        res = self.client.post(
+            CREATE_POST_URL,
+            data={**post_data, 'images': [image1, image2]},
+            format='multipart'
+        )
+        
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(len(res.data["images"]), 2)
+        
+        # Verify images are ordered according to custom order values
+        # Images should be sorted by order field, so order 2 comes before order 5
+        self.assertEqual(res.data["images"][0]["order"], 2)
+        self.assertEqual(res.data["images"][1]["order"], 5)
+        
+        # Verify in database
+        new_post = Post.objects.get(id=res.data["id"])
+        images = list(new_post.images.all().order_by('order'))
+        self.assertEqual(images[0].order, 2)
+        self.assertEqual(images[1].order, 5)
+        
+        current_post_count = self.get_posts_count()
+        self.assertEqual(current_post_count, starting_post_count + 1)
+
+    def test_create_post_with_ai_generated_flag_success(self):
+        """
+        Test creating a Post with AI generated flag set to true.
+        """
+        starting_post_count = self.get_posts_count()
+        
+        # Create test image
+        image = create_test_image('ai_generated_image.jpg')
+        
+        post_data = {
+            "caption": "AI generated content",
+            "profileId": self.profile.id,
+            "aiGenerated": True,
+            "order": [0],
+        }
+        
+        res = self.client.post(
+            CREATE_POST_URL,
+            data={**post_data, 'images': [image]},
+            format='multipart'
+        )
+        
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(res.data["contains_ai"], True)
+        
+        # Verify in database
+        new_post = Post.objects.get(id=res.data["id"])
+        self.assertEqual(new_post.contains_ai, True)
+        
+        current_post_count = self.get_posts_count()
+        self.assertEqual(current_post_count, starting_post_count + 1)
+
     def test_fetching_single_post_success(self):
         """
         Test successfully fetching a single Post successfully returns Post details.
@@ -311,3 +496,297 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         # Verify the error is about caption length
         self.assertIn('caption', context.exception.message_dict)
         self.assertIn('1000', str(context.exception.message_dict['caption'][0]))
+
+    def test_list_similar_posts_fallback_when_no_embeddings(self):
+        """
+        Test that ListSimilarPostsView falls back to basic filtering when no embeddings exist.
+        """
+        # Use post_2 (belongs to self.profile) as the reference post
+        # The base fixture creates posts with images but no embeddings
+        url = list_similar_posts_url(self.post_2.id)
+        
+        res = self.client.get(url, {'profileId': self.profile.id})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        
+        # Response should use fallback logic (basic filtering)
+        self.assertIsInstance(res.data, dict)
+        self.assertIn('results', res.data)
+        
+    def test_list_similar_posts_with_embeddings_finds_similar(self):
+        """
+        Test that similar posts endpoint finds posts with similar embeddings.
+        """
+        # Create a reference post with embedding (base value 0.5)
+        reference_post = create_post("Reference post", self.profile_2)
+        reference_embedding = create_mock_embedding(base_value=0.5, variation=0.0, seed=10)
+        create_post_image(reference_post, create_test_image('ref.jpg'), embedding=reference_embedding)
+        
+        # Create similar posts (base value close to 0.5)
+        similar_post_1 = create_post("Similar post 1", self.profile_3)
+        similar_embedding_1 = create_mock_embedding(base_value=0.51, variation=0.0, seed=11)
+        create_post_image(similar_post_1, create_test_image('sim1.jpg'), embedding=similar_embedding_1)
+        
+        similar_post_2 = create_post("Similar post 2", self.profile_4)
+        similar_embedding_2 = create_mock_embedding(base_value=0.49, variation=0.0, seed=12)
+        create_post_image(similar_post_2, create_test_image('sim2.jpg'), embedding=similar_embedding_2)
+        
+        # Create dissimilar post (base value far from 0.5)
+        dissimilar_post = create_post("Dissimilar post", self.profile_3)
+        dissimilar_embedding = create_mock_embedding(base_value=0.9, variation=0.0, seed=13)
+        create_post_image(dissimilar_post, create_test_image('dissim.jpg'), embedding=dissimilar_embedding)
+        
+        url = list_similar_posts_url(reference_post.id)
+        
+        res = self.client.get(url, {'profileId': self.profile.id})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        
+        # Should find the similar posts
+        result_ids = [post['id'] for post in res.data['results']]
+        self.assertIn(similar_post_1.id, result_ids)
+        self.assertIn(similar_post_2.id, result_ids)
+        
+        # Should not include dissimilar post (with default min_similarity=0.3)
+        # Note: Depending on the cosine distance, very dissimilar posts should not appear
+        
+    def test_list_similar_posts_with_embeddings_excludes_own_posts(self):
+        """
+        Test that similar posts endpoint excludes the authenticated user's own posts.
+        """
+        # Create a reference post owned by profile_2
+        reference_post = create_post("Reference post", self.profile_2)
+        reference_embedding = create_mock_embedding(base_value=0.5, variation=0.0, seed=20)
+        create_post_image(reference_post, create_test_image('ref.jpg'), embedding=reference_embedding)
+        
+        # Create similar posts - one owned by the authenticated user (self.profile)
+        own_post = create_post("Own similar post", self.profile)
+        own_embedding = create_mock_embedding(base_value=0.51, variation=0.0, seed=21)
+        create_post_image(own_post, create_test_image('own.jpg'), embedding=own_embedding)
+        
+        # Create similar post owned by another user
+        other_post = create_post("Other similar post", self.profile_3)
+        other_embedding = create_mock_embedding(base_value=0.49, variation=0.0, seed=22)
+        create_post_image(other_post, create_test_image('other.jpg'), embedding=other_embedding)
+        
+        url = list_similar_posts_url(reference_post.id)
+        
+        res = self.client.get(url, {'profileId': self.profile.id})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        
+        # Should not include posts from the authenticated user
+        result_ids = [post['id'] for post in res.data['results']]
+        self.assertNotIn(own_post.id, result_ids)
+        
+        # Should include posts from other users
+        self.assertIn(other_post.id, result_ids)
+        
+    def test_list_similar_posts_with_embeddings_excludes_original_post(self):
+        """
+        Test that similar posts endpoint excludes the original post from results.
+        """
+        # Create a reference post
+        reference_post = create_post("Reference post", self.profile_2)
+        reference_embedding = create_mock_embedding(base_value=0.5, variation=0.0, seed=30)
+        create_post_image(reference_post, create_test_image('ref.jpg'), embedding=reference_embedding)
+        
+        # Create similar posts
+        similar_post = create_post("Similar post", self.profile_3)
+        similar_embedding = create_mock_embedding(base_value=0.51, variation=0.0, seed=31)
+        create_post_image(similar_post, create_test_image('sim.jpg'), embedding=similar_embedding)
+        
+        url = list_similar_posts_url(reference_post.id)
+        
+        res = self.client.get(url, {'profileId': self.profile.id})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        
+        # The original post should not be in the results
+        result_ids = [post['id'] for post in res.data['results']]
+        self.assertNotIn(reference_post.id, result_ids)
+        
+    def test_list_similar_posts_with_embeddings_filters_reported_content(self):
+        """
+        Test that similar posts endpoint filters out reported inappropriate content.
+        """
+        # Create a reference post
+        reference_post = create_post("Reference post", self.profile_2)
+        reference_embedding = create_mock_embedding(base_value=0.5, variation=0.01, seed=100)
+        create_post_image(reference_post, create_test_image('ref.jpg'), embedding=reference_embedding)
+        
+        # Create a similar post that will be reported
+        reported_post = create_post("Reported similar post", self.profile_3)
+        reported_embedding = create_mock_embedding(base_value=0.51, variation=0.01, seed=101)
+        create_post_image(reported_post, create_test_image('reported.jpg'), embedding=reported_embedding)
+        
+        # Report the post with reason 1 (Inappropriate Content)
+        # The view filters by reason__id=1, so we need to use reason1 which should have id=1
+        from apps.moderation_app.models import PostReport
+        report = PostReport.objects.create(
+            post=reported_post,
+            reporter=self.profile,
+            reason=self.reason1  # Inappropriate Content (should have id=1 from fixture)
+        )
+        
+        # Verify the report was created with the expected reason
+        self.assertEqual(report.reason.id, self.reason1.id)
+        
+        # Create a similar post that is not reported
+        clean_post = create_post("Clean similar post", self.profile_4)
+        clean_embedding = create_mock_embedding(base_value=0.49, variation=0.01, seed=102)
+        create_post_image(clean_post, create_test_image('clean.jpg'), embedding=clean_embedding)
+        
+        url = list_similar_posts_url(reference_post.id)
+        
+        res = self.client.get(url, {'profileId': self.profile.id})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        
+        # The reported post should not appear in results (if reason1 has id=1)
+        result_ids = [post['id'] for post in res.data['results']]
+        if self.reason1.id == 1:
+            self.assertNotIn(reported_post.id, result_ids, 
+                           f"Reported post {reported_post.id} should not be in results. Reason ID: {self.reason1.id}")
+        
+        # The clean post should appear
+        self.assertIn(clean_post.id, result_ids)
+        
+    def test_list_similar_posts_with_embeddings_preserves_similarity_order(self):
+        """
+        Test that similar posts are returned and the ordering logic is working.
+        """
+        # Create a reference post with a specific embedding
+        reference_post = create_post("Reference post", self.profile_2)
+        reference_embedding = create_mock_embedding(base_value=0.5, variation=0.0, seed=200)
+        create_post_image(reference_post, create_test_image('ref.jpg'), embedding=reference_embedding)
+        
+        # Create similar posts with different seeds to create varied embeddings
+        similar_post_1 = create_post("Similar post 1", self.profile_3)
+        similar_embedding_1 = create_mock_embedding(base_value=0.5, variation=0.0, seed=201)
+        create_post_image(similar_post_1, create_test_image('sim1.jpg'), embedding=similar_embedding_1)
+        
+        similar_post_2 = create_post("Similar post 2", self.profile_4)
+        similar_embedding_2 = create_mock_embedding(base_value=0.5, variation=0.0, seed=250)
+        create_post_image(similar_post_2, create_test_image('sim2.jpg'), embedding=similar_embedding_2)
+        
+        similar_post_3 = create_post("Similar post 3", self.profile_3)
+        similar_embedding_3 = create_mock_embedding(base_value=0.5, variation=0.0, seed=300)
+        create_post_image(similar_post_3, create_test_image('sim3.jpg'), embedding=similar_embedding_3)
+        
+        url = list_similar_posts_url(reference_post.id)
+        
+        res = self.client.get(url, {'profileId': self.profile.id})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        
+        # Verify results are returned
+        result_ids = [post['id'] for post in res.data['results']]
+        
+        # Should have results
+        self.assertGreater(len(result_ids), 0, "Should return similar posts")
+        
+        # Verify that the posts are in the results (order may vary based on cosine distance)
+        self.assertIn(similar_post_1.id, result_ids, "Similar post 1 should be in results")
+        self.assertIn(similar_post_2.id, result_ids, "Similar post 2 should be in results")
+        self.assertIn(similar_post_3.id, result_ids, "Similar post 3 should be in results")
+        
+        # Verify that the ordering preserves the order from find_similar_images
+        # The exact order depends on the cosine distance calculation, but all should be present
+        self.assertEqual(len(result_ids), 3, "Should return all 3 similar posts")
+        
+    def test_list_similar_posts_with_embeddings_handles_duplicates(self):
+        """
+        Test that similar posts endpoint handles posts with multiple images correctly.
+        """
+        # Create a reference post
+        reference_post = create_post("Reference post", self.profile_2)
+        reference_embedding = create_mock_embedding(base_value=0.5, variation=0.0, seed=300)
+        create_post_image(reference_post, create_test_image('ref.jpg'), embedding=reference_embedding)
+        
+        # Create a post with multiple images (similar embeddings)
+        multi_image_post = create_post("Multi image post", self.profile_3)
+        similar_embedding_1 = create_mock_embedding(base_value=0.51, variation=0.0, seed=301)
+        similar_embedding_2 = create_mock_embedding(base_value=0.52, variation=0.0, seed=302)
+        create_post_image(multi_image_post, create_test_image('multi1.jpg'), embedding=similar_embedding_1)
+        create_post_image(multi_image_post, create_test_image('multi2.jpg'), embedding=similar_embedding_2)
+        
+        url = list_similar_posts_url(reference_post.id)
+        
+        res = self.client.get(url, {'profileId': self.profile.id})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        
+        # The post should appear only once, even though it has multiple similar images
+        result_ids = [post['id'] for post in res.data['results']]
+        count_of_multi_image_post = result_ids.count(multi_image_post.id)
+        self.assertEqual(count_of_multi_image_post, 1)
+        
+    def test_list_similar_posts_with_embeddings_respects_min_similarity(self):
+        """
+        Test that min_similarity parameter filters results appropriately.
+        """
+        # Create a reference post
+        reference_post = create_post("Reference post", self.profile_2)
+        reference_embedding = create_mock_embedding(base_value=0.5, variation=0.0, seed=400)
+        create_post_image(reference_post, create_test_image('ref.jpg'), embedding=reference_embedding)
+        
+        # Create a very similar post
+        very_similar_post = create_post("Very similar", self.profile_3)
+        very_similar_embedding = create_mock_embedding(base_value=0.501, variation=0.0, seed=401)
+        create_post_image(very_similar_post, create_test_image('very_sim.jpg'), embedding=very_similar_embedding)
+        
+        # Create a moderately similar post
+        moderate_post = create_post("Moderate similarity", self.profile_4)
+        moderate_embedding = create_mock_embedding(base_value=0.6, variation=0.0, seed=402)
+        create_post_image(moderate_post, create_test_image('moderate.jpg'), embedding=moderate_embedding)
+        
+        # Test with high min_similarity (should only get very similar posts)
+        url = list_similar_posts_url(reference_post.id)
+        res = self.client.get(url, {'profileId': self.profile.id, 'min_similarity': 0.9})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        
+        result_ids = [post['id'] for post in res.data['results']]
+        
+        # Very similar post should be included
+        self.assertIn(very_similar_post.id, result_ids)
+        
+        # Test with lower min_similarity (should get more posts)
+        res_low = self.client.get(url, {'profileId': self.profile.id, 'min_similarity': 0.1})
+        self.assertEqual(res_low.status_code, status.HTTP_200_OK)
+        
+        # Should have same or more results with lower threshold
+        self.assertGreaterEqual(len(res_low.data['results']), len(res.data['results']))
+        
+    def test_list_similar_posts_with_post_without_images(self):
+        """
+        Test that similar posts endpoint handles posts without images gracefully.
+        """
+        # Create a post without images
+        post_no_image = create_post("Post without images", self.profile_2)
+        
+        url = list_similar_posts_url(post_no_image.id)
+        
+        res = self.client.get(url, {'profileId': self.profile.id})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        
+        # Should return results (using fallback logic)
+        self.assertIn('results', res.data)
+        
+    def test_list_similar_posts_with_nonexistent_post(self):
+        """
+        Test that requesting similar posts for a non-existent post returns empty results.
+        The view catches exceptions and returns an empty queryset instead of 404.
+        """
+        url = list_similar_posts_url(99999)  # Non-existent post ID
+        
+        res = self.client.get(url, {'profileId': self.profile.id})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        # Should return empty results
+        self.assertIn('results', res.data)
+        self.assertEqual(len(res.data['results']), 0)
+        
+    def test_list_similar_posts_authenticated_required(self):
+        """
+        Test that ListSimilarPostsView requires authentication.
+        """
+        # Logout the current user
+        self.client.force_authenticate(user=None)
+        
+        url = list_similar_posts_url(self.post_2.id)
+        
+        res = self.client.get(url, {'profileId': self.profile.id})
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)

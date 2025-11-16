@@ -3,6 +3,7 @@ Shared test utilities for all apps.
 """
 
 import tempfile
+import io
 from PIL import Image
 from django.contrib.auth import get_user_model
 from apps.user_app.models import User
@@ -10,6 +11,35 @@ from apps.profile_app.models import Profile, RegularProfile, ProfileImage
 from apps.posts_app.models import Post, PostImage
 from apps.interactions_app.models import Like, Follow, Comment, CommentLike
 from django.core.files.uploadedfile import SimpleUploadedFile
+
+
+def create_test_image(name='test_image.jpg', size=(100, 100), color='red'):
+    """
+    Helper function to create a test image file in memory.
+    
+    Parameters
+    ----------
+    name : str
+        Name of the image file.
+    size : tuple
+        Size of the image (width, height).
+    color : str
+        Color of the image.
+        
+    Returns
+    -------
+    SimpleUploadedFile
+        A test image file ready to be uploaded.
+    """
+    image = Image.new('RGB', size, color=color)
+    image_io = io.BytesIO()
+    image.save(image_io, 'JPEG')
+    image_io.seek(0)
+    return SimpleUploadedFile(
+        name,
+        image_io.getvalue(),
+        content_type="image/jpeg"
+    )
 
 
 def create_user(email: str, password: str = "test_password_123", is_staff=False) -> User:
@@ -65,7 +95,7 @@ def create_post(caption: str, profile: Profile) -> Post:
     return Post.objects.create(caption=caption, profile=profile)
 
 
-def create_post_image(post: Post, image_file=None) -> PostImage:
+def create_post_image(post: Post, image_file=None, embedding=None) -> PostImage:
     """
     Create and return new PostImage.
 
@@ -75,6 +105,8 @@ def create_post_image(post: Post, image_file=None) -> PostImage:
         The Post that owns the PostImage.
     image_file : file, optional
         The image file. If None, creates with a mock file.
+    embedding : list, optional
+        A 512-dimensional embedding vector for similarity testing. If None, no embedding is set.
     """
     from django.core.files.uploadedfile import SimpleUploadedFile
     from PIL import Image
@@ -92,7 +124,56 @@ def create_post_image(post: Post, image_file=None) -> PostImage:
             content_type="image/jpeg"
         )
     
-    return PostImage.objects.create(post=post, image=image_file)
+    post_image = PostImage.objects.create(post=post, image=image_file)
+    
+    # Set embedding if provided (useful for similarity testing)
+    if embedding is not None:
+        post_image.embedding = embedding
+        post_image.save(update_fields=['embedding'])
+    
+    return post_image
+
+
+def create_mock_embedding(base_value=0.5, variation=0.0, dimensions=512, seed=None):
+    """
+    Create a mock embedding vector for testing similarity search.
+    
+    Parameters
+    ----------
+    base_value : float
+        The base value for all dimensions (default: 0.5).
+    variation : float
+        Variation to add to each dimension. For more realistic embeddings
+        with actual cosine distance differences, use a larger variation (default: 0.0).
+    dimensions : int
+        Number of dimensions in the vector (default: 512).
+    seed : int, optional
+        Random seed for reproducibility (default: None).
+        
+    Returns
+    -------
+    list
+        A list of floats representing the embedding vector.
+        
+    Notes
+    -----
+    To create similar embeddings, use similar seed values and base_value.
+    To create different embeddings, use different seed values.
+    For deterministic results, always pass a seed value.
+    
+    Note: Cosine distance measures angular difference, not magnitude.
+    To get meaningful differences, use variation > 0.1 or different seeds.
+    """
+    import random
+    if seed is not None:
+        random.seed(seed)
+    
+    # If variation is 0, create slight controlled variation based on seed
+    if variation == 0.0 and seed is not None:
+        # Create reproducible but varied embeddings
+        return [base_value + (hash(f"{seed}_{i}") % 1000) / 10000.0 for i in range(dimensions)]
+    
+    return [base_value + random.uniform(-variation, variation) for _ in range(dimensions)]
 
 
 def create_follow(followed_by: Profile, followed: Profile) -> Follow:
