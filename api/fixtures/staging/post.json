@@ -856,5 +856,137 @@
       "updated_at": "2025-10-29T03:51:11.079Z",
       "contains_ai": false
     }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 86,
+    "fields": {
+      "caption": "My first official baby pictures! \n\nThis is what my humans saw when they realized how cute I was and then they adopted me! How lucky am I!?",
+      "profile": 26,
+      "created_at": "2025-11-16T20:48:40.129Z",
+      "updated_at": "2025-11-16T20:48:40.129Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 87,
+    "fields": {
+      "caption": "Couple pics of me an my fren!!! \n\nWe like to go exploring together out in the wilderness especially on the weekends when our humans can take us to hang out together!",
+      "profile": 13,
+      "created_at": "2025-11-16T21:40:36.080Z",
+      "updated_at": "2025-11-16T21:40:36.080Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 88,
+    "fields": {
+      "caption": "Today’s post goes out to all the sleepy puppies of the world. What would we do without sleepy puppy breath!?",
+      "profile": 14,
+      "created_at": "2025-11-16T23:04:19.719Z",
+      "updated_at": "2025-11-16T23:04:19.719Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 89,
+    "fields": {
+      "caption": "Nearly drownded getting this mega stick! Those waves really sneak up on you, good thing I’m an excellent swimmer.\n\nMy parents took me swimming a lot when I was young, so I’m pretty much an expert swimmer.",
+      "profile": 15,
+      "created_at": "2025-11-16T23:08:51.786Z",
+      "updated_at": "2025-11-16T23:08:51.786Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 90,
+    "fields": {
+      "caption": "Great day running free in my yard. My ears do weird things sometimes ngl. But everyone seems to like it so I don’t mind!",
+      "profile": 16,
+      "created_at": "2025-11-16T23:13:06.046Z",
+      "updated_at": "2025-11-16T23:13:06.046Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 91,
+    "fields": {
+      "caption": "Showing off my sweet new harness. I wasn’t sure about it at first, but I’m starting to like it. It actually helps keep me warm when it’s a little chilly out. And I hate the cold so it’s a win for me!",
+      "profile": 17,
+      "created_at": "2025-11-16T23:19:15.126Z",
+      "updated_at": "2025-11-16T23:19:15.126Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 92,
+    "fields": {
+      "caption": "Lazy day on the couch. Wasn’t feeling good this morning so mom made me some special food and let me sleep on the couch all day.",
+      "profile": 18,
+      "created_at": "2025-11-16T23:50:06.986Z",
+      "updated_at": "2025-11-16T23:50:06.986Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 93,
+    "fields": {
+      "caption": "Don’t mean to brag but I have a really cool chair and I love to sit in it",
+      "profile": 19,
+      "created_at": "2025-11-16T23:52:18.405Z",
+      "updated_at": "2025-11-16T23:52:18.405Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 94,
+    "fields": {
+      "caption": "Whether it’s a mud puddle or a water bowl, if it can get me messy I’m going for it. I honestly think that the water bowl made for a pretty comfy chair.",
+      "profile": 20,
+      "created_at": "2025-11-16T23:54:54.757Z",
+      "updated_at": "2025-11-16T23:54:54.757Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 95,
+    "fields": {
+      "caption": "I’ve been making a lot of friends lately. It is kinda weird always being the big friend. I wonder if I’ll ever get a chance to have a friend bigger than me. If you’re bigger than me, leave a comment so we can be friends!",
+      "profile": 21,
+      "created_at": "2025-11-16T23:57:38.754Z",
+      "updated_at": "2025-11-16T23:57:38.754Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 96,
+    "fields": {
+      "caption": "Today we have a bow beagle and a sleepy chin beagle.",
+      "profile": 22,
+      "created_at": "2025-11-17T00:00:40.583Z",
+      "updated_at": "2025-11-17T00:00:40.583Z",
+      "contains_ai": false
+    }
+  },
+  {
+    "model": "posts_app.post",
+    "pk": 97,
+    "fields": {
+      "caption": "I’m starting to think there’s a pattern here. I’m always lurking in the grass. Maybe I am more of an outside dog than I thought. I wish there were couches outside. Why isn’t that a thing???",
+      "profile": 23,
+      "created_at": "2025-11-17T00:03:28.065Z",
+      "updated_at": "2025-11-17T00:03:28.065Z",
+      "contains_ai": false
+    }
   }
 ]
