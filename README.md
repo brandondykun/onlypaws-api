@@ -20,12 +20,13 @@ _The unapologetically pet friendly social media app._
 7. [Creating Fixtures for All Models](#creating-fixtures-for-all-models)
 8. [Clear and Reload Database](#clear-and-reload-database)
 9. [Generate Image Embeddings](#generate-image-embeddings)
-10. [Assign PostImage Order](#assign-postimage-order)
-11. [Nginx Configuration and SSL Setup](#nginx-configuration-and-ssl-setup)
-12. [Image Data](#image-data)
-13. [Commits](#commits)
-14. [Environment Variables](#environment-variables)
-15. [Dev and E2E Images](#dev-and-e2e-images)
+10. [Generate Combined Post Embeddings](#generate-combined-post-embeddings)
+11. [Assign PostImage Order](#assign-postimage-order)
+12. [Nginx Configuration and SSL Setup](#nginx-configuration-and-ssl-setup)
+13. [Image Data](#image-data)
+14. [Commits](#commits)
+15. [Environment Variables](#environment-variables)
+16. [Dev and E2E Images](#dev-and-e2e-images)
 
 ---
 
@@ -284,6 +285,62 @@ docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.overrid
 # Synchronous processing (useful for development/debugging)
 docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py generate_embeddings --sync
 ```
+
+## Generate Combined Post Embeddings
+
+Combined embeddings merge all image embeddings with the post caption for multimodal similarity search. These embeddings enable finding similar posts based on both visual and textual content.
+
+**Prerequisites:** Posts must have image embeddings generated first. Run the `generate_embeddings` command before generating combined embeddings.
+
+```bash
+# Generate combined embeddings for all posts that don't have them (async, recommended)
+docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py generate_combined_embeddings
+
+# Force regenerate all combined embeddings (overwrites existing ones)
+docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py generate_combined_embeddings --force
+
+# Generate combined embedding for a specific post
+docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py generate_combined_embeddings --post-id 5
+
+# Process in smaller batches (default: 50)
+docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py generate_combined_embeddings --batch-size 25
+
+# Synchronous processing for debugging
+docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py generate_combined_embeddings --sync
+
+# Increase countdown for posts with many images (gives more time for image embeddings)
+docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py generate_combined_embeddings --countdown 30
+```
+
+**Options:**
+- `--force`: Regenerate combined embeddings even if they already exist
+- `--post-id <ID>`: Process a specific post only
+- `--batch-size <SIZE>`: Number of posts to process in each batch (default: 50)
+- `--async`: Use Celery for asynchronous processing (default, recommended)
+- `--sync`: Process synchronously for development/debugging
+- `--countdown <SECONDS>`: Wait time before processing in async mode (default: 5)
+
+**How It Works:**
+1. Averages all image embeddings from the post
+2. Generates a text embedding from the post caption using CLIP
+3. Combines them with weighted average (70% images, 30% text)
+4. L2 normalizes the result for cosine similarity search
+
+**Common Use Cases:**
+- Initial setup after implementing combined embeddings feature
+- Regenerating embeddings after updating the CLIP model
+- Fixing failed embeddings (use `--force` on specific post)
+- When caption is updated (automatically triggered, but can be manually run)
+
+**Note:** Combined embeddings are automatically generated when new posts are created. This command is mainly for:
+- Existing posts created before the feature was added
+- Posts where automatic generation failed
+- Bulk regeneration after model updates
+
+**Troubleshooting:**
+- If posts fail, ensure all images have embeddings first: `generate_embeddings`
+- Check that Celery workers are running: `docker logs onlypaws_celery_embeddings -f`
+- Use `--sync` mode to see detailed error messages during development
 
 ## Background Processing with Celery and Redis
 

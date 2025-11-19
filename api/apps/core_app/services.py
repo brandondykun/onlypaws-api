@@ -79,6 +79,101 @@ class ImageEmbeddingService:
             logger.error(f"Full traceback: {traceback.format_exc()}")
             return None
 
+    def generate_text_embedding(self, text: str) -> Optional[List[float]]:
+        """
+        Generate embedding for text using CLIP text encoder.
+        The sentence-transformers CLIP model can encode both images and text
+        into the same semantic space.
+
+        Args:
+            text: Text string to encode
+
+        Returns:
+            List of floats representing the embedding, or None if error
+        """
+        try:
+            if not text or not text.strip():
+                logger.warning("Empty text provided for embedding generation")
+                return None
+
+            # Generate CLIP text embedding
+            embedding = self.model.encode([text])[0]
+
+            # Convert numpy array to list for JSON serialization
+            return embedding.tolist()
+
+        except Exception as e:
+            logger.error(f"Error generating text embedding: {str(e)}")
+            import traceback
+
+            logger.error(f"Full traceback: {traceback.format_exc()}")
+            return None
+
+    def combine_embeddings(
+        self,
+        image_embeddings: List[List[float]],
+        text_embedding: List[float],
+        image_weight: float = 0.7,
+        text_weight: float = 0.3,
+    ) -> Optional[List[float]]:
+        """
+        Combine multiple image embeddings with text embedding using weighted average.
+
+        Args:
+            image_embeddings: List of image embedding vectors
+            text_embedding: Text embedding vector
+            image_weight: Weight for image embeddings (default 0.7)
+            text_weight: Weight for text embedding (default 0.3)
+
+        Returns:
+            Combined and normalized embedding, or None if error
+
+        Steps:
+        1. Average all image embeddings
+        2. Weighted combination with text embedding
+        3. Normalize the result (L2 normalization for cosine similarity)
+        """
+        try:
+            if not image_embeddings:
+                logger.error("No image embeddings provided for combination")
+                return None
+
+            if not text_embedding:
+                logger.warning("No text embedding provided, using only image embeddings")
+                # Use only image embeddings
+                avg_image_emb = np.mean(image_embeddings, axis=0)
+                # Normalize
+                combined = avg_image_emb / np.linalg.norm(avg_image_emb)
+                return combined.tolist()
+
+            # Convert to numpy arrays
+            image_embs_array = np.array(image_embeddings)
+            text_emb_array = np.array(text_embedding)
+
+            # Average all image embeddings
+            avg_image_emb = np.mean(image_embs_array, axis=0)
+
+            # Weighted combination (default: 70% images, 30% text)
+            combined = image_weight * avg_image_emb + text_weight * text_emb_array
+
+            # L2 normalize for cosine similarity
+            norm = np.linalg.norm(combined)
+            if norm == 0:
+                logger.error("Combined embedding has zero norm")
+                return None
+
+            combined = combined / norm
+
+            # Convert to list for JSON serialization
+            return combined.tolist()
+
+        except Exception as e:
+            logger.error(f"Error combining embeddings: {str(e)}")
+            import traceback
+
+            logger.error(f"Full traceback: {traceback.format_exc()}")
+            return None
+
     def generate_embedding_for_post_image(self, post_image) -> bool:
         """
         Generate and save embedding for a PostImage instance.
@@ -110,6 +205,92 @@ class ImageEmbeddingService:
             logger.error(
                 f"Error generating embedding for PostImage {post_image.id}: {str(e)}"
             )
+            return False
+
+    def generate_combined_embedding_for_post(self, post) -> bool:
+        """
+        Generate and save combined embedding for a Post instance.
+
+        Args:
+            post: Post instance with related images
+
+        Returns:
+            True if successful, False otherwise
+
+        Steps:
+        1. Get all PostImage instances for this post
+        2. Verify all have embeddings
+        3. Generate text embedding for caption
+        4. Combine embeddings
+        5. Save to post.combined_embedding
+        """
+        try:
+            # Get all PostImage instances for this post
+            post_images = post.images.all()
+
+            if not post_images.exists():
+                logger.error(f"Post {post.id} has no images")
+                return False
+
+            # Collect image embeddings
+            image_embeddings = []
+            for img in post_images:
+                if img.embedding is None or (
+                    hasattr(img.embedding, "__len__") and len(img.embedding) == 0
+                ):
+                    logger.warning(
+                        f"PostImage {img.id} for Post {post.id} has no embedding"
+                    )
+                    return False
+                image_embeddings.append(img.embedding)
+
+            logger.info(
+                f"Collected {len(image_embeddings)} image embeddings for Post {post.id}"
+            )
+
+            # Generate text embedding for caption
+            text_embedding = None
+            if post.caption and post.caption.strip():
+                text_embedding = self.generate_text_embedding(post.caption)
+                if text_embedding is None:
+                    logger.warning(
+                        f"Failed to generate text embedding for Post {post.id}, "
+                        "will use only image embeddings"
+                    )
+
+            # Combine embeddings
+            combined_embedding = self.combine_embeddings(
+                image_embeddings, text_embedding
+            )
+
+            if combined_embedding is None:
+                logger.error(f"Failed to combine embeddings for Post {post.id}")
+                return False
+
+            # Update the Post instance
+            post.combined_embedding = combined_embedding
+            post.combined_embedding_model = self.model_name
+            post.combined_embedding_generated_at = timezone.now()
+            post.save(
+                update_fields=[
+                    "combined_embedding",
+                    "combined_embedding_model",
+                    "combined_embedding_generated_at",
+                ]
+            )
+
+            logger.info(
+                f"Successfully generated combined embedding for Post {post.id}"
+            )
+            return True
+
+        except Exception as e:
+            logger.error(
+                f"Error generating combined embedding for Post {post.id}: {str(e)}"
+            )
+            import traceback
+
+            logger.error(f"Full traceback: {traceback.format_exc()}")
             return False
 
     def calculate_similarity(

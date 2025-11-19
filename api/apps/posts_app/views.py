@@ -84,6 +84,13 @@ class CreatePostView(generics.CreateAPIView):
                         post=new_post,
                         order=int(order)
                     )
+                
+                # Queue combined embedding task once after all images are created
+                # Use countdown to give image embeddings time to be generated
+                transaction.on_commit(
+                    lambda: new_post.queue_combined_embedding_generation(countdown=10)
+                )
+                
                 new_post = Post.objects.get(id=serializer.data["id"])
                 serializer = PostDetailedSerializer(
                     new_post, context={"request": request}
@@ -208,6 +215,15 @@ class RetrieveUpdateDestroyPostView(generics.RetrieveUpdateDestroyAPIView):
         
         # Save the updated instance
         updated_instance = serializer.save()
+        
+        # If caption was updated, regenerate combined embedding
+        if 'caption' in update_data:
+            try:
+                updated_instance.queue_combined_embedding_generation(countdown=5)
+                logger.info(f"Queued combined embedding regeneration for Post {updated_instance.id} after caption update")
+            except Exception as e:
+                # Don't fail the update if embedding queue fails
+                logger.error(f"Failed to queue combined embedding for updated Post {updated_instance.id}: {str(e)}")
         
         # Refresh from database to ensure we have the latest data
         updated_instance.refresh_from_db()

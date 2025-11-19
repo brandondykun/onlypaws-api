@@ -20,8 +20,90 @@ class Post(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     contains_ai = models.BooleanField(blank=True, default=False)
 
+    # Combined embedding fields for multimodal similarity search
+    combined_embedding = VectorField(
+        dimensions=512,
+        null=True,
+        blank=True,
+        help_text="Combined embedding from images and caption",
+    )
+    combined_embedding_generated_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When the combined embedding was generated",
+    )
+    combined_embedding_model = models.CharField(
+        max_length=100,
+        default="clip-vit-base-patch32",
+        help_text="Model used to generate the combined embedding",
+    )
+
     def __str__(self):
         return f"Post {self.id} - {self.caption}"
+
+    def queue_combined_embedding_generation(self, countdown: int = 10):
+        """
+        Queue a task to generate the combined embedding for this post.
+        
+        Args:
+            countdown: Seconds to wait before running the task (to allow image embeddings to complete)
+        
+        Returns:
+            Task ID if successful, None otherwise
+        """
+        try:
+            from apps.core_app.tasks import generate_combined_post_embedding_task
+            
+            task = generate_combined_post_embedding_task.apply_async(
+                args=[self.id],
+                countdown=countdown
+            )
+            logger.info(
+                f"Queued combined embedding task {task.id} for Post {self.id} "
+                f"(countdown: {countdown}s)"
+            )
+            return task.id
+        except Exception as e:
+            logger.error(
+                f"Failed to queue combined embedding task for Post {self.id}: {str(e)}"
+            )
+            return None
+
+    def find_similar_posts(self, limit: int = 10, min_similarity: float = 0.1):
+        """
+        Find similar posts based on combined embedding similarity using pgvector.
+
+        Args:
+            limit: Maximum number of similar posts to return
+            min_similarity: Minimum similarity threshold (0-1)
+
+        Returns:
+            QuerySet of similar Post instances ordered by similarity
+        """
+        if self.combined_embedding is None or (
+            hasattr(self.combined_embedding, "__len__") and len(self.combined_embedding) == 0
+        ):
+            return Post.objects.none()
+
+        # Use pgvector's CosineDistance for similarity search
+        # CosineDistance returns values from 0 (identical) to 2 (opposite)
+        # So max_distance = 2 * (1 - min_similarity)
+        max_distance = 2 * (1 - min_similarity)
+
+        try:
+            return (
+                Post.objects.filter(combined_embedding__isnull=False)
+                .exclude(id=self.id)  # Exclude self
+                .annotate(distance=CosineDistance("combined_embedding", self.combined_embedding))
+                .filter(distance__lte=max_distance)
+                .order_by("distance")[:limit]
+            )
+        except Exception as e:
+            import traceback
+            logger.error(f"Error in pgvector query for similar posts: {str(e)}")
+            logger.error(f"Full traceback: {traceback.format_exc()}")
+            # Fallback to empty queryset
+            return Post.objects.none()
 
 
 def post_image_path(instance, filename):
