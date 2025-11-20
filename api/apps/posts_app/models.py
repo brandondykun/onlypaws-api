@@ -8,11 +8,24 @@ from django.core.validators import MaxLengthValidator
 from apps.core_app.utils import crop_square_and_resize
 from pgvector.django import VectorField, CosineDistance
 
+from apps.core_app.indexes import HnswIndex
+
 logger = logging.getLogger(__name__)
 
 
 class Post(models.Model):
     """Post with image and text."""
+
+    class Meta:
+        indexes = [
+            HnswIndex(
+                fields=['combined_embedding'],
+                name='post_comb_emb_hnsw_idx',
+                opclasses=['vector_cosine_ops'],
+                m=32,  # Higher m for better recall at scale
+                ef_construction=200,  # Higher ef_construction for better index quality
+            ),
+        ]
 
     caption = models.TextField(validators=[MaxLengthValidator(1000, message="Caption cannot exceed 1000 characters.")])
     profile = models.ForeignKey("profile_app.Profile", on_delete=models.CASCADE, related_name="posts")
@@ -279,6 +292,15 @@ class PostImage(models.Model):
 
     class Meta:
         ordering = ["order", "id"]
+        indexes = [
+            HnswIndex(
+                fields=['embedding'],
+                name='postimg_emb_hnsw_idx',
+                opclasses=['vector_cosine_ops'],
+                m=32,
+                ef_construction=200,
+            ),
+        ]
 
 
 class SavedPost(models.Model):

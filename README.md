@@ -21,12 +21,13 @@ _The unapologetically pet friendly social media app._
 8. [Clear and Reload Database](#clear-and-reload-database)
 9. [Generate Image Embeddings](#generate-image-embeddings)
 10. [Generate Combined Post Embeddings](#generate-combined-post-embeddings)
-11. [Assign PostImage Order](#assign-postimage-order)
-12. [Nginx Configuration and SSL Setup](#nginx-configuration-and-ssl-setup)
-13. [Image Data](#image-data)
-14. [Commits](#commits)
-15. [Environment Variables](#environment-variables)
-16. [Dev and E2E Images](#dev-and-e2e-images)
+11. [Verify and Test HNSW Indexes](#verify-and-test-hnsw-indexes)
+12. [Assign PostImage Order](#assign-postimage-order)
+13. [Nginx Configuration and SSL Setup](#nginx-configuration-and-ssl-setup)
+14. [Image Data](#image-data)
+15. [Commits](#commits)
+16. [Environment Variables](#environment-variables)
+17. [Dev and E2E Images](#dev-and-e2e-images)
 
 ---
 
@@ -341,6 +342,129 @@ docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.overrid
 - If posts fail, ensure all images have embeddings first: `generate_embeddings`
 - Check that Celery workers are running: `docker logs onlypaws_celery_embeddings -f`
 - Use `--sync` mode to see detailed error messages during development
+
+## Verify and Test HNSW Indexes
+
+HNSW (Hierarchical Navigable Small World) indexes are used to accelerate vector similarity searches for finding similar posts and images. These management commands help verify that the indexes are properly configured and performing efficiently.
+
+### Verify HNSW Indexes
+
+The `verify_hnsw_indexes` command checks that HNSW indexes exist, are configured correctly, and provides statistics about their usage.
+
+```bash
+# Verify HNSW indexes are properly configured
+docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py verify_hnsw_indexes
+```
+
+**What It Checks:**
+- ✅ Verifies HNSW indexes exist in the database
+- ✅ Confirms indexes are using HNSW index type
+- ✅ Validates HNSW parameters (m, ef_construction) are configured
+- ✅ Shows index statistics (size, usage, tuples read/fetched)
+- ✅ Displays embedding counts for posts and images
+- ✅ Analyzes query plan to confirm index usage in similarity searches
+
+**Sample Output:**
+```
+================================================================================
+HNSW INDEX VERIFICATION
+================================================================================
+
+================================================================================
+CHECKING HNSW INDEXES
+================================================================================
+
+✅ Found 2 HNSW index(es):
+
+Index: post_comb_emb_hnsw_idx
+  Table: public.posts_post
+  Definition: CREATE INDEX post_comb_emb_hnsw_idx ON public.posts_post USING hnsw (combined_embedding vector_cosine_ops) WITH (m='32', ef_construction='128')
+  ✓ Using HNSW index type
+  ✓ HNSW parameters configured
+
+Index: postimg_emb_hnsw_idx
+  Table: public.posts_postimage
+  Definition: CREATE INDEX postimg_emb_hnsw_idx ON public.posts_postimage USING hnsw (embedding vector_cosine_ops) WITH (m='16', ef_construction='64')
+  ✓ Using HNSW index type
+  ✓ HNSW parameters configured
+```
+
+**When to Use:**
+- After running migrations to confirm indexes were created
+- When troubleshooting slow similarity search queries
+- To verify index configuration after database changes
+- To check embedding generation progress
+
+### Test HNSW Index Performance
+
+The `test_hnsw_performance` command measures the actual performance of similarity searches and confirms that HNSW indexes are being used efficiently.
+
+```bash
+# Test HNSW index performance (default: 3 iterations)
+docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py test_hnsw_performance
+
+# Run more iterations for better averages
+docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py test_hnsw_performance --iterations 5
+
+# Show detailed results including sample matches
+docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py test_hnsw_performance --verbose
+```
+
+**Options:**
+- `--iterations <N>`: Number of test runs to average (default: 3)
+- `--verbose`: Show detailed results including individual iteration times and sample results
+
+**What It Tests:**
+- 🚀 Measures query execution time over multiple iterations
+- 📊 Calculates average, min, and max query times
+- 🔍 Shows the query execution plan
+- ✅ Confirms HNSW index is being used (not sequential scan)
+- 📈 Provides performance context and recommendations
+
+**Sample Output:**
+```
+================================================================================
+HNSW INDEX PERFORMANCE TEST
+================================================================================
+
+Testing with Post ID: 42
+Total posts with embeddings: 1250
+
+================================================================================
+PERFORMANCE TESTS
+================================================================================
+
+Query Performance:
+  Average: 23.45ms
+  Min: 21.12ms
+  Max: 28.67ms
+
+✅ Excellent performance!
+
+================================================================================
+QUERY EXECUTION PLAN
+================================================================================
+
+Limit  (cost=...)
+  ->  Index Scan using post_comb_emb_hnsw_idx on posts_post  (cost=...)
+        Order By: (combined_embedding <=> '...'::vector)
+        Filter: (combined_embedding IS NOT NULL)
+
+--------------------------------------------------------------------------------
+✅ HNSW index IS being used!
+```
+
+**Performance Guidelines:**
+- **< 50ms**: ✅ Excellent performance
+- **50-200ms**: ✅ Good performance
+- **200-1000ms**: ⚠️ Moderate performance
+- **> 1000ms**: ⚠️ Slow performance - index may not be used
+
+**Note:** For small datasets (< 1000 posts), PostgreSQL may use a sequential scan instead of the index, as it can be more efficient. The index will automatically be used at scale.
+
+**Prerequisites:**
+- Combined embeddings must be generated first (see [Generate Combined Post Embeddings](#generate-combined-post-embeddings))
+- HNSW indexes must be created via migrations
 
 ## Background Processing with Celery and Redis
 
