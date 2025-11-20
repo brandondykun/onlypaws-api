@@ -60,11 +60,7 @@ def generate_image_embedding_task(self, post_image_id: int):
             }
 
         # Check if embedding already exists (avoid duplicate work)
-        if (
-            post_image.embedding is not None
-            and hasattr(post_image.embedding, "__len__")
-            and len(post_image.embedding) > 0
-        ):
+        if post_image.has_embedding():
             logger.info(f"PostImage {post_image_id} already has an embedding, skipping")
             return {
                 "success": True,
@@ -167,11 +163,7 @@ def generate_combined_post_embedding_task(self, post_id: int):
             }
 
         # Check if combined embedding already exists (avoid duplicate work)
-        if (
-            post.combined_embedding is not None
-            and hasattr(post.combined_embedding, "__len__")
-            and len(post.combined_embedding) > 0
-        ):
+        if post.has_combined_embedding():
             logger.info(f"Post {post_id} already has a combined embedding, skipping")
             return {
                 "success": True,
@@ -194,9 +186,7 @@ def generate_combined_post_embedding_task(self, post_id: int):
         images_with_embeddings = []
         images_without_embeddings = []
         for img in post_images:
-            if img.embedding is None or (
-                hasattr(img.embedding, "__len__") and len(img.embedding) == 0
-            ):
+            if not img.has_embedding():
                 images_without_embeddings.append(img.id)
             else:
                 images_with_embeddings.append(img.id)

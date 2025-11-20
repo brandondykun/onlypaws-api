@@ -41,6 +41,21 @@ class Post(models.Model):
     def __str__(self):
         return f"Post {self.id} - {self.caption}"
 
+    def has_combined_embedding(self) -> bool:
+        """
+        Check if this post has a valid combined embedding.
+        
+        Returns:
+            bool: True if post has a valid combined embedding, False otherwise
+        """
+        return not (
+            self.combined_embedding is None
+            or (
+                hasattr(self.combined_embedding, "__len__")
+                and len(self.combined_embedding) == 0
+            )
+        )
+
     def queue_combined_embedding_generation(self, countdown: int = 10):
         """
         Queue a task to generate the combined embedding for this post.
@@ -69,20 +84,17 @@ class Post(models.Model):
             )
             return None
 
-    def find_similar_posts(self, limit: int = 10, min_similarity: float = 0.1):
+    def find_similar_posts(self, min_similarity: float = 0.1):
         """
         Find similar posts based on combined embedding similarity using pgvector.
 
         Args:
-            limit: Maximum number of similar posts to return
             min_similarity: Minimum similarity threshold (0-1)
 
         Returns:
             QuerySet of similar Post instances ordered by similarity
         """
-        if self.combined_embedding is None or (
-            hasattr(self.combined_embedding, "__len__") and len(self.combined_embedding) == 0
-        ):
+        if not self.has_combined_embedding():
             return Post.objects.none()
 
         # Use pgvector's CosineDistance for similarity search
@@ -96,7 +108,7 @@ class Post(models.Model):
                 .exclude(id=self.id)  # Exclude self
                 .annotate(distance=CosineDistance("combined_embedding", self.combined_embedding))
                 .filter(distance__lte=max_distance)
-                .order_by("distance")[:limit]
+                .order_by("distance")
             )
         except Exception as e:
             import traceback
@@ -175,10 +187,7 @@ class PostImage(models.Model):
         super().save(*args, **kwargs)
 
         # Generate embedding asynchronously if needed
-        if should_generate_embedding and (
-            self.embedding is None
-            or (hasattr(self.embedding, "__len__") and len(self.embedding) == 0)
-        ):
+        if should_generate_embedding and not self.has_embedding():
             try:
                 # Import here to avoid circular imports
                 from apps.core_app.tasks import generate_image_embedding_task
@@ -216,6 +225,21 @@ class PostImage(models.Model):
                         f"Synchronous embedding generation also failed for PostImage {self.id}: {str(sync_error)}"
                     )
 
+    def has_embedding(self) -> bool:
+        """
+        Check if this post image has a valid embedding.
+        
+        Returns:
+            bool: True if image has a valid embedding, False otherwise
+        """
+        return not (
+            self.embedding is None
+            or (
+                hasattr(self.embedding, "__len__")
+                and len(self.embedding) == 0
+            )
+        )
+
     def find_similar_images(self, limit: int = 10, min_similarity: float = 0.1):
         """
         Find similar images based on embedding similarity using pgvector.
@@ -227,9 +251,7 @@ class PostImage(models.Model):
         Returns:
             QuerySet of similar PostImage instances ordered by similarity
         """
-        if self.embedding is None or (
-            hasattr(self.embedding, "__len__") and len(self.embedding) == 0
-        ):
+        if not self.has_embedding():
             return PostImage.objects.none()
 
         # Use pgvector's CosineDistance for similarity search

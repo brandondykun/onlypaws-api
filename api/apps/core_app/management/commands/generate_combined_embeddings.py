@@ -88,12 +88,7 @@ class Command(BaseCommand):
                 continue
                 
             # Check if all images have embeddings
-            images_without_embeddings = [
-                img.id for img in images 
-                if img.embedding is None or (
-                    hasattr(img.embedding, "__len__") and len(img.embedding) == 0
-                )
-            ]
+            images_without_embeddings = [img.id for img in images if not img.has_embedding()]
             
             if images_without_embeddings:
                 posts_not_ready.append((post.id, images_without_embeddings))
@@ -246,12 +241,7 @@ class Command(BaseCommand):
                         continue
 
                     # Check if all images have embeddings
-                    images_without_embeddings = [
-                        img.id for img in post.images.all()
-                        if img.embedding is None or (
-                            hasattr(img.embedding, "__len__") and len(img.embedding) == 0
-                        )
-                    ]
+                    images_without_embeddings = [img.id for img in post.images.all() if not img.has_embedding()]
 
                     if images_without_embeddings:
                         failed += 1

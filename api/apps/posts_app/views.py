@@ -14,7 +14,7 @@ from .serializers import (
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import get_object_or_404
-from django.db.models import Q
+from django.db.models import Q, Case, When
 from django.db import transaction
 from .pagination import (
     ListExplorePostsPagination,
@@ -290,87 +290,105 @@ class ListExplorePostsView(generics.ListAPIView):
     get=extend_schema(
         parameters=[
             OpenApiParameter(
-                "profileId",
-                OpenApiTypes.STR,
-                description="Requesting profile id.",
+                "min_similarity",
+                OpenApiTypes.FLOAT,
+                description="Minimum similarity threshold (0-1). Default is 0.3.",
             ),
         ]
     )
 )
 class ListSimilarPostsView(generics.ListAPIView):
-    """Get posts that are visually similar to the desired post using image embeddings."""
+    """
+    Return up to 100 visually similar posts with:
+    - Max 3 posts from the same profile as the original post
+    - Excludes the user's own posts
+    - Excludes posts reported for inappropriate content
+    """
 
     serializer_class = PostDetailedSerializer
     permission_classes = [permissions.IsAuthenticated]
-    queryset = Post.objects.all()
     pagination_class = ListSimilarPostsPagination
+    queryset = Post.objects.all()
+
+    # How many posts from DB to pull before filtering in Python
+    PRE_LIMIT = 300
+    MAX_RESULTS = 100
+    MAX_SAME_PROFILE = 3
 
     def get_queryset(self):
         post_id = self.kwargs.get("pk")
-        profile_id = self.request.GET.get("profileId")
-        min_similarity = float(self.request.GET.get("min_similarity", 0.3))
+        min_similarity = float(self.request.query_params.get("min_similarity", 0.3))
 
         try:
-            # Get the post and its main image
+            # Get the post
             post: Post = get_object_or_404(Post, id=post_id)
-            main_image: PostImage = post.images.first()
 
-            if (
-                not main_image
-                or main_image.embedding is None
-                or (
-                    hasattr(main_image.embedding, "__len__")
-                    and len(main_image.embedding) == 0
+            # -------------------------------
+            # 1. Handle case with no embedding
+            # -------------------------------
+            if not post.has_combined_embedding():
+                return (
+                    Post.objects.filter(
+                        ~Q(profile__user=self.request.user),
+                        id__gt=post_id,
+                    )
+                    .exclude(reports__reason__id=1)
+                    .order_by("-created_at")[: self.MAX_RESULTS]
                 )
-            ):
-                # Fallback to basic filtering if no embedding available
-                return Post.objects.filter(
-                    ~Q(profile__user=self.request.user)
-                    & Q(id__gt=post_id)
-                    & ~Q(reports__reason__id=1)
-                ).order_by("-created_at")[:20]
 
-            # Find similar images
-            similar_images = main_image.find_similar_images(
-                limit=100, min_similarity=min_similarity
+            # -------------------------------
+            # 2. Use vector similarity search
+            # -------------------------------
+            qs = (
+                post.find_similar_posts(min_similarity=min_similarity)
+                .filter(~Q(profile__user=self.request.user))
+                .exclude(reports__reason__id=1)
             )
 
-            # Get posts for similar images, preserving similarity order and ensuring uniqueness
-            similar_posts_ids = []
-            seen_post_ids = set()
-            for img in similar_images:
-                # Does the post belong to any profile of the requesting user?
-                is_own_post = img.post.profile.user == self.request.user
-                # Is the post the original post passed in kwargs?
-                is_original_post = img.post.id == post_id
+            # --------------------------------------------
+            # 3. Pre-limit BEFORE iterating (performance!)
+            # --------------------------------------------
+            # Pull enough posts to enforce uniqueness rules
+            qs = qs[: self.PRE_LIMIT]
 
-                # Skip if it's the user's own post or the original post
-                if is_own_post or is_original_post:
-                    continue
+            # Materialize only the pre-limited subset
+            posts = list(qs)
 
-                # Only add if we haven't seen this post before
-                if img.post.id not in seen_post_ids:
-                    similar_posts_ids.append(img.post.id)
-                    seen_post_ids.add(img.post.id)
+            # --------------------------------------------
+            # 4. Enforce "max 3 posts from same profile"
+            # --------------------------------------------
+            source_profile_id = post.profile_id
+            same_profile_count = 0
+            final_posts = []
 
-            if not similar_posts_ids:
+            for p in posts:
+                if p.profile_id == source_profile_id:
+                    if same_profile_count < self.MAX_SAME_PROFILE:
+                        final_posts.append(p)
+                        same_profile_count += 1
+                else:
+                    final_posts.append(p)
+
+                # Stop early if we already have enough
+                if len(final_posts) >= self.MAX_RESULTS:
+                    break
+
+            if not final_posts:
                 return Post.objects.none()
 
-            # Get posts and filter out reported content
-            posts_dict = (
-                Post.objects.filter(id__in=similar_posts_ids)
-                .exclude(reports__reason__id=1)  # filter reported inappropriate content
-                .exclude(id=post_id)
-                .in_bulk(field_name="id")
+            # --------------------------------------------
+            # 5. Convert back to queryset with preserved order
+            # --------------------------------------------
+            post_ids = [p.id for p in final_posts]
+
+            preserved_order = Case(
+                *[When(pk=pk, then=pos) for pos, pk in enumerate(post_ids)]
             )
 
-            # Return posts in similarity order (preserving the order from similar_images)
-            ordered_posts = []
-            for post_id in similar_posts_ids:
-                if post_id in posts_dict:
-                    ordered_posts.append(posts_dict[post_id])
-
-            return ordered_posts
+            return (
+                Post.objects.filter(id__in=post_ids)
+                .order_by(preserved_order)[: self.MAX_RESULTS]
+            )
 
         except Exception as e:
             # Log error and return empty queryset

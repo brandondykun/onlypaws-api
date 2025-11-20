@@ -235,9 +235,7 @@ class ImageEmbeddingService:
             # Collect image embeddings
             image_embeddings = []
             for img in post_images:
-                if img.embedding is None or (
-                    hasattr(img.embedding, "__len__") and len(img.embedding) == 0
-                ):
+                if not img.has_embedding():
                     logger.warning(
                         f"PostImage {img.id} for Post {post.id} has no embedding"
                     )

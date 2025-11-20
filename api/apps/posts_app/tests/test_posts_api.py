@@ -505,7 +505,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         # The base fixture creates posts with images but no embeddings
         url = list_similar_posts_url(self.post_2.id)
         
-        res = self.client.get(url, {'profileId': self.profile.id})
+        res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         
         # Response should use fallback logic (basic filtering)
@@ -537,7 +537,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         
         url = list_similar_posts_url(reference_post.id)
         
-        res = self.client.get(url, {'profileId': self.profile.id})
+        res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         
         # Should find the similar posts
@@ -569,7 +569,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         
         url = list_similar_posts_url(reference_post.id)
         
-        res = self.client.get(url, {'profileId': self.profile.id})
+        res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         
         # Should not include posts from the authenticated user
@@ -595,7 +595,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         
         url = list_similar_posts_url(reference_post.id)
         
-        res = self.client.get(url, {'profileId': self.profile.id})
+        res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         
         # The original post should not be in the results
@@ -635,7 +635,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         
         url = list_similar_posts_url(reference_post.id)
         
-        res = self.client.get(url, {'profileId': self.profile.id})
+        res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         
         # The reported post should not appear in results (if reason1 has id=1)
@@ -671,7 +671,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         
         url = list_similar_posts_url(reference_post.id)
         
-        res = self.client.get(url, {'profileId': self.profile.id})
+        res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         
         # Verify results are returned
@@ -707,7 +707,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         
         url = list_similar_posts_url(reference_post.id)
         
-        res = self.client.get(url, {'profileId': self.profile.id})
+        res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         
         # The post should appear only once, even though it has multiple similar images
@@ -736,7 +736,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         
         # Test with high min_similarity (should only get very similar posts)
         url = list_similar_posts_url(reference_post.id)
-        res = self.client.get(url, {'profileId': self.profile.id, 'min_similarity': 0.9})
+        res = self.client.get(url, {'min_similarity': 0.9})
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         
         result_ids = [post['id'] for post in res.data['results']]
@@ -745,7 +745,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         self.assertIn(very_similar_post.id, result_ids)
         
         # Test with lower min_similarity (should get more posts)
-        res_low = self.client.get(url, {'profileId': self.profile.id, 'min_similarity': 0.1})
+        res_low = self.client.get(url, {'min_similarity': 0.1})
         self.assertEqual(res_low.status_code, status.HTTP_200_OK)
         
         # Should have same or more results with lower threshold
@@ -760,7 +760,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         
         url = list_similar_posts_url(post_no_image.id)
         
-        res = self.client.get(url, {'profileId': self.profile.id})
+        res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         
         # Should return results (using fallback logic)
@@ -773,7 +773,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         """
         url = list_similar_posts_url(99999)  # Non-existent post ID
         
-        res = self.client.get(url, {'profileId': self.profile.id})
+        res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         # Should return empty results
         self.assertIn('results', res.data)
@@ -788,5 +788,5 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         
         url = list_similar_posts_url(self.post_2.id)
         
-        res = self.client.get(url, {'profileId': self.profile.id})
+        res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
