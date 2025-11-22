@@ -760,10 +760,11 @@ class SearchProfileSerializer(serializers.ModelSerializer):
     profile_type = serializers.SerializerMethodField()
     name = serializers.SerializerMethodField()
     is_following = serializers.SerializerMethodField()
+    about = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
-        fields = ["id", "username", "name", "image", "is_following", "profile_type"]
+        fields = ["id", "username", "name", "image", "is_following", "profile_type", "about"]
 
     def get_profile_type(self, obj) -> Literal["regular", "business"]:
         """Returns 'regular' or 'business'."""
@@ -775,6 +776,14 @@ class SearchProfileSerializer(serializers.ModelSerializer):
             return obj.regularprofile.name
         elif hasattr(obj, 'businessprofile'):
             return obj.businessprofile.business_name
+        return ""
+
+    def get_about(self, obj):
+        """Get name from the specific profile type."""
+        if hasattr(obj, 'regularprofile'):
+            return obj.regularprofile.about
+        elif hasattr(obj, 'businessprofile'):
+            return obj.businessprofile.about
         return ""
 
     def get_is_following(self, obj) -> bool:
