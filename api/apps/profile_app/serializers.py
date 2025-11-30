@@ -168,6 +168,8 @@ class RegularProfileUpdateSerializer(serializers.ModelSerializer):
         if 'username' in validated_data:
             instance.profile_ptr.username = validated_data.pop('username')
             instance.profile_ptr.save()
+            # Refresh to prevent child save from overwriting parent with cached values
+            instance.refresh_from_db()
 
         # Update RegularProfile fields
         for field, value in validated_data.items():
@@ -377,6 +379,8 @@ class BusinessProfileUpdateSerializer(serializers.ModelSerializer):
         if 'username' in validated_data:
             instance.profile_ptr.username = validated_data.pop('username')
             instance.profile_ptr.save()
+            # Refresh to prevent child save from overwriting parent with cached values
+            instance.refresh_from_db()
 
         # Update BusinessProfile fields
         for field, value in validated_data.items():
@@ -625,7 +629,7 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "image"]
 
     def update(self, instance, validated_data):
-        """Update Profile and its child class fields."""
+        """Update Profile and its child class fields."""        
         # Extract child-specific fields
         name = validated_data.pop('name', None)
         about = validated_data.pop('about', None)
@@ -633,11 +637,15 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
         pet_type = validated_data.pop('pet_type', None)
 
         # Update the base Profile fields (username)
-        profile = super().update(instance, validated_data)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        
+        instance.refresh_from_db()
 
         # Update child class fields
-        if hasattr(profile, 'regularprofile'):
-            regular_profile = profile.regularprofile
+        if hasattr(instance, 'regularprofile'):
+            regular_profile = instance.regularprofile
             if name is not None:
                 regular_profile.name = name
             if about is not None:
@@ -647,13 +655,13 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
             if pet_type is not None:
                 regular_profile.pet_type = pet_type
             regular_profile.save()
-        elif hasattr(profile, 'businessprofile'):
-            business_profile = profile.businessprofile
+        elif hasattr(instance, 'businessprofile'):
+            business_profile = instance.businessprofile
             if about is not None:
                 business_profile.about = about
             business_profile.save()
 
-        return profile
+        return instance
 
 
 class ProfileDetailedSerializer(serializers.ModelSerializer):
