@@ -3,13 +3,15 @@ Views for the posts api.
 """
 
 from rest_framework import generics, permissions, status
-from apps.posts_app.models import Post, PostImage, SavedPost
+from apps.posts_app.models import Post, PostImage, SavedPost, PostImageTag
 from .serializers import (
     PostSerializer,
     PostUpdateSerializer,
     PostImageSerializer,
     PostDetailedSerializer,
     CreateSavedPostSerializer,
+    CreatePostImageTagSerializer,
+    PostImageTagSerializer,
 )
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -28,10 +30,54 @@ from drf_spectacular.utils import (
     OpenApiTypes,
 )
 import logging
+import json
 
 from core.schema_params import auth_profile_param
 
 logger = logging.getLogger(__name__)
+
+
+def adjust_tag_position_for_center_square_crop(x_percent, y_percent, original_width, original_height):
+    """
+    Adjust tag position percentages to account for center crop to square.
+    
+    The crop_square_and_resize function crops images to squares:
+    - Portrait (height > width): crops equally from top and bottom
+    - Landscape (width > height): crops equally from left and right
+    - Square: no cropping needed
+    
+    Args:
+        x_percent: X position as percentage (0-100) of original width
+        y_percent: Y position as percentage (0-100) of original height
+        original_width: Original image width in pixels
+        original_height: Original image height in pixels
+    
+    Returns:
+        tuple: (adjusted_x_percent, adjusted_y_percent) for the cropped square image
+    """
+    if original_width == original_height:
+        # Square image - no adjustment needed
+        return x_percent, y_percent
+    
+    if original_height > original_width:
+        # Portrait: crop from top and bottom
+        # X position doesn't change
+        # Y position needs adjustment
+        crop_amount = (original_height - original_width) / 2
+        original_y_px = (y_percent / 100) * original_height
+        new_y_px = original_y_px - crop_amount
+        new_y_percent = (new_y_px / original_width) * 100
+        return x_percent, new_y_percent
+    else:
+        # Landscape: crop from left and right
+        # Y position doesn't change
+        # X position needs adjustment
+        crop_amount = (original_width - original_height) / 2
+        original_x_px = (x_percent / 100) * original_width
+        new_x_px = original_x_px - crop_amount
+        new_x_percent = (new_x_px / original_height) * 100
+        return new_x_percent, y_percent
+
 
 @extend_schema_view(
     post=extend_schema(parameters=[auth_profile_param]),
@@ -49,6 +95,7 @@ class CreatePostView(generics.CreateAPIView):
         contains_ai = request.data.get("aiGenerated", False)
         images = request.FILES.getlist("images")
         orders = request.POST.getlist("order")
+        tags_json = request.data.get("tags", None)
 
         # ensure that the profile sent belongs to the current authenticated user
         current_profile = request.current_profile
@@ -62,6 +109,24 @@ class CreatePostView(generics.CreateAPIView):
                 {"error": "Number of images and order values must match."},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+        # Parse tags if provided
+        tags_data = {}
+        if tags_json:
+            try:
+                tags_data = json.loads(tags_json) if isinstance(tags_json, str) else tags_json
+                if not isinstance(tags_data, dict):
+                    logger.error("Tags must be a JSON object/dictionary.")
+                    return Response(
+                        {"error": "Tags must be a JSON object with image indices as keys."},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            except json.JSONDecodeError as e:
+                logger.error(f"Invalid JSON in tags parameter: {str(e)}")
+                return Response(
+                    {"error": "Invalid JSON format in tags parameter."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
         try:
             with transaction.atomic():
@@ -77,13 +142,68 @@ class CreatePostView(generics.CreateAPIView):
 
                 new_post = Post.objects.get(id=serializer.data["id"])
 
-                # Create PostImage objects with order
-                for image, order in zip(images, orders):
-                    PostImage.objects.create(
+                # Create PostImage objects with order and store them for tag creation
+                post_images = []
+                for idx, (image, order) in enumerate(zip(images, orders)):
+                    post_image = PostImage.objects.create(
                         image=image,
                         post=new_post,
                         order=int(order)
                     )
+                    post_images.append((idx, post_image))
+                
+                # Create PostImageTag objects if tags were provided
+                if tags_data:
+                    for img_idx, post_image in post_images:
+                        img_idx_str = str(img_idx)
+                        if img_idx_str in tags_data:
+                            image_tags = tags_data[img_idx_str]
+                            if not isinstance(image_tags, list):
+                                raise ValueError(f"Tags for image {img_idx} must be a list.")
+                            
+                            for tag_data in image_tags:
+                                # Validate tag data structure
+                                required_fields = ["taggedProfileId", "xPosition", "yPosition", "originalWidth", "originalHeight"]
+                                if not all(field in tag_data for field in required_fields):
+                                    raise ValueError(
+                                        f"Each tag must include: {', '.join(required_fields)}"
+                                    )
+                                
+                                # Validate profile exists
+                                from apps.profile_app.models import Profile
+                                try:
+                                    tagged_profile = Profile.objects.get(id=tag_data["taggedProfileId"])
+                                except Profile.DoesNotExist:
+                                    raise ValueError(
+                                        f"Profile {tag_data['taggedProfileId']} does not exist."
+                                    )
+                                
+                                # Adjust tag position to account for cropping
+                                original_width = tag_data["originalWidth"]
+                                original_height = tag_data["originalHeight"]
+                                x_position = tag_data["xPosition"]
+                                y_position = tag_data["yPosition"]
+                                
+                                adjusted_x, adjusted_y = adjust_tag_position_for_center_square_crop(
+                                    x_position,
+                                    y_position,
+                                    original_width,
+                                    original_height
+                                )
+                                
+                                # Create the tag with adjusted positions
+                                PostImageTag.objects.create(
+                                    post_image=post_image,
+                                    tagged_profile=tagged_profile,
+                                    tagged_by_profile=current_profile,
+                                    x_position=adjusted_x,
+                                    y_position=adjusted_y
+                                )
+                                logger.info(
+                                    f"Created tag for profile {tagged_profile.id} "
+                                    f"in image {post_image.id} at original ({x_position}, {y_position}), "
+                                    f"adjusted to ({adjusted_x:.2f}, {adjusted_y:.2f}) for {original_width}x{original_height} crop"
+                                )
                 
                 # Queue combined embedding task once after all images are created
                 # Use countdown to give image embeddings time to be generated
@@ -91,7 +211,18 @@ class CreatePostView(generics.CreateAPIView):
                     lambda: new_post.queue_combined_embedding_generation(countdown=10)
                 )
                 
-                new_post = Post.objects.get(id=serializer.data["id"])
+                new_post = Post.objects.prefetch_related(
+                    'images__tags__tagged_profile__image',
+                    'images__tags__tagged_profile__regularprofile',
+                    'images__tags__tagged_profile__businessprofile',
+                    'images__tags__tagged_by_profile__image',
+                    'images__tags__tagged_by_profile__regularprofile',
+                    'images__tags__tagged_by_profile__businessprofile',
+                    'profile__image',
+                    'profile__regularprofile',
+                    'profile__businessprofile',
+                    'reports',
+                ).get(id=serializer.data["id"])
                 serializer = PostDetailedSerializer(
                     new_post, context={"request": request}
                 )
@@ -99,6 +230,13 @@ class CreatePostView(generics.CreateAPIView):
                 return Response(
                     serializer.data, status=status.HTTP_201_CREATED, headers=headers
                 )
+        except ValueError as e:
+            # Handle validation errors specifically
+            logger.error(f"Validation error creating post: {str(e)}")
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         except Exception as e:
             # If an exception occurs, the transaction will be rolled back
             # and the main object will be deleted.
@@ -120,7 +258,18 @@ class ListProfilePostsView(generics.ListAPIView):
         profile_id = self.kwargs.get("id", None)
         current_profile = self.request.current_profile
 
-        profile_posts = Post.objects.filter(Q(profile__id=profile_id))
+        profile_posts = Post.objects.filter(Q(profile__id=profile_id)).prefetch_related(
+            'images__tags__tagged_profile__image',
+            'images__tags__tagged_profile__regularprofile',
+            'images__tags__tagged_profile__businessprofile',
+            'images__tags__tagged_by_profile__image',
+            'images__tags__tagged_by_profile__regularprofile',
+            'images__tags__tagged_by_profile__businessprofile',
+            'profile__image',
+            'profile__regularprofile',
+            'profile__businessprofile',
+            'reports',
+        )
 
         if str(profile_id) == str(current_profile.id):
             # Don't filter inappropriate posts if profile is requesting their own posts
@@ -146,6 +295,17 @@ class RetrieveFeedView(generics.ListAPIView):
         posts = Post.objects.filter(
             Q(profile__following__followed_by=current_profile)
             & ~Q(reports__reason__id=1)  # filter reported inappropriate content
+        ).prefetch_related(
+            'images__tags__tagged_profile__image',
+            'images__tags__tagged_profile__regularprofile',
+            'images__tags__tagged_profile__businessprofile',
+            'images__tags__tagged_by_profile__image',
+            'images__tags__tagged_by_profile__regularprofile',
+            'images__tags__tagged_by_profile__businessprofile',
+            'profile__image',
+            'profile__regularprofile',
+            'profile__businessprofile',
+            'reports',
         ).order_by("-created_at")
         return posts
 
@@ -160,7 +320,18 @@ class RetrieveUpdateDestroyPostView(generics.RetrieveUpdateDestroyAPIView):
 
     serializer_class = PostDetailedSerializer
     permission_classes = [permissions.IsAuthenticated]
-    queryset = Post.objects.all()
+    queryset = Post.objects.prefetch_related(
+        'images__tags__tagged_profile__image',
+        'images__tags__tagged_profile__regularprofile',
+        'images__tags__tagged_profile__businessprofile',
+        'images__tags__tagged_by_profile__image',
+        'images__tags__tagged_by_profile__regularprofile',
+        'images__tags__tagged_by_profile__businessprofile',
+        'profile__image',
+        'profile__regularprofile',
+        'profile__businessprofile',
+        'reports',
+    ).all()
 
     def get(self, request, *args, **kwargs):
         post_id = self.kwargs.get("pk")
@@ -200,7 +371,7 @@ class RetrieveUpdateDestroyPostView(generics.RetrieveUpdateDestroyAPIView):
             )
 
         # Only allow updating the caption field
-        allowed_fields = {'caption'}
+        allowed_fields = {'caption', 'contains_ai'}
         update_data = {k: v for k, v in request.data.items() if k in allowed_fields}
         
         if not update_data:
@@ -225,8 +396,19 @@ class RetrieveUpdateDestroyPostView(generics.RetrieveUpdateDestroyAPIView):
                 # Don't fail the update if embedding queue fails
                 logger.error(f"Failed to queue combined embedding for updated Post {updated_instance.id}: {str(e)}")
         
-        # Refresh from database to ensure we have the latest data
-        updated_instance.refresh_from_db()
+        # Refresh from database to ensure we have the latest data with prefetched relations
+        updated_instance = Post.objects.prefetch_related(
+            'images__tags__tagged_profile__image',
+            'images__tags__tagged_profile__regularprofile',
+            'images__tags__tagged_profile__businessprofile',
+            'images__tags__tagged_by_profile__image',
+            'images__tags__tagged_by_profile__regularprofile',
+            'images__tags__tagged_by_profile__businessprofile',
+            'profile__image',
+            'profile__regularprofile',
+            'profile__businessprofile',
+            'reports',
+        ).get(id=updated_instance.id)
 
         # Return the updated post using PostDetailedSerializer
         response_serializer = PostDetailedSerializer(updated_instance, context={"request": request})
@@ -282,6 +464,17 @@ class ListExplorePostsView(generics.ListAPIView):
             ~Q(profile__following__followed_by=current_profile)
             & ~Q(profile__user=self.request.user)
             & ~Q(reports__gt=0)  # filter all reported posts for explore screen
+        ).prefetch_related(
+            'images__tags__tagged_profile__image',
+            'images__tags__tagged_profile__regularprofile',
+            'images__tags__tagged_profile__businessprofile',
+            'images__tags__tagged_by_profile__image',
+            'images__tags__tagged_by_profile__regularprofile',
+            'images__tags__tagged_by_profile__businessprofile',
+            'profile__image',
+            'profile__regularprofile',
+            'profile__businessprofile',
+            'reports',
         ).order_by("-created_at")
         return posts
 
@@ -333,6 +526,18 @@ class ListSimilarPostsView(generics.ListAPIView):
                         id__gt=post_id,
                     )
                     .exclude(reports__reason__id=1)
+                    .prefetch_related(
+                        'images__tags__tagged_profile__image',
+                        'images__tags__tagged_profile__regularprofile',
+                        'images__tags__tagged_profile__businessprofile',
+                        'images__tags__tagged_by_profile__image',
+                        'images__tags__tagged_by_profile__regularprofile',
+                        'images__tags__tagged_by_profile__businessprofile',
+                        'profile__image',
+                        'profile__regularprofile',
+                        'profile__businessprofile',
+                        'reports',
+                    )
                     .order_by("-created_at")[: self.MAX_RESULTS]
                 )
 
@@ -387,6 +592,18 @@ class ListSimilarPostsView(generics.ListAPIView):
 
             return (
                 Post.objects.filter(id__in=post_ids)
+                .prefetch_related(
+                    'images__tags__tagged_profile__image',
+                    'images__tags__tagged_profile__regularprofile',
+                    'images__tags__tagged_profile__businessprofile',
+                    'images__tags__tagged_by_profile__image',
+                    'images__tags__tagged_by_profile__regularprofile',
+                    'images__tags__tagged_by_profile__businessprofile',
+                    'profile__image',
+                    'profile__regularprofile',
+                    'profile__businessprofile',
+                    'reports',
+                )
                 .order_by(preserved_order)[: self.MAX_RESULTS]
             )
 
@@ -408,10 +625,27 @@ class ListCreateSavedPostView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         current_profile = self.request.current_profile
-        saved_posts = current_profile.saved_posts.all()
-        saved_posts_ordered = saved_posts.order_by("-saved_at")
-        posts = [obj.post for obj in saved_posts_ordered]
-        return posts
+        saved_posts = current_profile.saved_posts.all().order_by("-saved_at")
+        # Extract post IDs to maintain order
+        post_ids = [obj.post_id for obj in saved_posts]
+        
+        # Build queryset with prefetching and preserve order
+        preserved_order = Case(
+            *[When(pk=pk, then=pos) for pos, pk in enumerate(post_ids)]
+        )
+        
+        return Post.objects.filter(id__in=post_ids).prefetch_related(
+            'images__tags__tagged_profile__image',
+            'images__tags__tagged_profile__regularprofile',
+            'images__tags__tagged_profile__businessprofile',
+            'images__tags__tagged_by_profile__image',
+            'images__tags__tagged_by_profile__regularprofile',
+            'images__tags__tagged_by_profile__businessprofile',
+            'profile__image',
+            'profile__regularprofile',
+            'profile__businessprofile',
+            'reports',
+        ).order_by(preserved_order)
 
     def get_serializer_class(self):
         if self.request.method == "GET":
@@ -511,3 +745,171 @@ class DestroyPostImageView(generics.DestroyAPIView):
         self.perform_destroy(post_image)
         logger.info(f"Post image {post_image.id} deleted successfully")
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@extend_schema_view(
+    post=extend_schema(parameters=[auth_profile_param]),
+)
+class CreatePostImageTagView(generics.CreateAPIView):
+    """Create a new PostImageTag."""
+
+    serializer_class = CreatePostImageTagSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        current_profile = request.current_profile
+
+        # Validate input data
+        serializer = self.serializer_class(data=request.data)
+        if not serializer.is_valid():
+            logger.error(f"Invalid tag data: {serializer.errors}")
+            return Response(
+                {"error": "Invalid tag data.", "details": serializer.errors},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        validated_data = serializer.validated_data
+        post_image_id = validated_data["post_image_id"]
+        tagged_profile_id = validated_data["tagged_profile_id"]
+        x_position = validated_data["x_position"]
+        y_position = validated_data["y_position"]
+        original_width = validated_data["original_width"]
+        original_height = validated_data["original_height"]
+
+        try:
+            # Get the post image
+            post_image = PostImage.objects.get(id=post_image_id)
+
+            # Check that the requesting user owns the post
+            if post_image.post.profile.user != request.user:
+                logger.warning(
+                    f"Unauthorized tag creation attempt: user {request.user.id} "
+                    f"attempted to tag in post {post_image.post.id} owned by user {post_image.post.profile.user.id}"
+                )
+                return Response(
+                    {"error": "Only the post owner can add tags."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
+            # Check that the requesting profile owns the post
+            if post_image.post.profile.id != int(current_profile.id):
+                logger.warning(
+                    f"Unauthorized tag creation attempt: profile {current_profile.id} "
+                    f"attempted to tag in post {post_image.post.id} owned by profile {post_image.post.profile.id}"
+                )
+                return Response(
+                    {"error": "Only the post owner can add tags."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
+            # Get the tagged profile
+            from apps.profile_app.models import Profile
+            tagged_profile = Profile.objects.get(id=tagged_profile_id)
+
+            # Check if tag already exists
+            existing_tag = PostImageTag.objects.filter(
+                post_image=post_image,
+                tagged_profile=tagged_profile
+            ).first()
+
+            if existing_tag:
+                logger.warning(
+                    f"Duplicate tag attempt: profile {tagged_profile.id} "
+                    f"already tagged in image {post_image.id}"
+                )
+                return Response(
+                    {"error": f"Profile {tagged_profile.username} is already tagged in this image."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Adjust tag position to account for cropping
+            adjusted_x, adjusted_y = adjust_tag_position_for_center_square_crop(
+                float(x_position),
+                float(y_position),
+                original_width,
+                original_height
+            )
+
+            # Create the tag
+            tag = PostImageTag.objects.create(
+                post_image=post_image,
+                tagged_profile=tagged_profile,
+                tagged_by_profile=current_profile,
+                x_position=adjusted_x,
+                y_position=adjusted_y
+            )
+
+            logger.info(
+                f"Created tag {tag.id} for profile {tagged_profile.id} "
+                f"in image {post_image.id} by profile {current_profile.id}"
+            )
+
+            # Return the created tag
+            response_serializer = PostImageTagSerializer(tag, context={'request': request})
+            return Response(
+                response_serializer.data,
+                status=status.HTTP_201_CREATED
+            )
+
+        except PostImage.DoesNotExist:
+            logger.error(f"Post image {post_image_id} not found")
+            return Response(
+                {"error": "Post image not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            logger.error(f"Error creating tag: {str(e)}")
+            return Response(
+                {"error": "Failed to create tag."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+
+@extend_schema_view(
+    delete=extend_schema(parameters=[auth_profile_param]),
+)
+class DestroyPostImageTagView(generics.DestroyAPIView):
+    """Delete a PostImageTag."""
+
+    serializer_class = PostImageTagSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = PostImageTag.objects.all()
+
+    def destroy(self, request, *args, **kwargs):
+        tag_id = self.kwargs.get("pk")
+        current_profile = request.current_profile
+
+        try:
+            # Get the tag
+            tag = get_object_or_404(PostImageTag, pk=tag_id)
+
+            # Check permissions: either the post owner, the person who created the tag,
+            # or the tagged profile can delete the tag
+            is_post_owner = tag.post_image.post.profile.id == int(current_profile.id)
+            is_tag_creator = tag.tagged_by_profile.id == int(current_profile.id)
+            is_tagged_profile = tag.tagged_profile.id == int(current_profile.id)
+
+            if not (is_post_owner or is_tag_creator or is_tagged_profile):
+                logger.warning(
+                    f"Unauthorized tag deletion attempt: profile {current_profile.id} "
+                    f"attempted to delete tag {tag_id}"
+                )
+                return Response(
+                    {"error": "You don't have permission to delete this tag."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
+            # Delete the tag
+            self.perform_destroy(tag)
+            logger.info(
+                f"Tag {tag_id} deleted by profile {current_profile.id} "
+                f"(post_owner: {is_post_owner}, creator: {is_tag_creator}, tagged: {is_tagged_profile})"
+            )
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        except Exception as e:
+            logger.error(f"Error deleting tag {tag_id}: {str(e)}")
+            return Response(
+                {"error": "Failed to delete tag."},
+                status=status.HTTP_400_BAD_REQUEST
+            )

@@ -1,7 +1,8 @@
+from decimal import Decimal
 from rest_framework import serializers
-from apps.posts_app.models import Post, PostImage, SavedPost
+from apps.posts_app.models import Post, PostImage, SavedPost, PostImageTag
 from django.db.models import Q
-from apps.profile_app.serializers import ProfileSerializer
+from apps.profile_app.serializers import ProfileSerializer, SearchProfileSerializer
 from drf_spectacular.utils import extend_schema_field
 
 # Import interaction serializers from interactions_app
@@ -14,12 +15,50 @@ from apps.interactions_app.serializers import (
 from apps.moderation_app.serializers import PostReportPreviewSerializer
 
 
+class PostImageTagSerializer(serializers.ModelSerializer):
+    """Serializer for Post Image Tags."""
+    
+    tagged_profile = SearchProfileSerializer(read_only=True)
+    tagged_by_profile = SearchProfileSerializer(read_only=True)
+
+    class Meta:
+        model = PostImageTag
+        fields = ["id", "tagged_profile", "tagged_by_profile", "x_position", "y_position", "created_at"]
+        read_only_fields = ["id", "created_at"]
+
+
+class CreatePostImageTagSerializer(serializers.Serializer):
+    """Serializer for creating a PostImageTag."""
+    
+    post_image_id = serializers.IntegerField(required=True)
+    tagged_profile_id = serializers.IntegerField(required=True)
+    x_position = serializers.DecimalField(max_digits=5, decimal_places=2, required=True, min_value=Decimal("0"), max_value=Decimal("100"))
+    y_position = serializers.DecimalField(max_digits=5, decimal_places=2, required=True, min_value=Decimal("0"), max_value=Decimal("100"))
+    original_width = serializers.IntegerField(required=True, min_value=1)
+    original_height = serializers.IntegerField(required=True, min_value=1)
+
+    def validate_post_image_id(self, value):
+        """Validate that the post image exists."""
+        if not PostImage.objects.filter(id=value).exists():
+            raise serializers.ValidationError("Post image does not exist.")
+        return value
+
+    def validate_tagged_profile_id(self, value):
+        """Validate that the profile exists."""
+        from apps.profile_app.models import Profile
+        if not Profile.objects.filter(id=value).exists():
+            raise serializers.ValidationError("Profile does not exist.")
+        return value
+
+
 class PostImageSerializer(serializers.ModelSerializer):
     """Serializer for Post Images."""
+    
+    tags = PostImageTagSerializer(many=True, read_only=True)
 
     class Meta:
         model = PostImage
-        fields = ["id", "post", "image", "order"]
+        fields = ["id", "post", "image", "order", "tags"]
 
 
 
@@ -67,6 +106,7 @@ class PostDetailedSerializer(serializers.ModelSerializer):
     reports = serializers.SerializerMethodField()
     is_hidden = serializers.SerializerMethodField()
     is_reported = serializers.SerializerMethodField()
+    tagged_profiles = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
@@ -85,6 +125,7 @@ class PostDetailedSerializer(serializers.ModelSerializer):
             "is_hidden",
             "is_reported",
             "contains_ai",
+            "tagged_profiles",
         ]
         read_only_fields = [
             "id",
@@ -98,6 +139,7 @@ class PostDetailedSerializer(serializers.ModelSerializer):
             "reports",
             "is_hidden",
             "is_reported",
+            "tagged_profiles",
         ]
 
     @extend_schema_field(serializers.ListField(child=serializers.DictField()))
@@ -137,6 +179,28 @@ class PostDetailedSerializer(serializers.ModelSerializer):
     def get_is_reported(self, obj) -> bool:
         current_profile = self.context["request"].current_profile
         return obj.reports.filter(reporter=current_profile).exists()
+
+    @extend_schema_field(serializers.ListField(child=serializers.DictField()))
+    def get_tagged_profiles(self, obj):
+        """Return unique list of all profiles tagged across all post images."""
+        # Collect all unique tagged profiles
+        seen_profile_ids = set()
+        tagged_profiles = []
+        
+        for image in obj.images.all():
+            for tag in image.tags.all():
+                if tag.tagged_profile_id not in seen_profile_ids:
+                    seen_profile_ids.add(tag.tagged_profile_id)
+                    tagged_profiles.append(tag.tagged_profile)
+        
+        # Get the current profile for the SearchProfileSerializer context
+        current_profile = self.context["request"].current_profile
+        
+        return SearchProfileSerializer(
+            tagged_profiles, 
+            many=True, 
+            context={"profile_id": current_profile.id, "request": self.context["request"]}
+        ).data
 
 
 class CreateSavedPostSerializer(serializers.ModelSerializer):

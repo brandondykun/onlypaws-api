@@ -4,7 +4,7 @@ Posts app models.
 import os
 import logging
 from django.db import models
-from django.core.validators import MaxLengthValidator
+from django.core.validators import MaxLengthValidator, MinValueValidator, MaxValueValidator
 from apps.core_app.utils import crop_square_and_resize
 from pgvector.django import VectorField, CosineDistance
 
@@ -312,4 +312,52 @@ class SavedPost(models.Model):
 
     class Meta:
         unique_together = (("profile", "post"),)
+
+
+class PostImageTag(models.Model):
+    """Represents a profile tagged in a specific post image at a specific location."""
+
+    post_image = models.ForeignKey(
+        "PostImage",
+        on_delete=models.CASCADE,
+        related_name="tags"
+    )
+    tagged_profile = models.ForeignKey(
+        "profile_app.Profile",
+        on_delete=models.CASCADE,
+        related_name="tagged_in_images"
+    )
+    tagged_by_profile = models.ForeignKey(
+        "profile_app.Profile",
+        on_delete=models.CASCADE,
+        related_name="image_tags_created",
+        help_text="The profile that created this tag"
+    )
+
+    # Position as percentages (0-100) for responsive positioning
+    x_position = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        validators=[MinValueValidator(0.0), MaxValueValidator(100.0)],
+        help_text="X coordinate as percentage (0-100) of image width"
+    )
+    y_position = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        validators=[MinValueValidator(0.0), MaxValueValidator(100.0)],
+        help_text="Y coordinate as percentage (0-100) of image height"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        # Prevent duplicate tags of the same profile in the same image
+        unique_together = [["post_image", "tagged_profile"]]
+        indexes = [
+            models.Index(fields=["post_image"]),
+            models.Index(fields=["tagged_profile"]),
+        ]
+
+    def __str__(self):
+        return f"{self.tagged_profile.username} tagged in image {self.post_image.id}"
 
