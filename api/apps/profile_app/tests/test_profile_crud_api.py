@@ -107,3 +107,23 @@ class PrivateProfileApiTests(TestCase):
         # Verify the profile was not updated
         other_profile.refresh_from_db()
         self.assertNotEqual(other_profile.get_specific_profile().name, "Hacked Name")
+
+    def test_update_username_successful(self):
+        """
+        Test updating a profile's username is successful and updates
+        the profile object in the database.
+        """
+        updated_profile = {
+            "username": "updated_username",
+        }
+        url = retrieve_update_profile_url(self.profile.id)
+        res = self.client.patch(url, updated_profile)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+        self.assertEqual(res.data["id"], self.profile.id)
+        self.assertEqual(res.data["username"], updated_profile["username"])
+        self.assertEqual(res.data["name"], self.profile.get_specific_profile().name)
+        self.assertEqual(res.data["about"], self.profile.get_specific_profile().about)
+
+        profile = RegularProfile.objects.get(id=self.profile.id)
+        self.assertEqual(profile.username, updated_profile["username"])
