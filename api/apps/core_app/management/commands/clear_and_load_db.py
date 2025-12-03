@@ -46,7 +46,8 @@ class Command(BaseCommand):
             "feedback.json",
             "feedbackcomment.json",
             "notification.json",
-            "appconfiguration.json"
+            "appconfiguration.json",
+            "postimagetag.json"
         ]
 
         path_prefix = "fixtures/e2e"
