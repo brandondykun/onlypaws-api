@@ -865,6 +865,33 @@ class CreatePostImageTagView(generics.CreateAPIView):
             )
 
 
+class ListTaggedPostsView(generics.ListAPIView):
+    """List all posts where a specific profile was tagged."""
+
+    serializer_class = PostDetailedSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = ListProfilePostsPagination
+
+    def get_queryset(self):
+        profile_id = self.kwargs.get("id", None)
+
+        # Get posts where the specified profile is tagged in any image
+        return Post.objects.filter(
+            images__tags__tagged_profile__id=profile_id
+        ).prefetch_related(
+            'images__tags__tagged_profile__image',
+            'images__tags__tagged_profile__regularprofile',
+            'images__tags__tagged_profile__businessprofile',
+            'images__tags__tagged_by_profile__image',
+            'images__tags__tagged_by_profile__regularprofile',
+            'images__tags__tagged_by_profile__businessprofile',
+            'profile__image',
+            'profile__regularprofile',
+            'profile__businessprofile',
+            'reports',
+        ).distinct().order_by("-created_at")
+
+
 @extend_schema_view(
     delete=extend_schema(parameters=[auth_profile_param]),
 )

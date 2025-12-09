@@ -31,6 +31,11 @@ urlpatterns = [
         name="destroy_post_image_tag",
     ),
     path(
+        "profile/<int:id>/tagged/",
+        views.ListTaggedPostsView.as_view(),
+        name="list_tagged_posts",
+    ),
+    path(
         "post/saved/",
         views.ListCreateSavedPostView.as_view(),
         name="list_create_saved_post",
