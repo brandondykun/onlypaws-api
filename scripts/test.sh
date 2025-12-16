@@ -24,8 +24,8 @@ if [ "$1" = "coverage" ]; then
     echo "--------------------------------"
     echo "Running tests with coverage"
     echo "--------------------------------"
-    $DOCKER_CMD "coverage run manage.py test apps"
-    $DOCKER_CMD "coverage html"
+    # Run both commands in the same container to ensure coverage data consistency
+    $DOCKER_CMD "coverage run manage.py test apps && coverage html"
     # open the coverage report in the browser
     open ../api/htmlcov/index.html
 else
