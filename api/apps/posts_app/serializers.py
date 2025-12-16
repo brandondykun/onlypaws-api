@@ -61,8 +61,6 @@ class PostImageSerializer(serializers.ModelSerializer):
         fields = ["id", "post", "image", "order", "tags"]
 
 
-
-
 class PostSerializer(serializers.ModelSerializer):
     """Serializer for Posts."""
 
@@ -82,6 +80,7 @@ class PostSerializer(serializers.ModelSerializer):
             "likes",
             "comments",
             "contains_ai",
+            "aspect_ratio",
         ]
         read_only_fields = ["id", "created_at", "updated_at", "likes", "comments"]
 
@@ -125,6 +124,7 @@ class PostDetailedSerializer(serializers.ModelSerializer):
             "is_hidden",
             "is_reported",
             "contains_ai",
+            "aspect_ratio",
             "tagged_profiles",
         ]
         read_only_fields = [

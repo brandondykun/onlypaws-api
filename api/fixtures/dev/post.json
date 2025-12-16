@@ -4,6 +4,7 @@
     "pk": 1,
     "fields": {
       "caption": "I do love sleeping on my favorite pillow!",
+      "aspect_ratio": "1:1",
       "profile": 1,
       "created_at": "2025-02-02T19:28:45.830Z",
       "updated_at": "2025-02-02T19:28:45.830Z",
@@ -18,6 +19,7 @@
     "pk": 2,
     "fields": {
       "caption": "Went for a walk and the snow was pretty deep.",
+      "aspect_ratio": "1:1",
       "profile": 2,
       "created_at": "2025-02-02T20:09:47.084Z",
       "updated_at": "2025-02-02T20:09:47.084Z",
@@ -32,6 +34,7 @@
     "pk": 3,
     "fields": {
       "caption": "There were some really cool signs in the dog park that I went to!",
+      "aspect_ratio": "1:1",
       "profile": 2,
       "created_at": "2025-02-02T20:10:54.514Z",
       "updated_at": "2025-02-02T20:10:54.514Z",
@@ -46,6 +49,7 @@
     "pk": 4,
     "fields": {
       "caption": "Some more cool pics of me sniffing around the dog park!",
+      "aspect_ratio": "1:1",
       "profile": 2,
       "created_at": "2025-02-02T20:12:01.080Z",
       "updated_at": "2025-02-02T20:12:01.080Z",
@@ -60,6 +64,7 @@
     "pk": 5,
     "fields": {
       "caption": "This is my “I want attention” face",
+      "aspect_ratio": "1:1",
       "profile": 3,
       "created_at": "2025-02-02T20:16:37.754Z",
       "updated_at": "2025-02-02T20:16:37.754Z",
@@ -74,6 +79,7 @@
     "pk": 6,
     "fields": {
       "caption": "Chewing on a toy when I had a sleepover with my cousin Linus! He’s pretty good at sharing toys with me but he keeps a close eye!",
+      "aspect_ratio": "1:1",
       "profile": 3,
       "created_at": "2025-02-02T20:18:46.053Z",
       "updated_at": "2025-02-02T20:18:46.053Z",
@@ -88,6 +94,7 @@
     "pk": 7,
     "fields": {
       "caption": "Out and about in the snow chewing on sticks",
+      "aspect_ratio": "1:1",
       "profile": 1,
       "created_at": "2025-02-03T04:11:34.439Z",
       "updated_at": "2025-09-26T20:09:27.613Z",
@@ -102,6 +109,7 @@
     "pk": 8,
     "fields": {
       "caption": "Enjoying the snow day! I’m glad my parents bought me this coat so I can stay warm on my winter walks!",
+      "aspect_ratio": "1:1",
       "profile": 1,
       "created_at": "2025-02-03T04:14:16.004Z",
       "updated_at": "2025-02-03T04:14:16.004Z",
@@ -116,6 +124,7 @@
     "pk": 9,
     "fields": {
       "caption": "Believe it or not that’s me as a little puppy!",
+      "aspect_ratio": "1:1",
       "profile": 4,
       "created_at": "2025-02-03T04:20:37.827Z",
       "updated_at": "2025-02-03T04:20:37.827Z",
@@ -130,6 +139,7 @@
     "pk": 10,
     "fields": {
       "caption": "Can’t believe my humans wake me up just to take a picture of me",
+      "aspect_ratio": "1:1",
       "profile": 4,
       "created_at": "2025-02-03T04:23:09.829Z",
       "updated_at": "2025-02-03T04:23:09.829Z",
@@ -144,6 +154,7 @@
     "pk": 11,
     "fields": {
       "caption": "I love sitting by the door watching for my favorite humans to come home",
+      "aspect_ratio": "1:1",
       "profile": 4,
       "created_at": "2025-02-04T02:42:37.233Z",
       "updated_at": "2025-02-04T02:42:37.234Z",
@@ -158,6 +169,7 @@
     "pk": 12,
     "fields": {
       "caption": "Sleepy morning…I know I’m just a dog, but I love a good pillow!",
+      "aspect_ratio": "1:1",
       "profile": 1,
       "created_at": "2025-02-19T15:32:12.375Z",
       "updated_at": "2025-02-19T15:32:12.375Z",
@@ -172,6 +184,7 @@
     "pk": 13,
     "fields": {
       "caption": "Taking my heart treats! Gotta stay healthy to live a long life to make my humans happy!",
+      "aspect_ratio": "1:1",
       "profile": 1,
       "created_at": "2025-02-19T23:00:12.086Z",
       "updated_at": "2025-02-19T23:00:12.086Z",
@@ -186,6 +199,7 @@
     "pk": 14,
     "fields": {
       "caption": "No caption needed. I’m stunning I know",
+      "aspect_ratio": "1:1",
       "profile": 4,
       "created_at": "2025-02-19T23:03:28.360Z",
       "updated_at": "2025-02-19T23:03:28.360Z",
@@ -200,6 +214,7 @@
     "pk": 15,
     "fields": {
       "caption": "The Regal Bernese Mountain Dog\n\nCreated by DALL-E",
+      "aspect_ratio": "1:1",
       "profile": 5,
       "created_at": "2025-02-20T00:58:40.370Z",
       "updated_at": "2025-02-20T00:58:40.370Z",
@@ -214,6 +229,7 @@
     "pk": 16,
     "fields": {
       "caption": "Showing some love to the pitbull!\n\nImages generate with Gemini. They’re crazy real looking.",
+      "aspect_ratio": "1:1",
       "profile": 5,
       "created_at": "2025-02-20T01:11:25.304Z",
       "updated_at": "2025-02-20T01:11:25.304Z",
@@ -228,6 +244,7 @@
     "pk": 17,
     "fields": {
       "caption": "Golden Retriever \n\nCreated with Gemini",
+      "aspect_ratio": "1:1",
       "profile": 5,
       "created_at": "2025-02-20T02:09:11.754Z",
       "updated_at": "2025-02-20T02:09:11.754Z",
@@ -242,6 +259,7 @@
     "pk": 18,
     "fields": {
       "caption": "Savannah Cat\n\nCreated using Gemini ♊️",
+      "aspect_ratio": "1:1",
       "profile": 6,
       "created_at": "2025-02-20T03:41:44.604Z",
       "updated_at": "2025-02-20T03:41:44.604Z",
@@ -256,6 +274,7 @@
     "pk": 19,
     "fields": {
       "caption": "Himalayan Cat",
+      "aspect_ratio": "1:1",
       "profile": 6,
       "created_at": "2025-02-20T03:43:36.731Z",
       "updated_at": "2025-02-20T03:43:36.731Z",
@@ -270,6 +289,7 @@
     "pk": 20,
     "fields": {
       "caption": "Nothing like a good stick chew in the grass! I really like chewing on sticks. I think it helps my teeth.\n\nSometimes my parents clean my teeth with special doggy teeth cleaning pads but I’m not crazy about that. I prefer to just chew on sticks like the old days! \n\nI’ve never once had a problem with it. Sometimes I even eat a little bit of the stick but I never have problems with that either. \n\nI think I just have an iron clad stomach.\n\nAnyways, chewing sticks is the best. Especially when I’m out on a walk with my humans laying in the grass! \n\nI hope you all get to chew on some sticks today!!",
+      "aspect_ratio": "1:1",
       "profile": 1,
       "created_at": "2025-08-31T18:01:09.231Z",
       "updated_at": "2025-10-01T17:01:54.643Z",
@@ -284,6 +304,7 @@
     "pk": 21,
     "fields": {
       "caption": "Husky puppies",
+      "aspect_ratio": "1:1",
       "profile": 7,
       "created_at": "2025-08-31T23:25:57.755Z",
       "updated_at": "2025-08-31T23:25:57.756Z",
@@ -298,6 +319,7 @@
     "pk": 22,
     "fields": {
       "caption": "Real life Snoopy! Who doesn’t love a Beagle??",
+      "aspect_ratio": "1:1",
       "profile": 7,
       "created_at": "2025-08-31T23:59:05.637Z",
       "updated_at": "2025-08-31T23:59:05.637Z",
@@ -312,6 +334,7 @@
     "pk": 23,
     "fields": {
       "caption": "Pug life",
+      "aspect_ratio": "1:1",
       "profile": 7,
       "created_at": "2025-09-01T04:51:00.916Z",
       "updated_at": "2025-09-01T04:51:00.916Z",
@@ -326,6 +349,7 @@
     "pk": 24,
     "fields": {
       "caption": "The always photogenic German Shepherd",
+      "aspect_ratio": "1:1",
       "profile": 7,
       "created_at": "2025-09-01T04:57:01.609Z",
       "updated_at": "2025-09-01T04:57:01.609Z",
@@ -340,6 +364,7 @@
     "pk": 25,
     "fields": {
       "caption": "Bernese Mountain Dog. The last one might be a mix. If you know what it could be, leave a comment.",
+      "aspect_ratio": "1:1",
       "profile": 7,
       "created_at": "2025-09-01T05:05:04.315Z",
       "updated_at": "2025-09-01T05:05:04.315Z",
@@ -354,6 +379,7 @@
     "pk": 26,
     "fields": {
       "caption": "101 reasons to love Dalmatians",
+      "aspect_ratio": "1:1",
       "profile": 7,
       "created_at": "2025-09-01T13:17:13.793Z",
       "updated_at": "2025-09-01T13:17:13.793Z",
@@ -368,6 +394,7 @@
     "pk": 27,
     "fields": {
       "caption": "Black Lab puppies",
+      "aspect_ratio": "1:1",
       "profile": 7,
       "created_at": "2025-09-01T13:40:30.574Z",
       "updated_at": "2025-09-01T13:40:30.574Z",
@@ -382,6 +409,7 @@
     "pk": 28,
     "fields": {
       "caption": "Rottweiler close ups",
+      "aspect_ratio": "1:1",
       "profile": 7,
       "created_at": "2025-09-01T13:49:30.858Z",
       "updated_at": "2025-09-01T13:49:30.858Z",
@@ -396,6 +424,7 @@
     "pk": 29,
     "fields": {
       "caption": "Me as a puppy",
+      "aspect_ratio": "1:1",
       "profile": 11,
       "created_at": "2025-09-22T01:54:54.944Z",
       "updated_at": "2025-09-22T01:54:54.944Z",
@@ -410,6 +439,7 @@
     "pk": 30,
     "fields": {
       "caption": "My ears are pretty cool!",
+      "aspect_ratio": "1:1",
       "profile": 11,
       "created_at": "2025-09-22T01:56:22.724Z",
       "updated_at": "2025-09-22T01:56:22.724Z",
@@ -424,6 +454,7 @@
     "pk": 31,
     "fields": {
       "caption": "Santa hat and couch time",
+      "aspect_ratio": "1:1",
       "profile": 11,
       "created_at": "2025-09-22T02:02:45.324Z",
       "updated_at": "2025-09-22T02:02:45.324Z",
@@ -438,6 +469,7 @@
     "pk": 32,
     "fields": {
       "caption": "A couple of my favorite smiling pictures.",
+      "aspect_ratio": "1:1",
       "profile": 11,
       "created_at": "2025-09-22T02:05:50.009Z",
       "updated_at": "2025-09-22T02:05:50.009Z",
@@ -452,6 +484,7 @@
     "pk": 33,
     "fields": {
       "caption": "Looking good in the sunshine!",
+      "aspect_ratio": "1:1",
       "profile": 11,
       "created_at": "2025-09-22T02:07:46.038Z",
       "updated_at": "2025-09-22T02:07:46.038Z",
@@ -466,6 +499,7 @@
     "pk": 34,
     "fields": {
       "caption": "Proud parents showing off a brand new litter!\n\nYear unknown",
+      "aspect_ratio": "1:1",
       "profile": 12,
       "created_at": "2025-09-22T02:25:21.554Z",
       "updated_at": "2025-09-22T02:25:21.554Z",
@@ -480,6 +514,7 @@
     "pk": 35,
     "fields": {
       "caption": "Sergeant Stubby - WWI\n\nSGT Stubby served in the 102nd Infantry Regiment, 26th ID. He took part in 17 battles and 4 offensives.",
+      "aspect_ratio": "1:1",
       "profile": 12,
       "created_at": "2025-09-22T03:15:03.616Z",
       "updated_at": "2025-09-22T03:15:03.616Z",
@@ -494,6 +529,7 @@
     "pk": 36,
     "fields": {
       "caption": "Going way back with this one.\n\nc. 1852-53",
+      "aspect_ratio": "1:1",
       "profile": 12,
       "created_at": "2025-09-22T12:03:14.419Z",
       "updated_at": "2025-09-22T12:03:14.419Z",
@@ -508,6 +544,7 @@
     "pk": 37,
     "fields": {
       "caption": "Lt. George A. Custer with his dog",
+      "aspect_ratio": "1:1",
       "profile": 12,
       "created_at": "2025-09-22T21:22:30.153Z",
       "updated_at": "2025-09-22T21:22:30.153Z",
@@ -522,6 +559,7 @@
     "pk": 38,
     "fields": {
       "caption": "Photogenic in my younger days.",
+      "aspect_ratio": "1:1",
       "profile": 13,
       "created_at": "2025-09-23T04:49:48.614Z",
       "updated_at": "2025-09-23T04:49:48.614Z",
@@ -536,6 +574,7 @@
     "pk": 39,
     "fields": {
       "caption": "Lurking in the grass",
+      "aspect_ratio": "1:1",
       "profile": 13,
       "created_at": "2025-09-23T04:50:27.932Z",
       "updated_at": "2025-09-23T04:50:27.932Z",
@@ -550,6 +589,7 @@
     "pk": 40,
     "fields": {
       "caption": "Big ears and big smiles for this little guy",
+      "aspect_ratio": "1:1",
       "profile": 14,
       "created_at": "2025-09-23T23:18:38.509Z",
       "updated_at": "2025-09-23T23:18:38.509Z",
@@ -564,6 +604,7 @@
     "pk": 41,
     "fields": {
       "caption": "Today we have some puppies in the grass. Why do puppies always look cuter laying in the grass?",
+      "aspect_ratio": "1:1",
       "profile": 14,
       "created_at": "2025-09-23T23:22:25.502Z",
       "updated_at": "2025-09-23T23:22:25.502Z",
@@ -578,6 +619,7 @@
     "pk": 42,
     "fields": {
       "caption": "Nothing better than a whole litter",
+      "aspect_ratio": "1:1",
       "profile": 14,
       "created_at": "2025-09-23T23:26:48.128Z",
       "updated_at": "2025-09-23T23:26:48.128Z",
@@ -592,6 +634,7 @@
     "pk": 43,
     "fields": {
       "caption": "A couple pictures of me as a puppy. That’s me in the middle with my brothers",
+      "aspect_ratio": "1:1",
       "profile": 15,
       "created_at": "2025-09-23T23:54:13.910Z",
       "updated_at": "2025-09-23T23:54:13.910Z",
@@ -606,6 +649,7 @@
     "pk": 44,
     "fields": {
       "caption": "My puppy form. Before I got all big and goofy I was just small and goofy.",
+      "aspect_ratio": "1:1",
       "profile": 16,
       "created_at": "2025-09-24T00:18:50.324Z",
       "updated_at": "2025-09-24T00:18:50.324Z",
@@ -620,6 +664,7 @@
     "pk": 45,
     "fields": {
       "caption": "Wondering why my humans aren’t petting me???",
+      "aspect_ratio": "1:1",
       "profile": 17,
       "created_at": "2025-09-24T01:08:14.227Z",
       "updated_at": "2025-09-24T01:08:14.227Z",
@@ -634,6 +679,7 @@
     "pk": 46,
     "fields": {
       "caption": "Puppy teeth lookin for treats!",
+      "aspect_ratio": "1:1",
       "profile": 18,
       "created_at": "2025-09-24T01:25:09.165Z",
       "updated_at": "2025-09-24T01:25:09.165Z",
@@ -648,6 +694,7 @@
     "pk": 47,
     "fields": {
       "caption": "Big eyes and smile to match!",
+      "aspect_ratio": "1:1",
       "profile": 19,
       "created_at": "2025-09-24T01:32:17.981Z",
       "updated_at": "2025-09-24T01:32:17.981Z",
@@ -662,6 +709,7 @@
     "pk": 48,
     "fields": {
       "caption": "Puppy eyes and puppy breath. Aren’t Goldens the best??",
+      "aspect_ratio": "1:1",
       "profile": 20,
       "created_at": "2025-09-24T01:42:21.776Z",
       "updated_at": "2025-09-24T01:42:21.776Z",
@@ -676,6 +724,7 @@
     "pk": 49,
     "fields": {
       "caption": "Couldn’t decide if I wanted to sit down, lie down or stick my tongue out. So I did all 3 🤣🤣",
+      "aspect_ratio": "1:1",
       "profile": 21,
       "created_at": "2025-09-24T01:50:49.201Z",
       "updated_at": "2025-09-24T01:50:49.201Z",
@@ -690,6 +739,7 @@
     "pk": 50,
     "fields": {
       "caption": "Beagle on the beach!",
+      "aspect_ratio": "1:1",
       "profile": 22,
       "created_at": "2025-09-24T01:59:25.156Z",
       "updated_at": "2025-09-24T01:59:25.156Z",
@@ -704,6 +754,7 @@
     "pk": 51,
     "fields": {
       "caption": "Stealth mode followed by serious face 🤣",
+      "aspect_ratio": "1:1",
       "profile": 13,
       "created_at": "2025-09-24T02:09:05.506Z",
       "updated_at": "2025-09-24T02:09:05.506Z",
@@ -718,6 +769,7 @@
     "pk": 52,
     "fields": {
       "caption": "Channeling my inner wolf today",
+      "aspect_ratio": "1:1",
       "profile": 11,
       "created_at": "2025-09-24T12:34:30.943Z",
       "updated_at": "2025-09-24T12:34:30.943Z",
@@ -732,6 +784,7 @@
     "pk": 53,
     "fields": {
       "caption": "Old school dog catcher.\n\nYear - unknown",
+      "aspect_ratio": "1:1",
       "profile": 12,
       "created_at": "2025-09-24T12:36:25.807Z",
       "updated_at": "2025-09-24T12:36:25.807Z",
@@ -746,6 +799,7 @@
     "pk": 54,
     "fields": {
       "caption": "Some action shots of me running with and without a stick. I’m fast as heck",
+      "aspect_ratio": "1:1",
       "profile": 13,
       "created_at": "2025-09-24T12:39:46.723Z",
       "updated_at": "2025-09-24T12:39:46.723Z",
@@ -760,6 +814,7 @@
     "pk": 55,
     "fields": {
       "caption": "Cutest photoshoot ever. Who doesn’t love a puppy wearing clothes??",
+      "aspect_ratio": "1:1",
       "profile": 14,
       "created_at": "2025-09-24T12:44:18.571Z",
       "updated_at": "2025-09-24T12:44:18.571Z",
@@ -774,6 +829,7 @@
     "pk": 56,
     "fields": {
       "caption": "I’m growing up so fast! I try my best to listen but sometimes it’s so hard",
+      "aspect_ratio": "1:1",
       "profile": 15,
       "created_at": "2025-09-24T12:51:13.176Z",
       "updated_at": "2025-09-24T12:51:13.176Z",
@@ -788,6 +844,7 @@
     "pk": 57,
     "fields": {
       "caption": "I think fall is my favorite season",
+      "aspect_ratio": "1:1",
       "profile": 16,
       "created_at": "2025-09-24T13:10:15.864Z",
       "updated_at": "2025-09-24T13:10:15.864Z",
@@ -802,6 +859,7 @@
     "pk": 58,
     "fields": {
       "caption": "Got a Christmas outfit and my hair cut!",
+      "aspect_ratio": "1:1",
       "profile": 17,
       "created_at": "2025-09-24T13:18:45.922Z",
       "updated_at": "2025-09-24T13:18:45.922Z",
@@ -816,6 +874,7 @@
     "pk": 59,
     "fields": {
       "caption": "My two favorite activities. Lounging around and refusing to come back inside 🤣🤣",
+      "aspect_ratio": "1:1",
       "profile": 18,
       "created_at": "2025-09-24T13:30:42.393Z",
       "updated_at": "2025-09-24T13:30:42.393Z",
@@ -830,6 +889,7 @@
     "pk": 60,
     "fields": {
       "caption": "Went to the park today and had some fun. I learned how to sit at a table!",
+      "aspect_ratio": "1:1",
       "profile": 19,
       "created_at": "2025-09-25T03:31:04.354Z",
       "updated_at": "2025-09-25T03:31:04.354Z",
@@ -844,6 +904,7 @@
     "pk": 61,
     "fields": {
       "caption": "Running around playing with my toy in the grass today. What more could I ask for?",
+      "aspect_ratio": "1:1",
       "profile": 20,
       "created_at": "2025-09-25T03:40:15.025Z",
       "updated_at": "2025-09-25T03:40:15.025Z",
@@ -858,6 +919,7 @@
     "pk": 62,
     "fields": {
       "caption": "Just popped in to say hey. If you saw me and aren’t following, what are you waiting for?",
+      "aspect_ratio": "1:1",
       "profile": 21,
       "created_at": "2025-09-25T03:43:03.085Z",
       "updated_at": "2025-09-25T03:43:03.085Z",
@@ -872,6 +934,7 @@
     "pk": 63,
     "fields": {
       "caption": "A couple good city beagles. Goes to show that Beagles can thrive anywhere!",
+      "aspect_ratio": "1:1",
       "profile": 22,
       "created_at": "2025-09-25T03:47:18.539Z",
       "updated_at": "2025-09-25T03:47:18.539Z",
@@ -886,6 +949,7 @@
     "pk": 64,
     "fields": {
       "caption": "People think poodles are fancy. I mean we are, but we still like to lay in the grass.",
+      "aspect_ratio": "1:1",
       "profile": 23,
       "created_at": "2025-09-25T12:09:38.674Z",
       "updated_at": "2025-09-25T12:09:38.674Z",
@@ -900,6 +964,7 @@
     "pk": 65,
     "fields": {
       "caption": "Day full of running around",
+      "aspect_ratio": "1:1",
       "profile": 11,
       "created_at": "2025-09-26T03:31:08.440Z",
       "updated_at": "2025-09-26T03:31:08.440Z",
@@ -914,6 +979,7 @@
     "pk": 66,
     "fields": {
       "caption": "Poodle hanging out a window doing poodle things.\n\nYear unknown",
+      "aspect_ratio": "1:1",
       "profile": 12,
       "created_at": "2025-09-26T03:33:03.796Z",
       "updated_at": "2025-09-26T03:33:03.796Z",
@@ -928,6 +994,7 @@
     "pk": 67,
     "fields": {
       "caption": "Majestic fall vibes going on today🍁🍂",
+      "aspect_ratio": "1:1",
       "profile": 13,
       "created_at": "2025-09-26T03:36:03.025Z",
       "updated_at": "2025-09-26T03:36:03.025Z",
@@ -942,6 +1009,7 @@
     "pk": 68,
     "fields": {
       "caption": "Some adorable golden’s for your viewing pleasure",
+      "aspect_ratio": "1:1",
       "profile": 14,
       "created_at": "2025-09-26T03:39:48.835Z",
       "updated_at": "2025-09-26T03:39:48.835Z",
@@ -956,6 +1024,7 @@
     "pk": 69,
     "fields": {
       "caption": "Got a cool harness today. My parents say it’ll help keep me safe but I think it’s kind of embarrassing.",
+      "aspect_ratio": "1:1",
       "profile": 15,
       "created_at": "2025-09-26T03:42:57.966Z",
       "updated_at": "2025-09-26T03:42:57.966Z",
@@ -970,6 +1039,7 @@
     "pk": 70,
     "fields": {
       "caption": "A couple epic outdoor portraits",
+      "aspect_ratio": "1:1",
       "profile": 16,
       "created_at": "2025-09-26T03:46:33.643Z",
       "updated_at": "2025-09-26T03:46:33.643Z",
@@ -984,6 +1054,7 @@
     "pk": 71,
     "fields": {
       "caption": "No one can resist my puppy dog eyes! This is why I usually get my way!",
+      "aspect_ratio": "1:1",
       "profile": 17,
       "created_at": "2025-09-26T03:49:28.109Z",
       "updated_at": "2025-09-26T03:49:28.109Z",
@@ -998,6 +1069,7 @@
     "pk": 72,
     "fields": {
       "caption": "Lounging is my favorite activity by far 💤",
+      "aspect_ratio": "1:1",
       "profile": 18,
       "created_at": "2025-09-26T03:52:04.149Z",
       "updated_at": "2025-09-26T03:52:04.149Z",
@@ -1012,6 +1084,7 @@
     "pk": 73,
     "fields": {
       "caption": "Who did it better? Me or the AI me?",
+      "aspect_ratio": "1:1",
       "profile": 19,
       "created_at": "2025-09-26T03:57:02.252Z",
       "updated_at": "2025-09-26T03:57:02.252Z",
@@ -1026,6 +1099,7 @@
     "pk": 74,
     "fields": {
       "caption": "Out playing in the grass today!",
+      "aspect_ratio": "1:1",
       "profile": 20,
       "created_at": "2025-09-26T14:11:56.810Z",
       "updated_at": "2025-09-26T14:11:56.810Z",
@@ -1040,6 +1114,7 @@
     "pk": 75,
     "fields": {
       "caption": "Hanging out with my friend today",
+      "aspect_ratio": "1:1",
       "profile": 21,
       "created_at": "2025-09-26T14:13:53.489Z",
       "updated_at": "2025-09-26T14:13:53.489Z",
@@ -1054,6 +1129,7 @@
     "pk": 76,
     "fields": {
       "caption": "Look at this good boy rocking a sweet harness. 10/10 does like sticks",
+      "aspect_ratio": "1:1",
       "profile": 22,
       "created_at": "2025-09-26T14:16:44.746Z",
       "updated_at": "2025-09-26T14:16:44.746Z",
@@ -1068,6 +1144,7 @@
     "pk": 77,
     "fields": {
       "caption": "Another day out playing in the grass!",
+      "aspect_ratio": "1:1",
       "profile": 23,
       "created_at": "2025-09-26T14:18:55.741Z",
       "updated_at": "2025-09-26T14:18:55.741Z",
@@ -1082,6 +1159,7 @@
     "pk": 85,
     "fields": {
       "caption": "It was a great day for a walk! Only 12 weeks and I’m learning to walk so good!",
+      "aspect_ratio": "1:1",
       "profile": 26,
       "created_at": "2025-10-29T03:51:11.078Z",
       "updated_at": "2025-10-29T03:51:11.079Z",
@@ -1096,6 +1174,7 @@
     "pk": 86,
     "fields": {
       "caption": "My first official baby pictures! \n\nThis is what my humans saw when they realized how cute I was and then they adopted me! How lucky am I!?",
+      "aspect_ratio": "1:1",
       "profile": 26,
       "created_at": "2025-11-16T20:48:40.129Z",
       "updated_at": "2025-11-16T20:48:40.129Z",
@@ -1110,6 +1189,7 @@
     "pk": 87,
     "fields": {
       "caption": "Couple pics of me an my fren!!! \n\nWe like to go exploring together out in the wilderness especially on the weekends when our humans can take us to hang out together!",
+      "aspect_ratio": "1:1",
       "profile": 13,
       "created_at": "2025-11-16T21:40:36.080Z",
       "updated_at": "2025-11-16T21:40:36.080Z",
@@ -1124,6 +1204,7 @@
     "pk": 88,
     "fields": {
       "caption": "Today’s post goes out to all the sleepy puppies of the world. What would we do without sleepy puppy breath!?",
+      "aspect_ratio": "1:1",
       "profile": 14,
       "created_at": "2025-11-16T23:04:19.719Z",
       "updated_at": "2025-11-16T23:04:19.719Z",
@@ -1138,6 +1219,7 @@
     "pk": 89,
     "fields": {
       "caption": "Nearly drownded getting this mega stick! Those waves really sneak up on you, good thing I’m an excellent swimmer.\n\nMy parents took me swimming a lot when I was young, so I’m pretty much an expert swimmer.",
+      "aspect_ratio": "1:1",
       "profile": 15,
       "created_at": "2025-11-16T23:08:51.786Z",
       "updated_at": "2025-11-16T23:08:51.786Z",
@@ -1152,6 +1234,7 @@
     "pk": 90,
     "fields": {
       "caption": "Great day running free in my yard. My ears do weird things sometimes ngl. But everyone seems to like it so I don’t mind!",
+      "aspect_ratio": "1:1",
       "profile": 16,
       "created_at": "2025-11-16T23:13:06.046Z",
       "updated_at": "2025-11-16T23:13:06.046Z",
@@ -1166,6 +1249,7 @@
     "pk": 91,
     "fields": {
       "caption": "Showing off my sweet new harness. I wasn’t sure about it at first, but I’m starting to like it. It actually helps keep me warm when it’s a little chilly out. And I hate the cold so it’s a win for me!",
+      "aspect_ratio": "1:1",
       "profile": 17,
       "created_at": "2025-11-16T23:19:15.126Z",
       "updated_at": "2025-11-16T23:19:15.126Z",
@@ -1180,6 +1264,7 @@
     "pk": 92,
     "fields": {
       "caption": "Lazy day on the couch. Wasn’t feeling good this morning so mom made me some special food and let me sleep on the couch all day.",
+      "aspect_ratio": "1:1",
       "profile": 18,
       "created_at": "2025-11-16T23:50:06.986Z",
       "updated_at": "2025-11-16T23:50:06.986Z",
@@ -1194,6 +1279,7 @@
     "pk": 93,
     "fields": {
       "caption": "Don’t mean to brag but I have a really cool chair and I love to sit in it",
+      "aspect_ratio": "1:1",
       "profile": 19,
       "created_at": "2025-11-16T23:52:18.405Z",
       "updated_at": "2025-11-16T23:52:18.405Z",
@@ -1208,6 +1294,7 @@
     "pk": 94,
     "fields": {
       "caption": "Whether it’s a mud puddle or a water bowl, if it can get me messy I’m going for it. I honestly think that the water bowl made for a pretty comfy chair.",
+      "aspect_ratio": "1:1",
       "profile": 20,
       "created_at": "2025-11-16T23:54:54.757Z",
       "updated_at": "2025-11-16T23:54:54.757Z",
@@ -1222,6 +1309,7 @@
     "pk": 95,
     "fields": {
       "caption": "I’ve been making a lot of friends lately. It is kinda weird always being the big friend. I wonder if I’ll ever get a chance to have a friend bigger than me. If you’re bigger than me, leave a comment so we can be friends!",
+      "aspect_ratio": "1:1",
       "profile": 21,
       "created_at": "2025-11-16T23:57:38.754Z",
       "updated_at": "2025-11-16T23:57:38.754Z",
@@ -1236,6 +1324,7 @@
     "pk": 96,
     "fields": {
       "caption": "Today we have a bow beagle and a sleepy chin beagle.",
+      "aspect_ratio": "1:1",
       "profile": 22,
       "created_at": "2025-11-17T00:00:40.583Z",
       "updated_at": "2025-11-17T00:00:40.583Z",
@@ -1250,6 +1339,7 @@
     "pk": 97,
     "fields": {
       "caption": "I’m starting to think there’s a pattern here. I’m always lurking in the grass. Maybe I am more of an outside dog than I thought. I wish there were couches outside. Why isn’t that a thing???",
+      "aspect_ratio": "1:1",
       "profile": 23,
       "created_at": "2025-11-17T00:03:28.065Z",
       "updated_at": "2025-11-17T00:03:28.065Z",

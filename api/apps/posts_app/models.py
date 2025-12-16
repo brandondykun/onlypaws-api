@@ -5,7 +5,7 @@ import os
 import logging
 from django.db import models
 from django.core.validators import MaxLengthValidator, MinValueValidator, MaxValueValidator
-from apps.core_app.utils import crop_square_and_resize
+from apps.core_app.utils import crop_to_aspect_ratio_and_resize
 from pgvector.django import VectorField, CosineDistance
 
 from apps.core_app.indexes import HnswIndex
@@ -15,6 +15,10 @@ logger = logging.getLogger(__name__)
 
 class Post(models.Model):
     """Post with image and text."""
+
+    class AspectRatio(models.TextChoices):
+        SQUARE = "1:1", "Square"
+        PORTRAIT = "4:5", "Portrait"
 
     class Meta:
         indexes = [
@@ -28,6 +32,12 @@ class Post(models.Model):
         ]
 
     caption = models.TextField(validators=[MaxLengthValidator(1000, message="Caption cannot exceed 1000 characters.")])
+    aspect_ratio = models.CharField(
+        max_length=5,
+        choices=AspectRatio.choices,
+        default=AspectRatio.SQUARE,
+        help_text="Aspect ratio for all images in this post"
+    )
     profile = models.ForeignKey("profile_app.Profile", on_delete=models.CASCADE, related_name="posts")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -186,8 +196,10 @@ class PostImage(models.Model):
         )
         
         if should_process_image:
-            # Process image
-            self.image = crop_square_and_resize(self.image, image_size=1080)
+            # Get aspect ratio from parent post, default to SQUARE
+            aspect_ratio = getattr(self.post, 'aspect_ratio', Post.AspectRatio.SQUARE) if self.post_id else Post.AspectRatio.SQUARE
+            # Process image with the appropriate aspect ratio
+            self.image = crop_to_aspect_ratio_and_resize(self.image, aspect_ratio=aspect_ratio)
 
         # Check if we need to generate embedding
         should_generate_embedding = (

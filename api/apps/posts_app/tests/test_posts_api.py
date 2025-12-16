@@ -54,6 +54,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
 
         res = self.client.post(CREATE_POST_URL, data=new_post)
         self.assertEqual(res.data["caption"], new_post["caption"])
+        self.assertEqual(res.data["aspect_ratio"], "1:1")  # Default aspect ratio
         expected_profile = {
             "id": self.profile.id,
             "username": self.profile.username,
@@ -346,6 +347,113 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         current_post_count = self.get_posts_count()
         self.assertEqual(current_post_count, starting_post_count + 1)
 
+    def test_create_post_with_default_aspect_ratio_success(self):
+        """
+        Test that creating a Post without specifying aspect_ratio defaults to 1:1.
+        """
+        starting_post_count = self.get_posts_count()
+
+        new_post = {
+            "caption": "Test default aspect ratio",
+            "profileId": self.profile.id,
+            "images": [],
+        }
+
+        res = self.client.post(CREATE_POST_URL, data=new_post)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(res.data["aspect_ratio"], "1:1")
+
+        # Verify in database
+        new_post_obj = Post.objects.get(id=res.data["id"])
+        self.assertEqual(new_post_obj.aspect_ratio, "1:1")
+
+        current_post_count = self.get_posts_count()
+        self.assertEqual(current_post_count, starting_post_count + 1)
+
+    def test_create_post_with_square_aspect_ratio_success(self):
+        """
+        Test creating a Post with explicit 1:1 (square) aspect ratio.
+        """
+        starting_post_count = self.get_posts_count()
+
+        # Create test image
+        image = create_test_image('square_image.jpg')
+
+        post_data = {
+            "caption": "Square aspect ratio post",
+            "profileId": self.profile.id,
+            "aspectRatio": "1:1",
+            "order": [0],
+        }
+
+        res = self.client.post(
+            CREATE_POST_URL,
+            data={**post_data, 'images': [image]},
+            format='multipart'
+        )
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(res.data["aspect_ratio"], "1:1")
+
+        # Verify in database
+        new_post = Post.objects.get(id=res.data["id"])
+        self.assertEqual(new_post.aspect_ratio, "1:1")
+
+        current_post_count = self.get_posts_count()
+        self.assertEqual(current_post_count, starting_post_count + 1)
+
+    def test_create_post_with_portrait_aspect_ratio_success(self):
+        """
+        Test creating a Post with 4:5 (portrait) aspect ratio.
+        """
+        starting_post_count = self.get_posts_count()
+
+        # Create test image
+        image = create_test_image('portrait_image.jpg')
+
+        post_data = {
+            "caption": "Portrait aspect ratio post",
+            "profileId": self.profile.id,
+            "aspectRatio": "4:5",
+            "order": [0],
+        }
+
+        res = self.client.post(
+            CREATE_POST_URL,
+            data={**post_data, 'images': [image]},
+            format='multipart'
+        )
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(res.data["aspect_ratio"], "4:5")
+
+        # Verify in database
+        new_post = Post.objects.get(id=res.data["id"])
+        self.assertEqual(new_post.aspect_ratio, "4:5")
+
+        current_post_count = self.get_posts_count()
+        self.assertEqual(current_post_count, starting_post_count + 1)
+
+    def test_create_post_with_invalid_aspect_ratio_fails(self):
+        """
+        Test that creating a Post with an invalid aspect ratio fails.
+        """
+        starting_post_count = self.get_posts_count()
+
+        post_data = {
+            "caption": "Invalid aspect ratio post",
+            "profileId": self.profile.id,
+            "aspectRatio": "16:9",  # Invalid choice
+            "images": [],
+        }
+
+        res = self.client.post(CREATE_POST_URL, data=post_data)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Ensure no post was created
+        current_post_count = self.get_posts_count()
+        self.assertEqual(current_post_count, starting_post_count)
+
     def test_fetching_single_post_success(self):
         """
         Test successfully fetching a single Post successfully returns Post details.
@@ -362,6 +470,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
 
         self.assertEqual(sample_post.id, res.data["id"])
         self.assertEqual(sample_post.caption, res.data["caption"])
+        self.assertEqual(sample_post.aspect_ratio, res.data["aspect_ratio"])
         self.assertEqual(sample_post.profile.id, res.data["profile"]["id"])
         self.assertEqual(sample_post.comments.count(), res.data["comments_count"])
         self.assertEqual(sample_post.likes.count(), res.data["likes_count"])
@@ -496,6 +605,76 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         # Verify the error is about caption length
         self.assertIn('caption', context.exception.message_dict)
         self.assertIn('1000', str(context.exception.message_dict['caption'][0]))
+
+    def test_post_model_aspect_ratio_default_value(self):
+        """
+        Test that Post model defaults aspect_ratio to 1:1.
+        """
+        post = Post(
+            caption="Test caption",
+            profile=self.profile,
+            contains_ai=False
+        )
+        post.full_clean()
+        post.save()
+        
+        self.assertEqual(post.aspect_ratio, "1:1")
+
+    def test_post_model_aspect_ratio_square_success(self):
+        """
+        Test that Post model accepts 1:1 (square) aspect ratio.
+        """
+        post = Post(
+            caption="Test caption",
+            profile=self.profile,
+            aspect_ratio="1:1",
+            contains_ai=False
+        )
+        
+        # This should not raise a ValidationError
+        try:
+            post.full_clean()
+            post.save()
+            self.assertEqual(post.aspect_ratio, "1:1")
+        except ValidationError:
+            self.fail("ValidationError raised for valid aspect_ratio 1:1")
+
+    def test_post_model_aspect_ratio_portrait_success(self):
+        """
+        Test that Post model accepts 4:5 (portrait) aspect ratio.
+        """
+        post = Post(
+            caption="Test caption",
+            profile=self.profile,
+            aspect_ratio="4:5",
+            contains_ai=False
+        )
+        
+        # This should not raise a ValidationError
+        try:
+            post.full_clean()
+            post.save()
+            self.assertEqual(post.aspect_ratio, "4:5")
+        except ValidationError:
+            self.fail("ValidationError raised for valid aspect_ratio 4:5")
+
+    def test_post_model_aspect_ratio_invalid_fails(self):
+        """
+        Test that Post model rejects invalid aspect_ratio values.
+        """
+        post = Post(
+            caption="Test caption",
+            profile=self.profile,
+            aspect_ratio="16:9",  # Invalid choice
+            contains_ai=False
+        )
+        
+        # This should raise a ValidationError
+        with self.assertRaises(ValidationError) as context:
+            post.full_clean()
+        
+        # Verify the error is about aspect_ratio
+        self.assertIn('aspect_ratio', context.exception.message_dict)
 
     def test_list_similar_posts_fallback_when_no_embeddings(self):
         """

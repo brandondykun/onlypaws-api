@@ -37,46 +37,66 @@ from core.schema_params import auth_profile_param
 logger = logging.getLogger(__name__)
 
 
-def adjust_tag_position_for_center_square_crop(x_percent, y_percent, original_width, original_height):
+VALID_ASPECT_RATIOS = Post.AspectRatio.values
+
+
+def adjust_tag_position_for_center_crop(x_percent, y_percent, original_width, original_height, target_aspect_ratio=Post.AspectRatio.SQUARE):
     """
-    Adjust tag position percentages to account for center crop to square.
+    Adjust tag position percentages to account for center crop to target aspect ratio.
     
-    The crop_square_and_resize function crops images to squares:
-    - Portrait (height > width): crops equally from top and bottom
-    - Landscape (width > height): crops equally from left and right
-    - Square: no cropping needed
+    The crop_to_aspect_ratio_and_resize function crops images to the target ratio:
+    - If image is wider than target ratio: crops equally from left and right
+    - If image is taller than target ratio: crops equally from top and bottom
+    - If image matches target ratio: no cropping needed
     
     Args:
         x_percent: X position as percentage (0-100) of original width
         y_percent: Y position as percentage (0-100) of original height
         original_width: Original image width in pixels
         original_height: Original image height in pixels
+        target_aspect_ratio: Target aspect ratio string (e.g., Post.AspectRatio.SQUARE, Post.AspectRatio.PORTRAIT)
     
     Returns:
-        tuple: (adjusted_x_percent, adjusted_y_percent) for the cropped square image
+        tuple: (adjusted_x_percent, adjusted_y_percent) for the cropped image
     """
-    if original_width == original_height:
-        # Square image - no adjustment needed
+    # Parse target aspect ratio
+    w_ratio, h_ratio = map(int, target_aspect_ratio.split(':'))
+    target_ratio = w_ratio / h_ratio  # e.g., 4/5 = 0.8 for 4:5
+    
+    # Calculate original ratio
+    original_ratio = original_width / original_height
+    
+    # Check if ratios match (within floating point tolerance)
+    if abs(original_ratio - target_ratio) < 0.001:
+        # Image already matches target ratio - no adjustment needed
         return x_percent, y_percent
     
-    if original_height > original_width:
-        # Portrait: crop from top and bottom
-        # X position doesn't change
-        # Y position needs adjustment
-        crop_amount = (original_height - original_width) / 2
-        original_y_px = (y_percent / 100) * original_height
-        new_y_px = original_y_px - crop_amount
-        new_y_percent = (new_y_px / original_width) * 100
-        return x_percent, new_y_percent
-    else:
-        # Landscape: crop from left and right
-        # Y position doesn't change
-        # X position needs adjustment
-        crop_amount = (original_width - original_height) / 2
+    if original_ratio > target_ratio:
+        # Image is wider than target - crop left and right
+        # New width based on keeping full height
+        new_width = original_height * target_ratio
+        crop_amount = (original_width - new_width) / 2
+        
+        # Convert x_percent to pixels, adjust, then back to percent of new width
         original_x_px = (x_percent / 100) * original_width
         new_x_px = original_x_px - crop_amount
-        new_x_percent = (new_x_px / original_height) * 100
+        new_x_percent = (new_x_px / new_width) * 100
+        
+        # Y position doesn't change (still percent of same height)
         return new_x_percent, y_percent
+    else:
+        # Image is taller than target - crop top and bottom
+        # New height based on keeping full width
+        new_height = original_width / target_ratio
+        crop_amount = (original_height - new_height) / 2
+        
+        # Convert y_percent to pixels, adjust, then back to percent of new height
+        original_y_px = (y_percent / 100) * original_height
+        new_y_px = original_y_px - crop_amount
+        new_y_percent = (new_y_px / new_height) * 100
+        
+        # X position doesn't change (still percent of same width)
+        return x_percent, new_y_percent
 
 
 @extend_schema_view(
@@ -93,6 +113,7 @@ class CreatePostView(generics.CreateAPIView):
         profile_id = request.data.get("profileId", None)
         caption = request.data.get("caption", None)
         contains_ai = request.data.get("aiGenerated", False)
+        aspect_ratio = request.data.get("aspectRatio", Post.AspectRatio.SQUARE)
         images = request.FILES.getlist("images")
         orders = request.POST.getlist("order")
         tags_json = request.data.get("tags", None)
@@ -101,6 +122,14 @@ class CreatePostView(generics.CreateAPIView):
         current_profile = request.current_profile
         if str(profile_id) != str(current_profile.id) or not caption:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        # Validate aspect ratio
+        if aspect_ratio not in VALID_ASPECT_RATIOS:
+            logger.error(f"Invalid aspect ratio: {aspect_ratio}")
+            return Response(
+                {"error": f"Invalid aspect ratio. Must be one of: {', '.join(VALID_ASPECT_RATIOS)}"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         # Validate that images and orders match in length
         if len(images) != len(orders):
@@ -135,6 +164,7 @@ class CreatePostView(generics.CreateAPIView):
                     "caption": caption,
                     "profile": current_profile.id,
                     "contains_ai": contains_ai,
+                    "aspect_ratio": aspect_ratio,
                 }
                 serializer = self.serializer_class(data=data)
                 serializer.is_valid(raise_exception=True)
@@ -184,11 +214,12 @@ class CreatePostView(generics.CreateAPIView):
                                 x_position = tag_data["xPosition"]
                                 y_position = tag_data["yPosition"]
                                 
-                                adjusted_x, adjusted_y = adjust_tag_position_for_center_square_crop(
+                                adjusted_x, adjusted_y = adjust_tag_position_for_center_crop(
                                     x_position,
                                     y_position,
                                     original_width,
-                                    original_height
+                                    original_height,
+                                    target_aspect_ratio=aspect_ratio
                                 )
                                 
                                 # Create the tag with adjusted positions
@@ -823,11 +854,14 @@ class CreatePostImageTagView(generics.CreateAPIView):
                 )
 
             # Adjust tag position to account for cropping
-            adjusted_x, adjusted_y = adjust_tag_position_for_center_square_crop(
+            # Get the aspect ratio from the post
+            post_aspect_ratio = getattr(post_image.post, 'aspect_ratio', Post.AspectRatio.SQUARE)
+            adjusted_x, adjusted_y = adjust_tag_position_for_center_crop(
                 float(x_position),
                 float(y_position),
                 original_width,
-                original_height
+                original_height,
+                target_aspect_ratio=post_aspect_ratio
             )
 
             # Create the tag

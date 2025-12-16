@@ -11,35 +11,71 @@ except ImportError:
     pass  # pillow-heif not installed, HEIC images won't be supported
 
 
-def crop_square_and_resize(image, image_size=1080):
+ASPECT_RATIO_DIMENSIONS = {
+    "1:1": (1080, 1080),
+    "4:5": (1080, 1350),
+}
+
+
+def crop_to_aspect_ratio_and_resize(image, aspect_ratio="1:1", base_width=1080):
     """
-    Crop and resize image to desired image size.
-    The image is cropped to into a square that is centered on the photo.
-    If the image is taller than it is wide, part of the top and bottom is cropped.
-    If the image is wider than it is tall, part of the left and right is cropped.
+    Crop and resize image to desired aspect ratio.
+    The image is center-cropped to match the target aspect ratio.
+    
+    Args:
+        image: The image file to process
+        aspect_ratio: Target aspect ratio as string (e.g., "1:1", "4:5")
+        base_width: The target width in pixels (default 1080)
+    
+    Returns:
+        Processed image file in webp format
     """
     img = Image.open(image)
-    img = ImageOps.exif_transpose(img)  # rotate the image
-
-    width, height = img.size  # Get dimensions
-
-    if height > width:
-        left = 0
-        right = width
-        top = (height / 2) - (width / 2)
-        bottom = top + width
-    else:
-        top = 0
-        bottom = height
-        left = (width / 2) - (height / 2)
-        right = left + height
-
-    img = img.crop((left, top, right, bottom))
+    img = ImageOps.exif_transpose(img)  # rotate the image based on EXIF data
 
     width, height = img.size
-    # resize image if it is larger than desired image size
-    if width > image_size:
-        img = img.resize((image_size, image_size))
+
+    # Parse aspect ratio
+    w_ratio, h_ratio = map(int, aspect_ratio.split(':'))
+    target_ratio = w_ratio / h_ratio  # e.g., 4/5 = 0.8 for 4:5
+    
+    # Calculate current ratio
+    current_ratio = width / height
+    
+    # Determine crop dimensions
+    if abs(current_ratio - target_ratio) < 0.001:
+        # Already matches target ratio, no crop needed
+        crop_width, crop_height = width, height
+        left, top = 0, 0
+    elif current_ratio > target_ratio:
+        # Image is wider than target - crop left and right
+        crop_height = height
+        crop_width = int(height * target_ratio)
+        left = (width - crop_width) / 2
+        top = 0
+    else:
+        # Image is taller than target - crop top and bottom
+        crop_width = width
+        crop_height = int(width / target_ratio)
+        left = 0
+        top = (height - crop_height) / 2
+    
+    right = left + crop_width
+    bottom = top + crop_height
+    
+    img = img.crop((left, top, right, bottom))
+
+    # Get target dimensions - use lookup only if using default base_width
+    if base_width == 1080 and aspect_ratio in ASPECT_RATIO_DIMENSIONS:
+        target_width, target_height = ASPECT_RATIO_DIMENSIONS[aspect_ratio]
+    else:
+        target_width = base_width
+        target_height = int(base_width / target_ratio)
+    
+    # Resize if image is larger than target dimensions
+    current_width, current_height = img.size
+    if current_width > target_width:
+        img = img.resize((target_width, target_height))
 
     output = BytesIO()
     img.save(output, "webp", optimize=True, quality=70)

@@ -4,6 +4,7 @@
     "pk": 1,
     "fields": {
       "caption": "Could hold the record for the sleepiest dog on the planet for sure!",
+      "aspect_ratio": "1:1",
       "profile": 2,
       "created_at": "2024-10-13T15:48:03.038Z",
       "updated_at": "2024-10-13T15:48:03.038Z",
@@ -18,6 +19,7 @@
     "pk": 2,
     "fields": {
       "caption": "Morning walk time!",
+      "aspect_ratio": "1:1",
       "profile": 4,
       "created_at": "2024-10-13T17:31:10.690Z",
       "updated_at": "2024-10-13T17:31:10.690Z",
@@ -32,6 +34,7 @@
     "pk": 3,
     "fields": {
       "caption": "Mom got me out here in the snow. Good grief!",
+      "aspect_ratio": "1:1",
       "profile": 4,
       "created_at": "2024-10-13T17:34:20.342Z",
       "updated_at": "2024-10-13T17:34:20.342Z",
@@ -46,6 +49,7 @@
     "pk": 4,
     "fields": {
       "caption": "Got a haircut today. Looking pretty dapper. Kinda feeling myself tbh.",
+      "aspect_ratio": "1:1",
       "profile": 4,
       "created_at": "2024-10-13T17:36:07.841Z",
       "updated_at": "2024-10-13T17:36:07.841Z",
@@ -60,6 +64,7 @@
     "pk": 5,
     "fields": {
       "caption": "I woke up like this.",
+      "aspect_ratio": "1:1",
       "profile": 5,
       "created_at": "2024-10-13T17:40:29.250Z",
       "updated_at": "2024-10-13T17:40:29.250Z",
@@ -74,6 +79,7 @@
     "pk": 6,
     "fields": {
       "caption": "Getting some pets today!",
+      "aspect_ratio": "1:1",
       "profile": 8,
       "created_at": "2024-10-13T17:46:37.560Z",
       "updated_at": "2024-10-13T17:46:37.560Z",
@@ -88,6 +94,7 @@
     "pk": 7,
     "fields": {
       "caption": "Yep I’m a German shep!",
+      "aspect_ratio": "1:1",
       "profile": 9,
       "created_at": "2024-10-13T17:49:24.281Z",
       "updated_at": "2024-10-13T17:49:24.281Z",
@@ -102,6 +109,7 @@
     "pk": 8,
     "fields": {
       "caption": "Mom says the cone is cute. I say it’s frickin embarrassing.",
+      "aspect_ratio": "1:1",
       "profile": 10,
       "created_at": "2024-10-13T17:51:30.639Z",
       "updated_at": "2024-10-13T17:51:30.639Z",
@@ -116,6 +124,7 @@
     "pk": 9,
     "fields": {
       "caption": "Livin that cone life.",
+      "aspect_ratio": "1:1",
       "profile": 10,
       "created_at": "2024-10-13T17:52:21.410Z",
       "updated_at": "2024-10-13T17:52:21.410Z",
@@ -130,6 +139,7 @@
     "pk": 10,
     "fields": {
       "caption": "Sniffing the camera man.",
+      "aspect_ratio": "1:1",
       "profile": 11,
       "created_at": "2024-10-13T17:55:15.281Z",
       "updated_at": "2024-10-13T17:55:15.281Z",
@@ -144,6 +154,7 @@
     "pk": 11,
     "fields": {
       "caption": "Sniffing for chocolate.",
+      "aspect_ratio": "1:1",
       "profile": 11,
       "created_at": "2024-10-13T17:56:34.040Z",
       "updated_at": "2024-10-13T17:56:34.040Z",
@@ -158,6 +169,7 @@
     "pk": 12,
     "fields": {
       "caption": "Hanging out with my friend Linus!",
+      "aspect_ratio": "1:1",
       "profile": 3,
       "created_at": "2024-10-13T17:59:25.422Z",
       "updated_at": "2024-10-13T17:59:25.422Z",
@@ -172,6 +184,7 @@
     "pk": 13,
     "fields": {
       "caption": "Party!!!",
+      "aspect_ratio": "1:1",
       "profile": 1,
       "created_at": "2024-10-13T20:37:32.656Z",
       "updated_at": "2024-10-13T20:37:32.656Z",
@@ -186,6 +199,7 @@
     "pk": 14,
     "fields": {
       "caption": "Goofy Shane!",
+      "aspect_ratio": "1:1",
       "profile": 1,
       "created_at": "2024-10-13T21:10:10.596Z",
       "updated_at": "2024-10-13T21:10:10.596Z",
@@ -200,6 +214,7 @@
     "pk": 15,
     "fields": {
       "caption": "Baby boy sleeping on the floor like usual.",
+      "aspect_ratio": "1:1",
       "profile": 1,
       "created_at": "2024-10-15T22:25:06.254Z",
       "updated_at": "2024-10-15T22:25:06.254Z",
@@ -214,6 +229,7 @@
     "pk": 16,
     "fields": {
       "caption": "Curled up like there’s no tomorrow!",
+      "aspect_ratio": "1:1",
       "profile": 1,
       "created_at": "2024-10-15T22:26:51.782Z",
       "updated_at": "2024-10-15T22:26:51.782Z",
@@ -228,6 +244,7 @@
     "pk": 17,
     "fields": {
       "caption": "Little lazy boy sleeping on the carpet!",
+      "aspect_ratio": "1:1",
       "profile": 1,
       "created_at": "2024-10-16T18:25:53.689Z",
       "updated_at": "2024-10-16T18:25:53.689Z",
@@ -242,6 +259,7 @@
     "pk": 18,
     "fields": {
       "caption": "He has 3 beds yet chooses to sleep on the floor lol",
+      "aspect_ratio": "1:1",
       "profile": 1,
       "created_at": "2024-10-17T01:12:21.750Z",
       "updated_at": "2024-10-17T01:12:21.750Z",
@@ -256,6 +274,7 @@
     "pk": 22,
     "fields": {
       "caption": "Look at those ears!",
+      "aspect_ratio": "1:1",
       "profile": 9,
       "created_at": "2024-10-17T23:08:31.529Z",
       "updated_at": "2024-10-17T23:08:31.529Z",
@@ -270,6 +289,7 @@
     "pk": 24,
     "fields": {
       "caption": "The tongue out always gets me!",
+      "aspect_ratio": "1:1",
       "profile": 9,
       "created_at": "2024-10-18T00:10:55.531Z",
       "updated_at": "2024-10-18T00:10:55.531Z",
@@ -284,6 +304,7 @@
     "pk": 25,
     "fields": {
       "caption": "Walk by the waterfall!",
+      "aspect_ratio": "1:1",
       "profile": 9,
       "created_at": "2024-10-18T00:15:34.175Z",
       "updated_at": "2024-10-18T00:15:34.175Z",
@@ -298,6 +319,7 @@
     "pk": 27,
     "fields": {
       "caption": "Fall bandana season",
+      "aspect_ratio": "1:1",
       "profile": 1,
       "created_at": "2024-10-18T00:28:52.793Z",
       "updated_at": "2024-10-18T00:28:52.793Z",
@@ -312,6 +334,7 @@
     "pk": 28,
     "fields": {
       "caption": "Fall bandana season",
+      "aspect_ratio": "1:1",
       "profile": 4,
       "created_at": "2024-10-18T18:08:50.087Z",
       "updated_at": "2024-10-18T18:08:50.087Z",
@@ -326,6 +349,7 @@
     "pk": 29,
     "fields": {
       "caption": "Does anyone else’s dog have a favorite blanket that they sleep with all the time?",
+      "aspect_ratio": "1:1",
       "profile": 4,
       "created_at": "2024-10-18T18:09:54.194Z",
       "updated_at": "2024-10-18T18:09:54.194Z",
@@ -340,6 +364,7 @@
     "pk": 30,
     "fields": {
       "caption": "World’s best sleeper no doubt.",
+      "aspect_ratio": "1:1",
       "profile": 5,
       "created_at": "2024-10-18T18:14:52.796Z",
       "updated_at": "2024-10-18T18:14:52.796Z",
@@ -354,6 +379,7 @@
     "pk": 31,
     "fields": {
       "caption": "I’m really happy with this dog bed. I would highly recommend it.",
+      "aspect_ratio": "1:1",
       "profile": 5,
       "created_at": "2024-10-18T18:16:28.153Z",
       "updated_at": "2024-10-18T18:16:28.153Z",
@@ -368,6 +394,7 @@
     "pk": 32,
     "fields": {
       "caption": "Linus asking for him morning walk!",
+      "aspect_ratio": "1:1",
       "profile": 1,
       "created_at": "2024-10-20T14:43:31.190Z",
       "updated_at": "2024-10-20T14:43:31.190Z",
@@ -382,6 +409,7 @@
     "pk": 33,
     "fields": {
       "caption": "Favorite nap spot is on my chair. Yep, my humans bought me a chair.",
+      "aspect_ratio": "1:1",
       "profile": 12,
       "created_at": "2024-10-20T22:03:00.677Z",
       "updated_at": "2024-10-20T22:03:00.677Z",
@@ -396,6 +424,7 @@
     "pk": 34,
     "fields": {
       "caption": "Sleeping beauty.",
+      "aspect_ratio": "1:1",
       "profile": 4,
       "created_at": "2024-10-21T02:07:28.949Z",
       "updated_at": "2024-10-21T02:07:28.949Z",
@@ -410,6 +439,7 @@
     "pk": 35,
     "fields": {
       "caption": "Sniffing around on walks is my absolute favorite. I could do it all day.",
+      "aspect_ratio": "1:1",
       "profile": 13,
       "created_at": "2024-10-22T03:45:12.141Z",
       "updated_at": "2024-10-22T03:45:12.141Z",
@@ -424,6 +454,7 @@
     "pk": 36,
     "fields": {
       "caption": "Little walk in the lake!",
+      "aspect_ratio": "1:1",
       "profile": 1,
       "created_at": "2024-10-23T00:28:33.991Z",
       "updated_at": "2024-10-23T00:28:33.991Z",
@@ -438,6 +469,7 @@
     "pk": 37,
     "fields": {
       "caption": "Throwback to my first lake walk",
+      "aspect_ratio": "1:1",
       "profile": 1,
       "created_at": "2024-10-23T00:29:29.955Z",
       "updated_at": "2024-10-23T00:29:29.955Z",
@@ -452,6 +484,7 @@
     "pk": 38,
     "fields": {
       "caption": "I love when my parents cover me with a blanket. I can’t believe some of y’all aren’t allowed to sleep in the bed!",
+      "aspect_ratio": "1:1",
       "profile": 1,
       "created_at": "2024-10-23T00:31:08.619Z",
       "updated_at": "2024-10-23T00:31:08.619Z",
@@ -466,6 +499,7 @@
     "pk": 39,
     "fields": {
       "caption": "Campfire shenanigans. I wish I could have chocolate so I could eat a s’mores.",
+      "aspect_ratio": "1:1",
       "profile": 1,
       "created_at": "2024-10-23T00:32:59.886Z",
       "updated_at": "2024-10-23T00:32:59.886Z",
@@ -480,6 +514,7 @@
     "pk": 40,
     "fields": {
       "caption": "Sitting on my dad’s lap while he works.",
+      "aspect_ratio": "1:1",
       "profile": 1,
       "created_at": "2024-10-23T00:34:45.275Z",
       "updated_at": "2024-10-23T00:34:45.275Z",
@@ -494,6 +529,7 @@
     "pk": 41,
     "fields": {
       "caption": "Me in the form of art",
+      "aspect_ratio": "1:1",
       "profile": 1,
       "created_at": "2024-10-23T00:35:54.927Z",
       "updated_at": "2024-10-23T00:35:54.927Z",
@@ -508,6 +544,7 @@
     "pk": 42,
     "fields": {
       "caption": "Sus side eye",
+      "aspect_ratio": "1:1",
       "profile": 1,
       "created_at": "2024-10-23T00:37:28.823Z",
       "updated_at": "2024-10-23T00:37:28.823Z",
@@ -522,6 +559,7 @@
     "pk": 43,
     "fields": {
       "caption": "Did I ever mention that I once saw an eclipse!",
+      "aspect_ratio": "1:1",
       "profile": 1,
       "created_at": "2024-10-23T00:41:11.295Z",
       "updated_at": "2024-10-23T00:41:11.295Z",
@@ -536,6 +574,7 @@
     "pk": 44,
     "fields": {
       "caption": "Got a cool new fall bandana. No big deal",
+      "aspect_ratio": "1:1",
       "profile": 1,
       "created_at": "2024-10-23T00:41:40.064Z",
       "updated_at": "2024-10-23T00:41:40.064Z",
@@ -550,6 +589,7 @@
     "pk": 45,
     "fields": {
       "caption": "Tongue out at the lake.",
+      "aspect_ratio": "1:1",
       "profile": 1,
       "created_at": "2024-10-23T00:43:31.964Z",
       "updated_at": "2024-10-23T00:43:31.964Z",
@@ -564,6 +604,7 @@
     "pk": 46,
     "fields": {
       "caption": "One time I got a cake baked just for me!",
+      "aspect_ratio": "1:1",
       "profile": 1,
       "created_at": "2024-10-23T00:46:57.418Z",
       "updated_at": "2024-10-23T00:46:57.418Z",
@@ -578,6 +619,7 @@
     "pk": 47,
     "fields": {
       "caption": "Got a haircut and a bowl of ice cream",
+      "aspect_ratio": "1:1",
       "profile": 1,
       "created_at": "2024-10-23T00:47:44.939Z",
       "updated_at": "2024-10-23T00:47:44.939Z",
@@ -592,6 +634,7 @@
     "pk": 48,
     "fields": {
       "caption": "Bath time got me like…",
+      "aspect_ratio": "1:1",
       "profile": 1,
       "created_at": "2024-10-23T00:48:48.815Z",
       "updated_at": "2024-10-23T00:48:48.815Z",
@@ -606,6 +649,7 @@
     "pk": 49,
     "fields": {
       "caption": "Made a card for mom and she really loved it",
+      "aspect_ratio": "1:1",
       "profile": 1,
       "created_at": "2024-10-23T00:51:55.229Z",
       "updated_at": "2024-10-23T00:51:55.229Z",
@@ -620,6 +664,7 @@
     "pk": 50,
     "fields": {
       "caption": "Went to the airport to pick up mom. Fun fact, I’ve been on an airplane before",
+      "aspect_ratio": "1:1",
       "profile": 1,
       "created_at": "2024-10-23T00:54:15.828Z",
       "updated_at": "2024-10-23T00:54:15.828Z",
@@ -634,6 +679,7 @@
     "pk": 51,
     "fields": {
       "caption": "I love my new moose chew toy. It’s a crinkly one",
+      "aspect_ratio": "1:1",
       "profile": 2,
       "created_at": "2024-10-24T02:55:29.708Z",
       "updated_at": "2024-10-24T02:55:29.708Z",
@@ -648,6 +694,7 @@
     "pk": 52,
     "fields": {
       "caption": "Linus at the hotel!",
+      "aspect_ratio": "1:1",
       "profile": 1,
       "created_at": "2024-10-26T15:32:45.869Z",
       "updated_at": "2024-10-26T15:32:45.869Z",
@@ -662,6 +709,7 @@
     "pk": 53,
     "fields": {
       "caption": "This hotel couch is kinda comfy!",
+      "aspect_ratio": "1:1",
       "profile": 1,
       "created_at": "2024-10-26T15:39:56.464Z",
       "updated_at": "2024-10-26T15:39:56.464Z",
@@ -676,6 +724,7 @@
     "pk": 54,
     "fields": {
       "caption": "Not a dog but a dawg.",
+      "aspect_ratio": "1:1",
       "profile": 1,
       "created_at": "2024-10-30T22:44:57.201Z",
       "updated_at": "2024-10-30T22:44:57.201Z",
@@ -690,6 +739,7 @@
     "pk": 55,
     "fields": {
       "caption": "Not a dog but a dawg",
+      "aspect_ratio": "1:1",
       "profile": 1,
       "created_at": "2025-01-05T02:37:03.765Z",
       "updated_at": "2025-01-05T02:37:03.765Z",
@@ -704,6 +754,7 @@
     "pk": 56,
     "fields": {
       "caption": "Not sure if you all know but I am a king. Here’s some proof for the haters.",
+      "aspect_ratio": "1:1",
       "profile": 1,
       "created_at": "2025-01-30T23:27:57.276Z",
       "updated_at": "2025-01-30T23:27:57.276Z",

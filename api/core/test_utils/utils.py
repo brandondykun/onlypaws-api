@@ -81,7 +81,7 @@ def create_profile(username: str, user: User, about: str = "", name: str = "") -
     return Profile.objects.get(pk=regular_profile.pk)
 
 
-def create_post(caption: str, profile: Profile) -> Post:
+def create_post(caption: str, profile: Profile, aspect_ratio: str = Post.AspectRatio.SQUARE) -> Post:
     """
     Create and return new Post.
 
@@ -91,8 +91,10 @@ def create_post(caption: str, profile: Profile) -> Post:
         The caption of the Post.
     profile : Profile
         The Profile that owns/created the Post.
+    aspect_ratio : str
+        The aspect ratio for all images in this post. Options: Post.AspectRatio.SQUARE (default), Post.AspectRatio.PORTRAIT.
     """
-    return Post.objects.create(caption=caption, profile=profile)
+    return Post.objects.create(caption=caption, profile=profile, aspect_ratio=aspect_ratio)
 
 
 def create_post_image(post: Post, image_file=None, embedding=None) -> PostImage:
