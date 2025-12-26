@@ -6,7 +6,7 @@ from asgiref.sync import async_to_sync
 from .models import Notification, NotificationType
 from .serializers import WebSocketNotificationSerializer
 from apps.profile_app.models import Profile
-from apps.posts_app.models import Post
+from apps.posts_app.models import Post, PostImageTag
 from apps.interactions_app.models import Comment
 
 logger = logging.getLogger(__name__)
@@ -400,6 +400,84 @@ def create_follow_notification_task(self, followed_profile_id, follower_profile_
         logger.error(f"Profile not found for follow notification: {e}")
     except Exception as e:
         logger.error(f"Error creating follow notification: {e}")
+        raise self.retry(countdown=60, max_retries=3)
+
+
+@shared_task(bind=True, ignore_result=True)
+def create_tagged_post_notification_task(self, post_image_tag_id):
+    """
+    Create and send a notification when a profile is tagged in a post image.
+    
+    Args:
+        post_image_tag_id (int): ID of the PostImageTag that was created
+    """
+    try:
+        # Validate input parameters
+        if not isinstance(post_image_tag_id, int):
+            logger.error(f"Invalid parameter type: post_image_tag_id={type(post_image_tag_id)}")
+            return
+            
+        post_image_tag = PostImageTag.objects.select_related(
+            'post_image',
+            'post_image__post',
+            'post_image__post__profile',
+            'tagged_profile',
+            'tagged_by_profile'
+        ).get(id=post_image_tag_id)
+        
+        post = post_image_tag.post_image.post
+        tagged_profile = post_image_tag.tagged_profile
+        tagger_profile = post_image_tag.tagged_by_profile
+        
+        # Security: Don't send notification if user tagged themselves
+        if tagged_profile.id == tagger_profile.id:
+            return
+        
+        # Get post preview image URL (use the image where they were tagged)
+        post_preview_image = None
+        if post_image_tag.post_image.image:
+            preview_image_path = post_image_tag.post_image.image.url
+            if preview_image_path:
+                # Store the URL as-is from Django's ImageField
+                # The serializer will handle proper URL construction
+                post_preview_image = preview_image_path
+        
+        # Get or update existing notification to prevent spam
+        # Use the post as the unique identifier (one notification per post, not per image tag)
+        notification, created = Notification.objects.get_or_create(
+            recipient=tagged_profile,
+            sender=tagger_profile,
+            notification_type=NotificationType.TAGGED_POST,
+            post=post,
+            comment=None,
+            defaults={
+                'title': "tagged you in a post", # this is displayed in the notification list item
+                'message': f"{tagger_profile.username} tagged you in a post", # this is displayed in the toast notification
+                'extra_data': {
+                    'post_caption': post.caption[:100],  # Limit data size
+                    'post_id': post.id,
+                    'post_image_id': post_image_tag.post_image.id,
+                    'tagger_username': tagger_profile.username,
+                    'tagger_id': tagger_profile.id,
+                    'post_preview_image': post_preview_image
+                }
+            }
+        )
+        
+        # If notification already exists, mark as unread
+        if not created and notification.is_read:
+            notification.is_read = False
+            notification.save(update_fields=['is_read'])
+        
+        # Send via WebSocket
+        send_notification_task.delay(notification.id)
+        
+        logger.info(f"Tagged post notification {'created' if created else 'updated'} for post {post.id}, tagged profile {tagged_profile.id}")
+        
+    except PostImageTag.DoesNotExist as e:
+        logger.error(f"PostImageTag not found for tagged post notification: {e}")
+    except Exception as e:
+        logger.error(f"Error creating tagged post notification: {e}")
         raise self.retry(countdown=60, max_retries=3)
 
 
