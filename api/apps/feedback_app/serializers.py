@@ -115,10 +115,7 @@ class FeedbackCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("device_info is too large (max 1KB).")
         
         # Validate allowed keys to prevent arbitrary data storage
-        allowed_keys = {
-            'platform', 'version', 'model', 'os_version', 'app_build', 
-            'device_id', 'screen_resolution', 'memory', 'storage'
-        }
+        allowed_keys = {"device_model", "manufacturer", "os_name", "os_version"}
         invalid_keys = set(value.keys()) - allowed_keys
         if invalid_keys:
             raise serializers.ValidationError(
