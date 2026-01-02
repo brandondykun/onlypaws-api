@@ -90,6 +90,7 @@ INSTALLED_APPS = [
     "apps.feedback_app",
     "apps.notifications_app",
     "apps.config_app",
+    "apps.announcements_app",
     "storages",
     "corsheaders",
 ]

@@ -46,6 +46,7 @@ class Command(BaseCommand):
             "notification",
             "appconfiguration",
             "postimagetag",
+            "announcement"
         ]
 
         # default fixture path
