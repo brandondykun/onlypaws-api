@@ -46,7 +46,7 @@ class FeedbackAPITest(TestCase):
             "description": "Please add dark mode",
             "ticket_type": "feature",
             "app_version": "1.0.0",
-            "device_info": {"platform": "iOS", "version": "15.0"},
+            "device_info": {"device_model": "iPhone 15", "manufacturer": "Apple", "os_name": "iOS", "os_version": "15.0"},
         }
 
         response = self.client.post(FEEDBACK_LIST_URL, data, format="json")
