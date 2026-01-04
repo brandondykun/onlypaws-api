@@ -77,7 +77,8 @@ class FeedbackCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Feedback
-        fields = ["title", "description", "ticket_type", "app_version", "device_info"]
+        fields = ["id", "title", "description", "ticket_type", "app_version", "device_info", "created_at", "updated_at"]
+        read_only_fields = ["id", "created_at", "updated_at"]
 
     def validate_title(self, value):
         """Validate title length and content"""

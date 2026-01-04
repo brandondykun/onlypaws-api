@@ -78,8 +78,10 @@ class FeedbackViewSet(viewsets.ModelViewSet):
         """Filter queryset based on user permissions and query parameters"""
         queryset = super().get_queryset()
 
-        # Apply user permission filtering first
-        if not self.request.user.is_staff:
+        # Apply user permission filtering
+        # - 'list' action: all users see only their own tickets
+        # - Other actions: staff can access any ticket, non-staff only their own
+        if self.action == "list" or not self.request.user.is_staff:
             queryset = queryset.filter(reporter=self.request.user)
 
         # Apply query parameter filtering
@@ -178,6 +180,32 @@ class FeedbackViewSet(viewsets.ModelViewSet):
     def assigned_to_me(self, request):
         """Get all feedback tickets assigned to the current staff user"""
         queryset = self.get_queryset().filter(assignee=request.user)
+
+        # Apply pagination
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = FeedbackListSerializer(
+                page, many=True, context={"request": request}
+            )
+            return self.get_paginated_response(serializer.data)
+
+        serializer = FeedbackListSerializer(
+            queryset, many=True, context={"request": request}
+        )
+        return Response(serializer.data)
+
+    @extend_schema(
+        summary="List all feedback tickets",
+        description="Get all feedback tickets in the system. Only accessible by staff members.",
+    )
+    @action(
+        detail=False,
+        methods=["get"],
+        permission_classes=[permissions.IsAuthenticated, permissions.IsAdminUser],
+    )
+    def all_tickets(self, request):
+        """Get all feedback tickets (staff only)"""
+        queryset = self.get_queryset()
 
         # Apply pagination
         page = self.paginate_queryset(queryset)
