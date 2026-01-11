@@ -18,6 +18,7 @@ from .permissions import (
     IsStaffOrReadOnlyForReporter,
     IsStaffForComments,
 )
+from .pagination import FeedbackPagination
 
 User = get_user_model()
 
@@ -60,6 +61,7 @@ class FeedbackViewSet(viewsets.ModelViewSet):
     queryset = Feedback.objects.all()
     permission_classes = [permissions.IsAuthenticated, IsStaffOrReadOnlyForReporter]
     filter_backends = [SearchFilter, OrderingFilter]
+    pagination_class = FeedbackPagination
     search_fields = ["title", "description"]
     ordering_fields = ["created_at", "updated_at", "priority"]
     ordering = ["-created_at"]
