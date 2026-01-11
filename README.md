@@ -19,15 +19,16 @@ _The unapologetically pet friendly social media app._
 6. [Creating Fixture for Individual Model](#creating-fixture-for-individual-model)
 7. [Creating Fixtures for All Models](#creating-fixtures-for-all-models)
 8. [Clear and Reload Database](#clear-and-reload-database)
-9. [Generate Image Embeddings](#generate-image-embeddings)
-10. [Generate Combined Post Embeddings](#generate-combined-post-embeddings)
-11. [Verify and Test HNSW Indexes](#verify-and-test-hnsw-indexes)
-12. [Assign PostImage Order](#assign-postimage-order)
-13. [Nginx Configuration and SSL Setup](#nginx-configuration-and-ssl-setup)
-14. [Image Data](#image-data)
-15. [Commits](#commits)
-16. [Environment Variables](#environment-variables)
-17. [Dev and E2E Images](#dev-and-e2e-images)
+9. [Flush Expired JWT Tokens](#flush-expired-jwt-tokens)
+10. [Generate Image Embeddings](#generate-image-embeddings)
+11. [Generate Combined Post Embeddings](#generate-combined-post-embeddings)
+12. [Verify and Test HNSW Indexes](#verify-and-test-hnsw-indexes)
+13. [Assign PostImage Order](#assign-postimage-order)
+14. [Nginx Configuration and SSL Setup](#nginx-configuration-and-ssl-setup)
+15. [Image Data](#image-data)
+16. [Commits](#commits)
+17. [Environment Variables](#environment-variables)
+18. [Dev and E2E Images](#dev-and-e2e-images)
 
 ---
 
@@ -40,6 +41,8 @@ Several scripts are available to help with the development process.
 [create_fixtures.sh](#creating-fixtures-for-all-models) - Creates fixtures for all models in the given environment.
 
 [create_model_fixture.sh](#creating-fixture-for-individual-model) - Creates a fixture for a single model in the given environment.
+
+[flush_expired_tokens.sh](#flush-expired-jwt-tokens) - Flushes expired JWT tokens from the database.
 
 [load_db.sh](#clear-and-reload-database) - Clears and reloads the database with the fixtures for the given environment.
 
@@ -241,6 +244,35 @@ scripts/load_db.sh staging
 - **dev**: Reset development database to a known state
 - **e2e**: Reset database between frontend e2e test runs to ensure consistent test conditions
 - **staging**: Refresh staging environment data
+
+
+## Flush Expired JWT Tokens
+
+This script flushes expired JWT tokens from the database. It removes expired tokens from the `OutstandingToken` and `BlacklistedToken` tables to prevent the token tables from growing indefinitely.
+
+With token rotation enabled, every time a user refreshes their token, the old token is blacklisted. Over time, these expired blacklisted tokens accumulate in the database. Running this script periodically cleans up these expired entries.
+
+```bash
+# base command example
+scripts/flush_expired_tokens.sh <dev|staging|test|e2e|prod>
+
+# flush expired tokens in dev environment
+scripts/flush_expired_tokens.sh dev
+
+# flush expired tokens in staging environment
+scripts/flush_expired_tokens.sh staging
+
+# flush expired tokens in prod environment
+scripts/flush_expired_tokens.sh prod
+```
+
+**Note:** This cleanup also runs automatically via a scheduled Celery Beat task daily at 4:00 AM UTC. Use this script for manual cleanup when needed.
+
+**When to Use:**
+- After enabling token blacklisting for the first time
+- When troubleshooting database size issues related to token tables
+- During maintenance windows for immediate cleanup
+- To verify the scheduled task is working correctly
 
 
 ## Generate Image Embeddings

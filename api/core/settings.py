@@ -45,7 +45,9 @@ CORS_ALLOW_HEADERS = [
     "origin",
     "authorization",
     "auth-profile-id",
+    "x-client-type",  # Used to distinguish between web and mobile clients
 ]
+CORS_ALLOW_CREDENTIALS = True  # Required for cookies to be sent cross-origin
 
 # CSRF Settings
 CSRF_TRUSTED_ORIGINS = [
@@ -93,6 +95,7 @@ INSTALLED_APPS = [
     "apps.announcements_app",
     "storages",
     "corsheaders",
+    "rest_framework_simplejwt.token_blacklist",  # Required for token blacklisting/rotation
 ]
 
 MIDDLEWARE = [
@@ -204,6 +207,19 @@ refresh_token_lifetime = int(os.environ.get("REFRESH_TOKEN_LIFETIME"))
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=access_token_lifetime),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=refresh_token_lifetime),
+    # Token rotation - generate new refresh token on each refresh
+    "ROTATE_REFRESH_TOKENS": True,
+    # Blacklist old tokens after rotation for security
+    "BLACKLIST_AFTER_ROTATION": True,
+    # Update last login time on token obtain
+    "UPDATE_LAST_LOGIN": True,
+    # Cookie settings for web clients (refresh token stored in HttpOnly cookie)
+    "AUTH_COOKIE": "refresh_token",
+    "AUTH_COOKIE_DOMAIN": None,  # Set to your domain in production for cross-subdomain support
+    "AUTH_COOKIE_SECURE": True,  # Only send cookie over HTTPS
+    "AUTH_COOKIE_HTTP_ONLY": True,  # Prevent JavaScript access to cookie
+    "AUTH_COOKIE_PATH": "/api/v1/auth/",  # Cookie only sent to auth endpoints
+    "AUTH_COOKIE_SAMESITE": "Strict",  # Strict CSRF protection
 }
 
 MEDIA_URL = "/media/"
@@ -283,6 +299,11 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'apps.notifications_app.tasks.cleanup_old_notifications_task',
         'schedule': crontab(hour=3, minute=0),  # Run daily at 3:00 AM UTC
         'args': (30,),  # Delete notifications older than 30 days
+    },
+    'flush-expired-jwt-tokens': {
+        'task': 'apps.core_app.tasks.flush_expired_tokens_task',
+        'schedule': crontab(hour=4, minute=0),  # Run daily at 4:00 AM UTC
+        'options': {'expires': 3600},  # Task expires after 1 hour if not picked up
     },
 }
 

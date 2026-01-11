@@ -405,3 +405,45 @@ def cleanup_expired_task_results():
     except Exception as exc:
         logger.error(f"Error in cleanup task: {str(exc)}")
         return {"success": False, "error": str(exc)}
+
+
+@shared_task
+def flush_expired_tokens_task():
+    """
+    Flush expired JWT tokens from the blacklist.
+    
+    This task runs the Django management command `flushexpiredtokens` provided by
+    djangorestframework-simplejwt's token_blacklist app. It removes:
+    - Expired tokens from the OutstandingToken table
+    - Associated entries from the BlacklistedToken table
+    
+    This should be run daily to prevent the token tables from growing indefinitely.
+    
+    Returns:
+        dict: Success status and details about the cleanup
+    """
+    logger.info("Starting flush of expired JWT tokens")
+    
+    try:
+        from django.core.management import call_command
+        from io import StringIO
+        
+        # Capture command output
+        out = StringIO()
+        call_command('flushexpiredtokens', stdout=out, verbosity=1)
+        output = out.getvalue()
+        
+        logger.info(f"Successfully flushed expired tokens: {output.strip() or 'completed'}")
+        
+        return {
+            "success": True,
+            "message": "Expired tokens flushed successfully",
+            "output": output.strip(),
+        }
+        
+    except Exception as exc:
+        logger.error(f"Error flushing expired tokens: {str(exc)}")
+        return {
+            "success": False,
+            "error": str(exc),
+        }
