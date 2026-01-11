@@ -53,8 +53,17 @@ class ReportReasonViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(serializer.data)
 
 
+status_filter_param = OpenApiParameter(
+    name="status",
+    description="Filter reports by status (PENDING, UNDER_REVIEW, RESOLVED, DISMISSED)",
+    required=False,
+    type=str,
+    location=OpenApiParameter.QUERY,
+)
+
+
 @extend_schema_view(
-    list=extend_schema(parameters=[auth_profile_param]),
+    list=extend_schema(parameters=[auth_profile_param, status_filter_param]),
     retrieve=extend_schema(
         parameters=[
             auth_profile_param,
@@ -89,10 +98,22 @@ class PostReportViewSet(
     def get_queryset(self):
         requesting_profile = self.request.current_profile
         if self.request.user.is_staff:
-            return PostReport.objects.all().order_by("created_at")
-        return PostReport.objects.filter(reporter=requesting_profile).order_by(
-            "-created_at"
-        )
+            queryset = PostReport.objects.all().order_by("created_at")
+        else:
+            queryset = PostReport.objects.filter(reporter=requesting_profile).order_by(
+                "-created_at"
+            )
+        return self._apply_status_filter(queryset)
+
+    def _apply_status_filter(self, queryset):
+        """Apply status filter if provided in query params."""
+        status_param = self.request.query_params.get("status")
+        if status_param:
+            # Normalize to uppercase for case-insensitive matching
+            status_param = status_param.upper()
+            if status_param in dict(PostReport.ReportStatus.choices):
+                queryset = queryset.filter(status=status_param)
+        return queryset
 
     def get_serializer_class(self):
         if self.action == "create":
@@ -160,7 +181,7 @@ class PostReportViewSet(
 
         return Response(PostReportDetailSerializer(report).data)
 
-    @extend_schema(parameters=[auth_profile_param])
+    @extend_schema(parameters=[auth_profile_param, status_filter_param])
     @action(detail=False, methods=["get"])
     def my_reports(self, request):
         """
@@ -169,6 +190,7 @@ class PostReportViewSet(
         requesting_profile = request.current_profile
 
         queryset = PostReport.objects.filter(reporter=requesting_profile)
+        queryset = self._apply_status_filter(queryset)
         page = self.paginate_queryset(queryset)
 
         if page is not None:
@@ -179,7 +201,7 @@ class PostReportViewSet(
         serializer = PostReportDetailSerializer(queryset, many=True)
         return Response(serializer.data)
 
-    @extend_schema(parameters=[auth_profile_param])
+    @extend_schema(parameters=[auth_profile_param, status_filter_param])
     @action(detail=False, methods=["get"])
     def reported_posts(self, request):
         """
@@ -188,6 +210,7 @@ class PostReportViewSet(
         requesting_profile = request.current_profile
 
         queryset = PostReport.objects.filter(post__profile=requesting_profile)
+        queryset = self._apply_status_filter(queryset)
         page = self.paginate_queryset(queryset)
 
         if page is not None:
