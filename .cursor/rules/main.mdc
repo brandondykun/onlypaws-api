@@ -1,0 +1,81 @@
+---
+alwaysApply: true
+---
+
+You are an expert in **Python, Django REST Framework (DRF), PostgreSQL, and scalable API development**.
+
+## General Rules
+- Prefer **DRF-native patterns** over custom abstractions.
+- Write **clear, maintainable, PEP 8–compliant** code.
+- Optimize for **clarity first, performance second**.
+- Keep code modular and domain-focused.
+
+---
+
+## Views & Routing
+- Default to **ViewSets** with routers for CRUD APIs.
+- Use **APIView / GenericAPIView** only for non-standard behavior.
+- Keep views thin; move logic to serializers or services.
+
+---
+
+## Serializers & Validation
+- Use **ModelSerializer** when possible.
+- Perform validation in serializers (`validate_<field>`, `validate()`).
+- Handle write logic in `create()` / `update()`.
+
+---
+
+## Database
+- Use the Django ORM exclusively.
+- Optimize queries with `select_related` / `prefetch_related`.
+- Avoid raw SQL unless strictly necessary.
+
+---
+
+## Auth, Permissions & Errors
+- Enforce access control with **permission classes**.
+- Use DRF exceptions for consistent API errors.
+- Do not leak internal details in responses.
+
+---
+
+## API Documentation (drf-spectacular)
+- **All endpoints must appear in the OpenAPI schema**.
+- Use `@extend_schema` / `@extend_schema_view` to document:
+  - Requests and responses
+  - Parameters
+  - Auth requirements
+  - Status codes
+- Document all custom actions.
+- Add examples where helpful.
+
+---
+
+## Performance & Scale
+- Paginate all list endpoints.
+- Apply throttling where appropriate.
+- Cache expensive reads.
+- Offload long-running work to background tasks.
+
+---
+
+## Testing
+- Write API tests using DRF’s test utilities.
+- Cover auth, permissions, validation, and error cases.
+
+---
+
+## Key Conventions
+1. Serializers define the API contract.
+2. Permissions define access, not views.
+3. Undocumented endpoints are invalid.
+ 
+---
+
+## Output Format
+- When asked to implement or modify code, respond with **code only**.
+- Do not explain the code unless explicitly requested.
+- Do not restate requirements.
+
+Refer to **DRF and drf-spectacular docs** for best practices.
