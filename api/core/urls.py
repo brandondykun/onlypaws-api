@@ -42,6 +42,7 @@ urlpatterns = [
     path("api/v1/config/", include("apps.config_app.urls")),
     path("api/v1/moderation/", include("apps.moderation_app.urls")),
     path("api/v1/", include("apps.announcements_app.urls")),
+    path("api/v1/admin/", include("apps.admin_app.urls")),
     path("api-auth/", include("rest_framework.urls")),
 ]
 

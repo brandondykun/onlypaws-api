@@ -7,10 +7,14 @@ import io
 from PIL import Image
 from django.contrib.auth import get_user_model
 from apps.user_app.models import User
-from apps.profile_app.models import Profile, RegularProfile, ProfileImage
+from apps.profile_app.models import Profile, RegularProfile, ProfileImage, PetType
 from apps.posts_app.models import Post, PostImage
 from apps.interactions_app.models import Like, Follow, Comment, CommentLike
+from apps.feedback_app.models import Feedback
+from apps.moderation_app.models import PostReport, ReportReason
+from apps.announcements_app.models import Announcement
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.utils import timezone
 
 
 def create_test_image(name='test_image.jpg', size=(100, 100), color='red'):
@@ -57,26 +61,55 @@ def create_user(email: str, password: str = "test_password_123", is_staff=False)
     )
 
 
-def create_profile(username: str, user: User, about: str = "", name: str = "") -> Profile:
+def create_pet_type(name: str) -> PetType:
+    """Create and return new PetType.
+
+    Parameters
+    ----------
+    name : str
+        Name of the pet type (e.g., 'Dog', 'Cat').
+    """
+    return PetType.objects.create(name=name)
+
+
+def create_profile(
+    username: str,
+    user: User,
+    about: str = "",
+    name: str = "",
+    pet_type: PetType = None,
+    breed: str = "",
+) -> Profile:
     """Create and return new Profile (via RegularProfile creation).
 
     Parameters
     ----------
     username : str
         Username of the Profile.
-    about : str
-        About text for the Profile.
     user : User
         The User that owns the Profile.
+    about : str
+        About text for the Profile.
     name : str
-        Name of the Profile.
+        Name of the Profile (pet's name).
+    pet_type : PetType, optional
+        The type of pet for this profile.
+    breed : str
+        The breed of the pet.
     
     Returns
     -------
     Profile
         The base Profile instance (for consistency with ForeignKey relationships).
     """
-    regular_profile = RegularProfile.objects.create(username=username, about=about, user=user, name=name)
+    regular_profile = RegularProfile.objects.create(
+        username=username,
+        about=about,
+        user=user,
+        name=name,
+        pet_type=pet_type,
+        breed=breed,
+    )
     # Return the base Profile instance to match what ForeignKey relationships return
     return Profile.objects.get(pk=regular_profile.pk)
 
@@ -262,4 +295,135 @@ def create_profile_image(profile):
         image=SimpleUploadedFile(
             name="test_image.jpg", content=image_file.read(), content_type="image/jpeg"
         ),
+    )
+
+
+def create_feedback(
+    title: str,
+    description: str,
+    ticket_type: str,
+    reporter,
+    status: str = Feedback.FeedbackStatus.OPEN,
+    priority: str = Feedback.Priority.MEDIUM,
+) -> Feedback:
+    """Create and return new Feedback.
+
+    Parameters
+    ----------
+    title : str
+        Title of the feedback ticket.
+    description : str
+        Description of the feedback.
+    ticket_type : str
+        Type of ticket (Feedback.TicketType.BUG, FEATURE, or GENERAL).
+    reporter : User
+        The User who reported the feedback.
+    status : str
+        Status of the feedback. Defaults to OPEN.
+    priority : str
+        Priority of the feedback. Defaults to MEDIUM.
+    """
+    return Feedback.objects.create(
+        title=title,
+        description=description,
+        ticket_type=ticket_type,
+        reporter=reporter,
+        status=status,
+        priority=priority,
+    )
+
+
+def create_report_reason(
+    name: str,
+    description: str = "",
+    is_active: bool = True,
+) -> ReportReason:
+    """Create and return new ReportReason.
+
+    Parameters
+    ----------
+    name : str
+        Name of the report reason.
+    description : str
+        Description of the report reason.
+    is_active : bool
+        Whether the report reason is active.
+    """
+    return ReportReason.objects.create(
+        name=name,
+        description=description,
+        is_active=is_active,
+    )
+
+
+def create_post_report(
+    post: Post,
+    reporter: Profile,
+    reason: ReportReason,
+    status: str = PostReport.ReportStatus.PENDING,
+    details: str = "",
+) -> PostReport:
+    """Create and return new PostReport.
+
+    Parameters
+    ----------
+    post : Post
+        The Post being reported.
+    reporter : Profile
+        The Profile reporting the post.
+    reason : ReportReason
+        The reason for the report.
+    status : str
+        The status of the report. Defaults to PENDING.
+    details : str
+        Additional details about the report.
+    """
+    return PostReport.objects.create(
+        post=post,
+        reporter=reporter,
+        reason=reason,
+        status=status,
+        details=details,
+    )
+
+
+def create_announcement(
+    title: str,
+    message: str,
+    start_date=None,
+    end_date=None,
+    priority: str = "normal",
+    is_active: bool = True,
+    announcement_type: str = "general",
+) -> Announcement:
+    """Create and return new Announcement.
+
+    Parameters
+    ----------
+    title : str
+        Title of the announcement.
+    message : str
+        Message content of the announcement.
+    start_date : datetime, optional
+        When the announcement starts. Defaults to now.
+    end_date : datetime, optional
+        When the announcement ends. Defaults to None (no end date).
+    priority : str
+        Priority level ('low', 'normal', 'high'). Defaults to 'normal'.
+    is_active : bool
+        Whether the announcement is active. Defaults to True.
+    announcement_type : str
+        Type of announcement. Defaults to 'general'.
+    """
+    if start_date is None:
+        start_date = timezone.now()
+    
+    return Announcement.objects.create(
+        title=title,
+        message=message,
+        start_date=start_date,
+        end_date=end_date,
+        priority=priority,
+        is_active=is_active,
+        announcement_type=announcement_type,
     )

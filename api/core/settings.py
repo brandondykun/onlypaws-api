@@ -93,6 +93,7 @@ INSTALLED_APPS = [
     "apps.notifications_app",
     "apps.config_app",
     "apps.announcements_app",
+    "apps.admin_app",
     "storages",
     "corsheaders",
     "rest_framework_simplejwt.token_blacklist",  # Required for token blacklisting/rotation
