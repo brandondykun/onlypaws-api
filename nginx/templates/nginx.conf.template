@@ -1,6 +1,3 @@
-# prevent css, js files sent as text/plain objects
-include /etc/nginx/mime.types;
-
 # Define upstream
 upstream only-paws-app {
     server only-paws-app:8000;
