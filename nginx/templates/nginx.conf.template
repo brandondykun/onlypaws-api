@@ -46,8 +46,9 @@ server {
     client_max_body_size 20M;
 
     # Maintenance mode check - include flag
+    # Note: Using /etc/nginx/maintenance.d/ to avoid conflict with default conf.d includes
     set $maintenance_mode 0;
-    include /etc/nginx/conf.d/maintenance.conf*;
+    include /etc/nginx/maintenance.d/*.conf;
 
     # Status endpoint - ALWAYS accessible, even during maintenance
     # This provides a fallback response if Django is down

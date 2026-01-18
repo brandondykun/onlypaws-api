@@ -280,7 +280,7 @@ curl http://localhost:8000/api/v1/config/status/
 ./scripts/maintenance-status.sh
 
 # Force remove maintenance config
-docker exec <nginx-container> rm -f /etc/nginx/conf.d/maintenance.conf
+docker exec <nginx-container> rm -f /etc/nginx/maintenance.d/maintenance.conf
 docker exec <nginx-container> nginx -s reload
 ```
 

@@ -58,11 +58,11 @@ fi
 echo -e "nginx container: ${GREEN}$CONTAINER_NAME${NC}"
 
 # Check if maintenance config file exists
-if docker exec "$CONTAINER_NAME" test -f /etc/nginx/conf.d/maintenance.conf 2>/dev/null; then
+if docker exec "$CONTAINER_NAME" test -f /etc/nginx/maintenance.d/maintenance.conf 2>/dev/null; then
     echo -e "Maintenance mode: ${YELLOW}ENABLED${NC}"
     echo ""
     echo "Maintenance config:"
-    docker exec "$CONTAINER_NAME" cat /etc/nginx/conf.d/maintenance.conf
+    docker exec "$CONTAINER_NAME" cat /etc/nginx/maintenance.d/maintenance.conf
 else
     echo -e "Maintenance mode: ${GREEN}DISABLED${NC}"
     echo "System is operational"
