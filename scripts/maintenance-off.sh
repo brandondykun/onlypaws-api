@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Disable maintenance mode for nginx
-# This script removes the maintenance flag file and reloads nginx
+# Disable maintenance mode for nginx and Django
+# This script removes maintenance flag files and reloads nginx
 
 set -e
 
@@ -12,21 +12,27 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Default values
-CONTAINER_NAME="only-paws-nginx-1"
+NGINX_CONTAINER="only-paws-nginx-1"
+DJANGO_CONTAINER="onlypaws_django"
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
         -c|--container)
-            CONTAINER_NAME="$2"
+            NGINX_CONTAINER="$2"
+            shift 2
+            ;;
+        --django-container)
+            DJANGO_CONTAINER="$2"
             shift 2
             ;;
         -h|--help)
             echo "Usage: $0 [OPTIONS]"
             echo ""
             echo "Options:"
-            echo "  -c, --container NAME   Docker container name (default: only-paws-nginx-1)"
-            echo "  -h, --help             Show this help message"
+            echo "  -c, --container NAME       Nginx container name (default: only-paws-nginx-1)"
+            echo "  --django-container NAME    Django container name (default: onlypaws_django)"
+            echo "  -h, --help                 Show this help message"
             exit 0
             ;;
         *)
@@ -45,10 +51,10 @@ echo -e "${YELLOW}Disabling maintenance mode...${NC}"
 # Check if nginx container is running
 if ! docker ps --format '{{.Names}}' | grep -q "nginx"; then
     # Try to find the correct container name
-    NGINX_CONTAINER=$(docker ps --format '{{.Names}}' | grep -E "(nginx|proxy)" | head -1)
-    if [ -n "$NGINX_CONTAINER" ]; then
-        CONTAINER_NAME="$NGINX_CONTAINER"
-        echo -e "${YELLOW}Found nginx container: $CONTAINER_NAME${NC}"
+    FOUND_NGINX=$(docker ps --format '{{.Names}}' | grep -E "(nginx|proxy)" | head -1)
+    if [ -n "$FOUND_NGINX" ]; then
+        NGINX_CONTAINER="$FOUND_NGINX"
+        echo -e "${YELLOW}Found nginx container: $NGINX_CONTAINER${NC}"
     else
         echo -e "${RED}Error: No nginx container found running${NC}"
         echo "Available containers:"
@@ -57,16 +63,35 @@ if ! docker ps --format '{{.Names}}' | grep -q "nginx"; then
     fi
 fi
 
-# Remove the maintenance config file
-echo -e "${YELLOW}Removing maintenance flag...${NC}"
-docker exec "$CONTAINER_NAME" rm -f /etc/nginx/maintenance.d/maintenance.conf
+# Check if Django container is running
+if ! docker ps --format '{{.Names}}' | grep -q "$DJANGO_CONTAINER"; then
+    # Try to find the correct container name
+    FOUND_DJANGO=$(docker ps --format '{{.Names}}' | grep -E "(django|app)" | head -1)
+    if [ -n "$FOUND_DJANGO" ]; then
+        DJANGO_CONTAINER="$FOUND_DJANGO"
+        echo -e "${YELLOW}Found Django container: $DJANGO_CONTAINER${NC}"
+    else
+        echo -e "${YELLOW}Warning: No Django container found, skipping Django maintenance flag${NC}"
+        DJANGO_CONTAINER=""
+    fi
+fi
+
+# Remove the nginx maintenance config file
+echo -e "${YELLOW}Removing nginx maintenance flag...${NC}"
+docker exec "$NGINX_CONTAINER" rm -f /etc/nginx/maintenance.d/maintenance.conf
+
+# Remove Django maintenance flag file
+if [ -n "$DJANGO_CONTAINER" ]; then
+    echo -e "${YELLOW}Removing Django maintenance flag...${NC}"
+    docker exec "$DJANGO_CONTAINER" rm -f /tmp/maintenance_mode.json
+fi
 
 # Test nginx configuration
 echo -e "${YELLOW}Testing nginx configuration...${NC}"
-if docker exec "$CONTAINER_NAME" nginx -t 2>&1; then
+if docker exec "$NGINX_CONTAINER" nginx -t 2>&1; then
     # Reload nginx gracefully
     echo -e "${YELLOW}Reloading nginx...${NC}"
-    docker exec "$CONTAINER_NAME" nginx -s reload
+    docker exec "$NGINX_CONTAINER" nginx -s reload
     
     echo -e "${GREEN}✓ Maintenance mode DISABLED${NC}"
     echo -e "  System is now operational"

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Enable maintenance mode for nginx
-# This script creates a maintenance flag file and reloads nginx
+# Enable maintenance mode for nginx and Django
+# This script creates maintenance flag files and reloads nginx
 
 set -e
 
@@ -12,7 +12,8 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Default values
-CONTAINER_NAME="only-paws-nginx-1"
+NGINX_CONTAINER="only-paws-nginx-1"
+DJANGO_CONTAINER="onlypaws_django"
 MESSAGE="The system is currently undergoing maintenance. Please try again later."
 END_TIME=""
 
@@ -28,17 +29,22 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         -c|--container)
-            CONTAINER_NAME="$2"
+            NGINX_CONTAINER="$2"
+            shift 2
+            ;;
+        --django-container)
+            DJANGO_CONTAINER="$2"
             shift 2
             ;;
         -h|--help)
             echo "Usage: $0 [OPTIONS]"
             echo ""
             echo "Options:"
-            echo "  -m, --message MSG      Custom maintenance message"
-            echo "  -e, --end-time TIME    Estimated end time (ISO format)"
-            echo "  -c, --container NAME   Docker container name (default: only-paws-nginx-1)"
-            echo "  -h, --help             Show this help message"
+            echo "  -m, --message MSG          Custom maintenance message"
+            echo "  -e, --end-time TIME        Estimated end time (ISO format)"
+            echo "  -c, --container NAME       Nginx container name (default: only-paws-nginx-1)"
+            echo "  --django-container NAME    Django container name (default: onlypaws_django)"
+            echo "  -h, --help                 Show this help message"
             exit 0
             ;;
         *)
@@ -57,10 +63,10 @@ echo -e "${YELLOW}Enabling maintenance mode...${NC}"
 # Check if nginx container is running
 if ! docker ps --format '{{.Names}}' | grep -q "nginx"; then
     # Try to find the correct container name
-    NGINX_CONTAINER=$(docker ps --format '{{.Names}}' | grep -E "(nginx|proxy)" | head -1)
-    if [ -n "$NGINX_CONTAINER" ]; then
-        CONTAINER_NAME="$NGINX_CONTAINER"
-        echo -e "${YELLOW}Found nginx container: $CONTAINER_NAME${NC}"
+    FOUND_NGINX=$(docker ps --format '{{.Names}}' | grep -E "(nginx|proxy)" | head -1)
+    if [ -n "$FOUND_NGINX" ]; then
+        NGINX_CONTAINER="$FOUND_NGINX"
+        echo -e "${YELLOW}Found nginx container: $NGINX_CONTAINER${NC}"
     else
         echo -e "${RED}Error: No nginx container found running${NC}"
         echo "Available containers:"
@@ -69,20 +75,45 @@ if ! docker ps --format '{{.Names}}' | grep -q "nginx"; then
     fi
 fi
 
-# Create maintenance config content
+# Check if Django container is running
+if ! docker ps --format '{{.Names}}' | grep -q "$DJANGO_CONTAINER"; then
+    # Try to find the correct container name
+    FOUND_DJANGO=$(docker ps --format '{{.Names}}' | grep -E "(django|app)" | head -1)
+    if [ -n "$FOUND_DJANGO" ]; then
+        DJANGO_CONTAINER="$FOUND_DJANGO"
+        echo -e "${YELLOW}Found Django container: $DJANGO_CONTAINER${NC}"
+    else
+        echo -e "${YELLOW}Warning: No Django container found, skipping Django maintenance flag${NC}"
+        DJANGO_CONTAINER=""
+    fi
+fi
+
+# Create nginx maintenance config content
 MAINTENANCE_CONFIG="set \$maintenance_mode 1;"
 
-# Create the maintenance config file inside the container
+# Create the maintenance config file inside nginx container
 # Using /etc/nginx/maintenance.d/ to avoid conflict with default conf.d includes at http level
-echo -e "${YELLOW}Creating maintenance flag...${NC}"
-docker exec "$CONTAINER_NAME" sh -c "mkdir -p /etc/nginx/maintenance.d && echo '$MAINTENANCE_CONFIG' > /etc/nginx/maintenance.d/maintenance.conf"
+echo -e "${YELLOW}Creating nginx maintenance flag...${NC}"
+docker exec "$NGINX_CONTAINER" sh -c "mkdir -p /etc/nginx/maintenance.d && echo '$MAINTENANCE_CONFIG' > /etc/nginx/maintenance.d/maintenance.conf"
+
+# Create Django maintenance flag file
+if [ -n "$DJANGO_CONTAINER" ]; then
+    echo -e "${YELLOW}Creating Django maintenance flag...${NC}"
+    # Build JSON for Django's maintenance flag
+    if [ -n "$END_TIME" ]; then
+        DJANGO_FLAG="{\"message\": \"$MESSAGE\", \"end_time\": \"$END_TIME\", \"allow_admin\": false}"
+    else
+        DJANGO_FLAG="{\"message\": \"$MESSAGE\", \"end_time\": null, \"allow_admin\": false}"
+    fi
+    docker exec "$DJANGO_CONTAINER" sh -c "echo '$DJANGO_FLAG' > /tmp/maintenance_mode.json"
+fi
 
 # Test nginx configuration
 echo -e "${YELLOW}Testing nginx configuration...${NC}"
-if docker exec "$CONTAINER_NAME" nginx -t 2>&1; then
+if docker exec "$NGINX_CONTAINER" nginx -t 2>&1; then
     # Reload nginx gracefully
     echo -e "${YELLOW}Reloading nginx...${NC}"
-    docker exec "$CONTAINER_NAME" nginx -s reload
+    docker exec "$NGINX_CONTAINER" nginx -s reload
     
     echo -e "${GREEN}✓ Maintenance mode ENABLED${NC}"
     echo -e "  Message: $MESSAGE"
@@ -93,7 +124,10 @@ if docker exec "$CONTAINER_NAME" nginx -t 2>&1; then
     echo -e "${YELLOW}Note: The status endpoint /api/v1/config/status/ remains accessible${NC}"
 else
     echo -e "${RED}Error: nginx configuration test failed${NC}"
-    # Remove the invalid config
-    docker exec "$CONTAINER_NAME" rm -f /etc/nginx/maintenance.d/maintenance.conf
+    # Remove the invalid configs
+    docker exec "$NGINX_CONTAINER" rm -f /etc/nginx/maintenance.d/maintenance.conf
+    if [ -n "$DJANGO_CONTAINER" ]; then
+        docker exec "$DJANGO_CONTAINER" rm -f /tmp/maintenance_mode.json
+    fi
     exit 1
 fi
