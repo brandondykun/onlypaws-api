@@ -106,6 +106,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "apps.core_app.middleware.CustomCsrfMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "apps.core_app.middleware.MaintenanceModeMiddleware",  # After auth for admin bypass
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "apps.core_app.middleware.ProfileAuthenticationMiddleware",

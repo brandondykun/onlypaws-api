@@ -24,11 +24,13 @@ _The unapologetically pet friendly social media app._
 11. [Generate Combined Post Embeddings](#generate-combined-post-embeddings)
 12. [Verify and Test HNSW Indexes](#verify-and-test-hnsw-indexes)
 13. [Assign PostImage Order](#assign-postimage-order)
-14. [Nginx Configuration and SSL Setup](#nginx-configuration-and-ssl-setup)
-15. [Image Data](#image-data)
-16. [Commits](#commits)
-17. [Environment Variables](#environment-variables)
-18. [Dev and E2E Images](#dev-and-e2e-images)
+14. [Maintenance Mode](#maintenance-mode)
+15. [Deploy with Maintenance](#deploy-with-maintenance)
+16. [Nginx Configuration and SSL Setup](#nginx-configuration-and-ssl-setup)
+17. [Image Data](#image-data)
+18. [Commits](#commits)
+19. [Environment Variables](#environment-variables)
+20. [Dev and E2E Images](#dev-and-e2e-images)
 
 ---
 
@@ -45,6 +47,14 @@ Several scripts are available to help with the development process.
 [flush_expired_tokens.sh](#flush-expired-jwt-tokens) - Flushes expired JWT tokens from the database.
 
 [load_db.sh](#clear-and-reload-database) - Clears and reloads the database with the fixtures for the given environment.
+
+[deploy-with-maintenance.sh](#deploy-with-maintenance) - Deploys the application with automatic maintenance mode handling.
+
+[maintenance-on.sh](#maintenance-mode) - Enables maintenance mode on the nginx reverse proxy.
+
+[maintenance-off.sh](#maintenance-mode) - Disables maintenance mode on the nginx reverse proxy.
+
+[maintenance-status.sh](#maintenance-mode) - Checks the current maintenance mode status.
 
 [restart.sh](#restarting-the-api) - Restarts the API service for the given environment.
 
@@ -585,6 +595,96 @@ scripts/assign_postimage_order.sh staging
 - `--dry-run`: Preview what changes would be made without actually updating the database
 
 **Note:** It's recommended to run with `--dry-run` first to preview the changes before applying them.
+
+## Maintenance Mode
+
+These scripts control maintenance mode for the nginx reverse proxy. When enabled, nginx returns a 503 Service Unavailable response for most endpoints while keeping the status endpoint accessible for health checks.
+
+### Enable Maintenance Mode
+
+```bash
+# Enable maintenance mode with default message
+scripts/maintenance-on.sh
+
+# Enable with custom message
+scripts/maintenance-on.sh -m "Upgrading database. Back in 30 minutes."
+
+# Enable with estimated end time
+scripts/maintenance-on.sh -e "2024-01-15T14:00:00Z"
+
+# Specify a different nginx container
+scripts/maintenance-on.sh -c my-nginx-container
+```
+
+**Options:**
+- `-m, --message MSG`: Custom maintenance message
+- `-e, --end-time TIME`: Estimated end time (ISO format)
+- `-c, --container NAME`: Docker container name (default: only-paws-nginx-1)
+
+### Disable Maintenance Mode
+
+```bash
+# Disable maintenance mode
+scripts/maintenance-off.sh
+
+# Specify a different nginx container
+scripts/maintenance-off.sh -c my-nginx-container
+```
+
+**Options:**
+- `-c, --container NAME`: Docker container name (default: only-paws-nginx-1)
+
+### Check Maintenance Status
+
+```bash
+# Check current maintenance mode status
+scripts/maintenance-status.sh
+
+# Specify a different nginx container
+scripts/maintenance-status.sh -c my-nginx-container
+```
+
+**Options:**
+- `-c, --container NAME`: Docker container name (default: only-paws-nginx-1)
+
+**Note:** The status endpoint `/api/v1/config/status/` remains accessible during maintenance mode for health monitoring.
+
+
+## Deploy with Maintenance
+
+This script automates the deployment process with proper maintenance mode handling. It enables maintenance mode before deployment and disables it after a successful health check.
+
+```bash
+# base command example
+scripts/deploy-with-maintenance.sh <dev|staging|prod> [OPTIONS]
+
+# Deploy to staging environment
+scripts/deploy-with-maintenance.sh staging
+
+# Deploy to production environment
+scripts/deploy-with-maintenance.sh prod
+
+# Deploy with extended health check timeout
+scripts/deploy-with-maintenance.sh prod --timeout 180
+
+# Deploy without enabling maintenance mode (for minor updates)
+scripts/deploy-with-maintenance.sh staging --skip-maintenance
+```
+
+**Options:**
+- `--skip-maintenance`: Skip maintenance mode (useful for minor updates that don't require downtime)
+- `--timeout SECONDS`: Health check timeout in seconds (default: 120)
+
+**Deployment Steps:**
+1. Enable maintenance mode (unless `--skip-maintenance` or dev environment)
+2. Stop existing containers
+3. Rebuild the application
+4. Start containers
+5. Run health checks against the status endpoint
+6. Disable maintenance mode (if health check passes)
+
+**Note:** If the health check fails, maintenance mode remains enabled and the script exits with an error. You must manually investigate and disable maintenance mode once the issue is resolved.
+
 
 ## Nginx Configuration and SSL Setup
 
