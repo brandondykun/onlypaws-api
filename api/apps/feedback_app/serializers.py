@@ -77,7 +77,8 @@ class FeedbackCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Feedback
-        fields = ["title", "description", "ticket_type", "app_version", "device_info"]
+        fields = ["id", "title", "description", "ticket_type", "app_version", "device_info", "created_at", "updated_at"]
+        read_only_fields = ["id", "created_at", "updated_at"]
 
     def validate_title(self, value):
         """Validate title length and content"""
@@ -115,10 +116,7 @@ class FeedbackCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("device_info is too large (max 1KB).")
         
         # Validate allowed keys to prevent arbitrary data storage
-        allowed_keys = {
-            'platform', 'version', 'model', 'os_version', 'app_build', 
-            'device_id', 'screen_resolution', 'memory', 'storage'
-        }
+        allowed_keys = {"device_model", "manufacturer", "os_name", "os_version"}
         invalid_keys = set(value.keys()) - allowed_keys
         if invalid_keys:
             raise serializers.ValidationError(

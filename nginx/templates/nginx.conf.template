@@ -45,7 +45,52 @@ server {
     # Set maximum allowed size for client uploads
     client_max_body_size 20M;
 
+    # Maintenance mode check - include flag
+    set $maintenance_mode 0;
+    include /etc/nginx/conf.d/maintenance.conf*;
+
+    # Status endpoint - ALWAYS accessible, even during maintenance
+    # This provides a fallback response if Django is down
+    location = /api/v1/config/status/ {
+        # Try to proxy to Django first
+        proxy_pass http://only-paws-app;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # If Django is unavailable, return a maintenance response
+        proxy_intercept_errors on;
+        error_page 502 503 504 = @status_fallback;
+    }
+
+    # Fallback status response when Django is unreachable
+    location @status_fallback {
+        default_type application/json;
+        add_header Retry-After 300 always;
+
+        # Check if maintenance mode is enabled
+        if ($maintenance_mode = 1) {
+            return 200 '{"status": "maintenance", "message": "The system is currently undergoing maintenance. Please try again later.", "estimated_end_time": null}';
+        }
+
+        # Django is down but not in maintenance mode
+        return 503 '{"status": "maintenance", "message": "Service temporarily unavailable. Please try again shortly.", "estimated_end_time": null}';
+    }
+
+    # Maintenance mode handler
+    location @maintenance {
+        default_type application/json;
+        add_header Retry-After 300 always;
+        return 503 '{"status": "maintenance", "message": "The system is currently undergoing maintenance. Please try again later.", "estimated_end_time": null}';
+    }
+
     location / {
+        # Check maintenance mode for non-status endpoints
+        if ($maintenance_mode = 1) {
+            return 503 '{"status": "maintenance", "message": "The system is currently undergoing maintenance. Please try again later.", "estimated_end_time": null}';
+        }
+
         proxy_pass http://only-paws-app;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
@@ -63,6 +108,11 @@ server {
 
     # WebSocket endpoints
     location /ws/ {
+        # Check maintenance mode
+        if ($maintenance_mode = 1) {
+            return 503 '{"status": "maintenance", "message": "The system is currently undergoing maintenance. Please try again later.", "estimated_end_time": null}';
+        }
+
         proxy_pass http://only-paws-app;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
@@ -77,6 +127,11 @@ server {
 
     # API endpoints - no CSRF needed
     location /api/ {
+        # Check maintenance mode (status endpoint is handled above with exact match)
+        if ($maintenance_mode = 1) {
+            return 503 '{"status": "maintenance", "message": "The system is currently undergoing maintenance. Please try again later.", "estimated_end_time": null}';
+        }
+
         proxy_pass http://only-paws-app;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
@@ -84,7 +139,7 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 
-    # Admin interface - requires CSRF
+    # Admin interface - requires CSRF (accessible during maintenance for admin tasks)
     location /admin/ {
         proxy_pass http://only-paws-app;
         proxy_set_header Host $host;

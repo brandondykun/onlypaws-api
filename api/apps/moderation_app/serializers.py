@@ -17,7 +17,7 @@ class PostReportPreviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PostReport
-        fields = ["id", "reason", "status"]
+        fields = ["id", "reason", "status", "created_at", "updated_at", "details"]
 
 
 class CreatePostReportSerializer(serializers.ModelSerializer):

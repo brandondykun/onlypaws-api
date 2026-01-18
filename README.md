@@ -19,13 +19,18 @@ _The unapologetically pet friendly social media app._
 6. [Creating Fixture for Individual Model](#creating-fixture-for-individual-model)
 7. [Creating Fixtures for All Models](#creating-fixtures-for-all-models)
 8. [Clear and Reload Database](#clear-and-reload-database)
-9. [Generate Image Embeddings](#generate-image-embeddings)
-10. [Assign PostImage Order](#assign-postimage-order)
-11. [Nginx Configuration and SSL Setup](#nginx-configuration-and-ssl-setup)
-12. [Image Data](#image-data)
-13. [Commits](#commits)
-14. [Environment Variables](#environment-variables)
-15. [Dev and E2E Images](#dev-and-e2e-images)
+9. [Flush Expired JWT Tokens](#flush-expired-jwt-tokens)
+10. [Generate Image Embeddings](#generate-image-embeddings)
+11. [Generate Combined Post Embeddings](#generate-combined-post-embeddings)
+12. [Verify and Test HNSW Indexes](#verify-and-test-hnsw-indexes)
+13. [Assign PostImage Order](#assign-postimage-order)
+14. [Maintenance Mode](#maintenance-mode)
+15. [Deploy with Maintenance](#deploy-with-maintenance)
+16. [Nginx Configuration and SSL Setup](#nginx-configuration-and-ssl-setup)
+17. [Image Data](#image-data)
+18. [Commits](#commits)
+19. [Environment Variables](#environment-variables)
+20. [Dev and E2E Images](#dev-and-e2e-images)
 
 ---
 
@@ -39,7 +44,17 @@ Several scripts are available to help with the development process.
 
 [create_model_fixture.sh](#creating-fixture-for-individual-model) - Creates a fixture for a single model in the given environment.
 
+[flush_expired_tokens.sh](#flush-expired-jwt-tokens) - Flushes expired JWT tokens from the database.
+
 [load_db.sh](#clear-and-reload-database) - Clears and reloads the database with the fixtures for the given environment.
+
+[deploy-with-maintenance.sh](#deploy-with-maintenance) - Deploys the application with automatic maintenance mode handling.
+
+[maintenance-on.sh](#maintenance-mode) - Enables maintenance mode on the nginx reverse proxy.
+
+[maintenance-off.sh](#maintenance-mode) - Disables maintenance mode on the nginx reverse proxy.
+
+[maintenance-status.sh](#maintenance-mode) - Checks the current maintenance mode status.
 
 [restart.sh](#restarting-the-api) - Restarts the API service for the given environment.
 
@@ -241,6 +256,35 @@ scripts/load_db.sh staging
 - **staging**: Refresh staging environment data
 
 
+## Flush Expired JWT Tokens
+
+This script flushes expired JWT tokens from the database. It removes expired tokens from the `OutstandingToken` and `BlacklistedToken` tables to prevent the token tables from growing indefinitely.
+
+With token rotation enabled, every time a user refreshes their token, the old token is blacklisted. Over time, these expired blacklisted tokens accumulate in the database. Running this script periodically cleans up these expired entries.
+
+```bash
+# base command example
+scripts/flush_expired_tokens.sh <dev|staging|test|e2e|prod>
+
+# flush expired tokens in dev environment
+scripts/flush_expired_tokens.sh dev
+
+# flush expired tokens in staging environment
+scripts/flush_expired_tokens.sh staging
+
+# flush expired tokens in prod environment
+scripts/flush_expired_tokens.sh prod
+```
+
+**Note:** This cleanup also runs automatically via a scheduled Celery Beat task daily at 4:00 AM UTC. Use this script for manual cleanup when needed.
+
+**When to Use:**
+- After enabling token blacklisting for the first time
+- When troubleshooting database size issues related to token tables
+- During maintenance windows for immediate cleanup
+- To verify the scheduled task is working correctly
+
+
 ## Generate Image Embeddings
 
 The image similarity search feature requires embeddings to be generated for images. Use the `generate_embeddings` management command to create embeddings for PostImage instances.
@@ -284,6 +328,185 @@ docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.overrid
 # Synchronous processing (useful for development/debugging)
 docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py generate_embeddings --sync
 ```
+
+## Generate Combined Post Embeddings
+
+Combined embeddings merge all image embeddings with the post caption for multimodal similarity search. These embeddings enable finding similar posts based on both visual and textual content.
+
+**Prerequisites:** Posts must have image embeddings generated first. Run the `generate_embeddings` command before generating combined embeddings.
+
+```bash
+# Generate combined embeddings for all posts that don't have them (async, recommended)
+docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py generate_combined_embeddings
+
+# Force regenerate all combined embeddings (overwrites existing ones)
+docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py generate_combined_embeddings --force
+
+# Generate combined embedding for a specific post
+docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py generate_combined_embeddings --post-id 5
+
+# Process in smaller batches (default: 50)
+docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py generate_combined_embeddings --batch-size 25
+
+# Synchronous processing for debugging
+docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py generate_combined_embeddings --sync
+
+# Increase countdown for posts with many images (gives more time for image embeddings)
+docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py generate_combined_embeddings --countdown 30
+```
+
+**Options:**
+- `--force`: Regenerate combined embeddings even if they already exist
+- `--post-id <ID>`: Process a specific post only
+- `--batch-size <SIZE>`: Number of posts to process in each batch (default: 50)
+- `--async`: Use Celery for asynchronous processing (default, recommended)
+- `--sync`: Process synchronously for development/debugging
+- `--countdown <SECONDS>`: Wait time before processing in async mode (default: 5)
+
+**How It Works:**
+1. Averages all image embeddings from the post
+2. Generates a text embedding from the post caption using CLIP
+3. Combines them with weighted average (70% images, 30% text)
+4. L2 normalizes the result for cosine similarity search
+
+**Common Use Cases:**
+- Initial setup after implementing combined embeddings feature
+- Regenerating embeddings after updating the CLIP model
+- Fixing failed embeddings (use `--force` on specific post)
+- When caption is updated (automatically triggered, but can be manually run)
+
+**Note:** Combined embeddings are automatically generated when new posts are created. This command is mainly for:
+- Existing posts created before the feature was added
+- Posts where automatic generation failed
+- Bulk regeneration after model updates
+
+**Troubleshooting:**
+- If posts fail, ensure all images have embeddings first: `generate_embeddings`
+- Check that Celery workers are running: `docker logs onlypaws_celery_embeddings -f`
+- Use `--sync` mode to see detailed error messages during development
+
+## Verify and Test HNSW Indexes
+
+HNSW (Hierarchical Navigable Small World) indexes are used to accelerate vector similarity searches for finding similar posts and images. These management commands help verify that the indexes are properly configured and performing efficiently.
+
+### Verify HNSW Indexes
+
+The `verify_hnsw_indexes` command checks that HNSW indexes exist, are configured correctly, and provides statistics about their usage.
+
+```bash
+# Verify HNSW indexes are properly configured
+docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py verify_hnsw_indexes
+```
+
+**What It Checks:**
+- ✅ Verifies HNSW indexes exist in the database
+- ✅ Confirms indexes are using HNSW index type
+- ✅ Validates HNSW parameters (m, ef_construction) are configured
+- ✅ Shows index statistics (size, usage, tuples read/fetched)
+- ✅ Displays embedding counts for posts and images
+- ✅ Analyzes query plan to confirm index usage in similarity searches
+
+**Sample Output:**
+```
+================================================================================
+HNSW INDEX VERIFICATION
+================================================================================
+
+================================================================================
+CHECKING HNSW INDEXES
+================================================================================
+
+✅ Found 2 HNSW index(es):
+
+Index: post_comb_emb_hnsw_idx
+  Table: public.posts_post
+  Definition: CREATE INDEX post_comb_emb_hnsw_idx ON public.posts_post USING hnsw (combined_embedding vector_cosine_ops) WITH (m='32', ef_construction='128')
+  ✓ Using HNSW index type
+  ✓ HNSW parameters configured
+
+Index: postimg_emb_hnsw_idx
+  Table: public.posts_postimage
+  Definition: CREATE INDEX postimg_emb_hnsw_idx ON public.posts_postimage USING hnsw (embedding vector_cosine_ops) WITH (m='16', ef_construction='64')
+  ✓ Using HNSW index type
+  ✓ HNSW parameters configured
+```
+
+**When to Use:**
+- After running migrations to confirm indexes were created
+- When troubleshooting slow similarity search queries
+- To verify index configuration after database changes
+- To check embedding generation progress
+
+### Test HNSW Index Performance
+
+The `test_hnsw_performance` command measures the actual performance of similarity searches and confirms that HNSW indexes are being used efficiently.
+
+```bash
+# Test HNSW index performance (default: 3 iterations)
+docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py test_hnsw_performance
+
+# Run more iterations for better averages
+docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py test_hnsw_performance --iterations 5
+
+# Show detailed results including sample matches
+docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py test_hnsw_performance --verbose
+```
+
+**Options:**
+- `--iterations <N>`: Number of test runs to average (default: 3)
+- `--verbose`: Show detailed results including individual iteration times and sample results
+
+**What It Tests:**
+- 🚀 Measures query execution time over multiple iterations
+- 📊 Calculates average, min, and max query times
+- 🔍 Shows the query execution plan
+- ✅ Confirms HNSW index is being used (not sequential scan)
+- 📈 Provides performance context and recommendations
+
+**Sample Output:**
+```
+================================================================================
+HNSW INDEX PERFORMANCE TEST
+================================================================================
+
+Testing with Post ID: 42
+Total posts with embeddings: 1250
+
+================================================================================
+PERFORMANCE TESTS
+================================================================================
+
+Query Performance:
+  Average: 23.45ms
+  Min: 21.12ms
+  Max: 28.67ms
+
+✅ Excellent performance!
+
+================================================================================
+QUERY EXECUTION PLAN
+================================================================================
+
+Limit  (cost=...)
+  ->  Index Scan using post_comb_emb_hnsw_idx on posts_post  (cost=...)
+        Order By: (combined_embedding <=> '...'::vector)
+        Filter: (combined_embedding IS NOT NULL)
+
+--------------------------------------------------------------------------------
+✅ HNSW index IS being used!
+```
+
+**Performance Guidelines:**
+- **< 50ms**: ✅ Excellent performance
+- **50-200ms**: ✅ Good performance
+- **200-1000ms**: ⚠️ Moderate performance
+- **> 1000ms**: ⚠️ Slow performance - index may not be used
+
+**Note:** For small datasets (< 1000 posts), PostgreSQL may use a sequential scan instead of the index, as it can be more efficient. The index will automatically be used at scale.
+
+**Prerequisites:**
+- Combined embeddings must be generated first (see [Generate Combined Post Embeddings](#generate-combined-post-embeddings))
+- HNSW indexes must be created via migrations
 
 ## Background Processing with Celery and Redis
 
@@ -372,6 +595,96 @@ scripts/assign_postimage_order.sh staging
 - `--dry-run`: Preview what changes would be made without actually updating the database
 
 **Note:** It's recommended to run with `--dry-run` first to preview the changes before applying them.
+
+## Maintenance Mode
+
+These scripts control maintenance mode for the nginx reverse proxy. When enabled, nginx returns a 503 Service Unavailable response for most endpoints while keeping the status endpoint accessible for health checks.
+
+### Enable Maintenance Mode
+
+```bash
+# Enable maintenance mode with default message
+scripts/maintenance-on.sh
+
+# Enable with custom message
+scripts/maintenance-on.sh -m "Upgrading database. Back in 30 minutes."
+
+# Enable with estimated end time
+scripts/maintenance-on.sh -e "2024-01-15T14:00:00Z"
+
+# Specify a different nginx container
+scripts/maintenance-on.sh -c my-nginx-container
+```
+
+**Options:**
+- `-m, --message MSG`: Custom maintenance message
+- `-e, --end-time TIME`: Estimated end time (ISO format)
+- `-c, --container NAME`: Docker container name (default: only-paws-nginx-1)
+
+### Disable Maintenance Mode
+
+```bash
+# Disable maintenance mode
+scripts/maintenance-off.sh
+
+# Specify a different nginx container
+scripts/maintenance-off.sh -c my-nginx-container
+```
+
+**Options:**
+- `-c, --container NAME`: Docker container name (default: only-paws-nginx-1)
+
+### Check Maintenance Status
+
+```bash
+# Check current maintenance mode status
+scripts/maintenance-status.sh
+
+# Specify a different nginx container
+scripts/maintenance-status.sh -c my-nginx-container
+```
+
+**Options:**
+- `-c, --container NAME`: Docker container name (default: only-paws-nginx-1)
+
+**Note:** The status endpoint `/api/v1/config/status/` remains accessible during maintenance mode for health monitoring.
+
+
+## Deploy with Maintenance
+
+This script automates the deployment process with proper maintenance mode handling. It enables maintenance mode before deployment and disables it after a successful health check.
+
+```bash
+# base command example
+scripts/deploy-with-maintenance.sh <dev|staging|prod> [OPTIONS]
+
+# Deploy to staging environment
+scripts/deploy-with-maintenance.sh staging
+
+# Deploy to production environment
+scripts/deploy-with-maintenance.sh prod
+
+# Deploy with extended health check timeout
+scripts/deploy-with-maintenance.sh prod --timeout 180
+
+# Deploy without enabling maintenance mode (for minor updates)
+scripts/deploy-with-maintenance.sh staging --skip-maintenance
+```
+
+**Options:**
+- `--skip-maintenance`: Skip maintenance mode (useful for minor updates that don't require downtime)
+- `--timeout SECONDS`: Health check timeout in seconds (default: 120)
+
+**Deployment Steps:**
+1. Enable maintenance mode (unless `--skip-maintenance` or dev environment)
+2. Stop existing containers
+3. Rebuild the application
+4. Start containers
+5. Run health checks against the status endpoint
+6. Disable maintenance mode (if health check passes)
+
+**Note:** If the health check fails, maintenance mode remains enabled and the script exits with an error. You must manually investigate and disable maintenance mode once the issue is resolved.
+
 
 ## Nginx Configuration and SSL Setup
 

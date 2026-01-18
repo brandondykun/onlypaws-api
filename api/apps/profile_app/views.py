@@ -124,6 +124,8 @@ class RetrieveUpdateDestroyProfileView(generics.RetrieveAPIView, generics.Update
                 # forcibly invalidate the prefetch cache on the instance.
                 instance._prefetched_objects_cache = {}
             
+            # Refresh instance from database to get updated values
+            instance.refresh_from_db()
             instance_serializer = ProfileSerializer(instance)
             logger.info(f"Profile {profile_id} updated successfully")
             return Response(instance_serializer.data)

@@ -13,6 +13,7 @@ class NotificationType(models.TextChoices):
     COMMENT_REPLY = 'comment_reply', _('Comment Reply')
     FOLLOW = 'follow', _('Follow')
     MENTION = 'mention', _('Mention')
+    TAGGED_POST = 'tagged_post', _('Tagged in Post')
     SYSTEM = 'system', _('System')
 
 

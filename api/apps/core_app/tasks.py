@@ -60,11 +60,7 @@ def generate_image_embedding_task(self, post_image_id: int):
             }
 
         # Check if embedding already exists (avoid duplicate work)
-        if (
-            post_image.embedding is not None
-            and hasattr(post_image.embedding, "__len__")
-            and len(post_image.embedding) > 0
-        ):
+        if post_image.has_embedding():
             logger.info(f"PostImage {post_image_id} already has an embedding, skipping")
             return {
                 "success": True,
@@ -115,6 +111,149 @@ def generate_image_embedding_task(self, post_image_id: int):
                 "success": False,
                 "error": f"Max retries exceeded: {str(exc)}",
                 "post_image_id": post_image_id,
+                "retries": self.request.retries,
+            }
+
+
+@shared_task(bind=True, max_retries=5)
+def generate_combined_post_embedding_task(self, post_id: int):
+    """
+    Background task to generate combined embedding for a Post.
+
+    Args:
+        post_id: ID of the Post instance to process
+
+    Returns:
+        Dict with success status and details
+
+    Retry Logic:
+    - Check if all PostImage embeddings exist
+    - If not, retry with exponential backoff: 10s, 20s, 40s, 80s, 160s
+    - Max delay capped at 300s
+    """
+    try:
+        # Import here to avoid circular imports
+        from apps.posts_app.models import Post
+        from .services import get_embedding_service
+
+        logger.info(f"Starting combined embedding generation for Post {post_id}")
+
+        # Get the Post instance
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            logger.warning(
+                f"Post {post_id} does not exist (attempt {self.request.retries + 1})"
+            )
+
+            # If this is a new Post, it might not be committed to DB yet
+            # Retry with exponential backoff for a few attempts
+            if self.request.retries < self.max_retries:
+                retry_delay = min(300, 10 * (2**self.request.retries))  # 10s, 20s, 40s, 80s, 160s
+                logger.info(f"Retrying Post {post_id} in {retry_delay} seconds...")
+                raise self.retry(exc=None, countdown=retry_delay, max_retries=self.max_retries)
+
+            # After all retries, return error
+            logger.error(f"Post {post_id} does not exist after {self.max_retries} retries")
+            return {
+                "success": False,
+                "error": f"Post {post_id} does not exist after {self.max_retries} retries",
+                "post_id": post_id,
+                "retries": self.request.retries,
+            }
+
+        # Check if combined embedding already exists (avoid duplicate work)
+        if post.has_combined_embedding():
+            logger.info(f"Post {post_id} already has a combined embedding, skipping")
+            return {
+                "success": True,
+                "message": "Combined embedding already exists",
+                "post_id": post_id,
+                "skipped": True,
+            }
+
+        # Get all PostImage instances and check if they have embeddings
+        post_images = post.images.all()
+        if not post_images.exists():
+            logger.error(f"Post {post_id} has no images")
+            return {
+                "success": False,
+                "error": "Post has no images",
+                "post_id": post_id,
+            }
+
+        # Check if all images have embeddings
+        images_with_embeddings = []
+        images_without_embeddings = []
+        for img in post_images:
+            if not img.has_embedding():
+                images_without_embeddings.append(img.id)
+            else:
+                images_with_embeddings.append(img.id)
+
+        # If not all images have embeddings yet, retry with exponential backoff
+        if images_without_embeddings:
+            if self.request.retries < self.max_retries:
+                retry_delay = min(300, 10 * (2**self.request.retries))  # 10s, 20s, 40s, 80s, 160s
+                logger.info(
+                    f"Post {post_id}: {len(images_without_embeddings)} of {len(post_images)} "
+                    f"images still need embeddings. Retrying in {retry_delay} seconds... "
+                    f"(attempt {self.request.retries + 1}/{self.max_retries})"
+                )
+                raise self.retry(exc=None, countdown=retry_delay, max_retries=self.max_retries)
+
+            # After max retries, return error
+            logger.error(
+                f"Post {post_id}: {len(images_without_embeddings)} images still don't have "
+                f"embeddings after {self.max_retries} retries: {images_without_embeddings}"
+            )
+            return {
+                "success": False,
+                "error": "Not all images have embeddings after max retries",
+                "post_id": post_id,
+                "images_without_embeddings": images_without_embeddings,
+                "retries": self.request.retries,
+            }
+
+        # Generate the combined embedding
+        embedding_service = get_embedding_service()
+        success = embedding_service.generate_combined_embedding_for_post(post)
+
+        if success:
+            logger.info(f"Successfully generated combined embedding for Post {post_id}")
+            return {
+                "success": True,
+                "message": "Combined embedding generated successfully",
+                "post_id": post_id,
+                "num_images": len(images_with_embeddings),
+                "model_used": embedding_service.model_name,
+                "generated_at": (
+                    post.combined_embedding_generated_at.isoformat()
+                    if post.combined_embedding_generated_at
+                    else None
+                ),
+            }
+        else:
+            logger.error(f"Failed to generate combined embedding for Post {post_id}")
+            return {
+                "success": False,
+                "error": "Combined embedding generation failed",
+                "post_id": post_id,
+            }
+
+    except Exception as exc:
+        logger.error(f"Error in combined embedding task for Post {post_id}: {str(exc)}")
+
+        # Retry with exponential backoff
+        try:
+            retry_delay = min(300, 10 * (2**self.request.retries))  # 10s, 20s, 40s, 80s, 160s
+            raise self.retry(exc=exc, countdown=retry_delay)
+        except self.MaxRetriesExceededError:
+            logger.error(f"Max retries exceeded for Post {post_id}")
+            return {
+                "success": False,
+                "error": f"Max retries exceeded: {str(exc)}",
+                "post_id": post_id,
                 "retries": self.request.retries,
             }
 
@@ -266,3 +405,45 @@ def cleanup_expired_task_results():
     except Exception as exc:
         logger.error(f"Error in cleanup task: {str(exc)}")
         return {"success": False, "error": str(exc)}
+
+
+@shared_task
+def flush_expired_tokens_task():
+    """
+    Flush expired JWT tokens from the blacklist.
+    
+    This task runs the Django management command `flushexpiredtokens` provided by
+    djangorestframework-simplejwt's token_blacklist app. It removes:
+    - Expired tokens from the OutstandingToken table
+    - Associated entries from the BlacklistedToken table
+    
+    This should be run daily to prevent the token tables from growing indefinitely.
+    
+    Returns:
+        dict: Success status and details about the cleanup
+    """
+    logger.info("Starting flush of expired JWT tokens")
+    
+    try:
+        from django.core.management import call_command
+        from io import StringIO
+        
+        # Capture command output
+        out = StringIO()
+        call_command('flushexpiredtokens', stdout=out, verbosity=1)
+        output = out.getvalue()
+        
+        logger.info(f"Successfully flushed expired tokens: {output.strip() or 'completed'}")
+        
+        return {
+            "success": True,
+            "message": "Expired tokens flushed successfully",
+            "output": output.strip(),
+        }
+        
+    except Exception as exc:
+        logger.error(f"Error flushing expired tokens: {str(exc)}")
+        return {
+            "success": False,
+            "error": str(exc),
+        }

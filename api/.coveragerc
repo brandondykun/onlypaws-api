@@ -8,3 +8,8 @@ omit =
     */*/*/__init.py
     apps/core_app/management/*
     core/celery.py
+    /tmp/*
+
+[report]
+# Ignore warnings about files that can't be found (like PyTorch temp files)
+ignore_errors = True

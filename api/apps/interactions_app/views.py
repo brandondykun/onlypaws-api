@@ -194,7 +194,7 @@ class ListCommentRepliesView(generics.ListAPIView):
     pagination_class = CommentRepliesPagination
 
     def get_queryset(self):
-        comment_id = self.kwargs.get("comment_id")
+        comment_id = self.kwargs.get("pk")
         replies = Comment.objects.filter(Q(parent_comment=comment_id)).order_by(
             "created_at"
         )

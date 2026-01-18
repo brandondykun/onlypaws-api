@@ -8,6 +8,7 @@ from .util import (
     FEEDBACK_LIST_URL,
     FEEDBACK_MY_TICKETS_URL,
     FEEDBACK_ASSIGNED_TO_ME_URL,
+    FEEDBACK_ALL_TICKETS_URL,
     FEEDBACK_COMMENTS_LIST_URL,
     feedback_detail_url,
     feedback_comments_detail_url,
@@ -46,7 +47,7 @@ class FeedbackAPITest(TestCase):
             "description": "Please add dark mode",
             "ticket_type": "feature",
             "app_version": "1.0.0",
-            "device_info": {"platform": "iOS", "version": "15.0"},
+            "device_info": {"device_model": "iPhone 15", "manufacturer": "Apple", "os_name": "iOS", "os_version": "15.0"},
         }
 
         response = self.client.post(FEEDBACK_LIST_URL, data, format="json")
@@ -89,7 +90,27 @@ class FeedbackAPITest(TestCase):
         self.assertEqual(response.data["results"][0]["title"], "Test Bug Report")
 
     def test_list_feedback_staff_user(self):
-        """Test that staff users can see all feedback"""
+        """Test that staff users only see their own feedback in list action"""
+        # Create feedback from another user
+        other_user = User.objects.create_user(
+            email="other@example.com", password="testpass123"
+        )
+        Feedback.objects.create(
+            title="Other User Feedback",
+            description="Staff should not see this in list",
+            ticket_type="general",
+            reporter=other_user,
+        )
+
+        self.client.force_authenticate(user=self.staff_user)
+        response = self.client.get(FEEDBACK_LIST_URL)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # Staff should only see their own feedback in list (none in this case)
+        self.assertEqual(len(response.data["results"]), 0)
+
+    def test_all_tickets_staff_user(self):
+        """Test that staff users can see all feedback via all_tickets action"""
         # Create feedback from another user
         other_user = User.objects.create_user(
             email="other@example.com", password="testpass123"
@@ -102,10 +123,17 @@ class FeedbackAPITest(TestCase):
         )
 
         self.client.force_authenticate(user=self.staff_user)
-        response = self.client.get(FEEDBACK_LIST_URL)
+        response = self.client.get(FEEDBACK_ALL_TICKETS_URL)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 2)
+
+    def test_all_tickets_regular_user_forbidden(self):
+        """Test that regular users cannot access all_tickets action"""
+        self.client.force_authenticate(user=self.regular_user)
+        response = self.client.get(FEEDBACK_ALL_TICKETS_URL)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_update_feedback_regular_user_forbidden(self):
         """Test that regular users cannot update feedback"""
@@ -213,14 +241,14 @@ class FeedbackAPITest(TestCase):
             status="in_progress",
         )
 
-        # Filter by open
-        response = self.client.get(FEEDBACK_LIST_URL, {"status": "open"})
+        # Filter by open (using all_tickets to see all feedback)
+        response = self.client.get(FEEDBACK_ALL_TICKETS_URL, {"status": "open"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
         self.assertEqual(response.data["results"][0]["status"], "open")
 
         # Filter by in_progress
-        response = self.client.get(FEEDBACK_LIST_URL, {"status": "in_progress"})
+        response = self.client.get(FEEDBACK_ALL_TICKETS_URL, {"status": "in_progress"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
         self.assertEqual(response.data["results"][0]["status"], "in_progress")
@@ -245,14 +273,14 @@ class FeedbackAPITest(TestCase):
             priority="low",
         )
 
-        # Filter by high priority
-        response = self.client.get(FEEDBACK_LIST_URL, {"priority": "high"})
+        # Filter by high priority (using all_tickets to see all feedback)
+        response = self.client.get(FEEDBACK_ALL_TICKETS_URL, {"priority": "high"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
         self.assertEqual(response.data["results"][0]["priority"], "high")
 
         # Filter by medium priority (default for self.feedback)
-        response = self.client.get(FEEDBACK_LIST_URL, {"priority": "medium"})
+        response = self.client.get(FEEDBACK_ALL_TICKETS_URL, {"priority": "medium"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
         self.assertEqual(response.data["results"][0]["priority"], "medium")
@@ -278,9 +306,9 @@ class FeedbackAPITest(TestCase):
 
         self.client.force_authenticate(user=self.staff_user)
 
-        # Filter by staff_user
+        # Filter by staff_user (using all_tickets to see all feedback)
         response = self.client.get(
-            FEEDBACK_LIST_URL, {"assignee": str(self.staff_user.id)}
+            FEEDBACK_ALL_TICKETS_URL, {"assignee": str(self.staff_user.id)}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
@@ -288,7 +316,7 @@ class FeedbackAPITest(TestCase):
 
         # Filter by staff_user2
         response = self.client.get(
-            FEEDBACK_LIST_URL, {"assignee": str(staff_user2.id)}
+            FEEDBACK_ALL_TICKETS_URL, {"assignee": str(staff_user2.id)}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
@@ -298,13 +326,13 @@ class FeedbackAPITest(TestCase):
         """Test filtering with invalid assignee ID returns empty queryset"""
         self.client.force_authenticate(user=self.staff_user)
 
-        # Try with non-numeric assignee
-        response = self.client.get(FEEDBACK_LIST_URL, {"assignee": "invalid"})
+        # Try with non-numeric assignee (using all_tickets to test filtering)
+        response = self.client.get(FEEDBACK_ALL_TICKETS_URL, {"assignee": "invalid"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 0)
 
         # Try with non-existent ID
-        response = self.client.get(FEEDBACK_LIST_URL, {"assignee": "99999"})
+        response = self.client.get(FEEDBACK_ALL_TICKETS_URL, {"assignee": "99999"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # Should return results if there are any tickets with that assignee (none in this case)
         self.assertEqual(len(response.data["results"]), 0)
@@ -433,9 +461,9 @@ class FeedbackAPITest(TestCase):
             status="open",
         )
 
-        # Filter by multiple parameters
+        # Filter by multiple parameters (using all_tickets to see all feedback)
         response = self.client.get(
-            FEEDBACK_LIST_URL,
+            FEEDBACK_ALL_TICKETS_URL,
             {
                 "ticket_type": "bug",
                 "priority": "high",

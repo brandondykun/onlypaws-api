@@ -8,6 +8,7 @@ FEEDBACK_LIST_URL = reverse("feedback_app:feedback-list")
 FEEDBACK_COMMENTS_LIST_URL = reverse("feedback_app:feedback-comments-list")
 FEEDBACK_ASSIGNED_TO_ME_URL = reverse("feedback_app:feedback-assigned-to-me")
 FEEDBACK_MY_TICKETS_URL = reverse("feedback_app:feedback-my-tickets")
+FEEDBACK_ALL_TICKETS_URL = reverse("feedback_app:feedback-all-tickets")
 
 
 def feedback_detail_url(feedback_id: int):

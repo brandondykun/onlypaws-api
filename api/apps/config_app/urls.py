@@ -5,5 +5,6 @@ app_name = 'config_app'
 
 urlpatterns = [
     path('ads/', views.GetAdsConfigView.as_view(), name='ads-config'),
+    path('status/', views.GetSystemStatusView.as_view(), name='system-status'),
 ]
 

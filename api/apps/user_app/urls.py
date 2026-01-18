@@ -1,9 +1,10 @@
 from django.urls import path
 from . import views
-
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
+from .authentication import (
+    CustomTokenObtainPairView,
+    CustomTokenRefreshView,
+    LogoutView,
+    LogoutAllView,
 )
 
 app_name = "user_app"
@@ -15,8 +16,12 @@ urlpatterns = [
         views.RetrieveUpdateUserView.as_view(),
         name="retrieve_update_user",
     ),
-    path("login/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
-    path("refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    # JWT Authentication endpoints with dual-client support (web + mobile)
+    # See authentication.py for detailed documentation on client-type behavior
+    path("login/", CustomTokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("refresh/", CustomTokenRefreshView.as_view(), name="token_refresh"),
+    path("logout/", LogoutView.as_view(), name="logout"),
+    path("logout-all/", LogoutAllView.as_view(), name="logout_all"),
     path("my-info/", views.RetrieveUserInfoView.as_view(), name="my_info"),
     path(
         "verify-email-token/",

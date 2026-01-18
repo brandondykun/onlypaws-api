@@ -6,7 +6,7 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from apps.core_app.utils import crop_square_and_resize
+from apps.core_app.utils import crop_to_aspect_ratio_and_resize
 
 
 class PetType(models.Model):
@@ -251,7 +251,7 @@ class ProfileImage(models.Model):
         )
         
         if should_process_image:
-            self.image = crop_square_and_resize(self.image, image_size=320)
+            self.image = crop_to_aspect_ratio_and_resize(self.image, aspect_ratio="1:1", base_width=320)
         
         super().save(*args, **kwargs)
 

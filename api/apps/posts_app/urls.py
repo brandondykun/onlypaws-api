@@ -21,6 +21,21 @@ urlpatterns = [
         name="destroy_post_image",
     ),
     path(
+        "post/image/tag/",
+        views.CreatePostImageTagView.as_view(),
+        name="create_post_image_tag",
+    ),
+    path(
+        "post/image/tag/<int:pk>/",
+        views.DestroyPostImageTagView.as_view(),
+        name="destroy_post_image_tag",
+    ),
+    path(
+        "profile/<int:id>/tagged/",
+        views.ListTaggedPostsView.as_view(),
+        name="list_tagged_posts",
+    ),
+    path(
         "post/saved/",
         views.ListCreateSavedPostView.as_view(),
         name="list_create_saved_post",
