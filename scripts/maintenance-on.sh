@@ -73,8 +73,9 @@ fi
 MAINTENANCE_CONFIG="set \$maintenance_mode 1;"
 
 # Create the maintenance config file inside the container
+# Using /etc/nginx/maintenance.d/ to avoid conflict with default conf.d includes at http level
 echo -e "${YELLOW}Creating maintenance flag...${NC}"
-docker exec "$CONTAINER_NAME" sh -c "echo '$MAINTENANCE_CONFIG' > /etc/nginx/conf.d/maintenance.conf"
+docker exec "$CONTAINER_NAME" sh -c "mkdir -p /etc/nginx/maintenance.d && echo '$MAINTENANCE_CONFIG' > /etc/nginx/maintenance.d/maintenance.conf"
 
 # Test nginx configuration
 echo -e "${YELLOW}Testing nginx configuration...${NC}"
@@ -93,6 +94,6 @@ if docker exec "$CONTAINER_NAME" nginx -t 2>&1; then
 else
     echo -e "${RED}Error: nginx configuration test failed${NC}"
     # Remove the invalid config
-    docker exec "$CONTAINER_NAME" rm -f /etc/nginx/conf.d/maintenance.conf
+    docker exec "$CONTAINER_NAME" rm -f /etc/nginx/maintenance.d/maintenance.conf
     exit 1
 fi

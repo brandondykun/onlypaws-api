@@ -59,7 +59,7 @@ fi
 
 # Remove the maintenance config file
 echo -e "${YELLOW}Removing maintenance flag...${NC}"
-docker exec "$CONTAINER_NAME" rm -f /etc/nginx/conf.d/maintenance.conf
+docker exec "$CONTAINER_NAME" rm -f /etc/nginx/maintenance.d/maintenance.conf
 
 # Test nginx configuration
 echo -e "${YELLOW}Testing nginx configuration...${NC}"
