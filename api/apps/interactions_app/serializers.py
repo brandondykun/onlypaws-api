@@ -3,7 +3,7 @@ Serializers for the interactions app.
 """
 
 from rest_framework import serializers
-from apps.interactions_app.models import Like, Comment, CommentLike, Follow
+from apps.interactions_app.models import Like, Comment, CommentLike, Follow, FollowRequest
 from apps.profile_app.serializers import ProfileSerializer
 from apps.posts_app.models import Post
 from drf_spectacular.utils import extend_schema_field
@@ -365,5 +365,36 @@ class FollowSerializer(serializers.ModelSerializer):
     class Meta:
         model = Follow
         fields = ["id", "followed", "followed_by", "created_at"]
+        read_only_fields = ["id", "created_at"]
+
+
+class FollowRequestSerializer(serializers.ModelSerializer):
+    """Serializer for FollowRequest - includes requester profile details (for received requests)."""
+
+    requester = ProfileSerializer(read_only=True)
+
+    class Meta:
+        model = FollowRequest
+        fields = ["id", "requester", "target", "created_at"]
+        read_only_fields = ["id", "created_at"]
+
+
+class SentFollowRequestSerializer(serializers.ModelSerializer):
+    """Serializer for sent FollowRequest - includes target profile details."""
+
+    target = ProfileSerializer(read_only=True)
+
+    class Meta:
+        model = FollowRequest
+        fields = ["id", "requester", "target", "created_at"]
+        read_only_fields = ["id", "created_at"]
+
+
+class FollowRequestCreateSerializer(serializers.ModelSerializer):
+    """Serializer for creating FollowRequest."""
+
+    class Meta:
+        model = FollowRequest
+        fields = ["id", "requester", "target", "created_at"]
         read_only_fields = ["id", "created_at"]
 

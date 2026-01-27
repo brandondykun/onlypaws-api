@@ -6,6 +6,7 @@
       "username": "admin_dog",
       "user": 1,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -17,6 +18,7 @@
       "username": "hound_dog",
       "user": 2,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -28,6 +30,7 @@
       "username": "chewyyy",
       "user": 3,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -39,6 +42,7 @@
       "username": "pitbulpup",
       "user": 4,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -50,6 +54,7 @@
       "username": "AIpets",
       "user": 5,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -61,6 +66,7 @@
       "username": "catAI",
       "user": 6,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -72,6 +78,7 @@
       "username": "AllPets",
       "user": 7,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -83,6 +90,7 @@
       "username": "SirDogsAlot",
       "user": 10,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -94,6 +102,7 @@
       "username": "husky123",
       "user": 11,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -105,6 +114,7 @@
       "username": "K9Historian",
       "user": 12,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -116,6 +126,7 @@
       "username": "that_one_lab",
       "user": 13,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -127,6 +138,7 @@
       "username": "bestpuppies",
       "user": 14,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -138,6 +150,7 @@
       "username": "oldyeller",
       "user": 15,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -149,6 +162,7 @@
       "username": "TheGreatOne",
       "user": 16,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -160,6 +174,7 @@
       "username": "goldie",
       "user": 17,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -171,6 +186,7 @@
       "username": "choco",
       "user": 18,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -182,6 +198,7 @@
       "username": "SnortyPickles",
       "user": 19,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -193,6 +210,7 @@
       "username": "GoldenMaple",
       "user": 20,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -204,6 +222,7 @@
       "username": "GuardianTitan",
       "user": 21,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -215,6 +234,7 @@
       "username": "AllAboutBeagles",
       "user": 22,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -226,6 +246,7 @@
       "username": "MidnightThePoodle",
       "user": 23,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -237,6 +258,7 @@
       "username": "LucyBelle",
       "user": 1,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }

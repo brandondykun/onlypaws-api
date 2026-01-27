@@ -140,6 +140,33 @@ class Post(models.Model):
             # Fallback to empty queryset
             return Post.objects.none()
 
+    def can_profile_interact(self, profile) -> bool:
+        """
+        Check if a profile can interact with this post (like, comment, etc.).
+        
+        Returns True if:
+        - The post's profile is public, OR
+        - The profile owns the post, OR
+        - The profile follows the post's profile
+        
+        Args:
+            profile: The Profile instance attempting to interact
+            
+        Returns:
+            bool: True if the profile can interact, False otherwise
+        """
+        # Import here to avoid circular imports
+        from apps.interactions_app.models import Follow
+        
+        # Public profiles allow all interactions
+        if not self.profile.is_private:
+            return True
+        # Can always interact with own posts
+        if profile.id == self.profile.id:
+            return True
+        # For private profiles, must be following
+        return Follow.objects.filter(followed=self.profile, followed_by=profile).exists()
+
 
 def post_image_path(instance, filename):
     """Generate S3 path (key) for saving post image.

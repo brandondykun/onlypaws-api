@@ -2,14 +2,48 @@ import logging
 from celery import shared_task
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from django.conf import settings
 
 from .models import Notification, NotificationType
 from .serializers import WebSocketNotificationSerializer
 from apps.profile_app.models import Profile
 from apps.posts_app.models import Post, PostImageTag
-from apps.interactions_app.models import Comment
+from apps.interactions_app.models import Comment, FollowRequest
 
 logger = logging.getLogger(__name__)
+
+
+def build_full_media_url(relative_path):
+    """
+    Build a full URL for media files.
+    
+    In production/staging with S3, the URL is already complete.
+    In development, we need to prepend the MEDIA_DOMAIN.
+    
+    Args:
+        relative_path (str): The relative path or full URL to the media file
+        
+    Returns:
+        str: The full URL to the media file, or None if relative_path is None/empty
+    """
+    if not relative_path:
+        return None
+    
+    # If already a full URL (S3), return as-is
+    if relative_path.startswith('http://') or relative_path.startswith('https://'):
+        return relative_path
+    
+    # Build full URL using MEDIA_DOMAIN
+    media_domain = getattr(settings, 'MEDIA_DOMAIN', '')
+    if media_domain:
+        # Ensure no double slashes
+        if media_domain.endswith('/') and relative_path.startswith('/'):
+            return f"{media_domain[:-1]}{relative_path}"
+        elif not media_domain.endswith('/') and not relative_path.startswith('/'):
+            return f"{media_domain}/{relative_path}"
+        return f"{media_domain}{relative_path}"
+    
+    return relative_path
 
 
 @shared_task(bind=True, ignore_result=True)
@@ -547,3 +581,192 @@ def cleanup_old_notifications_task(self, days=30):
     except Exception as e:
         logger.error(f"Error cleaning up old notifications: {e}")
         raise self.retry(countdown=3600, max_retries=3)  # Retry in 1 hour
+
+
+@shared_task(bind=True, ignore_result=True)
+def create_follow_request_notification_task(self, follow_request_id):
+    """
+    Send a real-time WebSocket notification for a follow request.
+    
+    Note: This does NOT create a Notification database object. Follow requests
+    are fetched separately by the frontend via FollowRequest endpoints, so we
+    only send a real-time WebSocket notification to alert the user.
+    
+    Args:
+        follow_request_id (int): ID of the FollowRequest that was created
+    """
+    try:
+        # Validate input parameters
+        if not isinstance(follow_request_id, int):
+            logger.error(f"Invalid parameter type: follow_request_id={type(follow_request_id)}")
+            return
+            
+        follow_request = FollowRequest.objects.select_related(
+            'requester', 'requester__image', 'target'
+        ).get(id=follow_request_id)
+        
+        requester_profile = follow_request.requester
+        target_profile = follow_request.target
+        
+        # Get the specific profile (RegularProfile or BusinessProfile)
+        specific_requester = requester_profile.get_specific_profile()
+        
+        # Get requester's avatar URL
+        requester_avatar = None
+        if hasattr(requester_profile, 'image') and requester_profile.image:
+            avatar_path = requester_profile.image.image.url
+            if avatar_path:
+                requester_avatar = build_full_media_url(avatar_path)
+        
+        # Get about snippet (first 150 characters)
+        about_snippet = ""
+        if hasattr(specific_requester, 'about') and specific_requester.about:
+            about_snippet = specific_requester.about[:150]
+            if len(specific_requester.about) > 150:
+                about_snippet += "..."
+        
+        # Build extra data based on profile type
+        extra_data = {
+            'requester_username': requester_profile.username,
+            'requester_id': requester_profile.id,
+            'requester_avatar': requester_avatar,
+            'requester_about': about_snippet,
+            'follow_request_id': follow_request_id,
+        }
+        
+        # Add profile-type-specific fields
+        if requester_profile.is_regular_profile():
+            extra_data.update({
+                'requester_name': specific_requester.name if specific_requester.name else "",
+                'requester_pet_type': specific_requester.pet_type.name if specific_requester.pet_type else None,
+                'requester_breed': specific_requester.breed if specific_requester.breed else "",
+            })
+        elif requester_profile.is_business_profile():
+            extra_data.update({
+                'requester_name': specific_requester.business_name if hasattr(specific_requester, 'business_name') else "",
+                'requester_business_category': specific_requester.business_category if hasattr(specific_requester, 'business_category') else None,
+            })
+        
+        # Build notification data matching WebSocketNotificationSerializer format
+        # Note: We don't create a Notification object for follow requests since
+        # they are fetched separately by the frontend via the FollowRequest endpoints
+        notification_data = {
+            'id': None,  # No Notification object
+            'notification_type': NotificationType.FOLLOW_REQUEST,
+            'title': "wants to follow you",
+            'message': f"{requester_profile.username} wants to follow you",
+            'created_at': follow_request.created_at.isoformat(),
+            'sender_username': requester_profile.username,
+            'sender_avatar': requester_avatar,
+            'post_id': None,
+            'comment_id': None,
+            'extra_data': extra_data
+        }
+        
+        # Send directly via WebSocket (no Notification object created)
+        channel_layer = get_channel_layer()
+        group_name = f'profile_{target_profile.id}'
+        
+        async_to_sync(channel_layer.group_send)(
+            group_name,
+            {
+                'type': 'notification_message',
+                'notification': notification_data
+            }
+        )
+        
+        logger.info(f"Follow request WebSocket notification sent to profile {target_profile.id} (from {requester_profile.id})")
+        
+    except FollowRequest.DoesNotExist as e:
+        logger.error(f"FollowRequest not found for follow request notification: {e}")
+    except Exception as e:
+        logger.error(f"Error creating follow request notification: {e}")
+        raise self.retry(countdown=60, max_retries=3)
+
+
+@shared_task(bind=True, ignore_result=True)
+def create_follow_request_accepted_notification_task(self, followed_profile_id, follower_profile_id):
+    """
+    Create and send a notification when a follow request is accepted.
+    Notifies the requester that their follow request was accepted.
+    
+    Args:
+        followed_profile_id (int): ID of the profile that accepted the request (the followed)
+        follower_profile_id (int): ID of the profile whose request was accepted (the follower)
+    """
+    try:
+        # Validate input parameters
+        if not isinstance(followed_profile_id, int) or not isinstance(follower_profile_id, int):
+            logger.error(f"Invalid parameter types: followed_profile_id={type(followed_profile_id)}, follower_profile_id={type(follower_profile_id)}")
+            return
+        
+        followed_profile = Profile.objects.select_related('image').get(id=followed_profile_id)
+        follower_profile = Profile.objects.get(id=follower_profile_id)
+        
+        # Get the specific profile (RegularProfile or BusinessProfile)
+        specific_followed = followed_profile.get_specific_profile()
+        
+        # Get followed's avatar URL
+        followed_avatar = None
+        if hasattr(followed_profile, 'image') and followed_profile.image:
+            avatar_path = followed_profile.image.image.url
+            if avatar_path:
+                followed_avatar = avatar_path
+        
+        # Get about snippet (first 150 characters)
+        about_snippet = ""
+        if hasattr(specific_followed, 'about') and specific_followed.about:
+            about_snippet = specific_followed.about[:150]
+            if len(specific_followed.about) > 150:
+                about_snippet += "..."
+        
+        # Build extra data
+        extra_data = {
+            'followed_username': followed_profile.username,
+            'followed_id': followed_profile.id,
+            'followed_avatar': followed_avatar,
+            'followed_about': about_snippet,
+        }
+        
+        # Add profile-type-specific fields
+        if followed_profile.is_regular_profile():
+            extra_data.update({
+                'followed_name': specific_followed.name if specific_followed.name else "",
+                'followed_pet_type': specific_followed.pet_type.name if specific_followed.pet_type else None,
+                'followed_breed': specific_followed.breed if specific_followed.breed else "",
+            })
+        elif followed_profile.is_business_profile():
+            extra_data.update({
+                'followed_name': specific_followed.business_name if hasattr(specific_followed, 'business_name') else "",
+                'followed_business_category': specific_followed.business_category if hasattr(specific_followed, 'business_category') else None,
+            })
+        
+        # Create notification (recipient is the follower who made the request)
+        notification, created = Notification.objects.get_or_create(
+            recipient=follower_profile,
+            sender=followed_profile,
+            notification_type=NotificationType.FOLLOW_REQUEST_ACCEPTED,
+            post=None,
+            comment=None,
+            defaults={
+                'title': "accepted your follow request",
+                'message': f"{followed_profile.username} accepted your follow request",
+                'extra_data': extra_data
+            }
+        )
+        
+        # If notification already exists, mark as unread
+        if not created and notification.is_read:
+            notification.is_read = False
+            notification.save(update_fields=['is_read'])
+        
+        # Send via WebSocket
+        send_notification_task.delay(notification.id)
+        
+        logger.info(f"Follow request accepted notification {'created' if created else 'updated'} for profile {follower_profile_id} (accepted by {followed_profile_id})")
+        
+    except Profile.DoesNotExist as e:
+        logger.error(f"Profile not found for follow request accepted notification: {e}")
+    except Exception as e:
+        logger.error(f"Error creating follow request accepted notification: {e}")
+        raise self.retry(countdown=60, max_retries=3)

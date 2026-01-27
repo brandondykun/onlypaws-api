@@ -4,6 +4,7 @@ Views for the posts api.
 
 from rest_framework import generics, permissions, status
 from apps.posts_app.models import Post, PostImage, SavedPost, PostImageTag
+from apps.interactions_app.models import Follow
 from .serializers import (
     PostSerializer,
     PostUpdateSerializer,
@@ -285,6 +286,29 @@ class ListProfilePostsView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = ListProfilePostsPagination
 
+    def list(self, request, *args, **kwargs):
+        """Override list to check profile access before queryset evaluation."""
+        from apps.profile_app.models import Profile
+
+        profile_id = self.kwargs.get("id", None)
+        current_profile = request.current_profile
+        target_profile = get_object_or_404(Profile, id=profile_id)
+
+        if target_profile.is_private:
+            is_own_profile = str(profile_id) == str(current_profile.id)
+            is_following = Follow.objects.filter(
+                followed=target_profile,
+                followed_by=current_profile
+            ).exists()
+
+            if not is_own_profile and not is_following:
+                return Response(
+                    {"detail": "This profile is private."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
+        return super().list(request, *args, **kwargs)
+
     def get_queryset(self):
         profile_id = self.kwargs.get("id", None)
         current_profile = self.request.current_profile
@@ -495,6 +519,7 @@ class ListExplorePostsView(generics.ListAPIView):
             ~Q(profile__following__followed_by=current_profile)
             & ~Q(profile__user=self.request.user)
             & ~Q(reports__gt=0)  # filter all reported posts for explore screen
+            & Q(profile__is_private=False)  # exclude posts from private profiles
         ).prefetch_related(
             'images__tags__tagged_profile__image',
             'images__tags__tagged_profile__regularprofile',
@@ -542,10 +567,20 @@ class ListSimilarPostsView(generics.ListAPIView):
     def get_queryset(self):
         post_id = self.kwargs.get("pk")
         min_similarity = float(self.request.query_params.get("min_similarity", 0.3))
+        current_profile = self.request.current_profile
 
         try:
             # Get the post
             post: Post = get_object_or_404(Post, id=post_id)
+
+            # Build the base filter for private profiles:
+            # Include posts from:
+            # - Public profiles
+            # - Private profiles that the current user follows
+            private_profile_filter = (
+                Q(profile__is_private=False) |  # Public profiles
+                Q(profile__following__followed_by=current_profile)  # Private profiles user follows
+            )
 
             # -------------------------------
             # 1. Handle case with no embedding
@@ -556,6 +591,7 @@ class ListSimilarPostsView(generics.ListAPIView):
                         ~Q(profile__user=self.request.user),
                         id__gt=post_id,
                     )
+                    .filter(private_profile_filter)
                     .exclude(reports__reason__id=1)
                     .prefetch_related(
                         'images__tags__tagged_profile__image',
@@ -569,6 +605,7 @@ class ListSimilarPostsView(generics.ListAPIView):
                         'profile__businessprofile',
                         'reports',
                     )
+                    .distinct()
                     .order_by("-created_at")[: self.MAX_RESULTS]
                 )
 
@@ -578,7 +615,9 @@ class ListSimilarPostsView(generics.ListAPIView):
             qs = (
                 post.find_similar_posts(min_similarity=min_similarity)
                 .filter(~Q(profile__user=self.request.user))
+                .filter(private_profile_filter)
                 .exclude(reports__reason__id=1)
+                .distinct()
             )
 
             # --------------------------------------------
@@ -908,10 +947,24 @@ class ListTaggedPostsView(generics.ListAPIView):
 
     def get_queryset(self):
         profile_id = self.kwargs.get("id", None)
+        current_profile = self.request.current_profile
+
+        # Build filter for private profiles:
+        # Include posts from:
+        # - Public profiles
+        # - Private profiles that the current user follows
+        # - The user's own posts (if they're viewing their own tagged posts)
+        private_profile_filter = (
+            Q(profile__is_private=False) |  # Public profiles
+            Q(profile__following__followed_by=current_profile) |  # Private profiles user follows
+            Q(profile=current_profile)  # User's own posts
+        )
 
         # Get posts where the specified profile is tagged in any image
         return Post.objects.filter(
             images__tags__tagged_profile__id=profile_id
+        ).filter(
+            private_profile_filter
         ).prefetch_related(
             'images__tags__tagged_profile__image',
             'images__tags__tagged_profile__regularprofile',

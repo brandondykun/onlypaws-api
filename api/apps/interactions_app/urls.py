@@ -65,5 +65,32 @@ urlpatterns = [
         views.ListFollowingView.as_view(),
         name="list_following",
     ),
+    
+    # Follow Requests
+    path(
+        "follow-requests/",
+        views.ListFollowRequestsView.as_view(),
+        name="list_follow_requests",
+    ),
+    path(
+        "follow-requests/sent/",
+        views.ListSentFollowRequestsView.as_view(),
+        name="list_sent_follow_requests",
+    ),
+    path(
+        "follow-request/<int:pk>/accept/",
+        views.AcceptFollowRequestView.as_view(),
+        name="accept_follow_request",
+    ),
+    path(
+        "follow-request/<int:pk>/decline/",
+        views.DeclineFollowRequestView.as_view(),
+        name="decline_follow_request",
+    ),
+    path(
+        "follow-request/<int:profile_id>/cancel/",
+        views.CancelFollowRequestView.as_view(),
+        name="cancel_follow_request",
+    ),
 ]
 

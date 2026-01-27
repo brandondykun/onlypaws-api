@@ -1,9 +1,16 @@
 import logging
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from apps.interactions_app.models import Like, CommentLike, Follow, Comment
+from apps.interactions_app.models import Like, CommentLike, Follow, Comment, FollowRequest
 from apps.posts_app.models import PostImageTag
-from .tasks import create_post_like_notification_task, create_comment_like_notification_task, create_follow_notification_task, create_comment_notification_task, create_tagged_post_notification_task
+from .tasks import (
+    create_post_like_notification_task,
+    create_comment_like_notification_task,
+    create_follow_notification_task,
+    create_comment_notification_task,
+    create_tagged_post_notification_task,
+    create_follow_request_notification_task,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -68,8 +75,17 @@ def handle_follow_created(sender, instance, created, **kwargs):
     """
     Signal handler for when a Follow is created.
     Triggers notification creation via Celery task.
+    Skip notification for private profiles since they receive follow request notifications.
     """
     if created:  # Only trigger for new follows, not updates
+        # Skip notification for private profiles - they already received
+        # a follow request notification and explicitly accepted it
+        if instance.followed.is_private:
+            logger.info(
+                f"Skipping follow notification for private profile {instance.followed.username}"
+            )
+            return
+
         try:
             # Trigger async notification creation
             create_follow_notification_task.delay(
@@ -96,3 +112,20 @@ def handle_post_image_tag_created(sender, instance, created, **kwargs):
             logger.info(f"Tagged post notification task queued for {instance.tagged_profile.username} tagged by {instance.tagged_by_profile.username}")
         except Exception as e:
             logger.error(f"Error queuing tagged post notification task: {e}")
+
+
+@receiver(post_save, sender=FollowRequest)
+def handle_follow_request_created(sender, instance, created, **kwargs):
+    """
+    Signal handler for when a FollowRequest is created.
+    Triggers notification creation via Celery task to notify the target profile.
+    """
+    if created:  # Only trigger for new follow requests, not updates
+        try:
+            # Trigger async notification creation
+            create_follow_request_notification_task.delay(
+                follow_request_id=instance.id
+            )
+            logger.info(f"Follow request notification task queued for {instance.target.username} from {instance.requester.username}")
+        except Exception as e:
+            logger.error(f"Error queuing follow request notification task: {e}")

@@ -61,6 +61,10 @@ class Profile(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profiles"
     )
     is_active = models.BooleanField(default=True)
+    is_private = models.BooleanField(
+        default=False,
+        help_text="If true, only approved followers can see posts"
+    )
     # Using default instead of auto_now_add for initial migration to populate existing rows
     # Will change to auto_now_add in a later migration after data is populated
     created_at = models.DateTimeField(default=timezone.now, blank=True)
