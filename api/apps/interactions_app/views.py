@@ -560,6 +560,43 @@ class DestroyFollowView(generics.DestroyAPIView):
 
 
 @extend_schema_view(
+    delete=extend_schema(
+        parameters=[auth_profile_param],
+        summary="Remove a follower",
+        description="Remove a follower from the current profile. profile_id is the id of the follower to remove."),
+)
+class RemoveFollowerView(generics.DestroyAPIView):
+    """Remove a follower from the current profile."""
+
+    serializer_class = FollowSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Follow.objects.all()
+
+    def destroy(self, request, *args, **kwargs):
+        follower_profile_id = self.kwargs.get("profile_id")  # profile id of follower to remove
+        current_profile = request.current_profile
+
+        if follower_profile_id:
+            try:
+                follow = get_object_or_404(
+                    Follow, followed=current_profile, followed_by=follower_profile_id
+                )
+                self.perform_destroy(follow)
+                logger.info(
+                    f"Remove follower: profile {current_profile.id} removed follower {follower_profile_id}"
+                )
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            except Exception as e:
+                logger.error(
+                    f"Error removing follower: profile {current_profile.id} removing {follower_profile_id}: {str(e)}"
+                )
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+        
+        logger.warning(f"Remove follower attempt with no profile_id by profile {current_profile.id}")
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+@extend_schema_view(
     get=extend_schema(parameters=[auth_profile_param]),
 )
 class ListFollowersView(generics.ListAPIView):

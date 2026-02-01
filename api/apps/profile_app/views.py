@@ -16,7 +16,8 @@ from .serializers import (
 from rest_framework.response import Response
 import logging
 from django.shortcuts import get_object_or_404
-from django.db.models import Q
+from django.db.models import Q, Exists, OuterRef
+from apps.interactions_app.models import Follow, FollowRequest
 from django.db import transaction
 from apps.posts_app.pagination import SearchedProfilesPagination
 from drf_spectacular.utils import extend_schema_view, extend_schema
@@ -322,6 +323,25 @@ class ListSearchedProfilesView(generics.ListAPIView):
         username = self.request.query_params.get("username", None)
         profiles = Profile.objects.filter(
             Q(username__icontains=username) & ~Q(id=current_profile.id)
+        ).annotate(
+            _is_following=Exists(
+                Follow.objects.filter(
+                    followed=OuterRef('pk'),
+                    followed_by=current_profile
+                )
+            ),
+            _follows_you=Exists(
+                Follow.objects.filter(
+                    followed_by=OuterRef('pk'),
+                    followed=current_profile
+                )
+            ),
+            _has_requested_follow=Exists(
+                FollowRequest.objects.filter(
+                    target=OuterRef('pk'),
+                    requester=current_profile
+                )
+            ),
         ).order_by("username")
         return profiles
 

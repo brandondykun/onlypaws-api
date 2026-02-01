@@ -56,6 +56,11 @@ urlpatterns = [
         name="destroy_follow",
     ),
     path(
+        "follower/<int:profile_id>/remove/",
+        views.RemoveFollowerView.as_view(),
+        name="remove_follower",
+    ),
+    path(
         "followers/<int:id>/",
         views.ListFollowersView.as_view(),
         name="list_followers",

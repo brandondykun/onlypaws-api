@@ -200,6 +200,7 @@ class RegularProfileDetailedSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='profile_ptr.username', read_only=True)
     is_private = serializers.BooleanField(source='profile_ptr.is_private', read_only=True)
     is_following = serializers.SerializerMethodField()
+    follows_you = serializers.SerializerMethodField()
     has_requested_follow = serializers.SerializerMethodField()
     can_view_posts = serializers.SerializerMethodField()
     posts_count = serializers.SerializerMethodField()
@@ -218,6 +219,7 @@ class RegularProfileDetailedSerializer(serializers.ModelSerializer):
             "image",
             "is_private",
             "is_following",
+            "follows_you",
             "has_requested_follow",
             "can_view_posts",
             "posts_count",
@@ -240,6 +242,13 @@ class RegularProfileDetailedSerializer(serializers.ModelSerializer):
         requesting_profile = self.context["request"].headers.get("auth-profile-id")
         if requesting_profile:
             return obj.profile_ptr.following.filter(followed_by=requesting_profile).exists()
+        return False
+
+    def get_follows_you(self, obj) -> bool:
+        """Check if this profile is following the requesting profile."""
+        requesting_profile = self.context["request"].headers.get("auth-profile-id")
+        if requesting_profile:
+            return obj.profile_ptr.followers.filter(followed=requesting_profile).exists()
         return False
 
     def get_has_requested_follow(self, obj) -> bool:
@@ -450,6 +459,7 @@ class BusinessProfileDetailedSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='profile_ptr.username', read_only=True)
     is_private = serializers.BooleanField(source='profile_ptr.is_private', read_only=True)
     is_following = serializers.SerializerMethodField()
+    follows_you = serializers.SerializerMethodField()
     has_requested_follow = serializers.SerializerMethodField()
     can_view_posts = serializers.SerializerMethodField()
     posts_count = serializers.SerializerMethodField()
@@ -474,6 +484,7 @@ class BusinessProfileDetailedSerializer(serializers.ModelSerializer):
             "image",
             "is_private",
             "is_following",
+            "follows_you",
             "has_requested_follow",
             "can_view_posts",
             "posts_count",
@@ -496,6 +507,13 @@ class BusinessProfileDetailedSerializer(serializers.ModelSerializer):
         requesting_profile = self.context["request"].headers.get("auth-profile-id")
         if requesting_profile:
             return obj.profile_ptr.following.filter(followed_by=requesting_profile).exists()
+        return False
+
+    def get_follows_you(self, obj) -> bool:
+        """Check if this profile is following the requesting profile."""
+        requesting_profile = self.context["request"].headers.get("auth-profile-id")
+        if requesting_profile:
+            return obj.profile_ptr.followers.filter(followed=requesting_profile).exists()
         return False
 
     def get_has_requested_follow(self, obj) -> bool:
@@ -750,6 +768,7 @@ class ProfileDetailedSerializer(serializers.ModelSerializer):
 
     image = ProfileImageSerializer(read_only=True)
     is_following = serializers.SerializerMethodField()
+    follows_you = serializers.SerializerMethodField()
     has_requested_follow = serializers.SerializerMethodField()
     can_view_posts = serializers.SerializerMethodField()
     posts_count = serializers.SerializerMethodField()
@@ -771,6 +790,7 @@ class ProfileDetailedSerializer(serializers.ModelSerializer):
             "image",
             "is_private",
             "is_following",
+            "follows_you",
             "has_requested_follow",
             "can_view_posts",
             "posts_count",
@@ -819,6 +839,13 @@ class ProfileDetailedSerializer(serializers.ModelSerializer):
 
         if requesting_profile:
             return obj.following.filter(followed_by=requesting_profile).exists()
+        return False
+
+    def get_follows_you(self, obj) -> bool:
+        """Check if this profile is following the requesting profile."""
+        requesting_profile = self.context["request"].headers.get("auth-profile-id")
+        if requesting_profile:
+            return obj.followers.filter(followed=requesting_profile).exists()
         return False
 
     def get_has_requested_follow(self, obj) -> bool:
@@ -875,12 +902,13 @@ class SearchProfileSerializer(serializers.ModelSerializer):
     profile_type = serializers.SerializerMethodField()
     name = serializers.SerializerMethodField()
     is_following = serializers.SerializerMethodField()
+    follows_you = serializers.SerializerMethodField()
     has_requested_follow = serializers.SerializerMethodField()
     about = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
-        fields = ["id", "username", "name", "image", "is_private", "is_following", "has_requested_follow", "profile_type", "about"]
+        fields = ["id", "username", "name", "image", "is_private", "is_following", "follows_you", "has_requested_follow", "profile_type", "about"]
 
     def get_profile_type(self, obj) -> Literal["regular", "business"]:
         """Returns 'regular' or 'business'."""
@@ -903,14 +931,33 @@ class SearchProfileSerializer(serializers.ModelSerializer):
         return ""
 
     def get_is_following(self, obj) -> bool:
-        # boolean - is requesting profile following the profile being fetched
+        """Check if requesting profile is following this profile."""
+        # Use annotation if available (optimized for list views)
+        if hasattr(obj, '_is_following'):
+            return obj._is_following
+        # Fallback to query (for single object views)
         profile_id = self.context.get("profile_id")
         if profile_id:
             return obj.following.filter(followed_by=profile_id).exists()
         return False
 
+    def get_follows_you(self, obj) -> bool:
+        """Check if this profile is following the requesting profile."""
+        # Use annotation if available (optimized for list views)
+        if hasattr(obj, '_follows_you'):
+            return obj._follows_you
+        # Fallback to query (for single object views)
+        profile_id = self.context.get("profile_id")
+        if profile_id:
+            return obj.followers.filter(followed=profile_id).exists()
+        return False
+
     def get_has_requested_follow(self, obj) -> bool:
         """Check if requesting profile has a pending follow request to this profile."""
+        # Use annotation if available (optimized for list views)
+        if hasattr(obj, '_has_requested_follow'):
+            return obj._has_requested_follow
+        # Fallback to query (for single object views)
         profile_id = self.context.get("profile_id")
         if profile_id:
             return FollowRequest.objects.filter(
