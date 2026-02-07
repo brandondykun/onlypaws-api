@@ -20,6 +20,12 @@ class Post(models.Model):
         SQUARE = "1:1", "Square"
         PORTRAIT = "4:5", "Portrait"
 
+    class Status(models.TextChoices):
+        PENDING_UPLOAD = "PENDING_UPLOAD", "Pending Upload"
+        PROCESSING = "PROCESSING", "Processing"
+        READY = "READY", "Ready"
+        FAILED = "FAILED", "Failed"
+
     class Meta:
         indexes = [
             HnswIndex(
@@ -42,6 +48,12 @@ class Post(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     contains_ai = models.BooleanField(blank=True, default=False)
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.READY,  # Backwards compatible with existing posts
+        help_text="Post lifecycle status"
+    )
 
     # Combined embedding fields for multimodal similarity search
     combined_embedding = VectorField(
@@ -190,9 +202,28 @@ def post_image_path(instance, filename):
 
 
 class PostImage(models.Model):
+    class ProcessingStatus(models.TextChoices):
+        PENDING_UPLOAD = "PENDING_UPLOAD", "Pending Upload"
+        UPLOADED = "UPLOADED", "Uploaded"
+        PROCESSING = "PROCESSING", "Processing"
+        READY = "READY", "Ready"
+        FAILED = "FAILED", "Failed"
+
     post = models.ForeignKey("posts_app.Post", on_delete=models.CASCADE, related_name="images")
-    image = models.ImageField(upload_to=post_image_path)
+    image = models.ImageField(upload_to=post_image_path, blank=True, null=True)
     order = models.IntegerField(default=0, help_text="Display order of the image in the post")
+    processing_status = models.CharField(
+        max_length=20,
+        choices=ProcessingStatus.choices,
+        default=ProcessingStatus.READY,  # Backwards compatible with existing images
+        help_text="Image processing status"
+    )
+    original_key = models.CharField(
+        max_length=500,
+        null=True,
+        blank=True,
+        help_text="S3 key for the original uploaded image (before processing)"
+    )
 
     # Embedding fields for similarity search
     embedding = VectorField(
@@ -211,15 +242,25 @@ class PostImage(models.Model):
     )
 
     def save(self, *args, **kwargs):
+        # Skip image processing and embedding generation for placeholder images
+        # (images with PENDING_UPLOAD status that don't have a file yet)
+        is_placeholder = self.processing_status == self.ProcessingStatus.PENDING_UPLOAD
+        has_image = bool(self.image)
+
         # Only process image if:
-        # 1. This is a new instance (self.pk is None), OR
-        # 2. update_fields is not specified (full save), OR
-        # 3. update_fields includes 'image'
+        # 1. Not a placeholder AND has an image file AND
+        # 2. (This is a new instance (self.pk is None), OR
+        # 3. update_fields is not specified (full save), OR
+        # 4. update_fields includes 'image')
         update_fields = kwargs.get("update_fields", None)
         should_process_image = (
-            self.pk is None  # New instance
-            or update_fields is None  # Full save without update_fields
-            or (update_fields is not None and "image" in update_fields)  # Explicitly updating image
+            not is_placeholder
+            and has_image
+            and (
+                self.pk is None  # New instance
+                or update_fields is None  # Full save without update_fields
+                or (update_fields is not None and "image" in update_fields)  # Explicitly updating image
+            )
         )
         
         if should_process_image:
@@ -229,10 +270,14 @@ class PostImage(models.Model):
             self.image = crop_to_aspect_ratio_and_resize(self.image, aspect_ratio=aspect_ratio)
 
         # Check if we need to generate embedding
+        # Don't generate for placeholders or images without files
         should_generate_embedding = (
-            self.pk is None  # New instance
-            or "embedding"
-            not in kwargs.get("update_fields", [])  # Not updating embedding field
+            not is_placeholder
+            and has_image
+            and (
+                self.pk is None  # New instance
+                or "embedding" not in kwargs.get("update_fields", [])  # Not updating embedding field
+            )
         )
 
         # Save first to ensure we have a file path
@@ -399,4 +444,66 @@ class PostImageTag(models.Model):
 
     def __str__(self):
         return f"{self.tagged_profile.username} tagged in image {self.post_image.id}"
+
+
+def post_image_scaled_path(instance, filename):
+    """Generate S3 path for scaled post images."""
+    post_image = instance.post_image
+    user_id = post_image.post.profile.user.id
+    profile_id = post_image.post.profile.id
+    post_id = post_image.post.id
+    # Path: images/{env}/{user}/{profile}/{post}/scaled/{scale}_{order}.webp
+    path = f"{user_id}/{profile_id}/{post_id}/scaled/{instance.scale}_{post_image.order}.webp"
+    # Add environment prefix
+    env = os.environ.get("DJANGO_ENV")
+    if env == "test":
+        path = "images/test/" + path
+    elif env == "dev":
+        path = "images/dev/" + path
+    elif env == "e2e":
+        path = "images/e2e/" + path
+    else:
+        path = "images/" + path
+    return path
+
+
+class PostImageScaled(models.Model):
+    """
+    Stores scaled variants of PostImage for different display contexts.
+    
+    Note: The LARGE (1080px) image is stored in PostImage.image directly,
+    not in PostImageScaled. This model only stores smaller variants.
+    """
+
+    class Scale(models.TextChoices):
+        SMALL = "small", "Small"              # 150px
+        MEDIUM = "medium", "Medium"           # 500px
+
+    # Dimensions for each scale (base width, height calculated from aspect ratio)
+    # LARGE (1080px) is stored in PostImage.image, not here
+    SCALE_DIMENSIONS = {
+        "small": 150,
+        "medium": 500,
+        "large": 1080,  # Used for PostImage.image processing
+    }
+
+    post_image = models.ForeignKey(
+        "PostImage",
+        on_delete=models.CASCADE,
+        related_name="scaled_images"
+    )
+    scale = models.CharField(max_length=20, choices=Scale.choices)
+    image = models.ImageField(upload_to=post_image_scaled_path)
+    width = models.PositiveIntegerField(help_text="Width in pixels")
+    height = models.PositiveIntegerField(help_text="Height in pixels")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = [["post_image", "scale"]]
+        indexes = [
+            models.Index(fields=["post_image", "scale"]),
+        ]
+
+    def __str__(self):
+        return f"PostImage {self.post_image.id} - {self.scale}"
 

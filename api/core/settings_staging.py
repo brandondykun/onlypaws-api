@@ -36,6 +36,10 @@ STORAGES = {
     },
 }
 
+# Ensure webp mimetype is registered (may not be in default mimetypes db)
+import mimetypes
+mimetypes.add_type("image/webp", ".webp")
+
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME")
@@ -49,4 +53,4 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://redis:6379/0")
 CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", "redis://redis:6379/0")
 
-MEDIA_DOMAIN = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/'
+MEDIA_DOMAIN = f'https://{AWS_STORAGE_BUCKET_NAME}.r2.cloudflarestorage.com'

@@ -5,6 +5,8 @@ Celery tasks for the core_app.
 import logging
 from typing import List
 from celery import shared_task
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 logger = logging.getLogger(__name__)
 
@@ -405,6 +407,370 @@ def cleanup_expired_task_results():
     except Exception as exc:
         logger.error(f"Error in cleanup task: {str(exc)}")
         return {"success": False, "error": str(exc)}
+
+
+@shared_task(bind=True, max_retries=3)
+def process_post_images_task(self, post_id: int):
+    """
+    Background task to process uploaded images for a post.
+    
+    This task handles images uploaded via presigned URLs:
+    1. Downloads original images from S3/R2
+    2. Crops to aspect ratio and resizes to LARGE (1080px)
+    3. Creates SMALL (320px) scaled variant
+    4. Converts all to webp format
+    5. Uploads processed images
+    6. Deletes original images from S3
+    7. Generates embeddings on the large image
+    8. Updates post status to READY
+    
+    Args:
+        post_id: ID of the Post to process
+    
+    Returns:
+        Dict with processing results
+    """
+    from io import BytesIO
+    
+    from django.core.files.base import ContentFile
+    from PIL import Image
+    from PIL import ImageOps
+    
+    from apps.posts_app.models import Post, PostImage, PostImageScaled
+    from apps.core_app.storage_utils import download_file, delete_file
+    from .services import get_embedding_service
+    
+    logger.info(f"Starting image processing for Post {post_id}")
+    
+    try:
+        # Get the post
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            logger.error(f"Post {post_id} does not exist")
+            return {
+                "success": False,
+                "error": f"Post {post_id} does not exist",
+                "post_id": post_id,
+            }
+        
+        # Verify post is in PROCESSING status
+        if post.status != Post.Status.PROCESSING:
+            logger.warning(
+                f"Post {post_id} is not in PROCESSING status (current: {post.status})"
+            )
+            return {
+                "success": False,
+                "error": f"Post is not in PROCESSING status (current: {post.status})",
+                "post_id": post_id,
+            }
+        
+        # Get all PostImages for this post
+        post_images = list(post.images.filter(
+            processing_status=PostImage.ProcessingStatus.UPLOADED
+        ).order_by("order"))
+        
+        if not post_images:
+            logger.error(f"Post {post_id} has no uploaded images to process")
+            post.status = Post.Status.FAILED
+            post.save(update_fields=["status"])
+            return {
+                "success": False,
+                "error": "No uploaded images to process",
+                "post_id": post_id,
+            }
+        
+        logger.info(f"Processing {len(post_images)} images for Post {post_id}")
+        
+        processed_count = 0
+        failed_count = 0
+        
+        for post_image in post_images:
+            try:
+                # Update status to PROCESSING
+                post_image.processing_status = PostImage.ProcessingStatus.PROCESSING
+                post_image.save(update_fields=["processing_status"])
+                
+                # Download original image
+                if not post_image.original_key:
+                    logger.error(f"PostImage {post_image.id} has no original_key")
+                    raise ValueError("No original_key set")
+                
+                original_data = download_file(post_image.original_key)
+                if original_data is None:
+                    logger.error(
+                        f"Failed to download original image for PostImage {post_image.id}"
+                    )
+                    raise ValueError("Failed to download original image")
+                
+                # Open and process the image
+                original_image = Image.open(BytesIO(original_data))
+                original_image = ImageOps.exif_transpose(original_image)
+                
+                # Convert to RGB if needed
+                if original_image.mode != "RGB":
+                    original_image = original_image.convert("RGB")
+                
+                # Get target dimensions from post aspect ratio
+                aspect_ratio = post.aspect_ratio
+                
+                # Process all 3 scale variants before saving any
+                # This ensures we don't partially process if something fails
+                
+                # Process LARGE image (1080px) - this becomes PostImage.image
+                large_image = _crop_and_resize_image(
+                    original_image.copy(),
+                    aspect_ratio,
+                    PostImageScaled.SCALE_DIMENSIONS["large"]
+                )
+                large_buffer = BytesIO()
+                large_image.save(large_buffer, "webp", optimize=True, quality=70)
+                large_buffer.seek(0)
+                
+                # Process MEDIUM image (500px)
+                medium_image = _crop_and_resize_image(
+                    original_image.copy(),
+                    aspect_ratio,
+                    PostImageScaled.SCALE_DIMENSIONS["medium"]
+                )
+                medium_buffer = BytesIO()
+                medium_image.save(medium_buffer, "webp", optimize=True, quality=70)
+                medium_buffer.seek(0)
+                
+                # Process SMALL image (150px)
+                small_image = _crop_and_resize_image(
+                    original_image.copy(),
+                    aspect_ratio,
+                    PostImageScaled.SCALE_DIMENSIONS["small"]
+                )
+                small_buffer = BytesIO()
+                small_image.save(small_buffer, "webp", optimize=True, quality=70)
+                small_buffer.seek(0)
+                
+                # All variants processed successfully, now save them
+                
+                # Save LARGE to PostImage.image field (primary image)
+                post_image.image.save(
+                    f"large_{post_image.order}.webp",
+                    ContentFile(large_buffer.getvalue()),
+                    save=False
+                )
+                
+                # Create or update PostImageScaled for MEDIUM
+                medium_scaled, _ = PostImageScaled.objects.update_or_create(
+                    post_image=post_image,
+                    scale=PostImageScaled.Scale.MEDIUM,
+                    defaults={
+                        "width": medium_image.width,
+                        "height": medium_image.height,
+                    }
+                )
+                medium_scaled.image.save(
+                    f"medium_{post_image.order}.webp",
+                    ContentFile(medium_buffer.getvalue()),
+                    save=True
+                )
+                
+                # Create or update PostImageScaled for SMALL
+                small_scaled, _ = PostImageScaled.objects.update_or_create(
+                    post_image=post_image,
+                    scale=PostImageScaled.Scale.SMALL,
+                    defaults={
+                        "width": small_image.width,
+                        "height": small_image.height,
+                    }
+                )
+                small_scaled.image.save(
+                    f"small_{post_image.order}.webp",
+                    ContentFile(small_buffer.getvalue()),
+                    save=True
+                )
+                
+                # Update PostImage status and save
+                post_image.processing_status = PostImage.ProcessingStatus.READY
+                post_image.save(update_fields=["image", "processing_status"])
+                
+                # All 3 variants created successfully, now safe to delete original
+                if delete_file(post_image.original_key):
+                    logger.info(f"Deleted original image: {post_image.original_key}")
+                else:
+                    logger.warning(
+                        f"Failed to delete original image: {post_image.original_key}"
+                    )
+                
+                processed_count += 1
+                logger.info(
+                    f"Successfully processed PostImage {post_image.id} "
+                    f"(large: {large_image.width}x{large_image.height}, "
+                    f"medium: {medium_image.width}x{medium_image.height}, "
+                    f"small: {small_image.width}x{small_image.height})"
+                )
+                
+            except Exception as e:
+                logger.error(
+                    f"Error processing PostImage {post_image.id}: {str(e)}"
+                )
+                post_image.processing_status = PostImage.ProcessingStatus.FAILED
+                post_image.save(update_fields=["processing_status"])
+                failed_count += 1
+        
+        # Check if any images were processed successfully
+        if processed_count == 0:
+            logger.error(f"All images failed processing for Post {post_id}")
+            post.status = Post.Status.FAILED
+            post.save(update_fields=["status"])
+            return {
+                "success": False,
+                "error": "All images failed processing",
+                "post_id": post_id,
+                "failed_count": failed_count,
+            }
+        
+        # Generate embeddings for successfully processed images
+        logger.info(f"Generating embeddings for Post {post_id}")
+        embedding_service = get_embedding_service()
+        
+        for post_image in post.images.filter(
+            processing_status=PostImage.ProcessingStatus.READY
+        ):
+            try:
+                if not post_image.has_embedding():
+                    success = embedding_service.generate_embedding_for_post_image(post_image)
+                    if success:
+                        logger.info(f"Generated embedding for PostImage {post_image.id}")
+                    else:
+                        logger.warning(
+                            f"Failed to generate embedding for PostImage {post_image.id}"
+                        )
+            except Exception as e:
+                logger.error(
+                    f"Error generating embedding for PostImage {post_image.id}: {str(e)}"
+                )
+        
+        # Generate combined embedding for the post
+        try:
+            success = embedding_service.generate_combined_embedding_for_post(post)
+            if success:
+                logger.info(f"Generated combined embedding for Post {post_id}")
+            else:
+                logger.warning(f"Failed to generate combined embedding for Post {post_id}")
+        except Exception as e:
+            logger.error(f"Error generating combined embedding for Post {post_id}: {str(e)}")
+        
+        # Update post status to READY
+        post.status = Post.Status.READY
+        post.save(update_fields=["status"])
+        
+        # Send websocket notification to the post owner
+        try:
+            channel_layer = get_channel_layer()
+            profile_id = post.profile.id
+            async_to_sync(channel_layer.group_send)(
+                f'profile_{profile_id}',
+                {
+                    'type': 'post_ready',
+                    'post_id': post_id,
+                    'message': 'Your post is ready',
+                }
+            )
+            logger.info(f"Sent post_ready websocket message for Post {post_id} to profile {profile_id}")
+        except Exception as e:
+            # Don't fail the task if websocket notification fails
+            logger.warning(f"Failed to send post_ready websocket message for Post {post_id}: {e}")
+        
+        logger.info(
+            f"Successfully processed Post {post_id}: "
+            f"{processed_count} images processed, {failed_count} failed"
+        )
+        
+        return {
+            "success": True,
+            "message": "Post images processed successfully",
+            "post_id": post_id,
+            "processed_count": processed_count,
+            "failed_count": failed_count,
+        }
+        
+    except Exception as exc:
+        logger.error(f"Error in process_post_images_task for Post {post_id}: {str(exc)}")
+        
+        # Update post status to FAILED
+        try:
+            post = Post.objects.get(id=post_id)
+            post.status = Post.Status.FAILED
+            post.save(update_fields=["status"])
+        except Exception:
+            pass
+        
+        # Retry with exponential backoff
+        try:
+            retry_delay = min(300, 30 * (2**self.request.retries))
+            raise self.retry(exc=exc, countdown=retry_delay)
+        except self.MaxRetriesExceededError:
+            logger.error(f"Max retries exceeded for Post {post_id}")
+            return {
+                "success": False,
+                "error": f"Max retries exceeded: {str(exc)}",
+                "post_id": post_id,
+                "retries": self.request.retries,
+            }
+
+
+def _crop_and_resize_image(image, aspect_ratio: str, base_width: int):
+    """
+    Helper function to crop and resize an image to a target aspect ratio and size.
+    
+    Args:
+        image: PIL Image object
+        aspect_ratio: Target aspect ratio string (e.g., "1:1", "4:5")
+        base_width: Target width in pixels
+    
+    Returns:
+        Processed PIL Image object
+    """
+    from PIL import Image
+    
+    width, height = image.size
+    
+    # Parse aspect ratio
+    w_ratio, h_ratio = map(int, aspect_ratio.split(':'))
+    target_ratio = w_ratio / h_ratio
+    
+    # Calculate current ratio
+    current_ratio = width / height
+    
+    # Determine crop dimensions
+    if abs(current_ratio - target_ratio) < 0.001:
+        # Already matches target ratio, no crop needed
+        crop_width, crop_height = width, height
+        left, top = 0, 0
+    elif current_ratio > target_ratio:
+        # Image is wider than target - crop left and right
+        crop_height = height
+        crop_width = int(height * target_ratio)
+        left = (width - crop_width) / 2
+        top = 0
+    else:
+        # Image is taller than target - crop top and bottom
+        crop_width = width
+        crop_height = int(width / target_ratio)
+        left = 0
+        top = (height - crop_height) / 2
+    
+    right = left + crop_width
+    bottom = top + crop_height
+    
+    # Crop the image
+    image = image.crop((left, top, right, bottom))
+    
+    # Calculate target height
+    target_height = int(base_width / target_ratio)
+    
+    # Resize if image is larger than target dimensions
+    if image.width > base_width:
+        image = image.resize((base_width, target_height), Image.Resampling.LANCZOS)
+    
+    return image
 
 
 @shared_task

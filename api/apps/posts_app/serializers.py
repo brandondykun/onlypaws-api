@@ -1,6 +1,6 @@
 from decimal import Decimal
 from rest_framework import serializers
-from apps.posts_app.models import Post, PostImage, SavedPost, PostImageTag
+from apps.posts_app.models import Post, PostImage, SavedPost, PostImageTag, PostImageScaled
 from django.db.models import Q
 from apps.profile_app.serializers import ProfileSerializer, SearchProfileSerializer
 from drf_spectacular.utils import extend_schema_field
@@ -13,6 +13,52 @@ from apps.interactions_app.serializers import (
 
 # Import moderation serializers
 from apps.moderation_app.serializers import PostReportPreviewSerializer
+
+
+# ============================================================================
+# Presigned Upload Serializers
+# ============================================================================
+
+class PrepareUploadRequestSerializer(serializers.Serializer):
+    """Serializer for prepare-upload request."""
+    
+    image_count = serializers.IntegerField(min_value=1, max_value=10)
+
+
+class UploadUrlSerializer(serializers.Serializer):
+    """Serializer for individual upload URL details."""
+    
+    url = serializers.URLField()
+    key = serializers.CharField()
+    order = serializers.IntegerField()
+
+
+class PrepareUploadResponseSerializer(serializers.Serializer):
+    """Serializer for prepare-upload response."""
+    
+    post_id = serializers.IntegerField()
+    upload_urls = UploadUrlSerializer(many=True)
+
+
+class CompletePostSerializer(serializers.Serializer):
+    """Serializer for completing a post after images are uploaded."""
+    
+    caption = serializers.CharField(max_length=1000)
+    aspect_ratio = serializers.ChoiceField(choices=Post.AspectRatio.choices, default=Post.AspectRatio.SQUARE)
+    ai_generated = serializers.BooleanField(default=False)
+    tags = serializers.JSONField(required=False, allow_null=True)
+
+
+# ============================================================================
+# PostImageScaled Serializer
+# ============================================================================
+
+class PostImageScaledSerializer(serializers.ModelSerializer):
+    """Serializer for scaled image variants."""
+    
+    class Meta:
+        model = PostImageScaled
+        fields = ["id", "scale", "image", "width", "height"]
 
 
 class PostImageTagSerializer(serializers.ModelSerializer):
@@ -55,10 +101,11 @@ class PostImageSerializer(serializers.ModelSerializer):
     """Serializer for Post Images."""
     
     tags = PostImageTagSerializer(many=True, read_only=True)
+    scaled_images = PostImageScaledSerializer(many=True, read_only=True)
 
     class Meta:
         model = PostImage
-        fields = ["id", "post", "image", "order", "tags"]
+        fields = ["id", "post", "image", "order", "tags", "scaled_images"]
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -126,6 +173,7 @@ class PostDetailedSerializer(serializers.ModelSerializer):
             "contains_ai",
             "aspect_ratio",
             "tagged_profiles",
+            "status",
         ]
         read_only_fields = [
             "id",
@@ -140,6 +188,7 @@ class PostDetailedSerializer(serializers.ModelSerializer):
             "is_hidden",
             "is_reported",
             "tagged_profiles",
+            "status",
         ]
 
     @extend_schema_field(serializers.ListField(child=serializers.DictField()))

@@ -120,6 +120,14 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             'data': event.get('data', {})
         }))
 
+    async def post_ready(self, event):
+        """Handle post ready messages sent to the group."""
+        await self.send(text_data=json.dumps({
+            'type': 'post_ready',
+            'post_id': event['post_id'],
+            'message': event.get('message', 'Your post is ready'),
+        }))
+
     @database_sync_to_async
     def get_user_from_token(self):
         """Extract and validate user from JWT token."""

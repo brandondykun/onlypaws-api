@@ -47,6 +47,7 @@ class Command(BaseCommand):
             "appconfiguration",
             "postimagetag",
             "announcement"
+            "postimagescaled",
         ]
 
         # default fixture path

@@ -1,3 +1,5 @@
+import os
+
 from PIL import Image, ImageOps
 from django.core.files import File
 from io import BytesIO
@@ -80,7 +82,9 @@ def crop_to_aspect_ratio_and_resize(image, aspect_ratio="1:1", base_width=1080):
     output = BytesIO()
     img.save(output, "webp", optimize=True, quality=70)
 
-    name_of_file = image.name.split(".")[0] + ".webp"
+    # Use only the basename to avoid path duplication when upload_to adds prefix
+    basename = os.path.basename(image.name)
+    name_of_file = os.path.splitext(basename)[0] + ".webp"
 
     return File(output, name=name_of_file)
 

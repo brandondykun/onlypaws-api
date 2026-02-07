@@ -5,6 +5,7 @@ app_name = "posts_app"
 
 urlpatterns = [
     path("post/", views.CreatePostView.as_view(), name="create_post"),
+    path("post/prepare-upload/", views.PrepareUploadView.as_view(), name="prepare_upload"),
     path(
         "post/<int:pk>/",
         views.RetrieveUpdateDestroyPostView.as_view(),
