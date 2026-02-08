@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Profile, RegularProfile, BusinessProfile, ProfileImage, PetType, Address
+from .models import Profile, RegularProfile, BusinessProfile, ProfileImage, ProfileImageScaled, PetType, Address
 
 
 @admin.register(PetType)
@@ -75,8 +75,17 @@ class BusinessProfileAdmin(admin.ModelAdmin):
 
 @admin.register(ProfileImage)
 class ProfileImageAdmin(admin.ModelAdmin):
-    list_display = ['id', 'profile', 'image', 'created_at', 'updated_at']
+    list_display = ['id', 'profile', 'image', 'processing_status', 'created_at', 'updated_at']
     search_fields = ['profile__username']
+    list_filter = ['processing_status']
     readonly_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
+
+
+@admin.register(ProfileImageScaled)
+class ProfileImageScaledAdmin(admin.ModelAdmin):
+    list_display = ['id', 'profile_image', 'scale', 'width', 'height', 'created_at']
+    list_filter = ['scale']
+    search_fields = ['profile_image__profile__username']
+    ordering = ['profile_image', 'scale']
 

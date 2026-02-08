@@ -716,6 +716,152 @@ def process_post_images_task(self, post_id: int):
             }
 
 
+@shared_task(bind=True, max_retries=3)
+def process_profile_image_task(self, profile_image_id: int):
+    """
+    Background task to process an uploaded profile image.
+
+    Downloads original from storage, crops/resizes to 1:1 (large 400px, medium 200px,
+    small 100px), saves large to ProfileImage.image and medium/small to
+    ProfileImageScaled, then deletes the original.
+    """
+    from io import BytesIO
+
+    from django.core.files.base import ContentFile
+    from PIL import Image
+    from PIL import ImageOps
+
+    from apps.profile_app.models import ProfileImage, ProfileImageScaled
+    from apps.core_app.storage_utils import download_file, delete_file
+
+    logger.info(f"Starting profile image processing for ProfileImage {profile_image_id}")
+
+    try:
+        try:
+            profile_image = ProfileImage.objects.get(id=profile_image_id)
+        except ProfileImage.DoesNotExist:
+            logger.error(f"ProfileImage {profile_image_id} does not exist")
+            return {"success": False, "error": "ProfileImage does not exist", "profile_image_id": profile_image_id}
+
+        if profile_image.processing_status != ProfileImage.ProcessingStatus.UPLOADED:
+            logger.warning(
+                f"ProfileImage {profile_image_id} status is not UPLOADED (current: {profile_image.processing_status})"
+            )
+            return {
+                "success": False,
+                "error": f"ProfileImage is not UPLOADED (current: {profile_image.processing_status})",
+                "profile_image_id": profile_image_id,
+            }
+
+        if not profile_image.original_key:
+            logger.error(f"ProfileImage {profile_image_id} has no original_key")
+            profile_image.processing_status = ProfileImage.ProcessingStatus.FAILED
+            profile_image.save(update_fields=["processing_status"])
+            return {"success": False, "error": "No original_key set", "profile_image_id": profile_image_id}
+
+        profile_image.processing_status = ProfileImage.ProcessingStatus.PROCESSING
+        profile_image.save(update_fields=["processing_status"])
+
+        original_data = download_file(profile_image.original_key)
+        if original_data is None:
+            logger.error(f"Failed to download original for ProfileImage {profile_image_id}")
+            profile_image.processing_status = ProfileImage.ProcessingStatus.FAILED
+            profile_image.save(update_fields=["processing_status"])
+            return {"success": False, "error": "Failed to download original", "profile_image_id": profile_image_id}
+
+        original_image = Image.open(BytesIO(original_data))
+        original_image = ImageOps.exif_transpose(original_image)
+        if original_image.mode != "RGB":
+            original_image = original_image.convert("RGB")
+
+        aspect_ratio = "1:1"
+
+        large_image = _crop_and_resize_image(
+            original_image.copy(), aspect_ratio, ProfileImageScaled.SCALE_DIMENSIONS["large"]
+        )
+        large_buffer = BytesIO()
+        large_image.save(large_buffer, "webp", optimize=True, quality=70)
+        large_buffer.seek(0)
+
+        medium_image = _crop_and_resize_image(
+            original_image.copy(), aspect_ratio, ProfileImageScaled.SCALE_DIMENSIONS["medium"]
+        )
+        medium_buffer = BytesIO()
+        medium_image.save(medium_buffer, "webp", optimize=True, quality=70)
+        medium_buffer.seek(0)
+
+        small_image = _crop_and_resize_image(
+            original_image.copy(), aspect_ratio, ProfileImageScaled.SCALE_DIMENSIONS["small"]
+        )
+        small_buffer = BytesIO()
+        small_image.save(small_buffer, "webp", optimize=True, quality=70)
+        small_buffer.seek(0)
+
+        profile_image.image.save(
+            "profile_image.webp",
+            ContentFile(large_buffer.getvalue()),
+            save=False,
+        )
+
+        medium_scaled, _ = ProfileImageScaled.objects.update_or_create(
+            profile_image=profile_image,
+            scale=ProfileImageScaled.Scale.MEDIUM,
+            defaults={"width": medium_image.width, "height": medium_image.height},
+        )
+        medium_scaled.image.save(
+            "medium.webp",
+            ContentFile(medium_buffer.getvalue()),
+            save=True,
+        )
+
+        small_scaled, _ = ProfileImageScaled.objects.update_or_create(
+            profile_image=profile_image,
+            scale=ProfileImageScaled.Scale.SMALL,
+            defaults={"width": small_image.width, "height": small_image.height},
+        )
+        small_scaled.image.save(
+            "small.webp",
+            ContentFile(small_buffer.getvalue()),
+            save=True,
+        )
+
+        profile_image.processing_status = ProfileImage.ProcessingStatus.READY
+        profile_image.save(update_fields=["image", "processing_status"])
+
+        if delete_file(profile_image.original_key):
+            logger.info(f"Deleted original profile image: {profile_image.original_key}")
+        else:
+            logger.warning(f"Failed to delete original: {profile_image.original_key}")
+
+        logger.info(
+            f"Successfully processed ProfileImage {profile_image_id} "
+            f"(large: {large_image.width}x{large_image.height}, "
+            f"medium: {medium_image.width}x{medium_image.height}, "
+            f"small: {small_image.width}x{small_image.height})"
+        )
+        return {"success": True, "profile_image_id": profile_image_id}
+
+    except Exception as exc:
+        logger.error(f"Error processing ProfileImage {profile_image_id}: {str(exc)}")
+        try:
+            profile_image = ProfileImage.objects.get(id=profile_image_id)
+            profile_image.processing_status = ProfileImage.ProcessingStatus.FAILED
+            profile_image.save(update_fields=["processing_status"])
+        except Exception:
+            pass
+        try:
+            retry_delay = min(300, 30 * (2**self.request.retries))
+            raise self.retry(exc=exc, countdown=retry_delay)
+        except self.MaxRetriesExceededError:
+            logger.error(f"Max retries exceeded for ProfileImage {profile_image_id}")
+            return {
+                "success": False,
+                "error": str(exc),
+                "profile_image_id": profile_image_id,
+                "retries": self.request.retries,
+            }
+
+
 def _crop_and_resize_image(image, aspect_ratio: str, base_width: int):
     """
     Helper function to crop and resize an image to a target aspect ratio and size.

@@ -23,6 +23,16 @@ urlpatterns = [
         name="create_profile_image",
     ),
     path(
+        "image/upload-url/",
+        views.ProfileImageUploadUrlView.as_view(),
+        name="profile_image_upload_url",
+    ),
+    path(
+        "image/confirm-upload/",
+        views.ConfirmProfileImageUploadView.as_view(),
+        name="confirm_profile_image_upload",
+    ),
+    path(
         "image/<int:pk>/",
         views.UpdateProfileImageView.as_view(),
         name="update_profile_image",

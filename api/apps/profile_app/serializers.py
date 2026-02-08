@@ -10,6 +10,7 @@ from apps.profile_app.models import (
     BusinessProfile,
     Address,
     ProfileImage,
+    ProfileImageScaled,
     PetType,
 )
 from apps.interactions_app.models import FollowRequest
@@ -21,13 +22,56 @@ from django.db.models import Q
 # Supporting Model Serializers
 # ============================================================================
 
+class ProfileImageScaledSerializer(serializers.ModelSerializer):
+    """Serializer for scaled profile image variants."""
+
+    class Meta:
+        model = ProfileImageScaled
+        fields = ["id", "scale", "image", "width", "height"]
+
+
 class ProfileImageSerializer(serializers.ModelSerializer):
-    """Serializer for profile image."""
+    """Serializer for profile image. Includes scaled variants when present."""
+
+    scaled_images = ProfileImageScaledSerializer(many=True, read_only=True)
 
     class Meta:
         model = ProfileImage
-        fields = ["id", "profile", "image", "created_at", "updated_at"]
-        read_only_fields = ["created_at", "updated_at"]
+        fields = [
+            "id",
+            "profile",
+            "image",
+            "processing_status",
+            "created_at",
+            "updated_at",
+            "scaled_images",
+        ]
+        read_only_fields = ["created_at", "updated_at", "processing_status"]
+
+
+# ============================================================================
+# Presigned profile image upload serializers
+# ============================================================================
+
+class ProfileImageUploadUrlRequestSerializer(serializers.Serializer):
+    """Request body for requesting a presigned upload URL."""
+
+    profile_id = serializers.IntegerField(min_value=1)
+
+
+class ProfileImageUploadUrlResponseSerializer(serializers.Serializer):
+    """Response with presigned URL and key for frontend upload."""
+
+    upload_url = serializers.URLField()
+    key = serializers.CharField()
+    expires_in = serializers.IntegerField(required=False)
+
+
+class ConfirmProfileImageUploadRequestSerializer(serializers.Serializer):
+    """Request body for confirming upload after frontend PUT to presigned URL."""
+
+    profile_id = serializers.IntegerField(min_value=1)
+    key = serializers.CharField()
 
 
 class PetTypeSerializer(serializers.ModelSerializer):

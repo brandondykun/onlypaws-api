@@ -12,6 +12,9 @@ from .serializers import (
     ProfileDetailedSerializer,
     PetTypeSerializer,
     SearchProfileSerializer,
+    ProfileImageUploadUrlRequestSerializer,
+    ProfileImageUploadUrlResponseSerializer,
+    ConfirmProfileImageUploadRequestSerializer,
 )
 from rest_framework.response import Response
 import logging
@@ -23,6 +26,12 @@ from apps.posts_app.pagination import SearchedProfilesPagination
 from drf_spectacular.utils import extend_schema_view, extend_schema
 
 from core.schema_params import auth_profile_param, username_param
+from apps.core_app.storage_utils import (
+    generate_profile_original_key,
+    generate_presigned_upload_url,
+    check_s3_object_exists,
+)
+from apps.core_app.tasks import process_profile_image_task
 
 logger = logging.getLogger(__name__)
 
@@ -161,9 +170,7 @@ class RetrieveUpdateDestroyProfileView(generics.RetrieveAPIView, generics.Update
             )
 
         try:
-            # Delete associated profile image from storage
             if hasattr(profile, "image"):
-                profile.image.image.delete(save=False)
                 profile.image.delete()
 
             # Delete the profile
@@ -278,6 +285,148 @@ class UpdateProfileImageView(generics.UpdateAPIView):
             logger.error(f"Error updating profile image: {str(e)}")
             return Response(
                 {"error": "Failed to update profile image."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+@extend_schema_view(
+    post=extend_schema(
+        parameters=[auth_profile_param],
+        request=ProfileImageUploadUrlRequestSerializer,
+        responses={200: ProfileImageUploadUrlResponseSerializer},
+    ),
+)
+class ProfileImageUploadUrlView(generics.GenericAPIView):
+    """
+    Return a presigned URL for uploading a profile image directly to R2.
+    Use for both new and update flows. Frontend should PUT the file to upload_url,
+    then call confirm-upload with the returned key.
+    """
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        data = request.data.copy()
+        # Frontend sends camelCase profileId; normalize for serializer
+        if "profileId" in data and "profile_id" not in data:
+            data["profile_id"] = data["profileId"]
+        serializer = ProfileImageUploadUrlRequestSerializer(data=data)
+        if not serializer.is_valid():
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        profile_id = serializer.validated_data["profile_id"]
+        user_profile = request.user.profiles.filter(id=profile_id).first()
+        if not user_profile:
+            logger.warning(
+                f"Unauthorized profile image upload URL: "
+                f"profile {profile_id} does not belong to user {request.user.id}"
+            )
+            return Response(
+                {"error": "Profile not found or you do not own it."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        key = generate_profile_original_key(
+            user_id=user_profile.user.id,
+            profile_id=user_profile.id,
+        )
+        presigned = generate_presigned_upload_url(key, expires_in=3600)
+        if presigned is None:
+            logger.error("Failed to generate presigned URL for profile image")
+            return Response(
+                {"error": "Failed to generate upload URL."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        return Response(
+            {
+                "upload_url": presigned["url"],
+                "key": presigned["key"],
+                "expires_in": 3600,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+@extend_schema_view(
+    post=extend_schema(
+        parameters=[auth_profile_param],
+        request=ConfirmProfileImageUploadRequestSerializer,
+        responses={200: ProfileImageSerializer, 201: ProfileImageSerializer},
+    ),
+)
+class ConfirmProfileImageUploadView(generics.GenericAPIView):
+    """
+    Confirm that the frontend has uploaded a file to the presigned URL.
+    Creates or updates ProfileImage and queues background processing.
+    """
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        data = request.data.copy()
+        # Frontend sends camelCase profileId; normalize for serializer
+        if "profileId" in data and "profile_id" not in data:
+            data["profile_id"] = data["profileId"]
+
+        serializer = ConfirmProfileImageUploadRequestSerializer(data=data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        profile_id = serializer.validated_data["profile_id"]
+        key = serializer.validated_data["key"]
+        user_profile = request.user.profiles.filter(id=profile_id).first()
+
+        if not user_profile:
+            logger.warning(
+                f"Unauthorized confirm upload: profile {profile_id} does not belong to user {request.user.id}"
+            )
+            return Response(
+                {"error": "Profile not found or you do not own it."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not check_s3_object_exists(key):
+            return Response(
+                {"error": "Upload not found at the given key. Upload the file first."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            with transaction.atomic():
+                profile_image = getattr(user_profile, "image", None)
+                created = False
+                if profile_image is None:
+                    profile_image = ProfileImage.objects.create(
+                        profile=user_profile,
+                        original_key=key,
+                        processing_status=ProfileImage.ProcessingStatus.UPLOADED,
+                    )
+                    created = True
+                else:
+                    profile_image.original_key = key
+                    profile_image.processing_status = ProfileImage.ProcessingStatus.UPLOADED
+                    profile_image.save(update_fields=["original_key", "processing_status"])
+
+                def queue_task():
+                    process_profile_image_task.delay(profile_image.id)
+
+                transaction.on_commit(queue_task)
+
+            profile_image.refresh_from_db()
+            response_serializer = ProfileImageSerializer(
+                profile_image,
+                context={"request": request},
+            )
+            return Response(
+                response_serializer.data,
+                status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+            )
+
+        except Exception as e:
+            logger.error(f"Error confirming profile image upload: {str(e)}", exc_info=True)
+            return Response(
+                {"error": "Failed to confirm upload."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 

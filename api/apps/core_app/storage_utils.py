@@ -6,6 +6,7 @@ Supports both S3/R2 cloud storage and local file storage for development.
 
 import os
 import logging
+import uuid
 from typing import Optional
 
 import boto3
@@ -124,6 +125,33 @@ def generate_original_image_key(user_id: int, profile_id: int, post_id: int, ima
         prefix = "images"
     
     return f"{prefix}/originals/{user_id}/{profile_id}/{post_id}/original_{image_order}"
+
+
+def generate_profile_original_key(user_id: int, profile_id: int) -> str:
+    """
+    Generate a unique S3 key for profile image original uploads (before processing).
+
+    Each request gets a new UUID so new and update uploads never clash.
+    Originals are deleted after processing.
+
+    Args:
+        user_id: The user's ID
+        profile_id: The profile's ID
+
+    Returns:
+        S3 key string for the original image (e.g. images/dev/originals/profile/1/2/<uuid>)
+    """
+    env = os.environ.get("DJANGO_ENV")
+    if env == "test":
+        prefix = "images/test"
+    elif env == "dev":
+        prefix = "images/dev"
+    elif env == "e2e":
+        prefix = "images/e2e"
+    else:
+        prefix = "images"
+
+    return f"{prefix}/originals/profile/{user_id}/{profile_id}/{uuid.uuid4()}"
 
 
 def delete_s3_object(key: str) -> bool:
