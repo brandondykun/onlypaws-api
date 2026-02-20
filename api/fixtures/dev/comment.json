@@ -430,5 +430,41 @@
       "parent_comment": 14,
       "reply_to_comment": 14
     }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 39,
+    "fields": {
+      "text": "I like your vest!",
+      "profile": 1,
+      "post": 91,
+      "created_at": "2026-02-11T00:08:29.491Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 40,
+    "fields": {
+      "text": "That chair is the perfect size!",
+      "profile": 3,
+      "post": 93,
+      "created_at": "2026-02-15T18:53:44.226Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 41,
+    "fields": {
+      "text": "I love that jacket! Where did you get it?",
+      "profile": 3,
+      "post": 92,
+      "created_at": "2026-02-15T19:12:40.064Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
   }
 ]

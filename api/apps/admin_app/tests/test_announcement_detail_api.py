@@ -65,7 +65,7 @@ class NonAdminAnnouncementDetailTests(TestCase):
     def test_non_admin_user_with_profile_returns_403(self):
         """Test that authenticated non-admin users with profile receive 403."""
         profile = create_profile("regular_user", self.regular_user, "About me")
-        self.client.credentials(HTTP_AUTH_PROFILE_ID=profile.id)
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(profile.public_id))
 
         url = get_admin_announcement_detail_url(self.announcement.id)
         response = self.client.get(url)

@@ -31,39 +31,42 @@ def get_feed_url():
     return reverse("posts_app:retrieve_feed")
 
 
-def retrieve_destroy_post_url(post_id: int):
+def retrieve_destroy_post_url(post):
     """Create and return a retrieve/destroy Post url.
 
     Parameters
     ----------
-    post_id : int
-        The id of the Post to fetch or destroy.
+    post : Post or str
+        The Post instance or its public_id (string).
     """
-    return reverse("posts_app:retrieve_update_destroy_post", args=[post_id])
+    public_id = str(post.public_id) if hasattr(post, "public_id") else post
+    return reverse("posts_app:retrieve_update_destroy_post", args=[public_id])
 
 
-def destroy_post_image_url(post_image_id: int):
+def destroy_post_image_url(post_image):
     """
     Create and return a destroy post image url.
 
     Parameters
     ----------
-    post_image_id : int
-        The id of the post image that is used to build the url.
+    post_image : PostImage or str
+        The PostImage instance or its public_id (string).
     """
-    return reverse("posts_app:destroy_post_image", args=[post_image_id])
+    public_id = str(post_image.public_id) if hasattr(post_image, "public_id") else post_image
+    return reverse("posts_app:destroy_post_image", args=[public_id])
 
 
-def list_similar_posts_url(post_id: int):
+def list_similar_posts_url(post):
     """
     Create and return a list similar posts url.
 
     Parameters
     ----------
-    post_id : int
-        The id of the post to find similar posts for.
+    post : Post or str
+        The Post instance or its public_id (string).
     """
-    return reverse("posts_app:lists_similar_posts", args=[post_id])
+    public_id = str(post.public_id) if hasattr(post, "public_id") else post
+    return reverse("posts_app:lists_similar_posts", args=[public_id])
 
 
 def list_create_saved_post_url():
@@ -73,13 +76,14 @@ def list_create_saved_post_url():
     return reverse("posts_app:list_create_saved_post")
 
 
-def destroy_saved_post_url(post_id: int):
+def destroy_saved_post_url(post):
     """
     Create and return a destroy saved post url.
 
     Parameters
     ----------
-    post_id : int
-        The id of the post to unsave.
+    post : Post or str
+        The Post instance or its public_id (string).
     """
-    return reverse("posts_app:destroy_saved_post", args=[post_id])
+    public_id = str(post.public_id) if hasattr(post, "public_id") else post
+    return reverse("posts_app:destroy_saved_post", args=[public_id])

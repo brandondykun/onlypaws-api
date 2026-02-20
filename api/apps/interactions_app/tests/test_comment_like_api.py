@@ -16,7 +16,7 @@ class PrivateCommentLikeApiTests(BaseFixtureTestCase):
         super(self.__class__, self).setUp()
         # extend setUp by authenticating self.profile
         self.client.force_authenticate(user=self.user)
-        self.client.credentials(HTTP_AUTH_PROFILE_ID=self.profile.id)
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(self.profile.public_id))
 
     # ========================================
     # POST (Create Comment Like) Tests
@@ -247,7 +247,7 @@ class PrivateCommentLikeApiTests(BaseFixtureTestCase):
 
         # Switch to profile_2
         self.client.force_authenticate(user=self.user_2)
-        self.client.credentials(HTTP_AUTH_PROFILE_ID=self.profile_2.id)
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(self.profile_2.public_id))
 
         # Profile 2 likes the same comment
         payload2 = {"profileId": self.profile_2.id}

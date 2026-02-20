@@ -51,7 +51,7 @@ urlpatterns = [
         name="create_follow",
     ),
     path(
-        "follow/<int:profile_id>/",
+        "follow/<str:profile_public_id>/",
         views.DestroyFollowView.as_view(),
         name="destroy_follow",
     ),
@@ -61,12 +61,12 @@ urlpatterns = [
         name="remove_follower",
     ),
     path(
-        "followers/<int:id>/",
+        "followers/<str:public_id>/",
         views.ListFollowersView.as_view(),
         name="list_followers",
     ),
     path(
-        "following/<int:id>/",
+        "following/<str:public_id>/",
         views.ListFollowingView.as_view(),
         name="list_following",
     ),
@@ -93,7 +93,7 @@ urlpatterns = [
         name="decline_follow_request",
     ),
     path(
-        "follow-request/<int:profile_id>/cancel/",
+        "follow-request/<str:public_id>/cancel/",
         views.CancelFollowRequestView.as_view(),
         name="cancel_follow_request",
     ),

@@ -18,7 +18,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         super(self.__class__, self).setUp()
         # extend setUp by authenticating self.profile
         self.client.force_authenticate(user=self.user)
-        self.client.credentials(HTTP_AUTH_PROFILE_ID=self.profile.id)
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(self.profile.public_id))
 
     def test_create_post_without_caption_returns_error(self):
         """
@@ -57,6 +57,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         self.assertEqual(res.data["aspect_ratio"], "1:1")  # Default aspect ratio
         expected_profile = {
             "id": self.profile.id,
+            "public_id": str(self.profile.public_id),
             "username": self.profile.username,
             "about": self.profile.regularprofile.about,
             "name": self.profile.regularprofile.name,
@@ -64,6 +65,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
             "breed": "",
             "pet_type": None,
             "profile_type": "regular",
+            "is_private": False,
         }
         self.assertEqual(res.data["profile"], expected_profile)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
@@ -128,7 +130,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         # Create a caption with exactly 1000 characters
         caption_1000_chars = "b" * 1000
         
-        url = retrieve_destroy_post_url(post.id)
+        url = retrieve_destroy_post_url(post)
         update_data = {"caption": caption_1000_chars}
 
         res = self.client.patch(url, data=update_data)
@@ -150,7 +152,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         # Create a caption with 1001 characters (exceeds limit)
         caption_1001_chars = "b" * 1001
         
-        url = retrieve_destroy_post_url(post.id)
+        url = retrieve_destroy_post_url(post)
         update_data = {"caption": caption_1001_chars}
 
         res = self.client.patch(url, data=update_data)
@@ -460,7 +462,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         """
         sample_post = Post.objects.first()
 
-        url = retrieve_destroy_post_url(sample_post.id)
+        url = retrieve_destroy_post_url(sample_post)
 
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -488,7 +490,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         current_post_count = self.get_posts_count()
         self.assertEqual(current_post_count, starting_post_count + 1)
 
-        url = retrieve_destroy_post_url(new_post.id)
+        url = retrieve_destroy_post_url(new_post)
         res = self.client.delete(url)
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -509,7 +511,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         self.assertEqual(post.images.count(), 2)
         
         # Delete one image
-        url = destroy_post_image_url(image1.id)
+        url = destroy_post_image_url(image1)
         res = self.client.delete(url)
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         
@@ -530,7 +532,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         self.assertEqual(post.images.count(), 1)
         
         # Try to delete the only image
-        url = destroy_post_image_url(image.id)
+        url = destroy_post_image_url(image)
         res = self.client.delete(url)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("Cannot delete the last image", res.data["error"])
@@ -548,7 +550,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         image = create_post_image(post)
         
         # Try to delete the image as self.profile (different user)
-        url = destroy_post_image_url(image.id)
+        url = destroy_post_image_url(image)
         res = self.client.delete(url)
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
         self.assertIn("does not own this resource", res.data["error"])
@@ -560,7 +562,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         """
         Test deleting a non-existent PostImage returns 404.
         """
-        url = destroy_post_image_url(99999)  # Non-existent ID
+        url = destroy_post_image_url("01HF7YQX8J9K2P3M4N5R6S7T8X")  # Non-existent public_id (26-char ULID)
         res = self.client.delete(url)
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -682,7 +684,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         """
         # Use post_2 (belongs to self.profile) as the reference post
         # The base fixture creates posts with images but no embeddings
-        url = list_similar_posts_url(self.post_2.id)
+        url = list_similar_posts_url(self.post_2)
         
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -714,7 +716,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         dissimilar_embedding = create_mock_embedding(base_value=0.9, variation=0.0, seed=13)
         create_post_image(dissimilar_post, create_test_image('dissim.jpg'), embedding=dissimilar_embedding)
         
-        url = list_similar_posts_url(reference_post.id)
+        url = list_similar_posts_url(reference_post)
         
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -746,7 +748,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         other_embedding = create_mock_embedding(base_value=0.49, variation=0.0, seed=22)
         create_post_image(other_post, create_test_image('other.jpg'), embedding=other_embedding)
         
-        url = list_similar_posts_url(reference_post.id)
+        url = list_similar_posts_url(reference_post)
         
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -772,7 +774,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         similar_embedding = create_mock_embedding(base_value=0.51, variation=0.0, seed=31)
         create_post_image(similar_post, create_test_image('sim.jpg'), embedding=similar_embedding)
         
-        url = list_similar_posts_url(reference_post.id)
+        url = list_similar_posts_url(reference_post)
         
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -812,7 +814,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         clean_embedding = create_mock_embedding(base_value=0.49, variation=0.01, seed=102)
         create_post_image(clean_post, create_test_image('clean.jpg'), embedding=clean_embedding)
         
-        url = list_similar_posts_url(reference_post.id)
+        url = list_similar_posts_url(reference_post)
         
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -848,7 +850,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         similar_embedding_3 = create_mock_embedding(base_value=0.5, variation=0.0, seed=300)
         create_post_image(similar_post_3, create_test_image('sim3.jpg'), embedding=similar_embedding_3)
         
-        url = list_similar_posts_url(reference_post.id)
+        url = list_similar_posts_url(reference_post)
         
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -884,7 +886,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         create_post_image(multi_image_post, create_test_image('multi1.jpg'), embedding=similar_embedding_1)
         create_post_image(multi_image_post, create_test_image('multi2.jpg'), embedding=similar_embedding_2)
         
-        url = list_similar_posts_url(reference_post.id)
+        url = list_similar_posts_url(reference_post)
         
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -914,7 +916,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         create_post_image(moderate_post, create_test_image('moderate.jpg'), embedding=moderate_embedding)
         
         # Test with high min_similarity (should only get very similar posts)
-        url = list_similar_posts_url(reference_post.id)
+        url = list_similar_posts_url(reference_post)
         res = self.client.get(url, {'min_similarity': 0.9})
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         
@@ -937,7 +939,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         # Create a post without images
         post_no_image = create_post("Post without images", self.profile_2)
         
-        url = list_similar_posts_url(post_no_image.id)
+        url = list_similar_posts_url(post_no_image)
         
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -950,7 +952,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         Test that requesting similar posts for a non-existent post returns empty results.
         The view catches exceptions and returns an empty queryset instead of 404.
         """
-        url = list_similar_posts_url(99999)  # Non-existent post ID
+        url = list_similar_posts_url("01HF7YQX8J9K2P3M4N5R6S7T8X")  # Non-existent post public_id (26-char ULID)
         
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -965,7 +967,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         # Logout the current user
         self.client.force_authenticate(user=None)
         
-        url = list_similar_posts_url(self.post_2.id)
+        url = list_similar_posts_url(self.post_2)
         
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)

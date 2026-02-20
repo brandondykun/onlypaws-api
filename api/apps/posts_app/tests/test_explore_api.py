@@ -15,7 +15,7 @@ class PrivateExploreApiTests(BaseFixtureTestCase):
         super(self.__class__, self).setUp()
         # extend setUp by authenticating self.profile
         self.client.force_authenticate(user=self.user)
-        self.client.credentials(HTTP_AUTH_PROFILE_ID=self.profile.id)
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(self.profile.public_id))
 
     def test_fetch_explore_posts_successful(self):
         """

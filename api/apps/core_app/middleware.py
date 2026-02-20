@@ -100,8 +100,8 @@ class MaintenanceModeMiddleware:
 
 class ProfileAuthenticationMiddleware:
     """
-    Middleware to authenticate the profile from the auth-profile-id header
-    and attach it to the request object.
+    Resolve the profile from the auth-profile-id header (profile's public_id, ULID)
+    and attach it as request.current_profile.
     """
 
     def __init__(self, get_response):
@@ -127,20 +127,20 @@ class ProfileAuthenticationMiddleware:
             return None
 
         # Get profile ID from header
-        profile_id = request.headers.get("auth-profile-id")
+        profile_public_id = request.headers.get("auth-profile-id")
 
-        if not profile_id:
+        if not profile_public_id:
             raise AuthenticationFailed(
-                detail="Profile ID not provided in headers", code="profile_id_missing"
+                detail="Profile public ID not provided in headers", code="profile_public_id_missing"
             )
 
         try:
-            profile = request.user.profiles.get(id=profile_id)
+            profile = request.user.profiles.get(public_id=profile_public_id)
             return profile
 
         except Profile.DoesNotExist:
             raise AuthenticationFailed(
-                detail="Invalid profile ID", code="profile_invalid"
+                detail="Invalid profile public ID", code="profile_public_id_invalid"
             )
 
     def _is_excluded_path(self, path):

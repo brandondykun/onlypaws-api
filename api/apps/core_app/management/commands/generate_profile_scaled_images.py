@@ -166,9 +166,10 @@ class Command(BaseCommand):
                     "height": medium_image.height,
                 },
             )
+            medium_content = medium_buffer.getvalue()
             medium_scaled.image.save(
                 "medium.webp",
-                ContentFile(medium_buffer.getvalue()),
+                ContentFile(medium_content),
                 save=True,
             )
             self.stdout.write(f"  Created medium image: {medium_scaled.image.name}")
@@ -190,9 +191,10 @@ class Command(BaseCommand):
                     "height": small_image.height,
                 },
             )
+            small_content = small_buffer.getvalue()
             small_scaled.image.save(
                 "small.webp",
-                ContentFile(small_buffer.getvalue()),
+                ContentFile(small_content),
                 save=True,
             )
             self.stdout.write(f"  Created small image: {small_scaled.image.name}")

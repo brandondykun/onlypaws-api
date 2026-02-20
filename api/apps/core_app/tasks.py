@@ -550,13 +550,15 @@ def process_post_images_task(self, post_id: int):
                 # All variants processed successfully, now save them
                 
                 # Save LARGE to PostImage.image field (primary image)
+                large_dim = PostImageScaled.SCALE_DIMENSIONS["large"]
                 post_image.image.save(
-                    f"large_{post_image.order}.webp",
+                    f"{post_image.order}_{large_dim}.webp",
                     ContentFile(large_buffer.getvalue()),
                     save=False
                 )
                 
                 # Create or update PostImageScaled for MEDIUM
+                medium_dim = PostImageScaled.SCALE_DIMENSIONS["medium"]
                 medium_scaled, _ = PostImageScaled.objects.update_or_create(
                     post_image=post_image,
                     scale=PostImageScaled.Scale.MEDIUM,
@@ -566,12 +568,13 @@ def process_post_images_task(self, post_id: int):
                     }
                 )
                 medium_scaled.image.save(
-                    f"medium_{post_image.order}.webp",
+                    f"{post_image.order}_{medium_dim}.webp",
                     ContentFile(medium_buffer.getvalue()),
                     save=True
                 )
                 
                 # Create or update PostImageScaled for SMALL
+                small_dim = PostImageScaled.SCALE_DIMENSIONS["small"]
                 small_scaled, _ = PostImageScaled.objects.update_or_create(
                     post_image=post_image,
                     scale=PostImageScaled.Scale.SMALL,
@@ -581,7 +584,7 @@ def process_post_images_task(self, post_id: int):
                     }
                 )
                 small_scaled.image.save(
-                    f"small_{post_image.order}.webp",
+                    f"{post_image.order}_{small_dim}.webp",
                     ContentFile(small_buffer.getvalue()),
                     save=True
                 )
@@ -670,6 +673,7 @@ def process_post_images_task(self, post_id: int):
                 {
                     'type': 'post_ready',
                     'post_id': post_id,
+                    'post_public_id': str(post.public_id),
                     'message': 'Your post is ready',
                 }
             )
@@ -797,30 +801,33 @@ def process_profile_image_task(self, profile_image_id: int):
         small_image.save(small_buffer, "webp", optimize=True, quality=70)
         small_buffer.seek(0)
 
+        large_dim = ProfileImageScaled.SCALE_DIMENSIONS["large"]
         profile_image.image.save(
-            "profile_image.webp",
+            f"avatar_{large_dim}.webp",
             ContentFile(large_buffer.getvalue()),
             save=False,
         )
 
+        medium_dim = ProfileImageScaled.SCALE_DIMENSIONS["medium"]
         medium_scaled, _ = ProfileImageScaled.objects.update_or_create(
             profile_image=profile_image,
             scale=ProfileImageScaled.Scale.MEDIUM,
             defaults={"width": medium_image.width, "height": medium_image.height},
         )
         medium_scaled.image.save(
-            "medium.webp",
+            f"avatar_{medium_dim}.webp",
             ContentFile(medium_buffer.getvalue()),
             save=True,
         )
 
+        small_dim = ProfileImageScaled.SCALE_DIMENSIONS["small"]
         small_scaled, _ = ProfileImageScaled.objects.update_or_create(
             profile_image=profile_image,
             scale=ProfileImageScaled.Scale.SMALL,
             defaults={"width": small_image.width, "height": small_image.height},
         )
         small_scaled.image.save(
-            "small.webp",
+            f"avatar_{small_dim}.webp",
             ContentFile(small_buffer.getvalue()),
             save=True,
         )

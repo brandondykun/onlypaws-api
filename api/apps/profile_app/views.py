@@ -98,6 +98,8 @@ class RetrieveUpdateDestroyProfileView(generics.RetrieveAPIView, generics.Update
     serializer_class = ProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
     allowed_methods = ["GET", "PATCH", "DELETE"]
+    lookup_url_kwarg = "public_id"
+    lookup_field = "public_id"
 
     def get_serializer_class(self):
         if self.request.method == "GET":
@@ -112,13 +114,13 @@ class RetrieveUpdateDestroyProfileView(generics.RetrieveAPIView, generics.Update
         return Response(serializer.data)
 
     def update(self, request, *args, **kwargs):
-        profile_id = self.kwargs.get("pk")
+        public_id = self.kwargs.get("public_id")
         # ensure that the profile sent belongs to the current authenticated user
-        user_profile_match = self.request.user.profiles.filter(id=profile_id).first()
+        user_profile_match = self.request.user.profiles.filter(public_id=public_id).first()
         if not user_profile_match:
             logger.warning(
                 f"Unauthorized profile update attempt: "
-                f"profile {profile_id} does not belong to user {request.user.id}"
+                f"profile {public_id} does not belong to user {request.user.id}"
             )
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -137,21 +139,21 @@ class RetrieveUpdateDestroyProfileView(generics.RetrieveAPIView, generics.Update
             # Refresh instance from database to get updated values
             instance.refresh_from_db()
             instance_serializer = ProfileSerializer(instance)
-            logger.info(f"Profile {profile_id} updated successfully")
+            logger.info(f"Profile {public_id} updated successfully")
             return Response(instance_serializer.data)
         except Exception as e:
-            logger.error(f"Error updating profile {profile_id}: {str(e)}")
+            logger.error(f"Error updating profile {public_id}: {str(e)}")
             return Response(
                 {"error": "Failed to update profile"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
     def destroy(self, request, *args, **kwargs):
-        profile_id = self.kwargs.get("pk")
+        public_id = self.kwargs.get("public_id")
 
         # Ensure the profile belongs to the current authenticated user
         try:
-            profile = self.request.user.profiles.get(id=profile_id)
+            profile = self.request.user.profiles.get(public_id=public_id)
         except Profile.DoesNotExist:
             return Response(
                 {
@@ -176,13 +178,13 @@ class RetrieveUpdateDestroyProfileView(generics.RetrieveAPIView, generics.Update
             # Delete the profile
             profile.delete()
             logger.info(
-                f"Profile {profile_id} deleted successfully by user {request.user.email}"
+                f"Profile {public_id} deleted successfully by user {request.user.email}"
             )
 
             return Response(status=status.HTTP_204_NO_CONTENT)
 
         except Exception as e:
-            logger.error(f"Error deleting profile {profile_id}: {str(e)}")
+            logger.error(f"Error deleting profile {public_id}: {str(e)}")
             return Response(
                 {"error": "Failed to delete profile. Please try again."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -255,6 +257,8 @@ class UpdateProfileImageView(generics.UpdateAPIView):
     permission_classes = [permissions.IsAuthenticated]
     allowed_methods = ["PATCH"]
     queryset = ProfileImage.objects.all()
+    lookup_url_kwarg = "public_id"
+    lookup_field = "public_id"
 
     def patch(self, request, *args, **kwargs):
         profile_id = request.data.get("profileId", None)
@@ -277,7 +281,7 @@ class UpdateProfileImageView(generics.UpdateAPIView):
                 if response.status_code == 200:
                     if old_image:
                         old_image.delete(save=False)
-                    logger.info(f"Profile image updated for profile {profile_id}")
+                    logger.info(f"Profile image updated for profile {instance.profile_id}")
 
                 return response
 
@@ -327,10 +331,7 @@ class ProfileImageUploadUrlView(generics.GenericAPIView):
                 {"error": "Profile not found or you do not own it."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        key = generate_profile_original_key(
-            user_id=user_profile.user.id,
-            profile_id=user_profile.id,
-        )
+        key = generate_profile_original_key(user_profile.public_id)
         presigned = generate_presigned_upload_url(key, expires_in=3600)
         if presigned is None:
             logger.error("Failed to generate presigned URL for profile image")

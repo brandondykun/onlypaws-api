@@ -129,3 +129,23 @@ def handle_follow_request_created(sender, instance, created, **kwargs):
             logger.info(f"Follow request notification task queued for {instance.target.username} from {instance.requester.username}")
         except Exception as e:
             logger.error(f"Error queuing follow request notification task: {e}")
+
+
+def disconnect_notification_signals():
+    """Disconnect all notification signal handlers (e.g. during fixture loading)."""
+    post_save.disconnect(handle_like_created, sender=Like)
+    post_save.disconnect(handle_comment_like_created, sender=CommentLike)
+    post_save.disconnect(handle_comment_created, sender=Comment)
+    post_save.disconnect(handle_follow_created, sender=Follow)
+    post_save.disconnect(handle_post_image_tag_created, sender=PostImageTag)
+    post_save.disconnect(handle_follow_request_created, sender=FollowRequest)
+
+
+def reconnect_notification_signals():
+    """Reconnect all notification signal handlers after fixture loading."""
+    post_save.connect(handle_like_created, sender=Like)
+    post_save.connect(handle_comment_like_created, sender=CommentLike)
+    post_save.connect(handle_comment_created, sender=Comment)
+    post_save.connect(handle_follow_created, sender=Follow)
+    post_save.connect(handle_post_image_tag_created, sender=PostImageTag)
+    post_save.connect(handle_follow_request_created, sender=FollowRequest)

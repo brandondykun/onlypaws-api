@@ -45,6 +45,19 @@ logger = logging.getLogger(__name__)
 VALID_ASPECT_RATIOS = Post.AspectRatio.values
 
 
+def _delete_pending_post_placeholders(post):
+    """
+    Delete a post that is still in PENDING_UPLOAD state after a failed complete-post.
+    Cascade deletes PostImages; post_delete signals remove original_key (and image) from R2.
+    Called on any error so the frontend can safely restart the workflow from prepare-upload.
+    """
+    if post.status != Post.Status.PENDING_UPLOAD:
+        return
+    post_id, public_id = post.id, post.public_id
+    post.delete()
+    logger.info(f"Deleted PENDING_UPLOAD post {post_id} ({public_id}) after failed completion.")
+
+
 def adjust_tag_position_for_center_crop(x_percent, y_percent, original_width, original_height, target_aspect_ratio=Post.AspectRatio.SQUARE):
     """
     Adjust tag position percentages to account for center crop to target aspect ratio.
@@ -157,12 +170,7 @@ class PrepareUploadView(generics.CreateAPIView):
                     )
                     
                     # Generate S3 key for original image
-                    key = generate_original_image_key(
-                        user_id=current_profile.user.id,
-                        profile_id=current_profile.id,
-                        post_id=post.id,
-                        image_order=order,
-                    )
+                    key = generate_original_image_key(post.public_id, order)
                     
                     # Store the original key in the PostImage
                     post_image.original_key = key
@@ -190,6 +198,7 @@ class PrepareUploadView(generics.CreateAPIView):
                 return Response(
                     {
                         "post_id": post.id,
+                        "post_public_id": str(post.public_id),
                         "upload_urls": upload_urls,
                     },
                     status=status.HTTP_201_CREATED
@@ -399,12 +408,12 @@ class ListProfilePostsView(generics.ListAPIView):
         """Override list to check profile access before queryset evaluation."""
         from apps.profile_app.models import Profile
 
-        profile_id = self.kwargs.get("id", None)
+        public_id = self.kwargs.get("public_id", None)
         current_profile = request.current_profile
-        target_profile = get_object_or_404(Profile, id=profile_id)
+        target_profile = get_object_or_404(Profile, public_id=public_id)
 
         if target_profile.is_private:
-            is_own_profile = str(profile_id) == str(current_profile.id)
+            is_own_profile = target_profile.id == current_profile.id
             is_following = Follow.objects.filter(
                 followed=target_profile,
                 followed_by=current_profile
@@ -419,10 +428,10 @@ class ListProfilePostsView(generics.ListAPIView):
         return super().list(request, *args, **kwargs)
 
     def get_queryset(self):
-        profile_id = self.kwargs.get("id", None)
+        public_id = self.kwargs.get("public_id", None)
         current_profile = self.request.current_profile
 
-        profile_posts = Post.objects.filter(Q(profile__id=profile_id)).prefetch_related(
+        profile_posts = Post.objects.filter(Q(profile__public_id=public_id)).prefetch_related(
             'images__tags__tagged_profile__image',
             'images__tags__tagged_profile__regularprofile',
             'images__tags__tagged_profile__businessprofile',
@@ -435,7 +444,7 @@ class ListProfilePostsView(generics.ListAPIView):
             'reports',
         )
 
-        if str(profile_id) == str(current_profile.id):
+        if str(public_id) == str(current_profile.public_id):
             # Don't filter inappropriate posts or pending posts if profile is requesting their own posts
             return profile_posts.order_by("-created_at")
 
@@ -487,6 +496,8 @@ class RetrieveUpdateDestroyPostView(generics.RetrieveUpdateDestroyAPIView):
 
     serializer_class = PostDetailedSerializer
     permission_classes = [permissions.IsAuthenticated]
+    lookup_url_kwarg = "public_id"
+    lookup_field = "public_id"
     queryset = Post.objects.prefetch_related(
         'images__tags__tagged_profile__image',
         'images__tags__tagged_profile__regularprofile',
@@ -501,14 +512,14 @@ class RetrieveUpdateDestroyPostView(generics.RetrieveUpdateDestroyAPIView):
     ).all()
 
     def get(self, request, *args, **kwargs):
-        post_id = self.kwargs.get("pk")
+        public_id = self.kwargs.get("public_id")
         try:
-            post = self.queryset.get(id=post_id)
-            logger.debug(f"Post {post_id} retrieved by user {request.user.id}")
+            post = self.queryset.get(public_id=public_id)
+            logger.debug(f"Post {public_id} retrieved by user {request.user.id}")
             serializer = self.serializer_class(post, context={"request": request})
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Post.DoesNotExist:
-            logger.warning(f"Post {post_id} not found")
+            logger.warning(f"Post {public_id} not found")
             return Response({"error": "Post not found"}, status=status.HTTP_404_NOT_FOUND)
 
     def update(self, request, *args, **kwargs):
@@ -604,6 +615,7 @@ class RetrieveUpdateDestroyPostView(generics.RetrieveUpdateDestroyAPIView):
         serializer = CompletePostSerializer(data=request.data)
         if not serializer.is_valid():
             logger.error(f"Invalid post completion request: {serializer.errors}")
+            _delete_pending_post_placeholders(instance)
             return Response(
                 {"error": "Invalid request.", "details": serializer.errors},
                 status=status.HTTP_400_BAD_REQUEST
@@ -618,6 +630,7 @@ class RetrieveUpdateDestroyPostView(generics.RetrieveUpdateDestroyAPIView):
         # Validate aspect ratio
         if aspect_ratio not in VALID_ASPECT_RATIOS:
             logger.error(f"Invalid aspect ratio: {aspect_ratio}")
+            _delete_pending_post_placeholders(instance)
             return Response(
                 {"error": f"Invalid aspect ratio. Must be one of: {', '.join(VALID_ASPECT_RATIOS)}"},
                 status=status.HTTP_400_BAD_REQUEST
@@ -678,12 +691,14 @@ class RetrieveUpdateDestroyPostView(generics.RetrieveUpdateDestroyAPIView):
         
         except ValueError as e:
             logger.error(f"Validation error completing post {instance.id}: {str(e)}")
+            _delete_pending_post_placeholders(instance)
             return Response(
                 {"error": str(e)},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         except Exception as e:
             logger.error(f"Error completing post {instance.id}: {str(e)}")
+            _delete_pending_post_placeholders(instance)
             return Response(
                 {"error": "Failed to complete post."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -853,13 +868,13 @@ class ListSimilarPostsView(generics.ListAPIView):
     MAX_SAME_PROFILE = 3
 
     def get_queryset(self):
-        post_id = self.kwargs.get("pk")
+        public_id = self.kwargs.get("public_id")
         min_similarity = float(self.request.query_params.get("min_similarity", 0.3))
         current_profile = self.request.current_profile
 
         try:
             # Get the post
-            post: Post = get_object_or_404(Post, id=post_id)
+            post: Post = get_object_or_404(Post, public_id=public_id)
 
             # Build the base filter for private profiles:
             # Include posts from:
@@ -877,7 +892,7 @@ class ListSimilarPostsView(generics.ListAPIView):
                 return (
                     Post.objects.filter(
                         ~Q(profile__user=self.request.user),
-                        id__gt=post_id,
+                        id__gt=post.id,
                         status=Post.Status.READY,  # only show completed posts
                     )
                     .filter(private_profile_filter)
@@ -1014,19 +1029,29 @@ class ListCreateSavedPostView(generics.ListCreateAPIView):
 
     def post(self, request, *args, **kwargs):
         current_profile = request.current_profile
-        profile_id = request.data.get("profile")
-        # ensure profile creating saved post belongs to the authenticated user
-        if str(profile_id) != str(current_profile.id):
+        data = request.data.copy()
+        post_input = data.get("post_public_id") or data.get("post")
+        if isinstance(post_input, str):
+            try:
+                post = Post.objects.get(public_id=post_input)
+                data["post"] = post.id
+            except Post.DoesNotExist:
+                return Response(
+                    {"error": "Post not found."},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+        profile_id = data.get("profile")
+        if profile_id is not None and str(profile_id) != str(current_profile.id):
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        
         try:
-            response = super().post(request, *args, **kwargs)
-            if response.status_code == 201:
-                post_id = request.data.get("post")
-                logger.info(f"Post {post_id} saved by profile {profile_id}")
-            return response
+            serializer = self.get_serializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            logger.info(f"Post {data.get('post')} saved by profile {profile_id or current_profile.id}")
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
         except Exception as e:
-            logger.error(f"Error saving post for profile {profile_id}: {str(e)}")
+            logger.error(f"Error saving post for profile {profile_id or current_profile.id}: {str(e)}")
             return Response(
                 {"error": "Failed to save post"},
                 status=status.HTTP_400_BAD_REQUEST
@@ -1044,24 +1069,25 @@ class DestroySavedPostView(generics.DestroyAPIView):
     queryset = SavedPost.objects.all()
 
     def destroy(self, request, *args, **kwargs):
-        post_id = self.kwargs.get("post_id", None)
+        post_public_id = self.kwargs.get("post_public_id", None)
         current_profile = request.current_profile
 
-        if post_id:
+        if post_public_id:
             try:
+                post = get_object_or_404(Post, public_id=post_public_id)
                 saved_post = get_object_or_404(
-                    SavedPost, profile=current_profile, post=post_id
+                    SavedPost, profile=current_profile, post=post
                 )
                 self.perform_destroy(saved_post)
-                logger.info(f"Post {post_id} unsaved by profile {current_profile.id}")
+                logger.info(f"Post {post_public_id} unsaved by profile {current_profile.id}")
                 return Response(status=status.HTTP_204_NO_CONTENT)
             except Exception as e:
                 logger.error(
-                    f"Error unsaving post {post_id} for profile {current_profile.id}: {str(e)}"
+                    f"Error un-saving post {post_public_id} for profile {current_profile.id}: {str(e)}"
                 )
                 return Response(status=status.HTTP_400_BAD_REQUEST)
         
-        logger.warning(f"Unsave attempt with no post_id by profile {current_profile.id}")
+        logger.warning(f"Unsave attempt with no post_public_id by profile {current_profile.id}")
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -1076,11 +1102,11 @@ class DestroyPostImageView(generics.DestroyAPIView):
     queryset = PostImage.objects.all()
 
     def destroy(self, request, *args, **kwargs):
-        post_image_id = self.kwargs.get("pk")
+        public_id = self.kwargs.get("public_id")
         current_profile = request.current_profile
 
         # Get the PostImage instance
-        post_image = get_object_or_404(PostImage, pk=post_image_id)
+        post_image = get_object_or_404(PostImage, public_id=public_id)
 
         # Check that the user requesting the delete owns the post
         if post_image.post.profile.user != self.request.user:
@@ -1236,7 +1262,7 @@ class ListTaggedPostsView(generics.ListAPIView):
     pagination_class = ListProfilePostsPagination
 
     def get_queryset(self):
-        profile_id = self.kwargs.get("id", None)
+        public_id = self.kwargs.get("public_id", None)
         current_profile = self.request.current_profile
 
         # Build filter for private profiles:
@@ -1252,7 +1278,7 @@ class ListTaggedPostsView(generics.ListAPIView):
 
         # Get posts where the specified profile is tagged in any image
         return Post.objects.filter(
-            images__tags__tagged_profile__id=profile_id
+            images__tags__tagged_profile__public_id=public_id
         ).filter(
             private_profile_filter
         ).prefetch_related(
@@ -1280,12 +1306,12 @@ class DestroyPostImageTagView(generics.DestroyAPIView):
     queryset = PostImageTag.objects.all()
 
     def destroy(self, request, *args, **kwargs):
-        tag_id = self.kwargs.get("pk")
+        public_id = self.kwargs.get("public_id")
         current_profile = request.current_profile
 
         try:
             # Get the tag
-            tag = get_object_or_404(PostImageTag, pk=tag_id)
+            tag = get_object_or_404(PostImageTag, public_id=public_id)
 
             # Check permissions: either the post owner, the person who created the tag,
             # or the tagged profile can delete the tag
@@ -1296,7 +1322,7 @@ class DestroyPostImageTagView(generics.DestroyAPIView):
             if not (is_post_owner or is_tag_creator or is_tagged_profile):
                 logger.warning(
                     f"Unauthorized tag deletion attempt: profile {current_profile.id} "
-                    f"attempted to delete tag {tag_id}"
+                    f"attempted to delete tag {public_id}"
                 )
                 return Response(
                     {"error": "You don't have permission to delete this tag."},
@@ -1306,13 +1332,13 @@ class DestroyPostImageTagView(generics.DestroyAPIView):
             # Delete the tag
             self.perform_destroy(tag)
             logger.info(
-                f"Tag {tag_id} deleted by profile {current_profile.id} "
+                f"Tag {public_id} deleted by profile {current_profile.id} "
                 f"(post_owner: {is_post_owner}, creator: {is_tag_creator}, tagged: {is_tagged_profile})"
             )
             return Response(status=status.HTTP_204_NO_CONTENT)
 
         except Exception as e:
-            logger.error(f"Error deleting tag {tag_id}: {str(e)}")
+            logger.error(f"Error deleting tag {public_id}: {str(e)}")
             return Response(
                 {"error": "Failed to delete tag."},
                 status=status.HTTP_400_BAD_REQUEST

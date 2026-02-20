@@ -1,16 +1,18 @@
 """
 Utilities for cloud storage operations including presigned URL generation.
 
-Supports both S3/R2 cloud storage and local file storage for development.
+All environments use remote S3/R2 storage for images; there is no local file storage.
 """
 
 import os
 import logging
 import uuid
+from pathlib import Path
 from typing import Optional
 
 import boto3
 from botocore.exceptions import ClientError
+from django.conf import settings
 from django.core.files.storage import default_storage
 
 logger = logging.getLogger(__name__)
@@ -98,36 +100,42 @@ def generate_presigned_upload_url(key: str, expires_in: int = 3600, content_type
         return None
 
 
-def generate_original_image_key(user_id: int, profile_id: int, post_id: int, image_order: int) -> str:
+def get_storage_env_prefix() -> str:
+    """Return the environment prefix for storage keys (e.g. images/dev/)."""
+    env = os.environ.get("DJANGO_ENV")
+    if env == "test":
+        return "images/test/"
+    if env == "dev":
+        return "images/dev/"
+    if env == "e2e":
+        return "images/e2e/"
+    return "images/"
+
+
+def _env_prefix() -> str:
+    """Return the environment prefix for storage keys."""
+    return get_storage_env_prefix()
+
+
+def generate_original_image_key(post_public_id, image_order: int) -> str:
     """
     Generate S3 key for original image uploads (before processing).
-    
+
     Original images are stored in a separate 'originals' directory and will be
     deleted after processing is complete.
-    
+
     Args:
-        user_id: The user's ID
-        profile_id: The profile's ID
-        post_id: The post's ID
+        post_public_id: The post's public_id (ULID string or object)
         image_order: The image's order/index in the post
-    
+
     Returns:
         S3 key string for the original image
     """
-    env = os.environ.get("DJANGO_ENV")
-    if env == "test":
-        prefix = "images/test"
-    elif env == "dev":
-        prefix = "images/dev"
-    elif env == "e2e":
-        prefix = "images/e2e"
-    else:
-        prefix = "images"
-    
-    return f"{prefix}/originals/{user_id}/{profile_id}/{post_id}/original_{image_order}"
+    prefix = _env_prefix()
+    return f"{prefix}originals/posts/{post_public_id}/{image_order}"
 
 
-def generate_profile_original_key(user_id: int, profile_id: int) -> str:
+def generate_profile_original_key(profile_public_id) -> str:
     """
     Generate a unique S3 key for profile image original uploads (before processing).
 
@@ -135,23 +143,13 @@ def generate_profile_original_key(user_id: int, profile_id: int) -> str:
     Originals are deleted after processing.
 
     Args:
-        user_id: The user's ID
-        profile_id: The profile's ID
+        profile_public_id: The profile's public_id (ULID string or object)
 
     Returns:
-        S3 key string for the original image (e.g. images/dev/originals/profile/1/2/<uuid>)
+        S3 key string for the original image
     """
-    env = os.environ.get("DJANGO_ENV")
-    if env == "test":
-        prefix = "images/test"
-    elif env == "dev":
-        prefix = "images/dev"
-    elif env == "e2e":
-        prefix = "images/e2e"
-    else:
-        prefix = "images"
-
-    return f"{prefix}/originals/profile/{user_id}/{profile_id}/{uuid.uuid4()}"
+    prefix = _env_prefix()
+    return f"{prefix}originals/profiles/{profile_public_id}/{uuid.uuid4()}"
 
 
 def delete_s3_object(key: str) -> bool:
@@ -215,77 +213,44 @@ def download_s3_object(key: str) -> Optional[bytes]:
 
 def download_file(key: str) -> Optional[bytes]:
     """
-    Download a file from storage (S3/R2 or local filesystem).
-    
-    Automatically detects whether to use S3 or local storage based on configuration.
-    
+    Download a file from S3/R2 storage.
+
     Args:
-        key: The storage key/path of the file to download
-    
+        key: The storage key (path) of the file to download
+
     Returns:
         The file contents as bytes, or None on failure
     """
-    if is_s3_configured():
-        return download_s3_object(key)
-    
-    # Fall back to local storage via Django's default_storage
-    try:
-        if not default_storage.exists(key):
-            logger.error(f"Local file does not exist: {key}")
-            return None
-        
-        with default_storage.open(key, 'rb') as f:
-            content = f.read()
-        logger.debug(f"Downloaded local file: {key} ({len(content)} bytes)")
-        return content
-    except Exception as e:
-        logger.error(f"Failed to download local file {key}: {str(e)}")
-        return None
+    return download_s3_object(key)
 
 
 def delete_file(key: str) -> bool:
     """
-    Delete a file from storage (S3/R2 or local filesystem).
-    
-    Automatically detects whether to use S3 or local storage based on configuration.
-    
+    Delete a file from S3/R2 storage.
+
     Args:
-        key: The storage key/path of the file to delete
-    
+        key: The storage key (path) of the file to delete
+
     Returns:
         True if successful, False otherwise
     """
-    if is_s3_configured():
-        return delete_s3_object(key)
-    
-    # Fall back to local storage via Django's default_storage
-    try:
-        if default_storage.exists(key):
-            default_storage.delete(key)
-            logger.info(f"Deleted local file: {key}")
-            return True
-        else:
-            logger.warning(f"Local file does not exist: {key}")
-            return True  # Consider it deleted if it doesn't exist
-    except Exception as e:
-        logger.error(f"Failed to delete local file {key}: {str(e)}")
-        return False
+    return delete_s3_object(key)
 
 
 def save_local_file(key: str, content: bytes) -> bool:
     """
     Save a file to local storage.
-    
+
     Args:
         key: The storage key/path where the file will be saved
         content: The file contents as bytes
-    
+
     Returns:
         True if successful, False otherwise
     """
     try:
         from django.core.files.base import ContentFile
-        
+
         # Ensure directory exists (default_storage.save handles this)
         saved_name = default_storage.save(key, ContentFile(content))
         logger.info(f"Saved local file: {saved_name}")
@@ -295,13 +260,66 @@ def save_local_file(key: str, content: bytes) -> bool:
         return False
 
 
+def write_local_file_exact(key: str, content: bytes) -> bool:
+    """
+    Write content directly to MEDIA_ROOT/key, overwriting if present.
+    Bypasses Django storage so the exact key is used (no get_available_name suffix).
+
+    Use for migrations where the destination path must be deterministic.
+    """
+    try:
+        key = key.lstrip("/") if isinstance(key, str) else key
+        full_path = Path(settings.MEDIA_ROOT) / key
+        full_path.parent.mkdir(parents=True, exist_ok=True)
+        full_path.write_bytes(content)
+        logger.info(f"Wrote local file: {key}")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to write local file {key}: {str(e)}")
+        return False
+
+
+def copy_s3_object(source_key: str, dest_key: str) -> bool:
+    """
+    Copy an object within S3/R2 (same bucket).
+
+    Args:
+        source_key: The S3 key of the source object
+        dest_key: The S3 key for the destination object
+
+    Returns:
+        True if successful, False otherwise
+    """
+    client = get_s3_client()
+    if not client:
+        logger.error("Cannot copy S3 object: S3 client not configured")
+        return False
+
+    bucket = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+    if not bucket:
+        logger.error("Cannot copy S3 object: AWS_STORAGE_BUCKET_NAME not configured")
+        return False
+
+    try:
+        client.copy_object(
+            Bucket=bucket,
+            CopySource={'Bucket': bucket, 'Key': source_key},
+            Key=dest_key,
+        )
+        logger.debug(f"Copied S3 object from {source_key} to {dest_key}")
+        return True
+    except ClientError as e:
+        logger.error(f"Failed to copy S3 object from {source_key} to {dest_key}: {str(e)}")
+        return False
+
+
 def check_s3_object_exists(key: str) -> bool:
     """
     Check if an object exists in S3/R2.
-    
+
     Args:
         key: The S3 key (path) to check
-    
+
     Returns:
         True if the object exists, False otherwise
     """
@@ -309,12 +327,12 @@ def check_s3_object_exists(key: str) -> bool:
     if not client:
         logger.error("Cannot check S3 object: S3 client not configured")
         return False
-    
+
     bucket = os.environ.get('AWS_STORAGE_BUCKET_NAME')
     if not bucket:
         logger.error("Cannot check S3 object: AWS_STORAGE_BUCKET_NAME not configured")
         return False
-    
+
     try:
         client.head_object(Bucket=bucket, Key=key)
         return True
@@ -323,3 +341,30 @@ def check_s3_object_exists(key: str) -> bool:
             return False
         logger.error(f"Failed to check S3 object {key}: {str(e)}")
         return False
+
+
+def storage_object_exists(key: str) -> bool:
+    """
+    Check if an object exists in S3/R2 storage.
+
+    Args:
+        key: The storage key (path) to check
+
+    Returns:
+        True if the object exists, False otherwise
+    """
+    return check_s3_object_exists(key)
+
+
+def copy_storage_object(source_key: str, dest_key: str) -> bool:
+    """
+    Copy an object within S3/R2 (same bucket).
+
+    Args:
+        source_key: The storage key of the source object
+        dest_key: The storage key for the destination object
+
+    Returns:
+        True if successful, False otherwise
+    """
+    return copy_s3_object(source_key, dest_key)

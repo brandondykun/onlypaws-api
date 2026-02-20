@@ -2,16 +2,20 @@
 Profile app models.
 """
 import os
+import ulid
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django_ulid.models import ULIDField
+
 from apps.core_app.utils import crop_to_aspect_ratio_and_resize
 
 
 class PetType(models.Model):
     """Types of pet."""
 
+    public_id = ULIDField(editable=False, unique=True, default=ulid.new)
     name = models.CharField(max_length=64, unique=True)
 
     def __str__(self):
@@ -20,7 +24,8 @@ class PetType(models.Model):
 
 class Address(models.Model):
     """Address model for business profiles."""
-    
+
+    public_id = ULIDField(editable=False, unique=True, default=ulid.new)
     street_address = models.CharField(max_length=255, blank=True, default="")
     street_address_2 = models.CharField(max_length=255, blank=True, default="")
     city = models.CharField(max_length=100, blank=True, default="")
@@ -55,6 +60,7 @@ class Profile(models.Model):
     and maintain relationships with other models (Post, Like, Comment, etc.).
     """
 
+    public_id = ULIDField(editable=False, unique=True, default=ulid.new)
     # Common fields for all profile types
     username = models.CharField(max_length=32, unique=True)
     user = models.ForeignKey(
@@ -216,39 +222,35 @@ class BusinessProfile(Profile):
         return f"{self.username} - {self.business_name} (Business)"
 
 
+def _profile_env_prefix():
+    """Return the environment prefix for profile storage keys."""
+    env = os.environ.get("DJANGO_ENV")
+    if env == "test":
+        return "images/test/"
+    if env == "dev":
+        return "images/dev/"
+    if env == "e2e":
+        return "images/e2e/"
+    return "images/"
+
+
 def profile_image_path(instance, filename):
     """Generate S3 path (key) for saving profile image.
-    The key is {env}/{user_id}/{profile_id}/profile_image.webp (or filename for legacy).
-    On update, the same key is generated which automatically overwrites the image in S3.
+    Key: {env_prefix}profiles/<profile.public_id>/avatar_400.webp
     """
-    user_id = instance.profile.user.id
-    profile_id = instance.profile.id
-    path = "images/{0}/{1}/{2}".format(user_id, profile_id, filename)
-    if os.environ.get("DJANGO_ENV") == "test":
-        path = "images/test/{0}/{1}/{2}".format(user_id, profile_id, filename)
-    elif os.environ.get("DJANGO_ENV") == "dev":
-        path = "images/dev/{0}/{1}/{2}".format(user_id, profile_id, filename)
-    elif os.environ.get("DJANGO_ENV") == "e2e":
-        path = "images/e2e/{0}/{1}/{2}".format(user_id, profile_id, filename)
-    return path
+    prefix = _profile_env_prefix()
+    public_id = str(instance.profile.public_id)
+    return f"{prefix}profiles/{public_id}/avatar_400.webp"
 
 
 def profile_scaled_path(instance, filename):
-    """Generate S3 path for scaled profile images."""
-    profile_image = instance.profile_image
-    user_id = profile_image.profile.user.id
-    profile_id = profile_image.profile.id
-    path = f"{user_id}/{profile_id}/profile_image_scaled/{instance.scale}.webp"
-    env = os.environ.get("DJANGO_ENV")
-    if env == "test":
-        path = "images/test/" + path
-    elif env == "dev":
-        path = "images/dev/" + path
-    elif env == "e2e":
-        path = "images/e2e/" + path
-    else:
-        path = "images/" + path
-    return path
+    """Generate S3 path for scaled profile images.
+    Key: {env_prefix}profiles/<profile.public_id>/avatar_<scale_dimension>.webp
+    """
+    prefix = _profile_env_prefix()
+    public_id = str(instance.profile_image.profile.public_id)
+    dim = ProfileImageScaled.SCALE_DIMENSIONS[instance.scale]
+    return f"{prefix}profiles/{public_id}/avatar_{dim}.webp"
 
 
 class ProfileImage(models.Model):
@@ -259,6 +261,7 @@ class ProfileImage(models.Model):
         READY = "READY", "Ready"
         FAILED = "FAILED", "Failed"
 
+    public_id = ULIDField(editable=False, unique=True, default=ulid.new)
     profile = models.OneToOneField(
         "profile_app.Profile", on_delete=models.CASCADE, related_name="image"
     )
@@ -320,6 +323,7 @@ class ProfileImageScaled(models.Model):
         "large": 400,  # Used for ProfileImage.image; matches common social (320–400)
     }
 
+    public_id = ULIDField(editable=False, unique=True, default=ulid.new)
     profile_image = models.ForeignKey(
         "ProfileImage",
         on_delete=models.CASCADE,

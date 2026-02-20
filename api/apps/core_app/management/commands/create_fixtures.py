@@ -46,8 +46,9 @@ class Command(BaseCommand):
             "notification",
             "appconfiguration",
             "postimagetag",
-            "announcement"
+            "announcement",
             "postimagescaled",
+            "profileimagescaled",
         ]
 
         # default fixture path

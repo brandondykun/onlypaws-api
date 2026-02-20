@@ -54,11 +54,16 @@ class Command(BaseCommand):
             )
             return
 
-        # Check if using R2/S3 or local storage
-        if is_s3_configured():
-            self._cleanup_s3_storage(environment, valid_images, dry_run)
-        else:
-            self._cleanup_local_storage(environment, valid_images, dry_run)
+        if not is_s3_configured():
+            self.stdout.write(
+                self.style.ERROR(
+                    "R2/S3 storage is required. Set AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, "
+                    "and AWS_STORAGE_BUCKET_NAME. Local image storage is no longer used."
+                )
+            )
+            return
+
+        self._cleanup_s3_storage(environment, valid_images, dry_run)
 
     def _get_valid_images_from_fixtures(self, environment):
         """Collect valid image paths from fixture files."""
@@ -76,6 +81,19 @@ class Command(BaseCommand):
                         valid_images.add(image_path)
             self.stdout.write(f"Found {len(valid_images)} post images in fixtures.")
 
+        # Load postimagescaled.json
+        postimagescaled_path = fixture_dir / "postimagescaled.json"
+        if postimagescaled_path.exists():
+            with open(postimagescaled_path, "r") as f:
+                scaled = json.load(f)
+                for item in scaled:
+                    image_path = item.get("fields", {}).get("image")
+                    if image_path:
+                        valid_images.add(image_path)
+            self.stdout.write(
+                f"Total valid images after adding post scaled images: {len(valid_images)}"
+            )
+
         # Load profileimage.json
         profileimage_path = fixture_dir / "profileimage.json"
         if profileimage_path.exists():
@@ -89,12 +107,25 @@ class Command(BaseCommand):
                 f"Total valid images after adding profile images: {len(valid_images)}"
             )
 
+        # Load profileimagescaled.json
+        profileimagescaled_path = fixture_dir / "profileimagescaled.json"
+        if profileimagescaled_path.exists():
+            with open(profileimagescaled_path, "r") as f:
+                scaled = json.load(f)
+                for item in scaled:
+                    image_path = item.get("fields", {}).get("image")
+                    if image_path:
+                        valid_images.add(image_path)
+            self.stdout.write(
+                f"Total valid images after adding profile scaled images: {len(valid_images)}"
+            )
+
         return valid_images
 
     def _get_valid_images_from_database(self):
         """Collect valid image paths from database models."""
         from apps.posts_app.models import PostImage, PostImageScaled
-        from apps.profile_app.models import ProfileImage
+        from apps.profile_app.models import ProfileImage, ProfileImageScaled
 
         valid_images = set()
 
@@ -109,13 +140,13 @@ class Command(BaseCommand):
         self.stdout.write(f"Found {len(valid_images)} post images in database.")
 
         # Get all PostImageScaled paths
-        scaled_count = 0
+        post_scaled_count = 0
         for scaled_image in PostImageScaled.objects.exclude(image="").exclude(image__isnull=True):
             if scaled_image.image and scaled_image.image.name:
                 valid_images.add(scaled_image.image.name)
-                scaled_count += 1
+                post_scaled_count += 1
 
-        self.stdout.write(f"Found {scaled_count} scaled images in database.")
+        self.stdout.write(f"Found {post_scaled_count} post scaled images in database.")
 
         # Get all ProfileImage paths
         profile_count = 0
@@ -125,6 +156,15 @@ class Command(BaseCommand):
                 profile_count += 1
 
         self.stdout.write(f"Found {profile_count} profile images in database.")
+
+        # Get all ProfileImageScaled paths
+        profile_scaled_count = 0
+        for scaled_image in ProfileImageScaled.objects.exclude(image="").exclude(image__isnull=True):
+            if scaled_image.image and scaled_image.image.name:
+                valid_images.add(scaled_image.image.name)
+                profile_scaled_count += 1
+
+        self.stdout.write(f"Found {profile_scaled_count} profile scaled images in database.")
         self.stdout.write(f"Total valid images: {len(valid_images)}")
 
         return valid_images
@@ -196,85 +236,3 @@ class Command(BaseCommand):
                 )
             )
 
-    def _cleanup_local_storage(self, environment, valid_images, dry_run):
-        """Clean up orphaned images from local filesystem storage."""
-        media_root = Path(settings.MEDIA_ROOT)
-        images_dir = media_root / "images" / environment
-
-        if not images_dir.exists():
-            self.stdout.write(
-                self.style.WARNING(f"Images directory does not exist: {images_dir}")
-            )
-            return
-
-        # Find all image files on disk
-        disk_images = set()
-        for image_file in images_dir.rglob("*"):
-            if image_file.is_file():
-                # Convert absolute path to relative path matching fixture format
-                relative_path = image_file.relative_to(media_root)
-                disk_images.add(str(relative_path))
-
-        self.stdout.write(f"Found {len(disk_images)} images on disk.")
-
-        # Find orphaned images (on disk but not in valid set)
-        orphaned_images = disk_images - valid_images
-
-        if not orphaned_images:
-            self.stdout.write(self.style.SUCCESS("No orphaned images found!"))
-            return
-
-        self.stdout.write(f"Found {len(orphaned_images)} orphaned images to delete:")
-
-        deleted_count = 0
-        for orphan in sorted(orphaned_images):
-            full_path = media_root / orphan
-            if dry_run:
-                self.stdout.write(f"  [DRY RUN] Would delete: {orphan}")
-            else:
-                try:
-                    full_path.unlink()
-                    self.stdout.write(f"  Deleted: {orphan}")
-                    deleted_count += 1
-                except OSError as e:
-                    self.stdout.write(
-                        self.style.ERROR(f"  Failed to delete {orphan}: {e}")
-                    )
-
-        # Clean up empty directories
-        if not dry_run:
-            self._cleanup_empty_dirs(images_dir)
-
-        if dry_run:
-            self.stdout.write(
-                self.style.WARNING(
-                    f"\n[DRY RUN] Would have deleted {len(orphaned_images)} orphaned images."
-                )
-            )
-        else:
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"\nSuccessfully deleted {deleted_count} orphaned images."
-                )
-            )
-
-    def _cleanup_empty_dirs(self, root_dir: Path):
-        """Remove empty directories recursively (local storage only)."""
-        empty_dirs_removed = 0
-        # Walk bottom-up to remove empty directories
-        for dirpath, dirnames, filenames in os.walk(root_dir, topdown=False):
-            dir_path = Path(dirpath)
-            # Skip the root directory itself
-            if dir_path == root_dir:
-                continue
-            # Check if directory is empty (no files and no subdirectories)
-            if not any(dir_path.iterdir()):
-                try:
-                    dir_path.rmdir()
-                    empty_dirs_removed += 1
-                    self.stdout.write(f"  Removed empty directory: {dir_path}")
-                except OSError:
-                    pass
-
-        if empty_dirs_removed > 0:
-            self.stdout.write(f"Removed {empty_dirs_removed} empty directories.")

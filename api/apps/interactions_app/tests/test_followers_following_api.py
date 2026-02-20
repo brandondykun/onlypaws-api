@@ -16,7 +16,7 @@ class PrivateListFollowersApiTests(BaseFixtureTestCase):
         super(self.__class__, self).setUp()
         # extend setUp by authenticating self.profile
         self.client.force_authenticate(user=self.user)
-        self.client.credentials(HTTP_AUTH_PROFILE_ID=self.profile.id)
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(self.profile.public_id))
 
     def test_list_followers_successful(self):
         """Test listing followers for a profile returns correct profiles."""
@@ -189,7 +189,7 @@ class PrivateListFollowingApiTests(BaseFixtureTestCase):
         super(self.__class__, self).setUp()
         # extend setUp by authenticating self.profile
         self.client.force_authenticate(user=self.user)
-        self.client.credentials(HTTP_AUTH_PROFILE_ID=self.profile.id)
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(self.profile.public_id))
 
     def test_list_following_successful(self):
         """Test listing profiles that a profile follows returns correct profiles."""

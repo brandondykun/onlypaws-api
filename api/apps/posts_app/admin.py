@@ -50,9 +50,10 @@ class PostImageAdmin(admin.ModelAdmin):
 
 @admin.register(PostImageScaled)
 class PostImageScaledAdmin(admin.ModelAdmin):
-    list_display = ['id', 'post_image', 'scale', 'width', 'height', 'created_at']
+    list_display = ['id', 'image', 'post_image__post__id', 'scale', 'width', 'height', 'created_at']
     list_filter = ['scale', 'created_at']
-    search_fields = ['post_image__post__id', 'post_image__post__caption']
+    search_fields = ['image', 'post_image__post__id', 'post_image__post__caption']
+    ordering = ['image', 'post_image', 'scale']
     readonly_fields = ['created_at']
 
 

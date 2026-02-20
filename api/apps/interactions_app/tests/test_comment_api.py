@@ -16,7 +16,7 @@ class PrivateCommentApiTests(BaseFixtureTestCase):
         super(self.__class__, self).setUp()
         # extend setUp by authenticating self.profile
         self.client.force_authenticate(user=self.user)
-        self.client.credentials(HTTP_AUTH_PROFILE_ID=self.profile.id)
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(self.profile.public_id))
 
     def test_create_comment_successful(self):
         """Test creating a post comment is successful."""
@@ -29,7 +29,7 @@ class PrivateCommentApiTests(BaseFixtureTestCase):
         }
 
         url = create_comment_url(self.post_1.id)
-        res = self.client.post(url, new_comment, HTTP_AUTH_PROFILE_ID=self.profile.id)
+        res = self.client.post(url, new_comment, HTTP_AUTH_PROFILE_ID=str(self.profile.public_id))
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         self.assertEqual(res.data["profile"]["id"], self.profile.id)

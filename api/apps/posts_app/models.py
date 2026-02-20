@@ -3,8 +3,10 @@ Posts app models.
 """
 import os
 import logging
+import ulid
 from django.db import models
 from django.core.validators import MaxLengthValidator, MinValueValidator, MaxValueValidator
+from django_ulid.models import ULIDField
 from apps.core_app.utils import crop_to_aspect_ratio_and_resize
 from pgvector.django import VectorField, CosineDistance
 
@@ -37,6 +39,7 @@ class Post(models.Model):
             ),
         ]
 
+    public_id = ULIDField(editable=False, unique=True, default=ulid.new)
     caption = models.TextField(validators=[MaxLengthValidator(1000, message="Caption cannot exceed 1000 characters.")])
     aspect_ratio = models.CharField(
         max_length=5,
@@ -180,25 +183,25 @@ class Post(models.Model):
         return Follow.objects.filter(followed=self.profile, followed_by=profile).exists()
 
 
+def _post_env_prefix():
+    """Return the environment prefix for post storage keys."""
+    env = os.environ.get("DJANGO_ENV")
+    if env == "test":
+        return "images/test/"
+    if env == "dev":
+        return "images/dev/"
+    if env == "e2e":
+        return "images/e2e/"
+    return "images/"
+
+
 def post_image_path(instance, filename):
     """Generate S3 path (key) for saving post image.
-    The key is {user_id}/{profile_id}/{post_id}/{filename}.webp
+    Key: {env_prefix}posts/<post.public_id>/<order>_1080.webp
     """
-    user_id = instance.post.profile.user.id
-    profile_id = instance.post.profile.id
-    post_id = instance.post.id
-    path = "{0}/{1}/{2}/{3}".format(user_id, profile_id, post_id, filename)
-    # build path based on environment
-    if os.environ.get("DJANGO_ENV") == "test":
-        path = "images/test/" + path
-    elif os.environ.get("DJANGO_ENV") == "dev":
-        path = "images/dev/" + path
-    elif os.environ.get("DJANGO_ENV") == "e2e":
-        path = "images/e2e/" + path
-    else:
-        path = "images/" + path
-
-    return path
+    prefix = _post_env_prefix()
+    public_id = str(instance.post.public_id)
+    return f"{prefix}posts/{public_id}/{instance.order}_1080.webp"
 
 
 class PostImage(models.Model):
@@ -209,6 +212,7 @@ class PostImage(models.Model):
         READY = "READY", "Ready"
         FAILED = "FAILED", "Failed"
 
+    public_id = ULIDField(editable=False, unique=True, default=ulid.new)
     post = models.ForeignKey("posts_app.Post", on_delete=models.CASCADE, related_name="images")
     image = models.ImageField(upload_to=post_image_path, blank=True, null=True)
     order = models.IntegerField(default=0, help_text="Display order of the image in the post")
@@ -388,6 +392,7 @@ class PostImage(models.Model):
 
 
 class SavedPost(models.Model):
+    public_id = ULIDField(editable=False, unique=True, default=ulid.new)
     profile = models.ForeignKey(
         "profile_app.Profile", on_delete=models.CASCADE, related_name="saved_posts"
     )
@@ -401,6 +406,7 @@ class SavedPost(models.Model):
 class PostImageTag(models.Model):
     """Represents a profile tagged in a specific post image at a specific location."""
 
+    public_id = ULIDField(editable=False, unique=True, default=ulid.new)
     post_image = models.ForeignKey(
         "PostImage",
         on_delete=models.CASCADE,
@@ -447,24 +453,13 @@ class PostImageTag(models.Model):
 
 
 def post_image_scaled_path(instance, filename):
-    """Generate S3 path for scaled post images."""
-    post_image = instance.post_image
-    user_id = post_image.post.profile.user.id
-    profile_id = post_image.post.profile.id
-    post_id = post_image.post.id
-    # Path: images/{env}/{user}/{profile}/{post}/scaled/{scale}_{order}.webp
-    path = f"{user_id}/{profile_id}/{post_id}/scaled/{instance.scale}_{post_image.order}.webp"
-    # Add environment prefix
-    env = os.environ.get("DJANGO_ENV")
-    if env == "test":
-        path = "images/test/" + path
-    elif env == "dev":
-        path = "images/dev/" + path
-    elif env == "e2e":
-        path = "images/e2e/" + path
-    else:
-        path = "images/" + path
-    return path
+    """Generate S3 path for scaled post images.
+    Key: {env_prefix}posts/<post.public_id>/<order>_<scale_dimension>.webp
+    """
+    prefix = _post_env_prefix()
+    public_id = str(instance.post_image.post.public_id)
+    dim = PostImageScaled.SCALE_DIMENSIONS[instance.scale]
+    return f"{prefix}posts/{public_id}/{instance.post_image.order}_{dim}.webp"
 
 
 class PostImageScaled(models.Model):
@@ -487,6 +482,7 @@ class PostImageScaled(models.Model):
         "large": 1080,  # Used for PostImage.image processing
     }
 
+    public_id = ULIDField(editable=False, unique=True, default=ulid.new)
     post_image = models.ForeignKey(
         "PostImage",
         on_delete=models.CASCADE,

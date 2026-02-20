@@ -183,12 +183,12 @@ class Command(BaseCommand):
         large_image.save(large_buffer, "webp", optimize=True, quality=70)
         large_buffer.seek(0)
         
-        # Save large image with new naming convention
-        large_filename = f"large_{post_image.order}.webp"
+        # Save large image with new naming convention (R2)
+        large_content = large_buffer.getvalue()
         post_image.image.save(
-            large_filename,
-            ContentFile(large_buffer.getvalue()),
-            save=False
+            f"large_{post_image.order}.webp",
+            ContentFile(large_content),
+            save=False,
         )
         self.stdout.write(f"  Created large image: {post_image.image.name}")
 
@@ -210,10 +210,11 @@ class Command(BaseCommand):
                 "height": medium_image.height,
             }
         )
+        medium_content = medium_buffer.getvalue()
         medium_scaled.image.save(
             f"medium_{post_image.order}.webp",
-            ContentFile(medium_buffer.getvalue()),
-            save=True
+            ContentFile(medium_content),
+            save=True,
         )
         self.stdout.write(f"  Created medium image: {medium_scaled.image.name}")
 
@@ -235,14 +236,14 @@ class Command(BaseCommand):
                 "height": small_image.height,
             }
         )
+        small_content = small_buffer.getvalue()
         small_scaled.image.save(
             f"small_{post_image.order}.webp",
-            ContentFile(small_buffer.getvalue()),
-            save=True
+            ContentFile(small_content),
+            save=True,
         )
         self.stdout.write(f"  Created small image: {small_scaled.image.name}")
 
-        # Save PostImage with updated image field
         post_image.save(update_fields=["image"])
 
         # Delete old image if it had a different name

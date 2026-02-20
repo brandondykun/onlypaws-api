@@ -16,7 +16,7 @@ class PrivateSavedPostsApiTests(BaseFixtureTestCase):
         super(self.__class__, self).setUp()
         # extend setUp by authenticating self.profile
         self.client.force_authenticate(user=self.user)
-        self.client.credentials(HTTP_AUTH_PROFILE_ID=self.profile.id)
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(self.profile.public_id))
 
     # ==================== LIST SAVED POSTS TESTS ====================
 
@@ -274,7 +274,7 @@ class PrivateSavedPostsApiTests(BaseFixtureTestCase):
         saved_post = SavedPost.objects.create(profile=self.profile, post=self.post_3)
         starting_saved_posts_count = SavedPost.objects.filter(profile=self.profile).count()
 
-        url = destroy_saved_post_url(self.post_3.id)
+        url = destroy_saved_post_url(self.post_3)
         res = self.client.delete(url)
 
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
@@ -294,7 +294,7 @@ class PrivateSavedPostsApiTests(BaseFixtureTestCase):
         Test that deleting a post that was never saved fails appropriately.
         """
         # Don't create a saved post for post_3
-        url = destroy_saved_post_url(self.post_3.id)
+        url = destroy_saved_post_url(self.post_3)
         res = self.client.delete(url)
 
         # Should return 400 or 404 since the saved post doesn't exist
@@ -308,7 +308,7 @@ class PrivateSavedPostsApiTests(BaseFixtureTestCase):
         SavedPost.objects.create(profile=self.profile_2, post=self.post_3)
 
         # self.profile tries to delete it
-        url = destroy_saved_post_url(self.post_3.id)
+        url = destroy_saved_post_url(self.post_3)
         res = self.client.delete(url)
 
         # Should fail because self.profile hasn't saved post_3
@@ -324,7 +324,7 @@ class PrivateSavedPostsApiTests(BaseFixtureTestCase):
         """
         Test that deleting a saved post with non-existent post ID fails.
         """
-        url = destroy_saved_post_url(99999)  # Non-existent post ID
+        url = destroy_saved_post_url("01HF7YQX8J9K2P3M4N5R6S7T8X")  # Non-existent post public_id (26-char ULID)
         res = self.client.delete(url)
 
         self.assertIn(res.status_code, [status.HTTP_400_BAD_REQUEST, status.HTTP_404_NOT_FOUND])
@@ -342,7 +342,7 @@ class PrivateSavedPostsApiTests(BaseFixtureTestCase):
         self.assertTrue(Post.objects.filter(id=self.post_3.id).exists())
 
         # Delete the saved post
-        url = destroy_saved_post_url(self.post_3.id)
+        url = destroy_saved_post_url(self.post_3)
         res = self.client.delete(url)
 
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
@@ -359,7 +359,7 @@ class PrivateSavedPostsApiTests(BaseFixtureTestCase):
         SavedPost.objects.create(profile=self.profile_2, post=self.post_3)
 
         # self.profile deletes their saved post
-        url = destroy_saved_post_url(self.post_3.id)
+        url = destroy_saved_post_url(self.post_3)
         res = self.client.delete(url)
 
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
@@ -387,7 +387,7 @@ class PrivateSavedPostsApiTests(BaseFixtureTestCase):
         self.client.force_authenticate(user=None)
         self.client.credentials()
 
-        url = destroy_saved_post_url(self.post_3.id)
+        url = destroy_saved_post_url(self.post_3)
         res = self.client.delete(url)
 
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -410,9 +410,9 @@ class PrivateSavedPostsApiTests(BaseFixtureTestCase):
 
         # Authenticate as self.user but try to use profile_2's ID in header
         # This should fail authentication since profile_2 doesn't belong to self.user
-        self.client.credentials(HTTP_AUTH_PROFILE_ID=self.profile_2.id)
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(self.profile_2.public_id))
 
-        url = destroy_saved_post_url(self.post_3.id)
+        url = destroy_saved_post_url(self.post_3)
         res = self.client.delete(url)
 
         # Should fail with 401 because the profile doesn't belong to the authenticated user
@@ -448,7 +448,7 @@ class PrivateSavedPostsApiTests(BaseFixtureTestCase):
         self.assertTrue(list_res.data["results"][0]["is_saved"])
 
         # Step 3: Unsave the post
-        delete_url = destroy_saved_post_url(self.post_3.id)
+        delete_url = destroy_saved_post_url(self.post_3)
         delete_res = self.client.delete(delete_url)
         self.assertEqual(delete_res.status_code, status.HTTP_204_NO_CONTENT)
 

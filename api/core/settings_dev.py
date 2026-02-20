@@ -1,6 +1,7 @@
 import os
 from datetime import timedelta
 from pathlib import Path
+from urllib.parse import urlparse
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -39,6 +40,7 @@ STORAGES = {
 
 # Ensure webp mimetype is registered (may not be in default mimetypes db)
 import mimetypes
+
 mimetypes.add_type("image/webp", ".webp")
 
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
@@ -46,7 +48,28 @@ AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME")
 AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
 AWS_QUERYSTRING_EXPIRE = 600
+# Endpoint for uploads and signed operations (boto3 client)
 AWS_S3_ENDPOINT_URL = os.environ.get("AWS_S3_ENDPOINT_URL")
+# Public base URL for read-only image URLs (no signing, no expiry)
+AWS_S3_ENDPOINT_PUBLIC_URL = os.environ.get("AWS_S3_ENDPOINT_PUBLIC_URL")
+
+if AWS_S3_ENDPOINT_PUBLIC_URL:
+    _public = urlparse(AWS_S3_ENDPOINT_PUBLIC_URL)
+    AWS_S3_CUSTOM_DOMAIN = _public.netloc or None
+    AWS_QUERYSTRING_AUTH = False
+    MEDIA_DOMAIN = (
+        f"{_public.scheme or 'https'}://{_public.netloc}/"
+        if _public.netloc
+        else os.environ.get(
+            "MEDIA_DOMAIN",
+            f"https://{AWS_STORAGE_BUCKET_NAME}.r2.cloudflarestorage.com/",
+        )
+    )
+else:
+    AWS_S3_CUSTOM_DOMAIN = None
+    MEDIA_DOMAIN = os.environ.get(
+        "MEDIA_DOMAIN", f"https://{AWS_STORAGE_BUCKET_NAME}.r2.cloudflarestorage.com/"
+    )
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
@@ -54,8 +77,12 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 # These override the production settings in settings.py to allow cookies
 # to work over HTTP and across different localhost ports
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=int(os.environ.get("ACCESS_TOKEN_LIFETIME", 5))),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=int(os.environ.get("REFRESH_TOKEN_LIFETIME", 7))),
+    "ACCESS_TOKEN_LIFETIME": timedelta(
+        minutes=int(os.environ.get("ACCESS_TOKEN_LIFETIME", 5))
+    ),
+    "REFRESH_TOKEN_LIFETIME": timedelta(
+        days=int(os.environ.get("REFRESH_TOKEN_LIFETIME", 7))
+    ),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": True,
@@ -72,4 +99,6 @@ SIMPLE_JWT = {
 CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://redis:6379/0")
 CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", "redis://redis:6379/0")
 
-MEDIA_DOMAIN = os.environ.get("MEDIA_DOMAIN", f'https://{AWS_STORAGE_BUCKET_NAME}.r2.cloudflarestorage.com')
+MEDIA_DOMAIN = os.environ.get(
+    "MEDIA_DOMAIN", f"https://{AWS_STORAGE_BUCKET_NAME}.r2.cloudflarestorage.com"
+)

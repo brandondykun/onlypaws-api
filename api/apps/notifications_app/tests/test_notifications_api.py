@@ -53,11 +53,11 @@ class NotificationAPITestCase(TestCase):
         refresh = RefreshToken.for_user(self.user1)
         self.access_token = str(refresh.access_token)
     
-    def authenticate(self, profile_id):
-        """Authenticate the client with JWT token and profile ID."""
+    def authenticate(self, profile):
+        """Authenticate the client with JWT token and profile (public_id in header)."""
         self.client.credentials(
             HTTP_AUTHORIZATION=f'Bearer {self.access_token}',
-            HTTP_AUTH_PROFILE_ID=str(profile_id)
+            HTTP_AUTH_PROFILE_ID=str(profile.public_id),
         )
     
     def test_create_notification(self):
@@ -88,7 +88,7 @@ class NotificationAPITestCase(TestCase):
             post=self.post
         )
         
-        self.authenticate(self.profile1.id)
+        self.authenticate(self.profile1)
         url = NOTIFICATIONS_LIST_URL
         response = self.client.get(url)
         
@@ -118,7 +118,7 @@ class NotificationAPITestCase(TestCase):
             is_read=False
         )
         
-        self.authenticate(self.profile1.id)
+        self.authenticate(self.profile1)
         url = NOTIFICATIONS_UNREAD_LIST_URL
         response = self.client.get(url)
         
@@ -138,7 +138,7 @@ class NotificationAPITestCase(TestCase):
             is_read=False
         )
         
-        self.authenticate(self.profile1.id)
+        self.authenticate(self.profile1)
         url = retrieve_update_notification_url(notification.id)
         response = self.client.patch(url, {'is_read': True})
         
@@ -168,7 +168,7 @@ class NotificationAPITestCase(TestCase):
             is_read=False
         )
         
-        self.authenticate(self.profile1.id)
+        self.authenticate(self.profile1)
         url = NOTIFICATIONS_GET_COUNTS_URL
         response = self.client.get(url)
         
@@ -198,7 +198,7 @@ class NotificationAPITestCase(TestCase):
             is_read=False
         )
         
-        self.authenticate(self.profile1.id)
+        self.authenticate(self.profile1)
         url = NOTIFICATIONS_MARK_ALL_READ_URL
         response = self.client.post(url)
         

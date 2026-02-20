@@ -129,8 +129,8 @@ class CropToAspectRatioAndResizeTestCase(TestCase):
         image = self.create_test_image(1080, 1080, filename='my.image.file.jpg')
         result = crop_to_aspect_ratio_and_resize(image, aspect_ratio="1:1")
         
-        # Should only replace the last extension
-        self.assertEqual(result.name, 'my.webp')
+        # Should only replace the last extension (.jpg -> .webp), keeping the rest of the filename
+        self.assertEqual(result.name, 'my.image.file.webp')
 
     def test_exif_orientation_handled(self):
         """Test that EXIF orientation data is properly handled"""

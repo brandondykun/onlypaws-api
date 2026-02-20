@@ -3,11 +3,12 @@ from celery import shared_task
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from django.conf import settings
+from django.db.models import Prefetch
 
 from .models import Notification, NotificationType
 from .serializers import WebSocketNotificationSerializer
-from apps.profile_app.models import Profile
-from apps.posts_app.models import Post, PostImageTag
+from apps.profile_app.models import Profile, ProfileImageScaled
+from apps.posts_app.models import Post, PostImage, PostImageScaled, PostImageTag
 from apps.interactions_app.models import Comment, FollowRequest
 
 logger = logging.getLogger(__name__)
@@ -99,21 +100,37 @@ def create_post_like_notification_task(self, post_id, liker_profile_id):
             logger.error(f"Invalid parameter types: post_id={type(post_id)}, liker_profile_id={type(liker_profile_id)}")
             return
             
-        post = Post.objects.select_related('profile').get(id=post_id)
+        post = Post.objects.select_related('profile').prefetch_related(
+            Prefetch(
+                'images',
+                queryset=PostImage.objects.prefetch_related(
+                    Prefetch(
+                        'scaled_images',
+                        queryset=PostImageScaled.objects.filter(
+                            scale=PostImageScaled.Scale.SMALL
+                        ),
+                    )
+                ),
+            )
+        ).get(id=post_id)
         liker_profile = Profile.objects.get(id=liker_profile_id)
         
         # Security: Don't send notification if user liked their own post
         if post.profile.id == liker_profile.id:
             return
         
-        # Get post preview image URL (let serializer handle URL construction)
+        # Get post preview image URL (prefer small scaled for notifications)
         post_preview_image = None
-        if post.images.first():
-            preview_image_path = post.images.first().image.url
-            if preview_image_path:
-                # Store the URL as-is from Django's ImageField
-                # The serializer will handle proper URL construction
-                post_preview_image = preview_image_path
+        first_image = post.images.first()
+        if first_image:
+            small_scaled = next(
+                (s for s in first_image.scaled_images.all() if s.image and s.image.url),
+                None,
+            )
+            if small_scaled:
+                post_preview_image = small_scaled.image.url
+            elif first_image.image and first_image.image.url:
+                post_preview_image = first_image.image.url
         
         # Get or update existing notification to prevent spam
         notification, created = Notification.objects.get_or_create(
@@ -128,8 +145,10 @@ def create_post_like_notification_task(self, post_id, liker_profile_id):
                 'extra_data': {
                     'post_caption': post.caption[:100],  # Limit data size
                     'post_id': post.id,
+                    'post_public_id': str(post.public_id),
                     'liker_username': liker_profile.username,
                     'liker_id': liker_profile.id,
+                    'liker_public_id': str(liker_profile.public_id),
                     'post_preview_image': post_preview_image
                 }
             }
@@ -167,21 +186,37 @@ def create_comment_like_notification_task(self, comment_id, liker_profile_id):
             logger.error(f"Invalid parameter types: comment_id={type(comment_id)}, liker_profile_id={type(liker_profile_id)}")
             return
             
-        comment = Comment.objects.select_related('profile', 'post').get(id=comment_id)
+        comment = Comment.objects.select_related('profile', 'post').prefetch_related(
+            Prefetch(
+                'post__images',
+                queryset=PostImage.objects.prefetch_related(
+                    Prefetch(
+                        'scaled_images',
+                        queryset=PostImageScaled.objects.filter(
+                            scale=PostImageScaled.Scale.SMALL
+                        ),
+                    )
+                ),
+            )
+        ).get(id=comment_id)
         liker_profile = Profile.objects.get(id=liker_profile_id)
         
         # Security: Don't send notification if user liked their own comment
         if comment.profile.id == liker_profile.id:
             return
         
-        # Get post preview image URL (let serializer handle URL construction)
+        # Get post preview image URL (prefer small scaled for notifications)
         post_preview_image = None
-        if comment.post.images.first():
-            preview_image_path = comment.post.images.first().image.url
-            if preview_image_path:
-                # Store the URL as-is from Django's ImageField
-                # The serializer will handle proper URL construction
-                post_preview_image = preview_image_path
+        first_image = comment.post.images.first()
+        if first_image:
+            small_scaled = next(
+                (s for s in first_image.scaled_images.all() if s.image and s.image.url),
+                None,
+            )
+            if small_scaled:
+                post_preview_image = small_scaled.image.url
+            elif first_image.image and first_image.image.url:
+                post_preview_image = first_image.image.url
         
         # Get or update existing notification to prevent spam
         notification, created = Notification.objects.get_or_create(
@@ -197,9 +232,11 @@ def create_comment_like_notification_task(self, comment_id, liker_profile_id):
                     'comment_text': comment.text[:100],  # Limit data size
                     'comment_id': comment.id,
                     'post_id': comment.post.id,
+                    'post_public_id': str(comment.post.public_id),
                     'post_caption': comment.post.caption[:100],
                     'liker_username': liker_profile.username,
                     'liker_id': liker_profile.id,
+                    'liker_public_id': str(liker_profile.public_id),
                     'post_preview_image': post_preview_image
                 }
             }
@@ -246,17 +283,33 @@ def create_comment_notification_task(self, comment_id, post_id, commenter_profil
             'reply_to_comment',
             'reply_to_comment__profile'
         ).get(id=comment_id)
-        post = Post.objects.select_related('profile').get(id=post_id)
+        post = Post.objects.select_related('profile').prefetch_related(
+            Prefetch(
+                'images',
+                queryset=PostImage.objects.prefetch_related(
+                    Prefetch(
+                        'scaled_images',
+                        queryset=PostImageScaled.objects.filter(
+                            scale=PostImageScaled.Scale.SMALL
+                        ),
+                    )
+                ),
+            )
+        ).get(id=post_id)
         commenter_profile = Profile.objects.get(id=commenter_profile_id)
         
-        # Get post preview image URL (let serializer handle URL construction)
+        # Get post preview image URL (prefer small scaled for notifications)
         post_preview_image = None
-        if post.images.first():
-            preview_image_path = post.images.first().image.url
-            if preview_image_path:
-                # Store the URL as-is from Django's ImageField
-                # The serializer will handle proper URL construction
-                post_preview_image = preview_image_path
+        first_image = post.images.first()
+        if first_image:
+            small_scaled = next(
+                (s for s in first_image.scaled_images.all() if s.image and s.image.url),
+                None,
+            )
+            if small_scaled:
+                post_preview_image = small_scaled.image.url
+            elif first_image.image and first_image.image.url:
+                post_preview_image = first_image.image.url
         
         # Determine if this is a reply or a top-level comment
         if comment.reply_to_comment:
@@ -284,9 +337,11 @@ def create_comment_notification_task(self, comment_id, post_id, commenter_profil
                         'replied_to_comment_id': replied_to_comment.id,
                         'replied_to_comment_text': replied_to_comment.text[:100],
                         'post_id': post.id,
+                        'post_public_id': str(post.public_id),
                         'post_caption': post.caption[:100],
                         'commenter_username': commenter_profile.username,
                         'commenter_id': commenter_profile.id,
+                        'commenter_public_id': str(commenter_profile.public_id),
                         'post_preview_image': post_preview_image,
                         'is_reply': True
                     }
@@ -317,9 +372,11 @@ def create_comment_notification_task(self, comment_id, post_id, commenter_profil
                         'comment_text': comment.text[:100],  # Limit data size
                         'comment_id': comment.id,
                         'post_id': post.id,
+                        'post_public_id': str(post.public_id),
                         'post_caption': post.caption[:100],
                         'commenter_username': commenter_profile.username,
                         'commenter_id': commenter_profile.id,
+                        'commenter_public_id': str(commenter_profile.public_id),
                         'post_preview_image': post_preview_image,
                         'is_reply': False
                     }
@@ -389,6 +446,7 @@ def create_follow_notification_task(self, followed_profile_id, follower_profile_
         extra_data = {
             'follower_username': follower_profile.username,
             'follower_id': follower_profile.id,
+            'follower_public_id': str(follower_profile.public_id),
             'follower_avatar': follower_avatar,
             'follower_about': about_snippet,
         }
@@ -457,6 +515,13 @@ def create_tagged_post_notification_task(self, post_image_tag_id):
             'post_image__post__profile',
             'tagged_profile',
             'tagged_by_profile'
+        ).prefetch_related(
+            Prefetch(
+                'post_image__scaled_images',
+                queryset=PostImageScaled.objects.filter(
+                    scale=PostImageScaled.Scale.SMALL
+                ),
+            )
         ).get(id=post_image_tag_id)
         
         post = post_image_tag.post_image.post
@@ -467,14 +532,18 @@ def create_tagged_post_notification_task(self, post_image_tag_id):
         if tagged_profile.id == tagger_profile.id:
             return
         
-        # Get post preview image URL (use the image where they were tagged)
+        # Get post preview image URL (prefer small scaled; use the image where they were tagged)
         post_preview_image = None
-        if post_image_tag.post_image.image:
-            preview_image_path = post_image_tag.post_image.image.url
-            if preview_image_path:
-                # Store the URL as-is from Django's ImageField
-                # The serializer will handle proper URL construction
-                post_preview_image = preview_image_path
+        post_image = post_image_tag.post_image
+        if post_image:
+            small_scaled = next(
+                (s for s in post_image.scaled_images.all() if s.image and s.image.url),
+                None,
+            )
+            if small_scaled:
+                post_preview_image = small_scaled.image.url
+            elif post_image.image and post_image.image.url:
+                post_preview_image = post_image.image.url
         
         # Get or update existing notification to prevent spam
         # Use the post as the unique identifier (one notification per post, not per image tag)
@@ -490,9 +559,12 @@ def create_tagged_post_notification_task(self, post_image_tag_id):
                 'extra_data': {
                     'post_caption': post.caption[:100],  # Limit data size
                     'post_id': post.id,
+                    'post_public_id': str(post.public_id),
                     'post_image_id': post_image_tag.post_image.id,
+                    'post_image_public_id': str(post_image_tag.post_image.public_id),
                     'tagger_username': tagger_profile.username,
                     'tagger_id': tagger_profile.id,
+                    'tagger_public_id': str(tagger_profile.public_id),
                     'post_preview_image': post_preview_image
                 }
             }
@@ -603,6 +675,11 @@ def create_follow_request_notification_task(self, follow_request_id):
             
         follow_request = FollowRequest.objects.select_related(
             'requester', 'requester__image', 'target'
+        ).prefetch_related(
+            Prefetch(
+                'requester__image__scaled_images',
+                queryset=ProfileImageScaled.objects.filter(scale=ProfileImageScaled.Scale.SMALL),
+            )
         ).get(id=follow_request_id)
         
         requester_profile = follow_request.requester
@@ -611,12 +688,19 @@ def create_follow_request_notification_task(self, follow_request_id):
         # Get the specific profile (RegularProfile or BusinessProfile)
         specific_requester = requester_profile.get_specific_profile()
         
-        # Get requester's avatar URL
+        # Get requester's avatar URL (prefer small scaled for notifications)
         requester_avatar = None
         if hasattr(requester_profile, 'image') and requester_profile.image:
-            avatar_path = requester_profile.image.image.url
-            if avatar_path:
-                requester_avatar = build_full_media_url(avatar_path)
+            small_scaled = next(
+                (s for s in requester_profile.image.scaled_images.all() if s.image and s.image.url),
+                None,
+            )
+            if small_scaled:
+                requester_avatar = build_full_media_url(small_scaled.image.url)
+            else:
+                avatar_path = requester_profile.image.image.url if requester_profile.image.image else None
+                if avatar_path:
+                    requester_avatar = build_full_media_url(avatar_path)
         
         # Get about snippet (first 150 characters)
         about_snippet = ""
@@ -632,6 +716,8 @@ def create_follow_request_notification_task(self, follow_request_id):
             'requester_avatar': requester_avatar,
             'requester_about': about_snippet,
             'follow_request_id': follow_request_id,
+            "requester_public_id": str(requester_profile.public_id),
+            "target_public_id": str(target_profile.public_id),
         }
         
         # Add profile-type-specific fields
@@ -658,7 +744,9 @@ def create_follow_request_notification_task(self, follow_request_id):
             'created_at': follow_request.created_at.isoformat(),
             'sender_username': requester_profile.username,
             'sender_avatar': requester_avatar,
+            'sender_public_id': str(requester_profile.public_id),
             'post_id': None,
+            'post_public_id': None,
             'comment_id': None,
             'extra_data': extra_data
         }
@@ -724,8 +812,10 @@ def create_follow_request_accepted_notification_task(self, followed_profile_id, 
         extra_data = {
             'followed_username': followed_profile.username,
             'followed_id': followed_profile.id,
+            'followed_public_id': str(followed_profile.public_id),
             'followed_avatar': followed_avatar,
             'followed_about': about_snippet,
+            'follower_public_id': str(follower_profile.public_id),
         }
         
         # Add profile-type-specific fields

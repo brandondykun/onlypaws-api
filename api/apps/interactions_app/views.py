@@ -436,7 +436,7 @@ class CreateFollowView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         current_profile = request.current_profile
         profile_to_follow_id = request.data.get("profileId")
-        profile_to_follow = get_object_or_404(Profile, pk=profile_to_follow_id)
+        profile_to_follow = get_object_or_404(Profile, public_id=profile_to_follow_id)
         
         # profile cannot follow itself
         if profile_to_follow.id == current_profile.id:
@@ -492,7 +492,7 @@ class CreateFollowView(generics.CreateAPIView):
 
             # For public profiles, create the follow directly
             new_follow_data = {
-                "followed": profile_to_follow_id,
+                "followed": profile_to_follow.id,
                 "followed_by": current_profile.id,
             }
             serializer = self.get_serializer(data=new_follow_data)
@@ -536,22 +536,23 @@ class DestroyFollowView(generics.DestroyAPIView):
     queryset = Follow.objects.all()
 
     def destroy(self, request, *args, **kwargs):
-        profile_id = self.kwargs.get("profile_id")  # profile id to unfollow
+        profile_public_id = self.kwargs.get("profile_public_id")  # profile id to unfollow
         current_profile = request.current_profile
+        profile_to_unfollow = get_object_or_404(Profile, public_id=profile_public_id)
 
-        if profile_id:
+        if profile_public_id:
             try:
                 follow = get_object_or_404(
-                    Follow, followed_by=current_profile, followed=profile_id
+                    Follow, followed_by=current_profile, followed=profile_to_unfollow.id
                 )
                 self.perform_destroy(follow)
                 logger.info(
-                    f"Unfollow: profile {current_profile.id} unfollowed {profile_id}"
+                    f"Unfollow: profile {current_profile.id} unfollowed {profile_to_unfollow.id}"
                 )
                 return Response(status=status.HTTP_204_NO_CONTENT)
             except Exception as e:
                 logger.error(
-                    f"Error unfollowing: profile {current_profile.id} -> {profile_id}: {str(e)}"
+                    f"Error unfollowing: profile {current_profile.id} -> {profile_to_unfollow.id}: {str(e)}"
                 )
                 return Response(status=status.HTTP_400_BAD_REQUEST)
         
@@ -608,11 +609,11 @@ class ListFollowersView(generics.ListAPIView):
     pagination_class = FollowListPagination
 
     def get_queryset(self):
-        profile_id = self.kwargs.get("id", None)
+        profile_public_id = self.kwargs.get("public_id", None)
         username = self.request.query_params.get("username", None)
 
         try:
-            profile = Profile.objects.get(id=profile_id)
+            profile = Profile.objects.get(public_id=profile_public_id)
             followers_objs = profile.following.all()
             if username:
                 followers_objs = followers_objs.filter(
@@ -622,7 +623,7 @@ class ListFollowersView(generics.ListAPIView):
             followers = [obj.followed_by for obj in sorted_objs]
             return followers
         except Profile.DoesNotExist:
-            logger.error(f"Profile {profile_id} not found when listing followers")
+            logger.error(f"Profile {profile_public_id} not found when listing followers")
             return []
 
 
@@ -638,11 +639,11 @@ class ListFollowingView(generics.ListAPIView):
     pagination_class = FollowListPagination
 
     def get_queryset(self):
-        profile_id = self.kwargs.get("id", None)
+        profile_public_id = self.kwargs.get("public_id", None)
         username = self.request.query_params.get("username", None)
 
         try:
-            profile = Profile.objects.get(id=profile_id)
+            profile = Profile.objects.get(public_id=profile_public_id)
             following_objs = profile.followers.all()
             if username:
                 following_objs = following_objs.filter(
@@ -652,7 +653,7 @@ class ListFollowingView(generics.ListAPIView):
             following = [obj.followed for obj in sorted_objs]
             return following
         except Profile.DoesNotExist:
-            logger.error(f"Profile {profile_id} not found when listing following")
+            logger.error(f"Profile {profile_public_id} not found when listing following")
             return []
 
 
@@ -826,21 +827,23 @@ class CancelFollowRequestView(generics.DestroyAPIView):
     queryset = FollowRequest.objects.all()
 
     def destroy(self, request, *args, **kwargs):
-        target_profile_id = self.kwargs.get("profile_id")
+        target_profile_public_id = self.kwargs.get("public_id")
         current_profile = request.current_profile
+
+        target_profile = get_object_or_404(Profile, public_id=target_profile_public_id)
 
         try:
             follow_request = get_object_or_404(
                 FollowRequest,
                 requester=current_profile,
-                target_id=target_profile_id
+                target=target_profile
             )
 
             follow_request.delete()
 
             logger.info(
                 f"Follow request cancelled by profile {current_profile.id} "
-                f"to profile {target_profile_id}"
+                f"to profile {target_profile_public_id}"
             )
 
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -848,7 +851,7 @@ class CancelFollowRequestView(generics.DestroyAPIView):
         except Exception as e:
             logger.error(
                 f"Error cancelling follow request from {current_profile.id} "
-                f"to {target_profile_id}: {str(e)}"
+                f"to {target_profile_public_id}: {str(e)}"
             )
             return Response(
                 {"error": "Failed to cancel follow request"},
