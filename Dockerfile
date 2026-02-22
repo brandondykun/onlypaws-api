@@ -32,16 +32,6 @@ RUN python -m venv /py && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/requirements.txt /tmp/requirements.dev.txt
 
-# Pre-download the sentence-transformers model into /app/models
-RUN mkdir -p /app/models && \
-    HF_HOME=/app/models /py/bin/python - <<'EOF'
-from sentence_transformers import SentenceTransformer
-SentenceTransformer("sentence-transformers/clip-ViT-B-32")
-EOF
-# Fix any permission issues with downloaded models
-RUN find /app/models -type f -exec chmod 644 {} \; 2>/dev/null || true && \
-    find /app/models -type d -exec chmod 755 {} \; 2>/dev/null || true
-
 # ============================
 # Final stage
 # ============================
@@ -59,9 +49,8 @@ RUN adduser \
     --no-create-home \
     django-user
 
-# Copy virtual environment and pre-downloaded models from builder
+# Copy virtual environment from builder
 COPY --from=builder /py /py
-COPY --from=builder /app/models /app/models
 
 # Install runtime dependencies
 RUN apt-get update && \
@@ -73,8 +62,8 @@ RUN apt-get update && \
 
 # Setup directories and permissions
 RUN mkdir -p /api/static /vol/web/media /vol/log && \
-    chown -R django-user:django-user /api /vol /app/models && \
-    chmod -R 755 /api /vol /app/models
+    chown -R django-user:django-user /api /vol && \
+    chmod -R 755 /api /vol
 
 # Copy application code
 COPY --chown=django-user:django-user ./api /api

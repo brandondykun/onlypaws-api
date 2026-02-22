@@ -1,4 +1,5 @@
 django.log
+models/
 */media/images/*
 api/media/images/*
 api/static/*

@@ -11,6 +11,8 @@ services:
     depends_on:
       - only-paws-db
       - redis
+    volumes:
+      - ../models:/app/models
     restart: unless-stopped
 
   only-paws-db:

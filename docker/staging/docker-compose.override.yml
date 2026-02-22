@@ -58,6 +58,7 @@ services:
     volumes:
       - ../api:/api
       - ../logs:/vol/log
+      - ../models:/app/models
     env_file:
       - staging/.env.staging
     environment:
@@ -78,6 +79,7 @@ services:
     volumes:
       - ../api:/api
       - ../logs:/vol/log
+      - ../models:/app/models
     env_file:
       - staging/.env.staging
     environment:
