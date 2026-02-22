@@ -57,6 +57,7 @@ services:
     volumes:
       - ../api:/api
       - ../logs:/vol/log
+      - ../models:/app/models
     env_file:
       - prod/.env.prod
     environment:
@@ -83,6 +84,7 @@ services:
     volumes:
       - ../api:/api
       - ../logs:/vol/log
+      - ../models:/app/models
     env_file:
       - prod/.env.prod
     environment:
