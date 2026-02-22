@@ -24,6 +24,7 @@ class Command(BaseCommand):
         models = [
             "user",
             "profile",
+            "authprovider",
             "regularprofile",
             "businessprofile",
             "address",

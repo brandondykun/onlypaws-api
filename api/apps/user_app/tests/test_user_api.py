@@ -105,6 +105,7 @@ class PrivateUserApiTests(TestCase):
             "profiles": [
                 {
                     "id": self.profile.id,
+                    "public_id": str(self.profile.public_id),
                     "username": self.profile.username,
                     "image": None,
                     "name": "",

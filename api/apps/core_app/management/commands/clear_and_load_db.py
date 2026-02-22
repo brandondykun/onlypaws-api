@@ -32,6 +32,7 @@ class Command(BaseCommand):
             "pettype.json",
             "reportreason.json",
             "user.json",
+            "authprovider.json",
             "profile.json",
             "regularprofile.json",
             "businessprofile.json",

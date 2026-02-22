@@ -201,10 +201,14 @@ REST_FRAMEWORK = {
     ),
     "EXCEPTION_HANDLER": "apps.core_app.exceptions.exceptions.custom_exception_handler",
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_THROTTLE_RATES": {
+        "auth": "30/minute",
+        "auth_sensitive": "5/minute",
+    },
 }
 
-access_token_lifetime = int(os.environ.get("ACCESS_TOKEN_LIFETIME"))
-refresh_token_lifetime = int(os.environ.get("REFRESH_TOKEN_LIFETIME"))
+access_token_lifetime = int(os.environ.get("ACCESS_TOKEN_LIFETIME", "15"))
+refresh_token_lifetime = int(os.environ.get("REFRESH_TOKEN_LIFETIME", "7"))
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=access_token_lifetime),

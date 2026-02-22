@@ -125,7 +125,7 @@ class PrivateSavedPostsApiTests(BaseFixtureTestCase):
         url = list_create_saved_post_url()
         data = {
             "profile": self.profile.id,
-            "post": self.post_3.id,
+            "post": str(self.post_3.public_id),
         }
         res = self.client.post(url, data=data)
 
@@ -149,7 +149,7 @@ class PrivateSavedPostsApiTests(BaseFixtureTestCase):
         url = list_create_saved_post_url()
         data = {
             "profile": self.profile.id,
-            "post": self.post_1.id,  # self.post_1 belongs to self.profile
+            "post": str(self.post_1.public_id),  # self.post_1 belongs to self.profile
         }
         res = self.client.post(url, data=data)
 
@@ -172,7 +172,7 @@ class PrivateSavedPostsApiTests(BaseFixtureTestCase):
         url = list_create_saved_post_url()
         data = {
             "profile": self.profile.id,
-            "post": self.post_3.id,
+            "post": str(self.post_3.public_id),
         }
         res = self.client.post(url, data=data)
 
@@ -188,7 +188,7 @@ class PrivateSavedPostsApiTests(BaseFixtureTestCase):
         url = list_create_saved_post_url()
         data = {
             "profile": self.profile_2.id,  # Different profile
-            "post": self.post_3.id,
+            "post": str(self.post_3.public_id),
         }
         res = self.client.post(url, data=data)
 
@@ -213,11 +213,11 @@ class PrivateSavedPostsApiTests(BaseFixtureTestCase):
         url = list_create_saved_post_url()
         data = {
             "profile": self.profile.id,
-            "post": 99999,  # Non-existent post ID
+            "post": "01HF7YQX8J9K2P3M4N5R6S7T8X",  # Non-existent post public_id
         }
         res = self.client.post(url, data=data)
 
-        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
 
         # Verify no saved post was created
         current_saved_posts_count = SavedPost.objects.filter(profile=self.profile).count()
@@ -229,7 +229,7 @@ class PrivateSavedPostsApiTests(BaseFixtureTestCase):
         """
         url = list_create_saved_post_url()
         data = {
-            "post": self.post_3.id,
+            "post": str(self.post_3.public_id),
         }
         res = self.client.post(url, data=data)
 
@@ -434,7 +434,7 @@ class PrivateSavedPostsApiTests(BaseFixtureTestCase):
         create_url = list_create_saved_post_url()
         create_data = {
             "profile": self.profile.id,
-            "post": self.post_3.id,
+            "post": str(self.post_3.public_id),
         }
         create_res = self.client.post(create_url, data=create_data)
         self.assertEqual(create_res.status_code, status.HTTP_201_CREATED)
@@ -464,17 +464,17 @@ class PrivateSavedPostsApiTests(BaseFixtureTestCase):
         url = list_create_saved_post_url()
 
         # Save post_3
-        data_1 = {"profile": self.profile.id, "post": self.post_3.id}
+        data_1 = {"profile": self.profile.id, "post": str(self.post_3.public_id)}
         res_1 = self.client.post(url, data=data_1)
         self.assertEqual(res_1.status_code, status.HTTP_201_CREATED)
 
         # Save post_4
-        data_2 = {"profile": self.profile.id, "post": self.post_4.id}
+        data_2 = {"profile": self.profile.id, "post": str(self.post_4.public_id)}
         res_2 = self.client.post(url, data=data_2)
         self.assertEqual(res_2.status_code, status.HTTP_201_CREATED)
 
         # Save post_5
-        data_3 = {"profile": self.profile.id, "post": self.post_5.id}
+        data_3 = {"profile": self.profile.id, "post": str(self.post_5.public_id)}
         res_3 = self.client.post(url, data=data_3)
         self.assertEqual(res_3.status_code, status.HTTP_201_CREATED)
 

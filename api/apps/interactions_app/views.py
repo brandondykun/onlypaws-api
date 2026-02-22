@@ -355,19 +355,19 @@ class CreateDestroyCommentLikeView(generics.GenericAPIView):
             )
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        # Get the comment and check if user can interact with the post
-        comment = get_object_or_404(Comment, pk=comment_id)
-        if not comment.post.can_profile_interact(current_profile):
-            logger.warning(
-                f"Profile {current_profile.id} attempted to like comment {comment_id} "
-                f"on a post from private profile {comment.post.profile.id} without following"
-            )
-            return Response(
-                {"error": "Cannot interact with posts from private profiles you don't follow"},
-                status=status.HTTP_403_FORBIDDEN
-            )
-
         try:
+            # Get the comment and check if user can interact with the post
+            comment = get_object_or_404(Comment, pk=comment_id)
+            if not comment.post.can_profile_interact(current_profile):
+                logger.warning(
+                    f"Profile {current_profile.id} attempted to like comment {comment_id} "
+                    f"on a post from private profile {comment.post.profile.id} without following"
+                )
+                return Response(
+                    {"error": "Cannot interact with posts from private profiles you don't follow"},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
             new_like_data = {
                 "comment": comment_id,
                 "profile": current_profile.id,
@@ -377,9 +377,9 @@ class CreateDestroyCommentLikeView(generics.GenericAPIView):
             )
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            
+
             logger.info(f"Comment like created for comment {comment_id} by profile {current_profile.id}")
-            
+
             return Response(
                 serializer.data, status=status.HTTP_201_CREATED
             )

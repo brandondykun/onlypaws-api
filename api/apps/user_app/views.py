@@ -3,8 +3,10 @@ Views for the user api.
 """
 
 from rest_framework import generics, permissions, status, serializers
+from rest_framework.throttling import ScopedRateThrottle
 from apps.user_app.models import (
     User,
+    AuthProvider,
     VerifyEmailToken,
     ResetPasswordToken,
     PendingEmailChange,
@@ -47,7 +49,7 @@ logger = logging.getLogger(__name__)
 # These functions are kept for backward compatibility but now queue tasks
 def send_verification_email(user, token_string):
     """Queue verification email task for user.
-    
+
     Args:
         user: User object
         token_string: String token (not VerifyEmailToken object)
@@ -57,7 +59,7 @@ def send_verification_email(user, token_string):
 
 def send_reset_password_email(user, token_string):
     """Queue reset password email task for user.
-    
+
     Args:
         user: User object
         token_string: String token (not ResetPasswordToken object)
@@ -67,7 +69,7 @@ def send_reset_password_email(user, token_string):
 
 def send_reset_email_email(email, token_string):
     """Queue email change verification task.
-    
+
     Args:
         email: Email address string
         token_string: String token (not verification token object)
@@ -76,11 +78,22 @@ def send_reset_email_email(email, token_string):
 
 
 class CreateUserView(generics.CreateAPIView):
-    """Create a new user in the system."""
+    """
+    Create a new user with **email/password** only.
+
+    Request: POST with {"email": "...", "password": "..."}.
+    Creates a User and an email AuthProvider; sends verification email; returns
+    user profile (no JWT — use POST /login/ to get tokens).
+
+    For sign-up with Google or Apple, use the provider-specific endpoints
+    instead: POST /api/v1/auth/google-auth/ or POST /api/v1/auth/apple-auth/.
+    """
 
     serializer_class = UserSerializer
     permission_classes = []
     authentication_classes = []
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "auth"
     allowed_methods = ["POST"]
 
     def create(self, request, *args, **kwargs):
@@ -112,7 +125,9 @@ class CreateUserView(generics.CreateAPIView):
                 )
                 verify_email_serializer.is_valid(raise_exception=True)
                 self.perform_create(verify_email_serializer)
-                logger.info(f"Verify email token created successfully: {verify_email_serializer.data}")
+                logger.info(
+                    f"Verify email token created successfully: {verify_email_serializer.data}"
+                )
 
                 verify_token_obj = VerifyEmailToken.objects.get(
                     id=verify_email_serializer.data["id"]
@@ -186,6 +201,8 @@ class VerifyEmailView(generics.CreateAPIView):
 
     serializer_class = VerifyEmailTokenSerializer
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "auth_sensitive"
     queryset = VerifyEmailToken.objects.all()
 
     def create(self, request, *args, **kwargs):
@@ -227,7 +244,7 @@ class VerifyEmailView(generics.CreateAPIView):
                 user.is_email_verified = True
                 user.save()
                 user_token.delete()
-                
+
             logger.info(f"Email verified successfully for user {user.email}")
         except Exception as e:
             logger.error(f"Error verifying email for user {user.id}: {str(e)}")
@@ -247,6 +264,8 @@ class VerifyEmailView(generics.CreateAPIView):
 class RequestNewVerifyEmailTokenView(generics.CreateAPIView):
     serializer_class = VerifyEmailTokenSerializer
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "auth"
     queryset = VerifyEmailToken.objects.all()
 
     def post(self, request, *args, **kwargs):
@@ -293,6 +312,8 @@ class CreateResetPasswordTokenView(generics.CreateAPIView):
     serializer_class = ResetPasswordTokenSerializer
     permission_classes = []  # Allow unauthenticated access
     authentication_classes = []
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "auth_sensitive"
     queryset = ResetPasswordToken.objects.all()
 
     def create(self, request, *args, **kwargs):
@@ -351,6 +372,8 @@ class ResetPasswordView(generics.CreateAPIView):
     serializer_class = ResetPasswordSerializer
     permission_classes = []  # Allow unauthenticated access
     authentication_classes = []
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "auth_sensitive"
 
     def create(self, request, *args, **kwargs):
         email = request.data.get("email")
@@ -487,6 +510,8 @@ class RequestEmailChangeView(generics.GenericAPIView):
 
     serializer_class = RequestEmailChangeSerializer
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "auth"
 
     def post(self, request):
         new_email = request.data.get("email")
@@ -503,7 +528,9 @@ class RequestEmailChangeView(generics.GenericAPIView):
 
         # Check if email is already in use
         if User.objects.filter(email=new_email).exists():
-            logger.warning(f"Email change requested to already existing email: {new_email}")
+            logger.warning(
+                f"Email change requested to already existing email: {new_email}"
+            )
             return Response(
                 {"error": {"email": "Email already in use."}},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -527,7 +554,7 @@ class RequestEmailChangeView(generics.GenericAPIView):
         except Exception as e:
             logger.error(
                 f"Failed to send email change verification to {new_email}: {str(e)}",
-                exc_info=True
+                exc_info=True,
             )
             pending_change.delete()
             return Response(
@@ -549,6 +576,8 @@ class VerifyEmailChangeView(generics.GenericAPIView):
 
     serializer_class = VerifyEmailChangeSerializer
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "auth"
 
     def post(self, request):
         token = request.data.get("token")
@@ -584,14 +613,16 @@ class VerifyEmailChangeView(generics.GenericAPIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Update user's email
+        # Update user's email and email auth provider external_id
         old_email = request.user.email
         new_email = pending_change.new_email
-        request.user.email = new_email
-        request.user.save()
-
-        # Delete pending change
-        pending_change.delete()
+        with transaction.atomic():
+            request.user.email = new_email
+            request.user.save()
+            AuthProvider.objects.filter(
+                user=request.user, provider=AuthProvider.Provider.EMAIL
+            ).update(external_id=new_email)
+            pending_change.delete()
 
         logger.info(f"Email changed successfully: {old_email} -> {new_email}")
 
@@ -630,22 +661,22 @@ class CompleteOnboardingView(generics.GenericAPIView):
                     user.regular_profile_onboarding_completed = True
                 elif profile_type == "business":
                     user.business_profile_onboarding_completed = True
-                
+
                 user.save()
 
             logger.info(
                 f"Onboarding marked as complete for user {user.email}, "
                 f"profile_type: {profile_type}"
             )
-            
+
             # Return updated user info
             user_serializer = UserProfileSerializer(user, context={"request": request})
             return Response(
                 {
                     "message": f"{profile_type.capitalize()} profile onboarding marked as complete.",
-                    "user": user_serializer.data
+                    "user": user_serializer.data,
                 },
-                status=status.HTTP_200_OK
+                status=status.HTTP_200_OK,
             )
 
         except Exception as e:

@@ -1,0 +1,275 @@
+[
+  {
+    "model": "user_app.authprovider",
+    "pk": 1,
+    "fields": {
+      "user": 2,
+      "provider": "email",
+      "external_id": "userone@email.com",
+      "token_data": {},
+      "metadata": {},
+      "created_at": "2026-02-22T02:45:15.117Z",
+      "updated_at": "2026-02-22T02:45:15.117Z"
+    }
+  },
+  {
+    "model": "user_app.authprovider",
+    "pk": 2,
+    "fields": {
+      "user": 3,
+      "provider": "email",
+      "external_id": "usertwo@email.com",
+      "token_data": {},
+      "metadata": {},
+      "created_at": "2026-02-22T02:45:15.126Z",
+      "updated_at": "2026-02-22T02:45:15.126Z"
+    }
+  },
+  {
+    "model": "user_app.authprovider",
+    "pk": 3,
+    "fields": {
+      "user": 4,
+      "provider": "email",
+      "external_id": "userthree@email.com",
+      "token_data": {},
+      "metadata": {},
+      "created_at": "2026-02-22T02:45:15.127Z",
+      "updated_at": "2026-02-22T02:45:15.127Z"
+    }
+  },
+  {
+    "model": "user_app.authprovider",
+    "pk": 4,
+    "fields": {
+      "user": 5,
+      "provider": "email",
+      "external_id": "userfour@email.com",
+      "token_data": {},
+      "metadata": {},
+      "created_at": "2026-02-22T02:45:15.129Z",
+      "updated_at": "2026-02-22T02:45:15.129Z"
+    }
+  },
+  {
+    "model": "user_app.authprovider",
+    "pk": 5,
+    "fields": {
+      "user": 6,
+      "provider": "email",
+      "external_id": "userfive@email.com",
+      "token_data": {},
+      "metadata": {},
+      "created_at": "2026-02-22T02:45:15.130Z",
+      "updated_at": "2026-02-22T02:45:15.130Z"
+    }
+  },
+  {
+    "model": "user_app.authprovider",
+    "pk": 6,
+    "fields": {
+      "user": 7,
+      "provider": "email",
+      "external_id": "usersix@email.com",
+      "token_data": {},
+      "metadata": {},
+      "created_at": "2026-02-22T02:45:15.131Z",
+      "updated_at": "2026-02-22T02:45:15.131Z"
+    }
+  },
+  {
+    "model": "user_app.authprovider",
+    "pk": 7,
+    "fields": {
+      "user": 10,
+      "provider": "email",
+      "external_id": "userseven@email.com",
+      "token_data": {},
+      "metadata": {},
+      "created_at": "2026-02-22T02:45:15.132Z",
+      "updated_at": "2026-02-22T02:45:15.132Z"
+    }
+  },
+  {
+    "model": "user_app.authprovider",
+    "pk": 8,
+    "fields": {
+      "user": 11,
+      "provider": "email",
+      "external_id": "usereight@email.com",
+      "token_data": {},
+      "metadata": {},
+      "created_at": "2026-02-22T02:45:15.133Z",
+      "updated_at": "2026-02-22T02:45:15.133Z"
+    }
+  },
+  {
+    "model": "user_app.authprovider",
+    "pk": 9,
+    "fields": {
+      "user": 12,
+      "provider": "email",
+      "external_id": "usernine@email.com",
+      "token_data": {},
+      "metadata": {},
+      "created_at": "2026-02-22T02:45:15.135Z",
+      "updated_at": "2026-02-22T02:45:15.135Z"
+    }
+  },
+  {
+    "model": "user_app.authprovider",
+    "pk": 10,
+    "fields": {
+      "user": 13,
+      "provider": "email",
+      "external_id": "userten@email.com",
+      "token_data": {},
+      "metadata": {},
+      "created_at": "2026-02-22T02:45:15.135Z",
+      "updated_at": "2026-02-22T02:45:15.135Z"
+    }
+  },
+  {
+    "model": "user_app.authprovider",
+    "pk": 11,
+    "fields": {
+      "user": 14,
+      "provider": "email",
+      "external_id": "usereleven@email.com",
+      "token_data": {},
+      "metadata": {},
+      "created_at": "2026-02-22T02:45:15.136Z",
+      "updated_at": "2026-02-22T02:45:15.136Z"
+    }
+  },
+  {
+    "model": "user_app.authprovider",
+    "pk": 12,
+    "fields": {
+      "user": 15,
+      "provider": "email",
+      "external_id": "usertwelve@email.com",
+      "token_data": {},
+      "metadata": {},
+      "created_at": "2026-02-22T02:45:15.137Z",
+      "updated_at": "2026-02-22T02:45:15.137Z"
+    }
+  },
+  {
+    "model": "user_app.authprovider",
+    "pk": 13,
+    "fields": {
+      "user": 16,
+      "provider": "email",
+      "external_id": "userthirteen@email.com",
+      "token_data": {},
+      "metadata": {},
+      "created_at": "2026-02-22T02:45:15.138Z",
+      "updated_at": "2026-02-22T02:45:15.138Z"
+    }
+  },
+  {
+    "model": "user_app.authprovider",
+    "pk": 14,
+    "fields": {
+      "user": 17,
+      "provider": "email",
+      "external_id": "userfourteen@email.com",
+      "token_data": {},
+      "metadata": {},
+      "created_at": "2026-02-22T02:45:15.139Z",
+      "updated_at": "2026-02-22T02:45:15.139Z"
+    }
+  },
+  {
+    "model": "user_app.authprovider",
+    "pk": 15,
+    "fields": {
+      "user": 18,
+      "provider": "email",
+      "external_id": "userfifteen@email.com",
+      "token_data": {},
+      "metadata": {},
+      "created_at": "2026-02-22T02:45:15.139Z",
+      "updated_at": "2026-02-22T02:45:15.139Z"
+    }
+  },
+  {
+    "model": "user_app.authprovider",
+    "pk": 16,
+    "fields": {
+      "user": 19,
+      "provider": "email",
+      "external_id": "usersixteen@email.com",
+      "token_data": {},
+      "metadata": {},
+      "created_at": "2026-02-22T02:45:15.140Z",
+      "updated_at": "2026-02-22T02:45:15.140Z"
+    }
+  },
+  {
+    "model": "user_app.authprovider",
+    "pk": 17,
+    "fields": {
+      "user": 20,
+      "provider": "email",
+      "external_id": "userseventeen@email.com",
+      "token_data": {},
+      "metadata": {},
+      "created_at": "2026-02-22T02:45:15.141Z",
+      "updated_at": "2026-02-22T02:45:15.141Z"
+    }
+  },
+  {
+    "model": "user_app.authprovider",
+    "pk": 18,
+    "fields": {
+      "user": 21,
+      "provider": "email",
+      "external_id": "usereighteen@email.com",
+      "token_data": {},
+      "metadata": {},
+      "created_at": "2026-02-22T02:45:15.142Z",
+      "updated_at": "2026-02-22T02:45:15.142Z"
+    }
+  },
+  {
+    "model": "user_app.authprovider",
+    "pk": 19,
+    "fields": {
+      "user": 22,
+      "provider": "email",
+      "external_id": "usernineteen@email.com",
+      "token_data": {},
+      "metadata": {},
+      "created_at": "2026-02-22T02:45:15.143Z",
+      "updated_at": "2026-02-22T02:45:15.143Z"
+    }
+  },
+  {
+    "model": "user_app.authprovider",
+    "pk": 20,
+    "fields": {
+      "user": 23,
+      "provider": "email",
+      "external_id": "usertwenty@email.com",
+      "token_data": {},
+      "metadata": {},
+      "created_at": "2026-02-22T02:45:15.144Z",
+      "updated_at": "2026-02-22T02:45:15.144Z"
+    }
+  },
+  {
+    "model": "user_app.authprovider",
+    "pk": 21,
+    "fields": {
+      "user": 1,
+      "provider": "email",
+      "external_id": "admin@email.com",
+      "token_data": {},
+      "metadata": {},
+      "created_at": "2026-02-22T02:45:15.145Z",
+      "updated_at": "2026-02-22T02:45:15.145Z"
+    }
+  }
+]
