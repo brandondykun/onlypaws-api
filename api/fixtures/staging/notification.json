@@ -1,6 +1,52 @@
 [
   {
     "model": "notifications_app.notification",
+    "pk": 67,
+    "fields": {
+      "recipient": 23,
+      "sender": 1,
+      "notification_type": "follow",
+      "title": "started following you",
+      "message": "admin_dog started following you",
+      "is_read": false,
+      "created_at": "2026-01-18T20:35:33.335Z",
+      "post": null,
+      "comment": null,
+      "extra_data": {
+        "follower_id": 1,
+        "follower_name": "Linus",
+        "follower_about": "I am the admin dog.",
+        "follower_breed": "Cavalier King Charles Spaniel",
+        "follower_avatar": "https://images-staging.onlypawsapp.com/images/profiles/01KJ312KA913X5CQ5T4KNK4Q1Y/avatar_100.webp",
+        "follower_pet_type": "Dog",
+        "follower_username": "admin_dog"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
+    "pk": 66,
+    "fields": {
+      "recipient": 17,
+      "sender": 1,
+      "notification_type": "like_post",
+      "title": "liked your post",
+      "message": "admin_dog liked your post: \"Showing off my sweet new harness. I wasn’t sure ab...\"",
+      "is_read": false,
+      "created_at": "2026-01-18T20:34:42.936Z",
+      "post": 91,
+      "comment": null,
+      "extra_data": {
+        "post_id": 91,
+        "liker_id": 1,
+        "post_caption": "Showing off my sweet new harness. I wasn’t sure about it at first, but I’m starting to like it. It a",
+        "liker_username": "admin_dog",
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JGF461PMSQHABXGDFSC/0_150.webp"
+      }
+    }
+  },
+  {
+    "model": "notifications_app.notification",
     "pk": 65,
     "fields": {
       "recipient": 14,
@@ -17,7 +63,7 @@
         "liker_id": 1,
         "post_caption": "Today we have some puppies in the grass. Why do puppies always look cuter laying in the grass?",
         "liker_username": "admin_dog",
-        "post_preview_image": "/media/images/dev/14/14/41/image_0.webp"
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JF58ZZEXF1BMH67YKGC/0_150.webp"
       }
     }
   },
@@ -39,7 +85,7 @@
         "liker_id": 1,
         "post_caption": "Out playing in the grass today!",
         "liker_username": "admin_dog",
-        "post_preview_image": "/media/images/dev/20/20/74/image_0.webp"
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JG4CQ63DTR0HFJ8BKCN/0_150.webp"
       }
     }
   },
@@ -63,7 +109,7 @@
         "comment_text": "Did he try to bring the stick inside?",
         "post_caption": "Out and about in the snow chewing on sticks",
         "liker_username": "admin_dog",
-        "post_preview_image": "/media/images/dev/1/1/7/image_0.webp"
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JDZ6TA4VJTTH8907A4N/0_150.webp"
       }
     }
   },
@@ -85,7 +131,7 @@
         "follower_name": "Jemma",
         "follower_about": "People think my breed is mean but I don’t have a mean bone in my body!",
         "follower_breed": "Pitbull",
-        "follower_avatar": "/media/images/dev/4/4/profile_image.webp",
+        "follower_avatar": "https://images-staging.onlypawsapp.com/images/profiles/01KJ312KADAQWQQSSV879M4E3W/avatar_100.webp",
         "follower_pet_type": "Dog",
         "follower_username": "pitbulpup"
       }
@@ -112,7 +158,7 @@
         "commenter_id": 1,
         "post_caption": "Got a Christmas outfit and my hair cut!",
         "commenter_username": "admin_dog",
-        "post_preview_image": "/media/images/dev/17/17/58/image_0.webp"
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JFNDEYEXK95H8V8P4DM/0_150.webp"
       }
     }
   },
@@ -137,7 +183,7 @@
         "commenter_id": 1,
         "post_caption": "No one can resist my puppy dog eyes! This is why I usually get my way!",
         "commenter_username": "admin_dog",
-        "post_preview_image": "/media/images/dev/17/17/71/image_0.webp",
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JG193A1M5DZ0X2PZR0Y/0_150.webp",
         "replied_to_comment_id": 10,
         "replied_to_comment_text": "I have 3 brothers and 2 sisters! What about you?"
       }
@@ -164,7 +210,7 @@
         "commenter_id": 17,
         "post_caption": "No one can resist my puppy dog eyes! This is why I usually get my way!",
         "commenter_username": "goldie",
-        "post_preview_image": "/media/images/dev/17/17/71/image_0.webp",
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JG193A1M5DZ0X2PZR0Y/0_150.webp",
         "replied_to_comment_id": 9,
         "replied_to_comment_text": "Well we do look a lot a like. Do you have any brother or sister?"
       }
@@ -191,7 +237,7 @@
         "commenter_id": 1,
         "post_caption": "No one can resist my puppy dog eyes! This is why I usually get my way!",
         "commenter_username": "admin_dog",
-        "post_preview_image": "/media/images/dev/17/17/71/image_0.webp",
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JG193A1M5DZ0X2PZR0Y/0_150.webp",
         "replied_to_comment_id": 8,
         "replied_to_comment_text": "I don't know exactly where I'm from, but I did come from Pennsylvania"
       }
@@ -218,7 +264,7 @@
         "commenter_id": 17,
         "post_caption": "No one can resist my puppy dog eyes! This is why I usually get my way!",
         "commenter_username": "goldie",
-        "post_preview_image": "/media/images/dev/17/17/71/image_0.webp",
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JG193A1M5DZ0X2PZR0Y/0_150.webp",
         "replied_to_comment_id": 7,
         "replied_to_comment_text": "Lititz PA is where my mom got me from!"
       }
@@ -245,7 +291,7 @@
         "commenter_id": 1,
         "post_caption": "No one can resist my puppy dog eyes! This is why I usually get my way!",
         "commenter_username": "admin_dog",
-        "post_preview_image": "/media/images/dev/17/17/71/image_0.webp",
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JG193A1M5DZ0X2PZR0Y/0_150.webp",
         "replied_to_comment_id": 5,
         "replied_to_comment_text": "Maybe, where are you from?"
       }
@@ -272,7 +318,7 @@
         "commenter_id": 17,
         "post_caption": "No one can resist my puppy dog eyes! This is why I usually get my way!",
         "commenter_username": "goldie",
-        "post_preview_image": "/media/images/dev/17/17/71/image_0.webp",
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JG193A1M5DZ0X2PZR0Y/0_150.webp",
         "replied_to_comment_id": 4,
         "replied_to_comment_text": "Hey are we related!?"
       }
@@ -299,7 +345,7 @@
         "commenter_id": 1,
         "post_caption": "No one can resist my puppy dog eyes! This is why I usually get my way!",
         "commenter_username": "admin_dog",
-        "post_preview_image": "/media/images/dev/17/17/71/image_0.webp"
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JG193A1M5DZ0X2PZR0Y/0_150.webp"
       }
     }
   },
@@ -324,7 +370,7 @@
         "commenter_id": 10,
         "post_caption": "Out and about in the snow chewing on sticks",
         "commenter_username": "SirDogsAlot",
-        "post_preview_image": "/media/images/dev/1/1/7/image_0.webp"
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JDZ6TA4VJTTH8907A4N/0_150.webp"
       }
     }
   },
@@ -349,7 +395,7 @@
         "commenter_id": 1,
         "post_caption": "Out and about in the snow chewing on sticks",
         "commenter_username": "admin_dog",
-        "post_preview_image": "/media/images/dev/1/1/7/image_0.webp",
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JDZ6TA4VJTTH8907A4N/0_150.webp",
         "replied_to_comment_id": 1,
         "replied_to_comment_text": "Did he try to bring the stick inside?"
       }
@@ -376,7 +422,7 @@
         "commenter_id": 4,
         "post_caption": "Out and about in the snow chewing on sticks",
         "commenter_username": "pitbulpup",
-        "post_preview_image": "/media/images/dev/1/1/7/image_0.webp"
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JDZ6TA4VJTTH8907A4N/0_150.webp"
       }
     }
   },
@@ -398,7 +444,7 @@
         "liker_id": 7,
         "post_caption": "Taking my heart treats! Gotta stay healthy to live a long life to make my humans happy!",
         "liker_username": "AllPets",
-        "post_preview_image": "/media/images/dev/1/1/13/image_0.webp"
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JE6G56T5MFCAYCXC6SD/0_150.webp"
       }
     }
   },
@@ -423,7 +469,7 @@
         "commenter_id": 1,
         "post_caption": "Out and about in the snow chewing on sticks",
         "commenter_username": "admin_dog",
-        "post_preview_image": "/media/images/dev/1/1/7/image_0.webp",
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JDZ6TA4VJTTH8907A4N/0_150.webp",
         "replied_to_comment_id": 3,
         "replied_to_comment_text": "Where did you get that jacket?"
       }
@@ -450,7 +496,7 @@
         "commenter_id": 10,
         "post_caption": "Nothing like a good stick chew in the grass! I really like chewing on sticks. I think it helps my te",
         "commenter_username": "SirDogsAlot",
-        "post_preview_image": "/media/images/dev/1/1/20/image_0_G4lvbAV.webp",
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JEDJZKRJMHA382R23XX/0_150.webp",
         "replied_to_comment_id": 15,
         "replied_to_comment_text": "And there is a never ending supply!"
       }
@@ -477,7 +523,7 @@
         "commenter_id": 1,
         "post_caption": "Nothing like a good stick chew in the grass! I really like chewing on sticks. I think it helps my te",
         "commenter_username": "admin_dog",
-        "post_preview_image": "/media/images/dev/1/1/20/image_0_G4lvbAV.webp",
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JEDJZKRJMHA382R23XX/0_150.webp",
         "replied_to_comment_id": 14,
         "replied_to_comment_text": "I love sticks too! They're the best free toys ever!"
       }
@@ -504,7 +550,7 @@
         "commenter_id": 10,
         "post_caption": "Nothing like a good stick chew in the grass! I really like chewing on sticks. I think it helps my te",
         "commenter_username": "SirDogsAlot",
-        "post_preview_image": "/media/images/dev/1/1/20/image_0_G4lvbAV.webp"
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JEDJZKRJMHA382R23XX/0_150.webp"
       }
     }
   },
@@ -528,7 +574,7 @@
         "comment_text": "Nice sweater!",
         "post_caption": "Got a Christmas outfit and my hair cut!",
         "liker_username": "goldie",
-        "post_preview_image": "/media/images/dev/17/17/58/image_0.webp"
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JFNDEYEXK95H8V8P4DM/0_150.webp"
       }
     }
   },
@@ -552,7 +598,7 @@
         "comment_text": "I think I have 6 or 7. I’d have to look in my baby book to know for sure.",
         "post_caption": "No one can resist my puppy dog eyes! This is why I usually get my way!",
         "liker_username": "goldie",
-        "post_preview_image": "/media/images/dev/17/17/71/image_0.webp"
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JG193A1M5DZ0X2PZR0Y/0_150.webp"
       }
     }
   },
@@ -574,7 +620,7 @@
         "follower_name": "Linus",
         "follower_about": "I am the admin dog. I basically run this app. I try to share pictures every day of my fun dog activities! Follow to keep up with what I’m doing!",
         "follower_breed": "Cavalier King Charles Spaniel",
-        "follower_avatar": "/media/images/dev/1/1/profile_image_xEwniGq.webp",
+        "follower_avatar": "https://images-staging.onlypawsapp.com/images/profiles/01KJ312KA913X5CQ5T4KNK4Q1Y/avatar_100.webp",
         "follower_pet_type": "Dog",
         "follower_username": "admin_dog"
       }
@@ -598,7 +644,7 @@
         "follower_name": "The Puppy Profile",
         "follower_about": "Your home for puppies! I post puppy pics of all breeds, shapes and sizes!",
         "follower_breed": "Any and all",
-        "follower_avatar": "/media/images/dev/7/7/profile_image.webp",
+        "follower_avatar": "https://images-staging.onlypawsapp.com/images/profiles/01KJ312KAE0MW4FX29ACJFTX6K/avatar_100.webp",
         "follower_pet_type": "Dog",
         "follower_username": "AllPets"
       }
@@ -624,7 +670,7 @@
         "comment_text": "No he knows better",
         "post_caption": "Out and about in the snow chewing on sticks",
         "liker_username": "chewyyy",
-        "post_preview_image": "/media/images/dev/1/1/7/image_0.webp"
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JDZ6TA4VJTTH8907A4N/0_150.webp"
       }
     }
   },
@@ -646,7 +692,7 @@
         "liker_id": 1,
         "post_caption": "I think fall is my favorite season",
         "liker_username": "admin_dog",
-        "post_preview_image": "/media/images/dev/16/16/57/image_0.webp"
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JFMK6N0A5DRWW4XF5KT/0_150.webp"
       }
     }
   },
@@ -668,7 +714,7 @@
         "liker_id": 1,
         "post_caption": "Stealth mode followed by serious face 🤣",
         "liker_username": "admin_dog",
-        "post_preview_image": "/media/images/dev/13/13/51/image_0.webp"
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JFE8DT2Y404DMA44E78/0_150.webp"
       }
     }
   },
@@ -690,7 +736,7 @@
         "liker_id": 1,
         "post_caption": "Puppy teeth lookin for treats!",
         "liker_username": "admin_dog",
-        "post_preview_image": "/media/images/dev/18/18/46/image_0.webp"
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JFA9TPY9B8MQJ5PJXYE/0_150.webp"
       }
     }
   },
@@ -712,7 +758,7 @@
         "liker_id": 1,
         "post_caption": "Running around playing with my toy in the grass today. What more could I ask for?",
         "liker_username": "admin_dog",
-        "post_preview_image": "/media/images/dev/20/20/61/image_0.webp"
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JFQ8V28FEFC974TP1V8/0_150.webp"
       }
     }
   },
@@ -734,7 +780,7 @@
         "liker_id": 1,
         "post_caption": "Bernese Mountain Dog. The last one might be a mix. If you know what it could be, leave a comment.",
         "liker_username": "admin_dog",
-        "post_preview_image": "/media/images/dev/7/7/25/image_0.webp"
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JEH97B4CZMCRHC2BDXN/0_150.webp"
       }
     }
   },
@@ -756,7 +802,7 @@
         "liker_id": 1,
         "post_caption": "Cutest photoshoot ever. Who doesn’t love a puppy wearing clothes??",
         "liker_username": "admin_dog",
-        "post_preview_image": "/media/images/dev/14/14/55/image_0.webp"
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JFJXCK0BN9DKEEN6CQW/0_150.webp"
       }
     }
   },
@@ -778,7 +824,7 @@
         "liker_id": 1,
         "post_caption": "Puppy eyes and puppy breath. Aren’t Goldens the best??",
         "liker_username": "admin_dog",
-        "post_preview_image": "/media/images/dev/20/20/48/image_0.webp"
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JFC1FR2HTP26S8FP2RE/0_150.webp"
       }
     }
   },
@@ -800,7 +846,7 @@
         "liker_id": 1,
         "post_caption": "A couple epic outdoor portraits",
         "liker_username": "admin_dog",
-        "post_preview_image": "/media/images/dev/16/16/70/image_0.webp"
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JG0XE673HWRGA00T1J2/0_150.webp"
       }
     }
   },
@@ -822,7 +868,7 @@
         "liker_id": 3,
         "post_caption": "Nothing like a good stick chew in the grass!",
         "liker_username": "chewyyy",
-        "post_preview_image": "/media/images/dev/1/1/20/image_0_G4lvbAV.webp"
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JEDJZKRJMHA382R23XX/0_150.webp"
       }
     }
   },
@@ -844,7 +890,7 @@
         "liker_id": 3,
         "post_caption": "Taking my heart treats! Gotta stay healthy to live a long life to make my humans happy!",
         "liker_username": "chewyyy",
-        "post_preview_image": "http://192.168.0.190:8000/media/images/dev/1/1/13/image_0.webp"
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JE6G56T5MFCAYCXC6SD/0_150.webp"
       }
     }
   },
@@ -866,7 +912,7 @@
         "liker_id": 3,
         "post_caption": "Sleepy morning…I know I’m just a dog, but I love a good pillow!",
         "liker_username": "chewyyy",
-        "post_preview_image": "http://192.168.0.190:8000/media/images/dev/1/1/12/image_0.webp"
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JE5SWXCMPKCC9FJRVY8/0_150.webp"
       }
     }
   },
@@ -888,7 +934,7 @@
         "liker_id": 3,
         "post_caption": "Enjoying the snow day! I’m glad my parents bought me this coat so I can stay warm on my winter walks",
         "liker_username": "chewyyy",
-        "post_preview_image": "http://192.168.0.190:8000/media/images/dev/1/1/8/image_0.webp"
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JE0SBVBDPK6NZ0FXTCJ/0_150.webp"
       }
     }
   },
@@ -910,7 +956,7 @@
         "liker_id": 3,
         "post_caption": "Out and about in the snow chewing on sticks",
         "liker_username": "chewyyy",
-        "post_preview_image": "http://192.168.0.190:8000/media/images/dev/1/1/7/image_0.webp"
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JDZ6TA4VJTTH8907A4N/0_150.webp"
       }
     }
   },
@@ -932,7 +978,7 @@
         "liker_id": 3,
         "post_caption": "I do love sleeping on my favorite pillow!",
         "liker_username": "chewyyy",
-        "post_preview_image": "http://192.168.0.190:8000/media/images/dev/1/1/1/image_0.webp"
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JDKAE7V4WGP2YG3DKHP/0_150.webp"
       }
     }
   },
@@ -954,7 +1000,7 @@
         "liker_id": 7,
         "post_caption": "Nothing like a good stick chew in the grass!",
         "liker_username": "AllPets",
-        "post_preview_image": "http://192.168.0.190:8000/media/images/dev/1/1/20/image_0_G4lvbAV.webp"
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JEDJZKRJMHA382R23XX/0_150.webp"
       }
     }
   },
@@ -976,7 +1022,7 @@
         "liker_id": 7,
         "post_caption": "Sleepy morning…I know I’m just a dog, but I love a good pillow!",
         "liker_username": "AllPets",
-        "post_preview_image": "http://192.168.0.190:8000/media/images/dev/1/1/12/image_0.webp"
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JE5SWXCMPKCC9FJRVY8/0_150.webp"
       }
     }
   },
@@ -998,7 +1044,7 @@
         "liker_id": 7,
         "post_caption": "Out and about in the snow chewing on sticks",
         "liker_username": "AllPets",
-        "post_preview_image": "http://192.168.0.190:8000/media/images/dev/1/1/7/image_0.webp"
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JDZ6TA4VJTTH8907A4N/0_150.webp"
       }
     }
   },
@@ -1020,7 +1066,7 @@
         "liker_id": 7,
         "post_caption": "Taking my heart treats! Gotta stay healthy to live a long life to make my humans happy!",
         "liker_username": "AllPets",
-        "post_preview_image": "http://192.168.0.190:8000/media/images/dev/1/1/13/image_0.webp"
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JE6G56T5MFCAYCXC6SD/0_150.webp"
       }
     }
   },
@@ -1033,7 +1079,7 @@
       "notification_type": "like_post",
       "title": "liked your post",
       "message": "AllPets liked your post: \"I do love sleeping on my favorite pillow!\"",
-      "is_read": true,
+      "is_read": false,
       "created_at": "2025-09-19T14:22:30.760Z",
       "post": 1,
       "comment": null,
@@ -1042,7 +1088,7 @@
         "liker_id": 7,
         "post_caption": "I do love sleeping on my favorite pillow!",
         "liker_username": "AllPets",
-        "post_preview_image": "http://192.168.0.190:8000/media/images/dev/1/1/1/image_0.webp"
+        "post_preview_image": "https://images-staging.onlypawsapp.com/images/posts/01KJ312JDKAE7V4WGP2YG3DKHP/0_150.webp"
       }
     }
   }
