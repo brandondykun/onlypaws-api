@@ -3,6 +3,7 @@
     "model": "posts_app.savedpost",
     "pk": 1,
     "fields": {
+      "public_id": "01KJ312JWKGTHJ289P0TQPDZKS",
       "profile": 4,
       "post": 7,
       "saved_at": "2025-02-04T04:14:01.437Z"

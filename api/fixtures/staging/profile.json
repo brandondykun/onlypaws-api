@@ -3,6 +3,7 @@
     "model": "profile_app.profile",
     "pk": 1,
     "fields": {
+      "public_id": "01KJ312KA913X5CQ5T4KNK4Q1Y",
       "username": "admin_dog",
       "user": 1,
       "is_active": true,
@@ -15,6 +16,7 @@
     "model": "profile_app.profile",
     "pk": 2,
     "fields": {
+      "public_id": "01KJ312KACF9WNWYGQY7QXC5YS",
       "username": "hound_dog",
       "user": 2,
       "is_active": true,
@@ -27,6 +29,7 @@
     "model": "profile_app.profile",
     "pk": 3,
     "fields": {
+      "public_id": "01KJ312KACQ90MNTK1W069NDH4",
       "username": "chewyyy",
       "user": 3,
       "is_active": true,
@@ -39,6 +42,7 @@
     "model": "profile_app.profile",
     "pk": 4,
     "fields": {
+      "public_id": "01KJ312KADAQWQQSSV879M4E3W",
       "username": "pitbulpup",
       "user": 4,
       "is_active": true,
@@ -51,6 +55,7 @@
     "model": "profile_app.profile",
     "pk": 5,
     "fields": {
+      "public_id": "01KJ312KADMADV6THFG86CHBCW",
       "username": "AIpets",
       "user": 5,
       "is_active": true,
@@ -63,6 +68,7 @@
     "model": "profile_app.profile",
     "pk": 6,
     "fields": {
+      "public_id": "01KJ312KAETJEGK1V4PQ68D0B0",
       "username": "catAI",
       "user": 6,
       "is_active": true,
@@ -75,6 +81,7 @@
     "model": "profile_app.profile",
     "pk": 7,
     "fields": {
+      "public_id": "01KJ312KAE0MW4FX29ACJFTX6K",
       "username": "AllPets",
       "user": 7,
       "is_active": true,
@@ -87,6 +94,7 @@
     "model": "profile_app.profile",
     "pk": 10,
     "fields": {
+      "public_id": "01KJ312KAFDKWZC1EEJMNNMQ5M",
       "username": "SirDogsAlot",
       "user": 10,
       "is_active": true,
@@ -99,6 +107,7 @@
     "model": "profile_app.profile",
     "pk": 11,
     "fields": {
+      "public_id": "01KJ312KAF2KWGYRCFBWMWPSJK",
       "username": "husky123",
       "user": 11,
       "is_active": true,
@@ -111,6 +120,7 @@
     "model": "profile_app.profile",
     "pk": 12,
     "fields": {
+      "public_id": "01KJ312KAFX2VBH5FQX3TJ871F",
       "username": "K9Historian",
       "user": 12,
       "is_active": true,
@@ -123,6 +133,7 @@
     "model": "profile_app.profile",
     "pk": 13,
     "fields": {
+      "public_id": "01KJ312KAGN19XJ0R7ZJ1WDHTR",
       "username": "that_one_lab",
       "user": 13,
       "is_active": true,
@@ -135,6 +146,7 @@
     "model": "profile_app.profile",
     "pk": 14,
     "fields": {
+      "public_id": "01KJ312KAG28KAXA021DG9PN5N",
       "username": "bestpuppies",
       "user": 14,
       "is_active": true,
@@ -147,6 +159,7 @@
     "model": "profile_app.profile",
     "pk": 15,
     "fields": {
+      "public_id": "01KJ312KAGN40MQM63J8JCSFP0",
       "username": "oldyeller",
       "user": 15,
       "is_active": true,
@@ -159,6 +172,7 @@
     "model": "profile_app.profile",
     "pk": 16,
     "fields": {
+      "public_id": "01KJ312KAHVJPFX4TPS5PD1K40",
       "username": "TheGreatOne",
       "user": 16,
       "is_active": true,
@@ -171,6 +185,7 @@
     "model": "profile_app.profile",
     "pk": 17,
     "fields": {
+      "public_id": "01KJ312KAHT1Z3NSKJ479JPK23",
       "username": "goldie",
       "user": 17,
       "is_active": true,
@@ -183,6 +198,7 @@
     "model": "profile_app.profile",
     "pk": 18,
     "fields": {
+      "public_id": "01KJ312KAJWP9JS0G0DX0YHX56",
       "username": "choco",
       "user": 18,
       "is_active": true,
@@ -195,6 +211,7 @@
     "model": "profile_app.profile",
     "pk": 19,
     "fields": {
+      "public_id": "01KJ312KAK2QD25QQNT16BBJMG",
       "username": "SnortyPickles",
       "user": 19,
       "is_active": true,
@@ -207,6 +224,7 @@
     "model": "profile_app.profile",
     "pk": 20,
     "fields": {
+      "public_id": "01KJ312KAKB4S1WJQQH8YZGPG2",
       "username": "GoldenMaple",
       "user": 20,
       "is_active": true,
@@ -219,6 +237,7 @@
     "model": "profile_app.profile",
     "pk": 21,
     "fields": {
+      "public_id": "01KJ312KAKW8DGV4QP1MCWBE01",
       "username": "GuardianTitan",
       "user": 21,
       "is_active": true,
@@ -231,6 +250,7 @@
     "model": "profile_app.profile",
     "pk": 22,
     "fields": {
+      "public_id": "01KJ312KAMWECZSBQZ49CWKMMJ",
       "username": "AllAboutBeagles",
       "user": 22,
       "is_active": true,
@@ -243,6 +263,7 @@
     "model": "profile_app.profile",
     "pk": 23,
     "fields": {
+      "public_id": "01KJ312KAMNBDKN1CP13065JR7",
       "username": "MidnightThePoodle",
       "user": 23,
       "is_active": true,
@@ -255,6 +276,7 @@
     "model": "profile_app.profile",
     "pk": 26,
     "fields": {
+      "public_id": "01KJ312KAN44GXJ9N70P5EH4CF",
       "username": "LucyBelle",
       "user": 1,
       "is_active": true,
