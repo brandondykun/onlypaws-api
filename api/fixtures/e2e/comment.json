@@ -3,10 +3,10 @@
     "model": "interactions_app.comment",
     "pk": 1,
     "fields": {
-      "text": "Always keep one eye open.",
-      "profile": 1,
-      "post": 1,
-      "created_at": "2024-10-13T18:01:23.968Z",
+      "text": "Did he try to bring the stick inside?",
+      "profile": 4,
+      "post": 7,
+      "created_at": "2025-02-04T04:12:37.514Z",
       "parent_comment": null,
       "reply_to_comment": null
     }
@@ -15,22 +15,22 @@
     "model": "interactions_app.comment",
     "pk": 2,
     "fields": {
-      "text": "Those ears tho",
-      "profile": 5,
+      "text": "No he knows better",
+      "profile": 1,
       "post": 7,
-      "created_at": "2024-10-13T18:02:34.269Z",
-      "parent_comment": null,
-      "reply_to_comment": null
+      "created_at": "2025-02-04T04:16:25.183Z",
+      "parent_comment": 1,
+      "reply_to_comment": 1
     }
   },
   {
     "model": "interactions_app.comment",
     "pk": 3,
     "fields": {
-      "text": "Poopsicles",
-      "profile": 5,
-      "post": 3,
-      "created_at": "2024-10-13T18:02:57.816Z",
+      "text": "Where did you get that jacket?",
+      "profile": 10,
+      "post": 7,
+      "created_at": "2025-10-18T14:37:31.867Z",
       "parent_comment": null,
       "reply_to_comment": null
     }
@@ -39,10 +39,10 @@
     "model": "interactions_app.comment",
     "pk": 4,
     "fields": {
-      "text": "Always",
-      "profile": 5,
-      "post": 1,
-      "created_at": "2024-10-13T18:03:12.157Z",
+      "text": "Hey are we related!?",
+      "profile": 1,
+      "post": 71,
+      "created_at": "2025-10-18T15:19:43.155Z",
       "parent_comment": null,
       "reply_to_comment": null
     }
@@ -51,120 +51,420 @@
     "model": "interactions_app.comment",
     "pk": 5,
     "fields": {
-      "text": "Ivy is the best!",
-      "profile": 1,
-      "post": 12,
-      "created_at": "2024-10-20T13:42:48.899Z",
-      "parent_comment": null,
-      "reply_to_comment": null
-    }
-  },
-  {
-    "model": "interactions_app.comment",
-    "pk": 6,
-    "fields": {
-      "text": "What a good boy!",
-      "profile": 1,
-      "post": 24,
-      "created_at": "2024-10-20T13:43:29.462Z",
-      "parent_comment": null,
-      "reply_to_comment": null
+      "text": "Maybe, where are you from?",
+      "profile": 17,
+      "post": 71,
+      "created_at": "2025-10-18T15:21:41.866Z",
+      "parent_comment": 4,
+      "reply_to_comment": 4
     }
   },
   {
     "model": "interactions_app.comment",
     "pk": 7,
     "fields": {
-      "text": "What a sleepy guy",
-      "profile": 4,
-      "post": 1,
-      "created_at": "2024-10-21T03:16:03.549Z",
-      "parent_comment": null,
-      "reply_to_comment": null
+      "text": "Lititz PA is where my mom got me from!",
+      "profile": 1,
+      "post": 71,
+      "created_at": "2025-10-18T15:23:41.486Z",
+      "parent_comment": 4,
+      "reply_to_comment": 5
     }
   },
   {
     "model": "interactions_app.comment",
     "pk": 8,
     "fields": {
-      "text": "Does he always sleep like that?",
-      "profile": 4,
-      "post": 1,
-      "created_at": "2024-10-21T03:16:50.513Z",
-      "parent_comment": null,
-      "reply_to_comment": null
+      "text": "I don't know exactly where I'm from, but I did come from Pennsylvania",
+      "profile": 17,
+      "post": 71,
+      "created_at": "2025-10-18T15:25:36.730Z",
+      "parent_comment": 4,
+      "reply_to_comment": 7
     }
   },
   {
     "model": "interactions_app.comment",
     "pk": 9,
     "fields": {
-      "text": "Looks so comfy!",
-      "profile": 4,
-      "post": 1,
-      "created_at": "2024-10-21T03:32:22.921Z",
-      "parent_comment": null,
-      "reply_to_comment": null
+      "text": "Well we do look a lot a like. Do you have any brother or sister?",
+      "profile": 1,
+      "post": 71,
+      "created_at": "2025-10-18T15:30:42.340Z",
+      "parent_comment": 4,
+      "reply_to_comment": 8
     }
   },
   {
     "model": "interactions_app.comment",
     "pk": 10,
     "fields": {
-      "text": "He loves smelling those bushes!",
-      "profile": 1,
-      "post": 35,
-      "created_at": "2024-10-26T16:45:20.541Z",
-      "parent_comment": null,
-      "reply_to_comment": null
-    }
-  },
-  {
-    "model": "interactions_app.comment",
-    "pk": 11,
-    "fields": {
-      "text": "Love the bandana! Where did you get it?",
-      "profile": 2,
-      "post": 28,
-      "created_at": "2025-01-02T00:45:27.969Z",
-      "parent_comment": null,
-      "reply_to_comment": null
+      "text": "I have 3 brothers and 2 sisters! What about you?",
+      "profile": 17,
+      "post": 71,
+      "created_at": "2025-10-18T15:48:03.502Z",
+      "parent_comment": 4,
+      "reply_to_comment": 9
     }
   },
   {
     "model": "interactions_app.comment",
     "pk": 12,
     "fields": {
-      "text": "I thought that same thing",
-      "profile": 3,
-      "post": 1,
-      "created_at": "2025-11-02T20:23:29.620Z",
-      "parent_comment": 1,
-      "reply_to_comment": 1
+      "text": "I think I have 6 or 7. I’d have to look in my baby book to know for sure.",
+      "profile": 1,
+      "post": 71,
+      "created_at": "2025-10-18T15:57:18.267Z",
+      "parent_comment": 4,
+      "reply_to_comment": 10
     }
   },
   {
     "model": "interactions_app.comment",
     "pk": 13,
     "fields": {
-      "text": "Does your dog do that?",
+      "text": "Nice sweater!",
       "profile": 1,
-      "post": 1,
-      "created_at": "2025-11-03T01:12:30.529Z",
-      "parent_comment": 1,
-      "reply_to_comment": 12
+      "post": 58,
+      "created_at": "2025-10-18T23:56:32.959Z",
+      "parent_comment": null,
+      "reply_to_comment": null
     }
   },
   {
     "model": "interactions_app.comment",
     "pk": 14,
     "fields": {
-      "text": "All the time",
+      "text": "I love sticks too! They're the best free toys ever!",
+      "profile": 10,
+      "post": 20,
+      "created_at": "2025-10-22T00:53:44.572Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 15,
+    "fields": {
+      "text": "And there is a never ending supply!",
+      "profile": 1,
+      "post": 20,
+      "created_at": "2025-10-22T03:23:18.695Z",
+      "parent_comment": 14,
+      "reply_to_comment": 14
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 16,
+    "fields": {
+      "text": "Wow I didn't even think of that, but you're right",
+      "profile": 10,
+      "post": 20,
+      "created_at": "2025-10-22T03:25:10.701Z",
+      "parent_comment": 14,
+      "reply_to_comment": 15
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 17,
+    "fields": {
+      "text": "You’re not gonna believe it, but Costco lol",
+      "profile": 1,
+      "post": 7,
+      "created_at": "2025-10-22T22:03:04.273Z",
+      "parent_comment": 3,
+      "reply_to_comment": 3
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 18,
+    "fields": {
+      "text": "Linus always chewing on sticks, I love it!",
+      "profile": 15,
+      "post": 20,
+      "created_at": "2026-01-25T16:55:29.364Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 19,
+    "fields": {
+      "text": "Hey I just had a stick like that earlier at the dog park",
+      "profile": 16,
+      "post": 20,
+      "created_at": "2026-01-25T16:56:07.813Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 20,
+    "fields": {
+      "text": "Best stick I've ever seen in the history of sticks!",
+      "profile": 18,
+      "post": 20,
+      "created_at": "2026-01-25T16:56:42.502Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 21,
+    "fields": {
+      "text": "I like your haricut!",
+      "profile": 11,
+      "post": 20,
+      "created_at": "2026-01-25T16:57:02.763Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 22,
+    "fields": {
+      "text": "I could chew that stick in half in no time",
+      "profile": 4,
+      "post": 20,
+      "created_at": "2026-01-25T16:57:45.824Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 23,
+    "fields": {
+      "text": "Hey that's my brother! Where did you get that stick? I don't remember seeing that one. Was it over by the pool or did you get a trip to the dog park without me!?",
+      "profile": 26,
+      "post": 20,
+      "created_at": "2026-01-25T16:59:01.791Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 24,
+    "fields": {
+      "text": "Now that looks like a good day to me. There's nothing better than laying in the grass with a good stick.",
+      "profile": 21,
+      "post": 20,
+      "created_at": "2026-01-25T17:00:24.145Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 25,
+    "fields": {
+      "text": "I hope you stick around",
+      "profile": 14,
+      "post": 20,
+      "created_at": "2026-01-25T17:00:48.233Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 26,
+    "fields": {
+      "text": "We should hang out sometime and find some great sticks together",
+      "profile": 17,
+      "post": 20,
+      "created_at": "2026-01-25T17:02:40.832Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 27,
+    "fields": {
+      "text": "Oh I hate getting my teeth brushed too! They try to flavor it but it always tastes so bad!",
+      "profile": 20,
+      "post": 20,
+      "created_at": "2026-01-25T17:03:59.331Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 28,
+    "fields": {
+      "text": "Not fooling me with the tooth brush. No way! I eat sticks too sometimes. It's fun",
+      "profile": 2,
+      "post": 20,
+      "created_at": "2026-01-25T17:05:02.320Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 29,
+    "fields": {
+      "text": "One time I ate a rock and had to have it removed with surgery",
+      "profile": 2,
+      "post": 20,
+      "created_at": "2026-01-25T17:05:28.693Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 30,
+    "fields": {
+      "text": "Sticks are my jam",
+      "profile": 1,
+      "post": 20,
+      "created_at": "2026-01-25T20:28:04.472Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 31,
+    "fields": {
+      "text": "Wow I’m glad you’re okay!",
+      "profile": 1,
+      "post": 20,
+      "created_at": "2026-01-25T20:28:33.080Z",
+      "parent_comment": 29,
+      "reply_to_comment": 29
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 32,
+    "fields": {
+      "text": "Sticks are cool",
+      "profile": 1,
+      "post": 20,
+      "created_at": "2026-01-26T03:30:46.124Z",
+      "parent_comment": 14,
+      "reply_to_comment": 14
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 33,
+    "fields": {
+      "text": "What is your favorite kind of stick?",
+      "profile": 1,
+      "post": 20,
+      "created_at": "2026-01-26T03:31:01.786Z",
+      "parent_comment": 14,
+      "reply_to_comment": 14
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 34,
+    "fields": {
+      "text": "Do you like the crunchy sticks?",
+      "profile": 1,
+      "post": 20,
+      "created_at": "2026-01-26T03:31:27.706Z",
+      "parent_comment": 14,
+      "reply_to_comment": 14
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 35,
+    "fields": {
+      "text": "Some sticks taste terrible",
+      "profile": 1,
+      "post": 20,
+      "created_at": "2026-01-26T03:33:17.121Z",
+      "parent_comment": 14,
+      "reply_to_comment": 14
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 36,
+    "fields": {
+      "text": "Do your humans let you bring sticks inside?",
+      "profile": 1,
+      "post": 20,
+      "created_at": "2026-01-26T03:33:51.334Z",
+      "parent_comment": 14,
+      "reply_to_comment": 14
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 37,
+    "fields": {
+      "text": "I’ve always wanted to bring a stick inside",
+      "profile": 1,
+      "post": 20,
+      "created_at": "2026-01-26T03:34:05.262Z",
+      "parent_comment": 14,
+      "reply_to_comment": 14
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 38,
+    "fields": {
+      "text": "I have a fake stick toy, but it’s nothing like the real thing. Real sticks are wayyyy better than that fake thing",
+      "profile": 1,
+      "post": 20,
+      "created_at": "2026-01-26T03:34:57.913Z",
+      "parent_comment": 14,
+      "reply_to_comment": 14
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 39,
+    "fields": {
+      "text": "I like your vest!",
+      "profile": 1,
+      "post": 91,
+      "created_at": "2026-02-11T00:08:29.491Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 40,
+    "fields": {
+      "text": "That chair is the perfect size!",
       "profile": 3,
-      "post": 1,
-      "created_at": "2025-11-03T01:13:58.650Z",
-      "parent_comment": 1,
-      "reply_to_comment": 13
+      "post": 93,
+      "created_at": "2026-02-15T18:53:44.226Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 41,
+    "fields": {
+      "text": "I love that jacket! Where did you get it?",
+      "profile": 3,
+      "post": 92,
+      "created_at": "2026-02-15T19:12:40.064Z",
+      "parent_comment": null,
+      "reply_to_comment": null
     }
   }
 ]

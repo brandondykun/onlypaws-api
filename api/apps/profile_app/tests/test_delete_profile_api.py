@@ -24,7 +24,7 @@ class DeleteProfileAPITests(TestCase):
 
     def test_delete_profile_success(self):
         """Test deleting a profile successfully."""
-        url = get_profile_detail_url(self.profile2.id)
+        url = get_profile_detail_url(self.profile2)
         res = self.client.delete(url)
 
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
@@ -35,7 +35,7 @@ class DeleteProfileAPITests(TestCase):
         """Test deleting a profile that has an associated image."""
         profile_image = create_profile_image(self.profile2)
         image_name = profile_image.image.name
-        url = get_profile_detail_url(self.profile2.id)
+        url = get_profile_detail_url(self.profile2)
 
         res = self.client.delete(url)
 
@@ -49,7 +49,7 @@ class DeleteProfileAPITests(TestCase):
         """Test attempting to delete the user's last profile."""
         # Delete profile2 first
         Profile.objects.filter(id=self.profile2.id).delete()
-        url = get_profile_detail_url(self.profile1.id)
+        url = get_profile_detail_url(self.profile1)
 
         res = self.client.delete(url)
 
@@ -61,7 +61,7 @@ class DeleteProfileAPITests(TestCase):
         """Test attempting to delete another user's profile."""
         other_user = create_user(email="other@example.com")
         other_profile = create_profile(user=other_user, username="otheruser")
-        url = get_profile_detail_url(other_profile.id)
+        url = get_profile_detail_url(other_profile)
 
         res = self.client.delete(url)
 
@@ -71,7 +71,7 @@ class DeleteProfileAPITests(TestCase):
 
     def test_delete_nonexistent_profile(self):
         """Test attempting to delete a profile that doesn't exist."""
-        url = get_profile_detail_url(99999)
+        url = get_profile_detail_url("01HF7YQX8J9K2P3M4N5R6S7T8X")  # Non-existent public_id (26-char ULID)
 
         res = self.client.delete(url)
 
@@ -81,7 +81,7 @@ class DeleteProfileAPITests(TestCase):
     def test_delete_profile_unauthenticated(self):
         """Test attempting to delete a profile while not authenticated."""
         self.client.force_authenticate(user=None)
-        url = get_profile_detail_url(self.profile1.id)
+        url = get_profile_detail_url(self.profile1)
 
         res = self.client.delete(url)
 

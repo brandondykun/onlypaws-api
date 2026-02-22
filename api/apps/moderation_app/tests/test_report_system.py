@@ -39,7 +39,7 @@ class PrivateReportReasonTests(BaseFixtureTestCase):
     def setUp(self):
         super(self.__class__, self).setUp()
         self.client.force_authenticate(user=self.user)
-        self.client.credentials(HTTP_AUTH_PROFILE_ID=self.profile.id)
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(self.profile.public_id))
 
     def test_list_report_reasons_authenticated(self):
         """Test that authenticated users can list report reasons"""
@@ -54,7 +54,7 @@ class PrivatePostReportTests(BaseFixtureTestCase):
     def setUp(self):
         super(self.__class__, self).setUp()
         self.client.force_authenticate(user=self.user)
-        self.client.credentials(HTTP_AUTH_PROFILE_ID=self.profile.id)
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(self.profile.public_id))
 
     def test_create_report(self):
         """Test creating a new report"""
@@ -146,7 +146,7 @@ class PrivateNonStaffPostReportTests(BaseFixtureTestCase):
     def setUp(self):
         super(self.__class__, self).setUp()
         self.client.force_authenticate(user=self.user_2)
-        self.client.credentials(HTTP_AUTH_PROFILE_ID=self.profile_2.id)
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(self.profile_2.public_id))
 
     def test_non_staff_cannot_resolve_report(self):
         """Test that non-staff users cannot resolve reports"""
@@ -169,7 +169,7 @@ class PrivateBadHeadersPostReportTests(BaseFixtureTestCase):
         super(self.__class__, self).setUp()
         self.client.force_authenticate(user=self.user_3)
         # user attached to profile 1 is authenticated. Send profile 2's id in the header
-        self.client.credentials(HTTP_AUTH_PROFILE_ID=self.profile_2.id)
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(self.profile_2.public_id))
 
     def test_invalid_profile_id(self):
         """Test that requests with invalid profile IDs are rejected"""

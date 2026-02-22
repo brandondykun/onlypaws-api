@@ -47,7 +47,7 @@ class MaintenanceModeMiddlewareTests(TestCase):
     def test_requests_allowed_when_maintenance_disabled(self):
         """Test that requests are allowed when maintenance mode is disabled."""
         self.client.force_authenticate(user=self.user)
-        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(self.profile.id))
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(self.profile.public_id))
 
         # Try to access an API endpoint
         res = self.client.get('/api/v1/auth/my-info/')
@@ -60,7 +60,7 @@ class MaintenanceModeMiddlewareTests(TestCase):
         self._enable_maintenance(message='System maintenance')
 
         self.client.force_authenticate(user=self.user)
-        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(self.profile.id))
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(self.profile.public_id))
 
         # Try to access an API endpoint (not the status endpoint)
         res = self.client.get('/api/v1/profile/')
@@ -144,7 +144,7 @@ class MaintenanceModeMiddlewareTests(TestCase):
         # Use login() for session auth so middleware sees the user
         self.client.login(email="admin@example.com", password="adminpass123")
         self.client.force_authenticate(user=admin_user)
-        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(admin_profile.id))
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(admin_profile.public_id))
 
         res = self.client.get('/api/v1/auth/my-info/')
 
@@ -156,7 +156,7 @@ class MaintenanceModeMiddlewareTests(TestCase):
         self._enable_maintenance(allow_admin=True)
 
         self.client.force_authenticate(user=self.user)
-        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(self.profile.id))
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(self.profile.public_id))
 
         res = self.client.get('/api/v1/profile/')
 

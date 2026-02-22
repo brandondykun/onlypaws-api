@@ -6,3 +6,6 @@ class ProfileAppConfig(AppConfig):
     name = 'apps.profile_app'
     verbose_name = 'Profile Management'
 
+    def ready(self):
+        import apps.profile_app.signals  # noqa: F401
+

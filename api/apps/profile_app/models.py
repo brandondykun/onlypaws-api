@@ -2,16 +2,20 @@
 Profile app models.
 """
 import os
+import ulid
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django_ulid.models import ULIDField
+
 from apps.core_app.utils import crop_to_aspect_ratio_and_resize
 
 
 class PetType(models.Model):
     """Types of pet."""
 
+    public_id = ULIDField(editable=False, unique=True, default=ulid.new)
     name = models.CharField(max_length=64, unique=True)
 
     def __str__(self):
@@ -20,7 +24,8 @@ class PetType(models.Model):
 
 class Address(models.Model):
     """Address model for business profiles."""
-    
+
+    public_id = ULIDField(editable=False, unique=True, default=ulid.new)
     street_address = models.CharField(max_length=255, blank=True, default="")
     street_address_2 = models.CharField(max_length=255, blank=True, default="")
     city = models.CharField(max_length=100, blank=True, default="")
@@ -55,12 +60,17 @@ class Profile(models.Model):
     and maintain relationships with other models (Post, Like, Comment, etc.).
     """
 
+    public_id = ULIDField(editable=False, unique=True, default=ulid.new)
     # Common fields for all profile types
     username = models.CharField(max_length=32, unique=True)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profiles"
     )
     is_active = models.BooleanField(default=True)
+    is_private = models.BooleanField(
+        default=False,
+        help_text="If true, only approved followers can see posts"
+    )
     # Using default instead of auto_now_add for initial migration to populate existing rows
     # Will change to auto_now_add in a later migration after data is populated
     created_at = models.DateTimeField(default=timezone.now, blank=True)
@@ -212,49 +222,125 @@ class BusinessProfile(Profile):
         return f"{self.username} - {self.business_name} (Business)"
 
 
+def _profile_env_prefix():
+    """Return the environment prefix for profile storage keys."""
+    env = os.environ.get("DJANGO_ENV")
+    if env == "test":
+        return "images/test/"
+    if env == "dev":
+        return "images/dev/"
+    if env == "e2e":
+        return "images/e2e/"
+    return "images/"
+
+
 def profile_image_path(instance, filename):
     """Generate S3 path (key) for saving profile image.
-    The key is {user_id}/{profile_id}/profile_image.webp
-    On update, the same key is generated which automatically overwrites the image in S3.
+    Key: {env_prefix}profiles/<profile.public_id>/avatar_400.webp
     """
-    user_id = instance.profile.user.id
-    profile_id = instance.profile.id
-    path = "images/{0}/{1}/{2}".format(user_id, profile_id, filename)
-    # build path based on environment
-    if os.environ.get("DJANGO_ENV") == "test":
-        path = "images/test/{0}/{1}/{2}".format(user_id, profile_id, filename)
-    if os.environ.get("DJANGO_ENV") == "dev":
-        path = "images/dev/{0}/{1}/{2}".format(user_id, profile_id, filename)
-    elif os.environ.get("DJANGO_ENV") == "e2e":
-        path = "images/e2e/{0}/{1}/{2}".format(user_id, profile_id, filename)
-    return path
+    prefix = _profile_env_prefix()
+    public_id = str(instance.profile.public_id)
+    return f"{prefix}profiles/{public_id}/avatar_400.webp"
+
+
+def profile_scaled_path(instance, filename):
+    """Generate S3 path for scaled profile images.
+    Key: {env_prefix}profiles/<profile.public_id>/avatar_<scale_dimension>.webp
+    """
+    prefix = _profile_env_prefix()
+    public_id = str(instance.profile_image.profile.public_id)
+    dim = ProfileImageScaled.SCALE_DIMENSIONS[instance.scale]
+    return f"{prefix}profiles/{public_id}/avatar_{dim}.webp"
 
 
 class ProfileImage(models.Model):
+    class ProcessingStatus(models.TextChoices):
+        PENDING_UPLOAD = "PENDING_UPLOAD", "Pending Upload"
+        UPLOADED = "UPLOADED", "Uploaded"
+        PROCESSING = "PROCESSING", "Processing"
+        READY = "READY", "Ready"
+        FAILED = "FAILED", "Failed"
+
+    public_id = ULIDField(editable=False, unique=True, default=ulid.new)
     profile = models.OneToOneField(
         "profile_app.Profile", on_delete=models.CASCADE, related_name="image"
     )
-    image = models.ImageField(upload_to=profile_image_path)
+    image = models.ImageField(upload_to=profile_image_path, blank=True, null=True)
+    original_key = models.CharField(
+        max_length=500,
+        null=True,
+        blank=True,
+        help_text="S3 key for the original uploaded image (before processing)",
+    )
+    processing_status = models.CharField(
+        max_length=20,
+        choices=ProcessingStatus.choices,
+        default=ProcessingStatus.READY,
+        help_text="Image processing status",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
-        # Only process image if:
-        # 1. This is a new instance (self.pk is None), OR
-        # 2. update_fields is not specified (full save), OR
-        # 3. update_fields includes 'image'
+        # Legacy direct upload: no original_key, process image in save (crop/resize)
         update_fields = kwargs.get("update_fields", None)
         should_process_image = (
-            self.pk is None  # New instance
-            or update_fields is None  # Full save without update_fields
-            or (update_fields is not None and "image" in update_fields)  # Explicitly updating image
+            self.original_key is None
+            and self.image
+            and (
+                self.pk is None
+                or update_fields is None
+                or (update_fields is not None and "image" in update_fields)
+            )
         )
-        
         if should_process_image:
-            self.image = crop_to_aspect_ratio_and_resize(self.image, aspect_ratio="1:1", base_width=320)
-        
+            # Match presigned-URL flow (ProfileImageScaled.SCALE_DIMENSIONS["large"])
+            self.image = crop_to_aspect_ratio_and_resize(
+                self.image,
+                aspect_ratio="1:1",
+                base_width=ProfileImageScaled.SCALE_DIMENSIONS["large"],
+            )
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"Profile {self.profile.id} - {self.image.name}"
+        return f"Profile {self.profile.id} - {self.image.name if self.image else 'no image'}"
+
+
+class ProfileImageScaled(models.Model):
+    """
+    Stores scaled variants of ProfileImage for different display contexts.
+    LARGE (400px) is stored in ProfileImage.image; this model stores medium and small.
+    Sizes chosen for avatars: large for profile/zoom, medium for cards, small for lists.
+    """
+
+    class Scale(models.TextChoices):
+        SMALL = "small", "Small"  # 100px – lists, comments
+        MEDIUM = "medium", "Medium"  # 200px – cards, feeds
+
+    SCALE_DIMENSIONS = {
+        "small": 100,
+        "medium": 200,
+        "large": 400,  # Used for ProfileImage.image; matches common social (320–400)
+    }
+
+    public_id = ULIDField(editable=False, unique=True, default=ulid.new)
+    profile_image = models.ForeignKey(
+        "ProfileImage",
+        on_delete=models.CASCADE,
+        related_name="scaled_images",
+    )
+    scale = models.CharField(max_length=20, choices=Scale.choices)
+    image = models.ImageField(upload_to=profile_scaled_path)
+    width = models.PositiveIntegerField(help_text="Width in pixels")
+    height = models.PositiveIntegerField(help_text="Height in pixels")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = [["profile_image", "scale"]]
+        indexes = [
+            models.Index(fields=["profile_image", "scale"]),
+        ]
+
+    def __str__(self):
+        return f"ProfileImage {self.profile_image.id} - {self.scale}"
 

@@ -1,8 +1,10 @@
 from django.urls import path
 from . import views
 from .authentication import (
+    AppleAuthView,
     CustomTokenObtainPairView,
     CustomTokenRefreshView,
+    GoogleAuthView,
     LogoutView,
     LogoutAllView,
 )
@@ -19,6 +21,8 @@ urlpatterns = [
     # JWT Authentication endpoints with dual-client support (web + mobile)
     # See authentication.py for detailed documentation on client-type behavior
     path("login/", CustomTokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("google-auth/", GoogleAuthView.as_view(), name="google_auth"),
+    path("apple-auth/", AppleAuthView.as_view(), name="apple_auth"),
     path("refresh/", CustomTokenRefreshView.as_view(), name="token_refresh"),
     path("logout/", LogoutView.as_view(), name="logout"),
     path("logout-all/", LogoutAllView.as_view(), name="logout_all"),

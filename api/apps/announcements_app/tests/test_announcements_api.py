@@ -56,7 +56,7 @@ class PrivateAnnouncementsApiTests(TestCase):
         self.client.force_authenticate(user=self.user)
 
         # Set auth-profile-id header
-        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(self.profile.id))
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(self.profile.public_id))
 
         # Store current time for testing
         self.now = timezone.now()
@@ -261,7 +261,7 @@ class AnnouncementFilteringTests(TestCase):
 
         # Authenticate the client
         self.client.force_authenticate(user=self.user)
-        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(self.profile.id))
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(self.profile.public_id))
 
         self.now = timezone.now()
 
@@ -477,7 +477,7 @@ class AnnouncementOrderingTests(TestCase):
 
         # Authenticate the client
         self.client.force_authenticate(user=self.user)
-        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(self.profile.id))
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(self.profile.public_id))
 
         self.now = timezone.now()
 
@@ -649,7 +649,7 @@ class AnnouncementTypeTests(TestCase):
         )
 
         self.client.force_authenticate(user=self.user)
-        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(self.profile.id))
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(self.profile.public_id))
 
         self.now = timezone.now()
 
@@ -713,7 +713,7 @@ class AnnouncementEdgeCasesTests(TestCase):
         )
 
         self.client.force_authenticate(user=self.user)
-        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(self.profile.id))
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(self.profile.public_id))
 
         self.now = timezone.now()
 
@@ -908,7 +908,7 @@ class AnnouncementAuthenticationTests(TestCase):
         profile = create_profile(user=user, username="testuser")
 
         # Set header but don't authenticate
-        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(profile.id))
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(profile.public_id))
 
         res = self.client.get(ANNOUNCEMENTS_LIST_URL)
 
@@ -926,12 +926,12 @@ class AnnouncementAuthenticationTests(TestCase):
 
         # Test with first user
         self.client.force_authenticate(user=user1)
-        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(profile1.id))
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(profile1.public_id))
         res1 = self.client.get(ANNOUNCEMENTS_LIST_URL)
 
         # Test with second user
         self.client.force_authenticate(user=user2)
-        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(profile2.id))
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(profile2.public_id))
         res2 = self.client.get(ANNOUNCEMENTS_LIST_URL)
 
         self.assertEqual(res1.status_code, status.HTTP_200_OK)
@@ -946,7 +946,7 @@ class AnnouncementAuthenticationTests(TestCase):
         profile = create_profile(user=user, username="testuser")
 
         self.client.force_authenticate(user=user)
-        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(profile.id))
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(profile.public_id))
 
         res = self.client.post(ANNOUNCEMENTS_LIST_URL, {
             "title": "New Announcement",
@@ -961,7 +961,7 @@ class AnnouncementAuthenticationTests(TestCase):
         profile = create_profile(user=user, username="testuser")
 
         self.client.force_authenticate(user=user)
-        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(profile.id))
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(profile.public_id))
 
         res = self.client.put(ANNOUNCEMENTS_LIST_URL, {
             "title": "Updated Announcement",
@@ -975,7 +975,7 @@ class AnnouncementAuthenticationTests(TestCase):
         profile = create_profile(user=user, username="testuser")
 
         self.client.force_authenticate(user=user)
-        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(profile.id))
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(profile.public_id))
 
         res = self.client.patch(ANNOUNCEMENTS_LIST_URL, {
             "title": "Patched Announcement",
@@ -989,7 +989,7 @@ class AnnouncementAuthenticationTests(TestCase):
         profile = create_profile(user=user, username="testuser")
 
         self.client.force_authenticate(user=user)
-        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(profile.id))
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(profile.public_id))
 
         res = self.client.delete(ANNOUNCEMENTS_LIST_URL)
 

@@ -16,7 +16,7 @@ class PrivateFollowApiTests(BaseFixtureTestCase):
         super(self.__class__, self).setUp()
         # extend setUp by authenticating self.profile
         self.client.force_authenticate(user=self.user)
-        self.client.credentials(HTTP_AUTH_PROFILE_ID=self.profile.id)
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(self.profile.public_id))
 
     def test_follow_profile_successful(self):
         """
@@ -25,7 +25,7 @@ class PrivateFollowApiTests(BaseFixtureTestCase):
         """
         starting_follows_count = self.get_follows_count()
 
-        new_follow = {"profileId": self.profile_3.id}
+        new_follow = {"profileId": str(self.profile_3.public_id)}
         url = create_follow_url()
 
         res = self.client.post(url, data=new_follow)
@@ -41,7 +41,7 @@ class PrivateFollowApiTests(BaseFixtureTestCase):
         """
         starting_follows_count = self.get_follows_count()
 
-        new_follow = {"profileId": self.profile_2.id}
+        new_follow = {"profileId": str(self.profile_2.public_id)}
         url = create_follow_url()
 
         res = self.client.post(url, data=new_follow)
@@ -57,7 +57,7 @@ class PrivateFollowApiTests(BaseFixtureTestCase):
         """
         starting_follows_count = self.get_follows_count()
 
-        new_follow = {"profileId": self.profile.id}
+        new_follow = {"profileId": str(self.profile.public_id)}
         url = create_follow_url()
 
         res = self.client.post(url, data=new_follow)
@@ -73,7 +73,7 @@ class PrivateFollowApiTests(BaseFixtureTestCase):
         """
         starting_follows_count = self.get_follows_count()
 
-        new_follow = {"profileId": self.profile_2.id}
+        new_follow = {"profileId": str(self.profile_2.public_id)}
         url = create_follow_url()
 
         res = self.client.post(url, data=new_follow)
@@ -94,7 +94,7 @@ class PrivateFollowApiTests(BaseFixtureTestCase):
         current_follows_count = self.get_follows_count()
         self.assertEqual(current_follows_count, starting_follows_count + 1)
 
-        url = create_destroy_follow_url(self.profile_2.id)
+        url = create_destroy_follow_url(str(self.profile_2.public_id))
 
         res = self.client.delete(url)
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
@@ -112,7 +112,7 @@ class PrivateFollowApiTests(BaseFixtureTestCase):
         create_follow(self.profile_2, self.profile_3)
 
         # Try to unfollow profile_3, but self.profile is not following profile_3
-        url = create_destroy_follow_url(self.profile_3.id)
+        url = create_destroy_follow_url(str(self.profile_3.public_id))
 
         res = self.client.delete(url)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)

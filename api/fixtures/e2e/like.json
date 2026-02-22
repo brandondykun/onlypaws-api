@@ -1,218 +1,101 @@
 [
   {
     "model": "interactions_app.like",
-    "pk": 2,
+    "pk": 23,
     "fields": {
-      "profile": 1,
+      "profile": 7,
       "post": 1,
-      "liked_at": "2024-10-13T18:01:07.938Z"
+      "liked_at": "2025-09-19T14:22:30.529Z"
     }
   },
   {
     "model": "interactions_app.like",
-    "pk": 3,
-    "fields": {
-      "profile": 5,
-      "post": 4,
-      "liked_at": "2024-10-13T18:02:15.535Z"
-    }
-  },
-  {
-    "model": "interactions_app.like",
-    "pk": 4,
-    "fields": {
-      "profile": 5,
-      "post": 7,
-      "liked_at": "2024-10-13T18:02:36.933Z"
-    }
-  },
-  {
-    "model": "interactions_app.like",
-    "pk": 5,
-    "fields": {
-      "profile": 5,
-      "post": 3,
-      "liked_at": "2024-10-13T18:02:48.082Z"
-    }
-  },
-  {
-    "model": "interactions_app.like",
-    "pk": 6,
+    "pk": 24,
     "fields": {
       "profile": 7,
-      "post": 6,
-      "liked_at": "2024-10-13T18:03:38.399Z"
+      "post": 13,
+      "liked_at": "2025-09-19T14:33:34.892Z"
     }
   },
   {
     "model": "interactions_app.like",
-    "pk": 7,
-    "fields": {
-      "profile": 7,
-      "post": 5,
-      "liked_at": "2024-10-13T18:03:45.182Z"
-    }
-  },
-  {
-    "model": "interactions_app.like",
-    "pk": 8,
-    "fields": {
-      "profile": 7,
-      "post": 3,
-      "liked_at": "2024-10-13T18:03:48.322Z"
-    }
-  },
-  {
-    "model": "interactions_app.like",
-    "pk": 9,
+    "pk": 25,
     "fields": {
       "profile": 7,
       "post": 7,
-      "liked_at": "2024-10-13T18:03:55.657Z"
+      "liked_at": "2025-09-19T14:34:24.474Z"
     }
   },
   {
     "model": "interactions_app.like",
-    "pk": 10,
+    "pk": 26,
     "fields": {
-      "profile": 1,
-      "post": 9,
-      "liked_at": "2024-10-13T20:37:43.168Z"
+      "profile": 7,
+      "post": 12,
+      "liked_at": "2025-09-19T14:34:51.654Z"
     }
   },
   {
     "model": "interactions_app.like",
-    "pk": 11,
+    "pk": 27,
     "fields": {
-      "profile": 1,
-      "post": 3,
-      "liked_at": "2024-10-17T04:02:05.957Z"
+      "profile": 7,
+      "post": 20,
+      "liked_at": "2025-09-19T14:35:48.184Z"
     }
   },
   {
     "model": "interactions_app.like",
-    "pk": 13,
+    "pk": 28,
     "fields": {
-      "profile": 9,
-      "post": 5,
-      "liked_at": "2024-10-18T02:45:27.842Z"
+      "profile": 3,
+      "post": 1,
+      "liked_at": "2025-09-20T13:37:10.372Z"
     }
   },
   {
     "model": "interactions_app.like",
-    "pk": 15,
+    "pk": 29,
     "fields": {
-      "profile": 1,
-      "post": 31,
-      "liked_at": "2024-10-20T13:24:41.844Z"
+      "profile": 3,
+      "post": 7,
+      "liked_at": "2025-09-20T13:38:43.031Z"
     }
   },
   {
     "model": "interactions_app.like",
-    "pk": 16,
+    "pk": 31,
     "fields": {
-      "profile": 1,
-      "post": 30,
-      "liked_at": "2024-10-20T13:25:08.768Z"
-    }
-  },
-  {
-    "model": "interactions_app.like",
-    "pk": 20,
-    "fields": {
-      "profile": 1,
-      "post": 24,
-      "liked_at": "2024-10-20T14:45:04.180Z"
-    }
-  },
-  {
-    "model": "interactions_app.like",
-    "pk": 21,
-    "fields": {
-      "profile": 1,
-      "post": 25,
-      "liked_at": "2024-10-20T15:04:09.845Z"
-    }
-  },
-  {
-    "model": "interactions_app.like",
-    "pk": 42,
-    "fields": {
-      "profile": 2,
-      "post": 9,
-      "liked_at": "2024-10-24T03:32:12.503Z"
-    }
-  },
-  {
-    "model": "interactions_app.like",
-    "pk": 43,
-    "fields": {
-      "profile": 2,
+      "profile": 3,
       "post": 8,
-      "liked_at": "2024-10-24T03:32:27.397Z"
+      "liked_at": "2025-09-21T01:05:26.406Z"
     }
   },
   {
     "model": "interactions_app.like",
-    "pk": 45,
+    "pk": 32,
     "fields": {
-      "profile": 2,
-      "post": 49,
-      "liked_at": "2024-10-24T03:33:05.089Z"
+      "profile": 3,
+      "post": 12,
+      "liked_at": "2025-09-21T01:06:33.599Z"
     }
   },
   {
     "model": "interactions_app.like",
-    "pk": 46,
+    "pk": 33,
     "fields": {
-      "profile": 2,
-      "post": 48,
-      "liked_at": "2024-10-24T03:33:12.823Z"
+      "profile": 3,
+      "post": 13,
+      "liked_at": "2025-09-21T14:50:08.770Z"
     }
   },
   {
     "model": "interactions_app.like",
-    "pk": 47,
+    "pk": 36,
     "fields": {
-      "profile": 2,
-      "post": 45,
-      "liked_at": "2024-10-24T03:41:41.307Z"
-    }
-  },
-  {
-    "model": "interactions_app.like",
-    "pk": 50,
-    "fields": {
-      "profile": 2,
-      "post": 47,
-      "liked_at": "2024-10-24T03:54:31.672Z"
-    }
-  },
-  {
-    "model": "interactions_app.like",
-    "pk": 62,
-    "fields": {
-      "profile": 1,
-      "post": 28,
-      "liked_at": "2024-10-25T02:57:05.359Z"
-    }
-  },
-  {
-    "model": "interactions_app.like",
-    "pk": 67,
-    "fields": {
-      "profile": 1,
-      "post": 35,
-      "liked_at": "2024-10-26T16:25:50.619Z"
-    }
-  },
-  {
-    "model": "interactions_app.like",
-    "pk": 70,
-    "fields": {
-      "profile": 1,
-      "post": 34,
-      "liked_at": "2024-10-30T22:43:12.019Z"
+      "profile": 3,
+      "post": 20,
+      "liked_at": "2025-09-21T16:11:19.181Z"
     }
   }
 ]

@@ -24,13 +24,14 @@ _The unapologetically pet friendly social media app._
 11. [Generate Combined Post Embeddings](#generate-combined-post-embeddings)
 12. [Verify and Test HNSW Indexes](#verify-and-test-hnsw-indexes)
 13. [Assign PostImage Order](#assign-postimage-order)
-14. [Maintenance Mode](#maintenance-mode)
-15. [Deploy with Maintenance](#deploy-with-maintenance)
-16. [Nginx Configuration and SSL Setup](#nginx-configuration-and-ssl-setup)
-17. [Image Data](#image-data)
-18. [Commits](#commits)
-19. [Environment Variables](#environment-variables)
-20. [Dev and E2E Images](#dev-and-e2e-images)
+14. [Cleanup Orphaned Images](#cleanup-orphaned-images)
+15. [Maintenance Mode](#maintenance-mode)
+16. [Deploy with Maintenance](#deploy-with-maintenance)
+17. [Nginx Configuration and SSL Setup](#nginx-configuration-and-ssl-setup)
+18. [Image Data](#image-data)
+19. [Commits](#commits)
+20. [Environment Variables](#environment-variables)
+21. [Dev and E2E Images](#dev-and-e2e-images)
 
 ---
 
@@ -596,6 +597,56 @@ scripts/assign_postimage_order.sh staging
 
 **Note:** It's recommended to run with `--dry-run` first to preview the changes before applying them.
 
+
+## Cleanup Orphaned Images
+
+This management command removes orphaned images from storage (R2/S3 or local filesystem) that are not referenced in the database or fixture files. This is useful for cleaning up files that were left behind after failed uploads, manual deletions, or other edge cases.
+
+The command automatically detects whether you're using R2/S3 cloud storage or local filesystem storage and handles each appropriately.
+
+```bash
+# Preview orphaned images without deleting (recommended first step)
+docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py cleanup_orphaned_images --dry-run
+
+# Delete orphaned images using fixture files as source of truth
+docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py cleanup_orphaned_images
+
+# Delete orphaned images using database as source of truth (recommended for R2)
+docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py cleanup_orphaned_images --source=database
+
+# Preview with database source
+docker compose -f docker/docker-compose.yml -f docker/dev/docker-compose.override.yml run --rm only-paws-app python manage.py cleanup_orphaned_images --source=database --dry-run
+```
+
+**Options:**
+- `--dry-run`: Preview what would be deleted without actually deleting files
+- `--source`: Source of valid image references (default: `fixtures`)
+  - `fixtures`: Uses fixture JSON files (`postimage.json`, `profileimage.json`)
+  - `database`: Queries `PostImage`, `PostImageScaled`, and `ProfileImage` models directly
+
+**Supported Storage Backends:**
+- **R2/S3**: Lists objects using boto3 and deletes via S3 API
+- **Local filesystem**: Scans media directory and removes files/empty directories
+
+**What Gets Checked:**
+When using `--source=database`:
+- `PostImage.image` - Main processed post images
+- `PostImage.original_key` - Original uploaded images (if still exists)
+- `PostImageScaled.image` - Scaled image variants
+- `ProfileImage.image` - Profile avatar images
+
+**Environment Restrictions:**
+This command can only be run in `dev`, `staging`, or `e2e` environments as a safety measure.
+
+**When to Use:**
+- Periodically to clean up orphaned files and save storage costs
+- After bulk deletions that may have left orphaned files
+- When storage costs indicate many unused files
+- After recovering from failed operations that left partial uploads
+
+**Recommendation:** Always run with `--dry-run` first to preview what would be deleted. For R2/S3 storage, prefer `--source=database` as it reflects the actual current state of the database rather than potentially outdated fixture files.
+
+
 ## Maintenance Mode
 
 These scripts control maintenance mode for the nginx reverse proxy. When enabled, nginx returns a 503 Service Unavailable response for most endpoints while keeping the status endpoint accessible for health checks.
@@ -768,11 +819,11 @@ cp docker/dev/.env.dev.local.db.template docker/dev/.env.dev.local.db
 Once the files are renamed, a value must be set for each variable in the file.
 
 
-## Dev and E2E Images
+## E2E Images
 
 The images for this project are not committed to the repo and must be downloaded separately.
 
-Images for the dev and e2e test environments are hosted on google drive. The image folder at the link below should be downloaded and placed in a media folder inside the api folder.
+Images for the e2e test environment are hosted on google drive. The image folder at the link below should be downloaded and placed in a media folder inside the api folder.
 
 To create the media folder, from the root of the project run: 
 
@@ -790,6 +841,5 @@ The resulting project structure for the images directory should look like the fo
 api/
   media/
     images/
-      dev/
       e2e/
 ```

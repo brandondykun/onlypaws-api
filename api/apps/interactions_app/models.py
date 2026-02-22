@@ -67,3 +67,20 @@ class Follow(models.Model):
     class Meta:
         unique_together = (("followed", "followed_by"),)
 
+
+class FollowRequest(models.Model):
+    """Model for follow requests to private profiles."""
+    requester = models.ForeignKey(
+        "profile_app.Profile", on_delete=models.CASCADE, related_name="sent_follow_requests"
+    )
+    target = models.ForeignKey(
+        "profile_app.Profile", on_delete=models.CASCADE, related_name="received_follow_requests"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.requester.username} requested to follow {self.target.username}"
+
+    class Meta:
+        unique_together = (("requester", "target"),)
+

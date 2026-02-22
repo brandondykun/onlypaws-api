@@ -3,9 +3,20 @@
     "model": "posts_app.savedpost",
     "pk": 1,
     "fields": {
+      "public_id": "01KH2BYQA4PGWAHRG6HDJ1CND3",
       "profile": 4,
       "post": 7,
       "saved_at": "2025-02-04T04:14:01.437Z"
+    }
+  },
+  {
+    "model": "posts_app.savedpost",
+    "pk": 5,
+    "fields": {
+      "public_id": "01KH4YNKK6VTTQZZP6VF9YFG91",
+      "profile": 1,
+      "post": 88,
+      "saved_at": "2026-02-10T23:37:30.982Z"
     }
   }
 ]

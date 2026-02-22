@@ -76,35 +76,35 @@ def create_follow_url():
     return reverse("interactions_app:create_follow")
 
 
-def create_destroy_follow_url(followed_profile_id: int):
+def create_destroy_follow_url(profile_public_id: str):
     """Create and return a destroy follow url.
 
     Parameters
     ----------
-    followed_profile_id : int
-        The id of the profile being followed.
+    profile_public_id : str
+        The public_id (ULID) of the profile being followed.
     """
-    return reverse("interactions_app:destroy_follow", args=[followed_profile_id])
+    return reverse("interactions_app:destroy_follow", args=[profile_public_id])
 
 
-def list_followers_url(profile_id: int):
+def list_followers_url(profile_public_id: str):
     """Create and return a list followers url.
 
     Parameters
     ----------
-    profile_id : int
-        The id of the profile to fetch followers for.
+    profile_public_id : str
+        The public_id (ULID) of the profile to fetch followers for.
     """
-    return reverse("interactions_app:list_followers", args=[profile_id])
+    return reverse("interactions_app:list_followers", args=[profile_public_id])
 
 
-def list_following_url(profile_id: int):
+def list_following_url(profile_public_id: str):
     """Create and return a list following url.
 
     Parameters
     ----------
-    profile_id : int
-        The id of the profile to fetch following for.
+    profile_public_id : str
+        The public_id (ULID) of the profile to fetch following for.
     """
-    return reverse("interactions_app:list_following", args=[profile_id])
+    return reverse("interactions_app:list_following", args=[profile_public_id])
 

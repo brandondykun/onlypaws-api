@@ -3,9 +3,11 @@
     "model": "profile_app.profile",
     "pk": 1,
     "fields": {
+      "public_id": "01KH2BYQFDRZJD8P686RTZ8W44",
       "username": "admin_dog",
       "user": 1,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -14,9 +16,11 @@
     "model": "profile_app.profile",
     "pk": 2,
     "fields": {
+      "public_id": "01KH2BYQFDEAA0M1EGSYG2APAM",
       "username": "hound_dog",
       "user": 2,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -25,9 +29,11 @@
     "model": "profile_app.profile",
     "pk": 3,
     "fields": {
+      "public_id": "01KH2BYQFD913BV6Z3WPR510TY",
       "username": "chewyyy",
       "user": 3,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -36,9 +42,11 @@
     "model": "profile_app.profile",
     "pk": 4,
     "fields": {
+      "public_id": "01KH2BYQFDFPVS273DBQXECS9J",
       "username": "pitbulpup",
       "user": 4,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -47,9 +55,11 @@
     "model": "profile_app.profile",
     "pk": 5,
     "fields": {
+      "public_id": "01KH2BYQFD08FFFY6SWMV7P6WV",
       "username": "AIpets",
       "user": 5,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -58,9 +68,11 @@
     "model": "profile_app.profile",
     "pk": 6,
     "fields": {
+      "public_id": "01KH2BYQFEBECKY5VV4ZNF9T5Q",
       "username": "catAI",
       "user": 6,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -69,9 +81,11 @@
     "model": "profile_app.profile",
     "pk": 7,
     "fields": {
+      "public_id": "01KH2BYQFE091123BE1Q2QKKKX",
       "username": "AllPets",
       "user": 7,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -80,9 +94,11 @@
     "model": "profile_app.profile",
     "pk": 10,
     "fields": {
+      "public_id": "01KH2BYQFE5S3M4Z01BZJBFHX8",
       "username": "SirDogsAlot",
       "user": 10,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -91,9 +107,11 @@
     "model": "profile_app.profile",
     "pk": 11,
     "fields": {
+      "public_id": "01KH2BYQFE22VYCK9JE3DHECBG",
       "username": "husky123",
       "user": 11,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -102,9 +120,11 @@
     "model": "profile_app.profile",
     "pk": 12,
     "fields": {
+      "public_id": "01KH2BYQFEG9R4V5KQV1HWXJHF",
       "username": "K9Historian",
       "user": 12,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -113,9 +133,11 @@
     "model": "profile_app.profile",
     "pk": 13,
     "fields": {
+      "public_id": "01KH2BYQFEN9771DQXYCNA39KZ",
       "username": "that_one_lab",
       "user": 13,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -124,9 +146,11 @@
     "model": "profile_app.profile",
     "pk": 14,
     "fields": {
+      "public_id": "01KH2BYQFFVD1Y3MFC097YQ99T",
       "username": "bestpuppies",
       "user": 14,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -135,9 +159,11 @@
     "model": "profile_app.profile",
     "pk": 15,
     "fields": {
+      "public_id": "01KH2BYQFFTQH5MWCZ8NYSQSYT",
       "username": "oldyeller",
       "user": 15,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -146,9 +172,11 @@
     "model": "profile_app.profile",
     "pk": 16,
     "fields": {
+      "public_id": "01KH2BYQFFR6PG746YYEDB216F",
       "username": "TheGreatOne",
       "user": 16,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -157,9 +185,11 @@
     "model": "profile_app.profile",
     "pk": 17,
     "fields": {
+      "public_id": "01KH2BYQFFGSYXKSHGQTP004JH",
       "username": "goldie",
       "user": 17,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -168,9 +198,11 @@
     "model": "profile_app.profile",
     "pk": 18,
     "fields": {
+      "public_id": "01KH2BYQFF0XTXEZAPDTZAY1J2",
       "username": "choco",
       "user": 18,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -179,9 +211,11 @@
     "model": "profile_app.profile",
     "pk": 19,
     "fields": {
+      "public_id": "01KH2BYQFF42CR1438Z1G5SHEZ",
       "username": "SnortyPickles",
       "user": 19,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -190,9 +224,11 @@
     "model": "profile_app.profile",
     "pk": 20,
     "fields": {
+      "public_id": "01KH2BYQFGT50HCDPYCR4PGVJ7",
       "username": "GoldenMaple",
       "user": 20,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -201,9 +237,11 @@
     "model": "profile_app.profile",
     "pk": 21,
     "fields": {
+      "public_id": "01KH2BYQFGYYWGWEKQA3PGEQHS",
       "username": "GuardianTitan",
       "user": 21,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -212,9 +250,11 @@
     "model": "profile_app.profile",
     "pk": 22,
     "fields": {
+      "public_id": "01KH2BYQFGNB4HGNJWNG33AH65",
       "username": "AllAboutBeagles",
       "user": 22,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -223,9 +263,11 @@
     "model": "profile_app.profile",
     "pk": 23,
     "fields": {
+      "public_id": "01KH2BYQFGG9JYPXPNC8T5BN5T",
       "username": "MidnightThePoodle",
       "user": 23,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }
@@ -234,9 +276,11 @@
     "model": "profile_app.profile",
     "pk": 26,
     "fields": {
+      "public_id": "01KH2BYQFGF0AZHBSPA4XJ7GPQ",
       "username": "LucyBelle",
       "user": 1,
       "is_active": true,
+      "is_private": false,
       "created_at": "2025-10-24T12:47:44.897Z",
       "updated_at": "2025-10-24T12:47:44.923Z"
     }

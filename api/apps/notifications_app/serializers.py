@@ -105,8 +105,10 @@ class WebSocketNotificationSerializer(serializers.ModelSerializer):
     
     sender_username = serializers.CharField(source='sender.username', read_only=True)
     sender_avatar = serializers.SerializerMethodField()
+    sender_public_id = serializers.SerializerMethodField()
     extra_data = serializers.SerializerMethodField()
     post_id = serializers.SerializerMethodField()
+    post_public_id = serializers.SerializerMethodField()
     comment_id = serializers.SerializerMethodField()
     
     class Meta:
@@ -119,7 +121,9 @@ class WebSocketNotificationSerializer(serializers.ModelSerializer):
             'created_at',
             'sender_username',
             'sender_avatar',
+            'sender_public_id',
             'post_id',
+            'post_public_id',
             'comment_id',
             'extra_data'
         ]
@@ -160,11 +164,21 @@ class WebSocketNotificationSerializer(serializers.ModelSerializer):
         """Get extra data with full URLs for images."""
         return get_extra_data_with_full_urls(obj, self.context)
     
+    @extend_schema_field(serializers.CharField(allow_null=True))
+    def get_sender_public_id(self, obj):
+        """Get sender profile public_id (ULID), returning None if no sender."""
+        return str(obj.sender.public_id) if obj.sender else None
+
     @extend_schema_field(serializers.IntegerField(allow_null=True))
     def get_post_id(self, obj):
         """Get post ID, returning None if no post."""
         return obj.post.id if obj.post else None
-    
+
+    @extend_schema_field(serializers.CharField(allow_null=True))
+    def get_post_public_id(self, obj):
+        """Get post public_id (ULID), returning None if no post."""
+        return str(obj.post.public_id) if obj.post else None
+
     @extend_schema_field(serializers.IntegerField(allow_null=True))
     def get_comment_id(self, obj):
         """Get comment ID, returning None if no comment."""

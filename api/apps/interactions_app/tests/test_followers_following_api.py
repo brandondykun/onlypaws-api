@@ -16,7 +16,7 @@ class PrivateListFollowersApiTests(BaseFixtureTestCase):
         super(self.__class__, self).setUp()
         # extend setUp by authenticating self.profile
         self.client.force_authenticate(user=self.user)
-        self.client.credentials(HTTP_AUTH_PROFILE_ID=self.profile.id)
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(self.profile.public_id))
 
     def test_list_followers_successful(self):
         """Test listing followers for a profile returns correct profiles."""
@@ -27,7 +27,7 @@ class PrivateListFollowersApiTests(BaseFixtureTestCase):
         create_follow(self.profile_4, self.profile_2)
 
         # profile_2 now has 3 followers: self.profile, profile_3, profile_4
-        url = list_followers_url(self.profile_2.id)
+        url = list_followers_url(str(self.profile_2.public_id))
         res = self.client.get(url)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -46,7 +46,7 @@ class PrivateListFollowersApiTests(BaseFixtureTestCase):
     def test_list_followers_empty_when_no_followers(self):
         """Test listing followers for a profile with no followers returns empty list."""
         # profile_3 has no followers
-        url = list_followers_url(self.profile_3.id)
+        url = list_followers_url(str(self.profile_3.public_id))
         res = self.client.get(url)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -68,7 +68,7 @@ class PrivateListFollowersApiTests(BaseFixtureTestCase):
         create_follow(profile_7, self.profile_2)
 
         # Filter by "alice" - should return alice_smith and alice_jones
-        url = list_followers_url(self.profile_2.id)
+        url = list_followers_url(str(self.profile_2.public_id))
         res = self.client.get(url, {"username": "alice"})
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -87,7 +87,7 @@ class PrivateListFollowersApiTests(BaseFixtureTestCase):
         create_follow(profile_5, self.profile_2)
 
         # Filter with lowercase "alice" should still match "AliceSmith"
-        url = list_followers_url(self.profile_2.id)
+        url = list_followers_url(str(self.profile_2.public_id))
         res = self.client.get(url, {"username": "alice"})
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -98,7 +98,7 @@ class PrivateListFollowersApiTests(BaseFixtureTestCase):
         """Test listing followers with username filter that matches nothing returns empty."""
         create_follow(self.profile_3, self.profile_2)
 
-        url = list_followers_url(self.profile_2.id)
+        url = list_followers_url(str(self.profile_2.public_id))
         res = self.client.get(url, {"username": "nonexistent"})
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -106,7 +106,7 @@ class PrivateListFollowersApiTests(BaseFixtureTestCase):
 
     def test_list_followers_nonexistent_profile_returns_empty(self):
         """Test listing followers for nonexistent profile returns empty list."""
-        url = list_followers_url(99999)
+        url = list_followers_url("01HF7YQX8J9K2P3M4N5R6S7T8X")
         res = self.client.get(url)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -121,7 +121,7 @@ class PrivateListFollowersApiTests(BaseFixtureTestCase):
             create_follow(profile, self.profile_2)
 
         # profile_2 now has 21 followers (20 new + self.profile)
-        url = list_followers_url(self.profile_2.id)
+        url = list_followers_url(str(self.profile_2.public_id))
         res = self.client.get(url)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -141,7 +141,7 @@ class PrivateListFollowersApiTests(BaseFixtureTestCase):
             create_follow(profile, self.profile_2)
 
         # Get second page
-        url = list_followers_url(self.profile_2.id)
+        url = list_followers_url(str(self.profile_2.public_id))
         res = self.client.get(url, {"page": 2})
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -154,7 +154,7 @@ class PrivateListFollowersApiTests(BaseFixtureTestCase):
         """Test that followers list includes full profile details."""
         create_follow(self.profile_3, self.profile_2)
 
-        url = list_followers_url(self.profile_2.id)
+        url = list_followers_url(str(self.profile_2.public_id))
         res = self.client.get(url)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -176,7 +176,7 @@ class PublicListFollowersApiTests(BaseFixtureTestCase):
 
     def test_list_followers_without_authentication_returns_error(self):
         """Test listing followers without authentication returns 401."""
-        url = list_followers_url(self.profile_2.id)
+        url = list_followers_url(str(self.profile_2.public_id))
         res = self.client.get(url)
 
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -189,7 +189,7 @@ class PrivateListFollowingApiTests(BaseFixtureTestCase):
         super(self.__class__, self).setUp()
         # extend setUp by authenticating self.profile
         self.client.force_authenticate(user=self.user)
-        self.client.credentials(HTTP_AUTH_PROFILE_ID=self.profile.id)
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(self.profile.public_id))
 
     def test_list_following_successful(self):
         """Test listing profiles that a profile follows returns correct profiles."""
@@ -199,7 +199,7 @@ class PrivateListFollowingApiTests(BaseFixtureTestCase):
         create_follow(self.profile, self.profile_4)
 
         # self.profile now follows 3 profiles: profile_2, profile_3, profile_4
-        url = list_following_url(self.profile.id)
+        url = list_following_url(str(self.profile.public_id))
         res = self.client.get(url)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -218,7 +218,7 @@ class PrivateListFollowingApiTests(BaseFixtureTestCase):
     def test_list_following_empty_when_not_following_anyone(self):
         """Test listing following for a profile that follows no one returns empty list."""
         # profile_3 doesn't follow anyone
-        url = list_following_url(self.profile_3.id)
+        url = list_following_url(str(self.profile_3.public_id))
         res = self.client.get(url)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -240,7 +240,7 @@ class PrivateListFollowingApiTests(BaseFixtureTestCase):
         create_follow(self.profile_2, profile_7)
 
         # Filter by "charlie" - should return charlie_smith and charlie_jones
-        url = list_following_url(self.profile_2.id)
+        url = list_following_url(str(self.profile_2.public_id))
         res = self.client.get(url, {"username": "charlie"})
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -259,7 +259,7 @@ class PrivateListFollowingApiTests(BaseFixtureTestCase):
         create_follow(self.profile_2, profile_5)
 
         # Filter with lowercase "charlie" should still match "CharlieSmith"
-        url = list_following_url(self.profile_2.id)
+        url = list_following_url(str(self.profile_2.public_id))
         res = self.client.get(url, {"username": "charlie"})
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -270,7 +270,7 @@ class PrivateListFollowingApiTests(BaseFixtureTestCase):
         """Test listing following with username filter that matches nothing returns empty."""
         create_follow(self.profile_2, self.profile_3)
 
-        url = list_following_url(self.profile_2.id)
+        url = list_following_url(str(self.profile_2.public_id))
         res = self.client.get(url, {"username": "nonexistent"})
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -278,7 +278,7 @@ class PrivateListFollowingApiTests(BaseFixtureTestCase):
 
     def test_list_following_nonexistent_profile_returns_empty(self):
         """Test listing following for nonexistent profile returns empty list."""
-        url = list_following_url(99999)
+        url = list_following_url("01HF7YQX8J9K2P3M4N5R6S7T8X")
         res = self.client.get(url)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -293,7 +293,7 @@ class PrivateListFollowingApiTests(BaseFixtureTestCase):
             create_follow(self.profile_2, profile)
 
         # profile_2 now follows 20 profiles
-        url = list_following_url(self.profile_2.id)
+        url = list_following_url(str(self.profile_2.public_id))
         res = self.client.get(url)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -313,7 +313,7 @@ class PrivateListFollowingApiTests(BaseFixtureTestCase):
             create_follow(self.profile_2, profile)
 
         # Get second page
-        url = list_following_url(self.profile_2.id)
+        url = list_following_url(str(self.profile_2.public_id))
         res = self.client.get(url, {"page": 2})
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -326,7 +326,7 @@ class PrivateListFollowingApiTests(BaseFixtureTestCase):
         """Test that following list includes full profile details."""
         create_follow(self.profile_2, self.profile_3)
 
-        url = list_following_url(self.profile_2.id)
+        url = list_following_url(str(self.profile_2.public_id))
         res = self.client.get(url)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -344,7 +344,7 @@ class PrivateListFollowingApiTests(BaseFixtureTestCase):
         create_follow(self.profile_2, self.profile_3)
         create_follow(self.profile_2, self.profile_4)
 
-        url = list_following_url(self.profile_2.id)
+        url = list_following_url(str(self.profile_2.public_id))
         res = self.client.get(url)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -360,7 +360,7 @@ class PrivateListFollowingApiTests(BaseFixtureTestCase):
         # self.profile follows profile_2 (from setUp)
         create_follow(self.profile, self.profile_3)
 
-        url = list_following_url(self.profile.id)
+        url = list_following_url(str(self.profile.public_id))
         res = self.client.get(url)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -380,7 +380,7 @@ class PublicListFollowingApiTests(BaseFixtureTestCase):
 
     def test_list_following_without_authentication_returns_error(self):
         """Test listing following without authentication returns 401."""
-        url = list_following_url(self.profile.id)
+        url = list_following_url(str(self.profile.public_id))
         res = self.client.get(url)
 
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)

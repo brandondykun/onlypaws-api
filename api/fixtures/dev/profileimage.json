@@ -1,50 +1,13 @@
 [
   {
     "model": "profile_app.profileimage",
-    "pk": 2,
-    "fields": {
-      "profile": 2,
-      "image": "images/dev/2/2/profile_image.webp",
-      "created_at": "2025-02-02T19:35:39.265Z",
-      "updated_at": "2025-02-02T19:35:39.265Z"
-    }
-  },
-  {
-    "model": "profile_app.profileimage",
-    "pk": 3,
-    "fields": {
-      "profile": 3,
-      "image": "images/dev/3/3/profile_image.webp",
-      "created_at": "2025-02-02T20:15:58.768Z",
-      "updated_at": "2025-02-02T20:15:58.768Z"
-    }
-  },
-  {
-    "model": "profile_app.profileimage",
-    "pk": 4,
-    "fields": {
-      "profile": 4,
-      "image": "images/dev/4/4/profile_image.webp",
-      "created_at": "2025-02-03T04:20:00.624Z",
-      "updated_at": "2025-02-03T04:20:00.624Z"
-    }
-  },
-  {
-    "model": "profile_app.profileimage",
-    "pk": 5,
-    "fields": {
-      "profile": 5,
-      "image": "images/dev/5/5/profile_image.webp",
-      "created_at": "2025-02-20T00:59:07.594Z",
-      "updated_at": "2025-02-20T00:59:07.594Z"
-    }
-  },
-  {
-    "model": "profile_app.profileimage",
     "pk": 6,
     "fields": {
+      "public_id": "01KH2BYQFJBE8H45KPHWMTSKTE",
       "profile": 6,
-      "image": "images/dev/6/6/profile_image.webp",
+      "image": "images/dev/profiles/01KH2BYQFEBECKY5VV4ZNF9T5Q/avatar_400.webp",
+      "original_key": null,
+      "processing_status": "READY",
       "created_at": "2025-02-20T03:37:24.065Z",
       "updated_at": "2025-02-20T03:37:24.065Z"
     }
@@ -53,8 +16,11 @@
     "model": "profile_app.profileimage",
     "pk": 7,
     "fields": {
+      "public_id": "01KH2BYQFJDS1W9CFSGARD6KKJ",
       "profile": 7,
-      "image": "images/dev/7/7/profile_image.webp",
+      "image": "images/dev/profiles/01KH2BYQFE091123BE1Q2QKKKX/avatar_400.webp",
+      "original_key": null,
+      "processing_status": "READY",
       "created_at": "2025-09-01T00:03:37.191Z",
       "updated_at": "2025-09-01T00:03:37.191Z"
     }
@@ -63,8 +29,11 @@
     "model": "profile_app.profileimage",
     "pk": 1,
     "fields": {
+      "public_id": "01KH2BYQFJT516563275HXZ2TS",
       "profile": 1,
-      "image": "images/dev/1/1/profile_image_xEwniGq.webp",
+      "image": "images/dev/profiles/01KH2BYQFDRZJD8P686RTZ8W44/avatar_400.webp",
+      "original_key": null,
+      "processing_status": "READY",
       "created_at": "2025-02-02T17:36:12.342Z",
       "updated_at": "2025-09-07T12:54:54.513Z"
     }
@@ -73,8 +42,11 @@
     "model": "profile_app.profileimage",
     "pk": 8,
     "fields": {
+      "public_id": "01KH2BYQFJCPA8NRGECK0EPHQW",
       "profile": 11,
-      "image": "images/dev/11/11/profile_image.webp",
+      "image": "images/dev/profiles/01KH2BYQFE22VYCK9JE3DHECBG/avatar_400.webp",
+      "original_key": null,
+      "processing_status": "READY",
       "created_at": "2025-09-22T02:03:44.694Z",
       "updated_at": "2025-09-22T02:03:44.694Z"
     }
@@ -83,8 +55,11 @@
     "model": "profile_app.profileimage",
     "pk": 9,
     "fields": {
+      "public_id": "01KH2BYQFKNYBN2GVY7A2VV1D4",
       "profile": 12,
-      "image": "images/dev/12/12/profile_image.webp",
+      "image": "images/dev/profiles/01KH2BYQFEG9R4V5KQV1HWXJHF/avatar_400.webp",
+      "original_key": null,
+      "processing_status": "READY",
       "created_at": "2025-09-22T02:21:28.843Z",
       "updated_at": "2025-09-22T02:21:28.843Z"
     }
@@ -93,8 +68,11 @@
     "model": "profile_app.profileimage",
     "pk": 10,
     "fields": {
+      "public_id": "01KH2BYQFKA4J1BAX9JABJWCJM",
       "profile": 13,
-      "image": "images/dev/13/13/profile_image.webp",
+      "image": "images/dev/profiles/01KH2BYQFEN9771DQXYCNA39KZ/avatar_400.webp",
+      "original_key": null,
+      "processing_status": "READY",
       "created_at": "2025-09-23T04:50:46.952Z",
       "updated_at": "2025-09-23T04:50:46.952Z"
     }
@@ -103,8 +81,11 @@
     "model": "profile_app.profileimage",
     "pk": 11,
     "fields": {
+      "public_id": "01KH2BYQFKM761W6Z6JD30A2FY",
       "profile": 14,
-      "image": "images/dev/14/14/profile_image.webp",
+      "image": "images/dev/profiles/01KH2BYQFFVD1Y3MFC097YQ99T/avatar_400.webp",
+      "original_key": null,
+      "processing_status": "READY",
       "created_at": "2025-09-23T23:23:49.304Z",
       "updated_at": "2025-09-23T23:23:49.304Z"
     }
@@ -113,8 +94,11 @@
     "model": "profile_app.profileimage",
     "pk": 12,
     "fields": {
+      "public_id": "01KH2BYQFK6C0DSF4T1N8FSDBD",
       "profile": 15,
-      "image": "images/dev/15/15/profile_image.webp",
+      "image": "images/dev/profiles/01KH2BYQFFTQH5MWCZ8NYSQSYT/avatar_400.webp",
+      "original_key": null,
+      "processing_status": "READY",
       "created_at": "2025-09-23T23:55:20.243Z",
       "updated_at": "2025-09-23T23:55:20.243Z"
     }
@@ -123,8 +107,11 @@
     "model": "profile_app.profileimage",
     "pk": 13,
     "fields": {
+      "public_id": "01KH2BYQFK9YPXT4C4PND6FV8J",
       "profile": 16,
-      "image": "images/dev/16/16/profile_image.webp",
+      "image": "images/dev/profiles/01KH2BYQFFR6PG746YYEDB216F/avatar_400.webp",
+      "original_key": null,
+      "processing_status": "READY",
       "created_at": "2025-09-24T00:20:16.644Z",
       "updated_at": "2025-09-24T00:20:16.644Z"
     }
@@ -133,8 +120,11 @@
     "model": "profile_app.profileimage",
     "pk": 14,
     "fields": {
+      "public_id": "01KH2BYQFKQ74T5J5WZ8TBNH1M",
       "profile": 17,
-      "image": "images/dev/17/17/profile_image.webp",
+      "image": "images/dev/profiles/01KH2BYQFFGSYXKSHGQTP004JH/avatar_400.webp",
+      "original_key": null,
+      "processing_status": "READY",
       "created_at": "2025-09-24T01:09:32.783Z",
       "updated_at": "2025-09-24T01:09:32.783Z"
     }
@@ -143,18 +133,76 @@
     "model": "profile_app.profileimage",
     "pk": 15,
     "fields": {
+      "public_id": "01KH2BYQFK6W22W7CKP2QKXG13",
       "profile": 18,
-      "image": "images/dev/18/18/profile_image.webp",
+      "image": "images/dev/profiles/01KH2BYQFF0XTXEZAPDTZAY1J2/avatar_400.webp",
+      "original_key": null,
+      "processing_status": "READY",
       "created_at": "2025-09-24T01:26:30.654Z",
       "updated_at": "2025-09-24T01:26:30.655Z"
     }
   },
   {
     "model": "profile_app.profileimage",
+    "pk": 2,
+    "fields": {
+      "public_id": "01KH2BYQFHT9BRHFHCFBGPS4VC",
+      "profile": 2,
+      "image": "images/dev/profiles/01KH2BYQFDEAA0M1EGSYG2APAM/avatar_400.webp",
+      "original_key": null,
+      "processing_status": "READY",
+      "created_at": "2025-02-02T19:35:39.265Z",
+      "updated_at": "2025-02-02T19:35:39.265Z"
+    }
+  },
+  {
+    "model": "profile_app.profileimage",
+    "pk": 3,
+    "fields": {
+      "public_id": "01KH2BYQFJ1ZCFPRDKA4ZTHV2E",
+      "profile": 3,
+      "image": "images/dev/profiles/01KH2BYQFD913BV6Z3WPR510TY/avatar_400.webp",
+      "original_key": null,
+      "processing_status": "READY",
+      "created_at": "2025-02-02T20:15:58.768Z",
+      "updated_at": "2025-02-02T20:15:58.768Z"
+    }
+  },
+  {
+    "model": "profile_app.profileimage",
+    "pk": 4,
+    "fields": {
+      "public_id": "01KH2BYQFJHCKJ587SMRQYWAYY",
+      "profile": 4,
+      "image": "images/dev/profiles/01KH2BYQFDFPVS273DBQXECS9J/avatar_400.webp",
+      "original_key": null,
+      "processing_status": "READY",
+      "created_at": "2025-02-03T04:20:00.624Z",
+      "updated_at": "2025-02-03T04:20:00.624Z"
+    }
+  },
+  {
+    "model": "profile_app.profileimage",
+    "pk": 5,
+    "fields": {
+      "public_id": "01KH2BYQFJRX6BRX8DDN1FAVNW",
+      "profile": 5,
+      "image": "images/dev/profiles/01KH2BYQFD08FFFY6SWMV7P6WV/avatar_400.webp",
+      "original_key": null,
+      "processing_status": "READY",
+      "created_at": "2025-02-20T00:59:07.594Z",
+      "updated_at": "2025-02-20T00:59:07.594Z"
+    }
+  },
+  {
+    "model": "profile_app.profileimage",
     "pk": 16,
     "fields": {
+      "public_id": "01KH2BYQFK0PRDPFAJSV272V93",
       "profile": 19,
-      "image": "images/dev/19/19/profile_image.webp",
+      "image": "images/dev/profiles/01KH2BYQFF42CR1438Z1G5SHEZ/avatar_400.webp",
+      "original_key": null,
+      "processing_status": "READY",
       "created_at": "2025-09-24T01:33:15.927Z",
       "updated_at": "2025-09-24T01:33:15.927Z"
     }
@@ -163,8 +211,11 @@
     "model": "profile_app.profileimage",
     "pk": 17,
     "fields": {
+      "public_id": "01KH2BYQFMFTNVV13Y9WVMDW4Z",
       "profile": 20,
-      "image": "images/dev/20/20/profile_image.webp",
+      "image": "images/dev/profiles/01KH2BYQFGT50HCDPYCR4PGVJ7/avatar_400.webp",
+      "original_key": null,
+      "processing_status": "READY",
       "created_at": "2025-09-24T01:41:10.255Z",
       "updated_at": "2025-09-24T01:41:10.255Z"
     }
@@ -173,8 +224,11 @@
     "model": "profile_app.profileimage",
     "pk": 18,
     "fields": {
+      "public_id": "01KH2BYQFMK3JSKKEPXBF1CQ8T",
       "profile": 21,
-      "image": "images/dev/21/21/profile_image.webp",
+      "image": "images/dev/profiles/01KH2BYQFGYYWGWEKQA3PGEQHS/avatar_400.webp",
+      "original_key": null,
+      "processing_status": "READY",
       "created_at": "2025-09-24T01:51:53.030Z",
       "updated_at": "2025-09-24T01:51:53.030Z"
     }
@@ -183,8 +237,11 @@
     "model": "profile_app.profileimage",
     "pk": 19,
     "fields": {
+      "public_id": "01KH2BYQFMNZN92A3ZR5NCGGFX",
       "profile": 22,
-      "image": "images/dev/22/22/profile_image.webp",
+      "image": "images/dev/profiles/01KH2BYQFGNB4HGNJWNG33AH65/avatar_400.webp",
+      "original_key": null,
+      "processing_status": "READY",
       "created_at": "2025-09-24T01:56:51.153Z",
       "updated_at": "2025-09-24T01:56:51.153Z"
     }
@@ -193,10 +250,26 @@
     "model": "profile_app.profileimage",
     "pk": 20,
     "fields": {
+      "public_id": "01KH2BYQFMBXPZYYXX382G4JKY",
       "profile": 23,
-      "image": "images/dev/23/23/profile_image.webp",
+      "image": "images/dev/profiles/01KH2BYQFGG9JYPXPNC8T5BN5T/avatar_400.webp",
+      "original_key": null,
+      "processing_status": "READY",
       "created_at": "2025-09-25T12:10:54.852Z",
       "updated_at": "2025-09-25T12:10:54.852Z"
+    }
+  },
+  {
+    "model": "profile_app.profileimage",
+    "pk": 21,
+    "fields": {
+      "public_id": "01KH2BYQFM4A92TYEAPATFN68T",
+      "profile": 26,
+      "image": "images/dev/profiles/01KH2BYQFGF0AZHBSPA4XJ7GPQ/avatar_400.webp",
+      "original_key": null,
+      "processing_status": "READY",
+      "created_at": "2026-02-08T00:42:33.069Z",
+      "updated_at": "2026-02-08T00:42:33.069Z"
     }
   }
 ]

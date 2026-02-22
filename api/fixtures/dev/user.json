@@ -1,23 +1,6 @@
 [
   {
     "model": "user_app.user",
-    "pk": 1,
-    "fields": {
-      "password": "pbkdf2_sha256$870000$baKuX26w7TcnKqz7HmbBQv$Gq0JRzEd1m2rlq5QSIXOgUgEgdeggxLORzx3BnB9DJE=",
-      "last_login": "2025-11-07T17:28:17.797Z",
-      "is_superuser": true,
-      "email": "admin@email.com",
-      "is_active": true,
-      "is_staff": true,
-      "is_email_verified": true,
-      "regular_profile_onboarding_completed": true,
-      "business_profile_onboarding_completed": false,
-      "groups": [],
-      "user_permissions": []
-    }
-  },
-  {
-    "model": "user_app.user",
     "pk": 2,
     "fields": {
       "password": "pbkdf2_sha256$870000$qNzeRHr2fv5bAC4oiRYI8Y$7WEpYPO8vaTQEPOlCeSxyy6wwNn9scw4sRy09mxKGf0=",
@@ -197,6 +180,8 @@
       "is_active": true,
       "is_staff": false,
       "is_email_verified": true,
+      "regular_profile_onboarding_completed": false,
+      "business_profile_onboarding_completed": false,
       "groups": [],
       "user_permissions": []
     }
@@ -347,6 +332,23 @@
       "email": "usertwenty@email.com",
       "is_active": true,
       "is_staff": false,
+      "is_email_verified": true,
+      "regular_profile_onboarding_completed": true,
+      "business_profile_onboarding_completed": false,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "user_app.user",
+    "pk": 1,
+    "fields": {
+      "password": "pbkdf2_sha256$870000$baKuX26w7TcnKqz7HmbBQv$Gq0JRzEd1m2rlq5QSIXOgUgEgdeggxLORzx3BnB9DJE=",
+      "last_login": "2026-02-08T22:35:26.088Z",
+      "is_superuser": true,
+      "email": "admin@email.com",
+      "is_active": true,
+      "is_staff": true,
       "is_email_verified": true,
       "regular_profile_onboarding_completed": true,
       "business_profile_onboarding_completed": false,

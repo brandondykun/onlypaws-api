@@ -28,6 +28,7 @@ class PrivateProfileApiTests(TestCase):
         self.profile = create_profile(**profile_details)
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(self.profile.public_id))
 
     def test_create_new_profile_successful(self):
         """
@@ -58,7 +59,7 @@ class PrivateProfileApiTests(TestCase):
             "name": "Updated Name",
             "about": "Updated about text.",
         }
-        url = retrieve_update_profile_url(self.profile.id)
+        url = retrieve_update_profile_url(self.profile)
         res = self.client.patch(url, updated_profile)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
@@ -85,7 +86,7 @@ class PrivateProfileApiTests(TestCase):
         """Test that updating a profile requires authentication."""
         self.client.force_authenticate(user=None)
         updated_profile = {"name": "Updated Name"}
-        url = retrieve_update_profile_url(self.profile.id)
+        url = retrieve_update_profile_url(self.profile)
         res = self.client.patch(url, updated_profile)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
@@ -99,7 +100,7 @@ class PrivateProfileApiTests(TestCase):
         )
         
         updated_profile = {"name": "Hacked Name"}
-        url = retrieve_update_profile_url(other_profile.id)
+        url = retrieve_update_profile_url(other_profile)
         res = self.client.patch(url, updated_profile)
         
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
@@ -116,7 +117,7 @@ class PrivateProfileApiTests(TestCase):
         updated_profile = {
             "username": "updated_username",
         }
-        url = retrieve_update_profile_url(self.profile.id)
+        url = retrieve_update_profile_url(self.profile)
         res = self.client.patch(url, updated_profile)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 

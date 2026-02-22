@@ -12,7 +12,7 @@ from drf_spectacular.utils import (
 )
 import logging
 
-from apps.interactions_app.models import Like, Comment, CommentLike, Follow
+from apps.interactions_app.models import Like, Comment, CommentLike, Follow, FollowRequest
 from apps.posts_app.models import Post
 from apps.profile_app.models import Profile
 from .serializers import (
@@ -23,6 +23,8 @@ from .serializers import (
     CommentLikeSerializer,
     FollowSerializer,
     CreateFollowSerializer,
+    FollowRequestSerializer,
+    SentFollowRequestSerializer,
 )
 from .pagination import (
     FollowListPagination,
@@ -65,6 +67,17 @@ class CreateDestroyLikeView(generics.GenericAPIView):
         post = get_object_or_404(Post, pk=post_id)
         if post.profile.id == current_profile.id:
             return Response(status=status.HTTP_403_FORBIDDEN)
+
+        # Check if user can interact with this post (private profile check)
+        if not post.can_profile_interact(current_profile):
+            logger.warning(
+                f"Profile {current_profile.id} attempted to like post {post_id} "
+                f"from private profile {post.profile.id} without following"
+            )
+            return Response(
+                {"error": "Cannot interact with posts from private profiles you don't follow"},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
         new_like_data = {
             "post": post_id,
@@ -127,6 +140,18 @@ class CreateCommentView(generics.CreateAPIView):
                 f"provided {profile_id}, expected {current_profile.id}"
             )
             return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if user can interact with this post (private profile check)
+        post = get_object_or_404(Post, pk=post_id)
+        if not post.can_profile_interact(current_profile):
+            logger.warning(
+                f"Profile {current_profile.id} attempted to comment on post {post_id} "
+                f"from private profile {post.profile.id} without following"
+            )
+            return Response(
+                {"error": "Cannot interact with posts from private profiles you don't follow"},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
         try:
             serializer = self.get_serializer(
@@ -331,6 +356,18 @@ class CreateDestroyCommentLikeView(generics.GenericAPIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         try:
+            # Get the comment and check if user can interact with the post
+            comment = get_object_or_404(Comment, pk=comment_id)
+            if not comment.post.can_profile_interact(current_profile):
+                logger.warning(
+                    f"Profile {current_profile.id} attempted to like comment {comment_id} "
+                    f"on a post from private profile {comment.post.profile.id} without following"
+                )
+                return Response(
+                    {"error": "Cannot interact with posts from private profiles you don't follow"},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
             new_like_data = {
                 "comment": comment_id,
                 "profile": current_profile.id,
@@ -340,9 +377,9 @@ class CreateDestroyCommentLikeView(generics.GenericAPIView):
             )
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            
+
             logger.info(f"Comment like created for comment {comment_id} by profile {current_profile.id}")
-            
+
             return Response(
                 serializer.data, status=status.HTTP_201_CREATED
             )
@@ -386,11 +423,11 @@ class CreateDestroyCommentLikeView(generics.GenericAPIView):
     post=extend_schema(
         request=CreateFollowSerializer,
         parameters=[auth_profile_param],
-        summary="Create a follow",
-        description="Create a follow."),
+        summary="Create a follow or follow request",
+        description="Create a follow for public profiles, or a follow request for private profiles."),
 )
 class CreateFollowView(generics.CreateAPIView):
-    """Create a follow."""
+    """Create a follow (for public profiles) or a follow request (for private profiles)."""
 
     serializer_class = FollowSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -399,16 +436,63 @@ class CreateFollowView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         current_profile = request.current_profile
         profile_to_follow_id = request.data.get("profileId")
-        profile_to_follow = get_object_or_404(Profile, pk=profile_to_follow_id)
+        profile_to_follow = get_object_or_404(Profile, public_id=profile_to_follow_id)
         
         # profile cannot follow itself
         if profile_to_follow.id == current_profile.id:
             logger.warning(f"Profile {current_profile.id} attempted to follow itself")
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
+        # Check if already following
+        if Follow.objects.filter(
+            followed=profile_to_follow,
+            followed_by=current_profile
+        ).exists():
+            logger.warning(
+                f"Profile {current_profile.id} already follows {profile_to_follow_id}"
+            )
+            return Response(
+                {"error": "Already following this profile"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Check if a follow request already exists
+        if FollowRequest.objects.filter(
+            requester=current_profile,
+            target=profile_to_follow
+        ).exists():
+            logger.warning(
+                f"Profile {current_profile.id} already has a pending follow request to {profile_to_follow_id}"
+            )
+            return Response(
+                {"error": "Follow request already pending"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         try:
+            # If target profile is private, create a follow request instead
+            if profile_to_follow.is_private:
+                follow_request = FollowRequest.objects.create(
+                    requester=current_profile,
+                    target=profile_to_follow
+                )
+                
+                logger.info(
+                    f"Follow request created: profile {current_profile.id} requested to follow {profile_to_follow_id}"
+                )
+                
+                follow_request_serializer = FollowRequestSerializer(follow_request)
+                return Response(
+                    {
+                        "status": "requested",
+                        "follow_request": follow_request_serializer.data
+                    },
+                    status=status.HTTP_201_CREATED
+                )
+
+            # For public profiles, create the follow directly
             new_follow_data = {
-                "followed": profile_to_follow_id,
+                "followed": profile_to_follow.id,
                 "followed_by": current_profile.id,
             }
             serializer = self.get_serializer(data=new_follow_data)
@@ -421,7 +505,12 @@ class CreateFollowView(generics.CreateAPIView):
             )
             
             return Response(
-                serializer.data, status=status.HTTP_201_CREATED, headers=headers
+                {
+                    "status": "following",
+                    "follow": serializer.data
+                },
+                status=status.HTTP_201_CREATED,
+                headers=headers
             )
         except Exception as e:
             logger.error(
@@ -447,26 +536,64 @@ class DestroyFollowView(generics.DestroyAPIView):
     queryset = Follow.objects.all()
 
     def destroy(self, request, *args, **kwargs):
-        profile_id = self.kwargs.get("profile_id")  # profile id to unfollow
+        profile_public_id = self.kwargs.get("profile_public_id")  # profile id to unfollow
         current_profile = request.current_profile
+        profile_to_unfollow = get_object_or_404(Profile, public_id=profile_public_id)
 
-        if profile_id:
+        if profile_public_id:
             try:
                 follow = get_object_or_404(
-                    Follow, followed_by=current_profile, followed=profile_id
+                    Follow, followed_by=current_profile, followed=profile_to_unfollow.id
                 )
                 self.perform_destroy(follow)
                 logger.info(
-                    f"Unfollow: profile {current_profile.id} unfollowed {profile_id}"
+                    f"Unfollow: profile {current_profile.id} unfollowed {profile_to_unfollow.id}"
                 )
                 return Response(status=status.HTTP_204_NO_CONTENT)
             except Exception as e:
                 logger.error(
-                    f"Error unfollowing: profile {current_profile.id} -> {profile_id}: {str(e)}"
+                    f"Error unfollowing: profile {current_profile.id} -> {profile_to_unfollow.id}: {str(e)}"
                 )
                 return Response(status=status.HTTP_400_BAD_REQUEST)
         
         logger.warning(f"Unfollow attempt with no profile_id by profile {current_profile.id}")
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+@extend_schema_view(
+    delete=extend_schema(
+        parameters=[auth_profile_param],
+        summary="Remove a follower",
+        description="Remove a follower from the current profile. profile_id is the id of the follower to remove."),
+)
+class RemoveFollowerView(generics.DestroyAPIView):
+    """Remove a follower from the current profile."""
+
+    serializer_class = FollowSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Follow.objects.all()
+
+    def destroy(self, request, *args, **kwargs):
+        follower_profile_id = self.kwargs.get("profile_id")  # profile id of follower to remove
+        current_profile = request.current_profile
+
+        if follower_profile_id:
+            try:
+                follow = get_object_or_404(
+                    Follow, followed=current_profile, followed_by=follower_profile_id
+                )
+                self.perform_destroy(follow)
+                logger.info(
+                    f"Remove follower: profile {current_profile.id} removed follower {follower_profile_id}"
+                )
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            except Exception as e:
+                logger.error(
+                    f"Error removing follower: profile {current_profile.id} removing {follower_profile_id}: {str(e)}"
+                )
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+        
+        logger.warning(f"Remove follower attempt with no profile_id by profile {current_profile.id}")
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -482,11 +609,11 @@ class ListFollowersView(generics.ListAPIView):
     pagination_class = FollowListPagination
 
     def get_queryset(self):
-        profile_id = self.kwargs.get("id", None)
+        profile_public_id = self.kwargs.get("public_id", None)
         username = self.request.query_params.get("username", None)
 
         try:
-            profile = Profile.objects.get(id=profile_id)
+            profile = Profile.objects.get(public_id=profile_public_id)
             followers_objs = profile.following.all()
             if username:
                 followers_objs = followers_objs.filter(
@@ -496,7 +623,7 @@ class ListFollowersView(generics.ListAPIView):
             followers = [obj.followed_by for obj in sorted_objs]
             return followers
         except Profile.DoesNotExist:
-            logger.error(f"Profile {profile_id} not found when listing followers")
+            logger.error(f"Profile {profile_public_id} not found when listing followers")
             return []
 
 
@@ -512,11 +639,11 @@ class ListFollowingView(generics.ListAPIView):
     pagination_class = FollowListPagination
 
     def get_queryset(self):
-        profile_id = self.kwargs.get("id", None)
+        profile_public_id = self.kwargs.get("public_id", None)
         username = self.request.query_params.get("username", None)
 
         try:
-            profile = Profile.objects.get(id=profile_id)
+            profile = Profile.objects.get(public_id=profile_public_id)
             following_objs = profile.followers.all()
             if username:
                 following_objs = following_objs.filter(
@@ -526,5 +653,207 @@ class ListFollowingView(generics.ListAPIView):
             following = [obj.followed for obj in sorted_objs]
             return following
         except Profile.DoesNotExist:
-            logger.error(f"Profile {profile_id} not found when listing following")
+            logger.error(f"Profile {profile_public_id} not found when listing following")
             return []
+
+
+# ============================================================================
+# Follow Request Views
+# ============================================================================
+
+@extend_schema_view(
+    get=extend_schema(parameters=[auth_profile_param]),
+)
+class ListFollowRequestsView(generics.ListAPIView):
+    """List pending follow requests received by the current profile."""
+
+    serializer_class = FollowRequestSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = FollowRequest.objects.all()
+    pagination_class = FollowListPagination
+
+    def get_queryset(self):
+        current_profile = self.request.current_profile
+        return FollowRequest.objects.filter(
+            target=current_profile
+        ).select_related(
+            'requester__image',
+            'requester__regularprofile',
+            'requester__regularprofile__pet_type',
+            'requester__businessprofile',
+        ).order_by("-created_at")
+
+
+@extend_schema_view(
+    get=extend_schema(parameters=[auth_profile_param]),
+)
+class ListSentFollowRequestsView(generics.ListAPIView):
+    """List pending follow requests sent by the current profile."""
+
+    serializer_class = SentFollowRequestSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = FollowRequest.objects.all()
+    pagination_class = FollowListPagination
+
+    def get_queryset(self):
+        current_profile = self.request.current_profile
+        return FollowRequest.objects.filter(
+            requester=current_profile
+        ).select_related(
+            'target__image',
+            'target__regularprofile',
+            'target__regularprofile__pet_type',
+            'target__businessprofile',
+        ).order_by("-created_at")
+
+
+@extend_schema_view(
+    post=extend_schema(parameters=[auth_profile_param]),
+)
+class AcceptFollowRequestView(generics.GenericAPIView):
+    """Accept a follow request - creates a Follow and deletes the request."""
+
+    serializer_class = FollowSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = FollowRequest.objects.all()
+
+    def post(self, request, *args, **kwargs):
+        follow_request_id = self.kwargs.get("pk")
+        current_profile = request.current_profile
+
+        try:
+            follow_request = get_object_or_404(
+                FollowRequest,
+                pk=follow_request_id,
+                target=current_profile
+            )
+
+            # Check if follow already exists (shouldn't happen but be safe)
+            if Follow.objects.filter(
+                followed=current_profile,
+                followed_by=follow_request.requester
+            ).exists():
+                follow_request.delete()
+                logger.warning(
+                    f"Follow request {follow_request_id} accepted but follow already exists"
+                )
+                return Response(
+                    {"message": "Already following"},
+                    status=status.HTTP_200_OK
+                )
+
+            # Store requester id before deleting the request
+            requester_id = follow_request.requester.id
+
+            # Create the follow
+            follow = Follow.objects.create(
+                followed=current_profile,
+                followed_by=follow_request.requester
+            )
+
+            # Delete the follow request
+            follow_request.delete()
+
+            # Trigger notification for the requester that their request was accepted
+            from apps.notifications_app.tasks import create_follow_request_accepted_notification_task
+            create_follow_request_accepted_notification_task.delay(
+                followed_profile_id=current_profile.id,
+                follower_profile_id=requester_id
+            )
+
+            logger.info(
+                f"Follow request {follow_request_id} accepted: "
+                f"profile {requester_id} now follows {current_profile.id}"
+            )
+
+            serializer = self.get_serializer(follow)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            logger.error(f"Error accepting follow request {follow_request_id}: {str(e)}")
+            return Response(
+                {"error": "Failed to accept follow request"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+
+@extend_schema_view(
+    delete=extend_schema(parameters=[auth_profile_param]),
+)
+class DeclineFollowRequestView(generics.DestroyAPIView):
+    """Decline a follow request - deletes the request without creating a Follow."""
+
+    serializer_class = FollowRequestSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = FollowRequest.objects.all()
+
+    def destroy(self, request, *args, **kwargs):
+        follow_request_id = self.kwargs.get("pk")
+        current_profile = request.current_profile
+
+        try:
+            follow_request = get_object_or_404(
+                FollowRequest,
+                pk=follow_request_id,
+                target=current_profile
+            )
+
+            requester_id = follow_request.requester.id
+            follow_request.delete()
+
+            logger.info(
+                f"Follow request {follow_request_id} declined by profile {current_profile.id} "
+                f"(from profile {requester_id})"
+            )
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        except Exception as e:
+            logger.error(f"Error declining follow request {follow_request_id}: {str(e)}")
+            return Response(
+                {"error": "Failed to decline follow request"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+
+@extend_schema_view(
+    delete=extend_schema(parameters=[auth_profile_param]),
+)
+class CancelFollowRequestView(generics.DestroyAPIView):
+    """Cancel a sent follow request - allows requester to withdraw their request."""
+
+    serializer_class = FollowRequestSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = FollowRequest.objects.all()
+
+    def destroy(self, request, *args, **kwargs):
+        target_profile_public_id = self.kwargs.get("public_id")
+        current_profile = request.current_profile
+
+        target_profile = get_object_or_404(Profile, public_id=target_profile_public_id)
+
+        try:
+            follow_request = get_object_or_404(
+                FollowRequest,
+                requester=current_profile,
+                target=target_profile
+            )
+
+            follow_request.delete()
+
+            logger.info(
+                f"Follow request cancelled by profile {current_profile.id} "
+                f"to profile {target_profile_public_id}"
+            )
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        except Exception as e:
+            logger.error(
+                f"Error cancelling follow request from {current_profile.id} "
+                f"to {target_profile_public_id}: {str(e)}"
+            )
+            return Response(
+                {"error": "Failed to cancel follow request"},
+                status=status.HTTP_400_BAD_REQUEST
+            )

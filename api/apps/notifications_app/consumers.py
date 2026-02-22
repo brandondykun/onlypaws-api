@@ -17,27 +17,28 @@ class NotificationConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         """Handle WebSocket connection."""
         try:
-            # Extract profile_id from URL route
-            self.profile_id = self.scope['url_route']['kwargs']['profile_id']
-            self.profile_group_name = f'profile_{self.profile_id}'
-            
+            # Extract profile_public_id from URL route (ULID string)
+            self.profile_public_id = self.scope['url_route']['kwargs']['profile_public_id']
+
             # Authenticate the user
             user = await self.get_user_from_token()
             if not user or user == AnonymousUser():
-                logger.warning(f"Authentication failed for WebSocket connection to profile {self.profile_id}")
+                logger.warning(f"Authentication failed for WebSocket connection to profile {self.profile_public_id}")
                 await self.close(code=4001)
                 return
-                
-            # Verify the user owns this profile
-            profile = await self.get_profile(user, self.profile_id)
+
+            # Resolve profile by public_id and verify the user owns it
+            profile = await self.get_profile_by_public_id(user, self.profile_public_id)
             if not profile:
-                logger.warning(f"Profile {self.profile_id} not found or not owned by user {user.id}")
+                logger.warning(f"Profile {self.profile_public_id} not found or not owned by user {user.id}")
                 await self.close(code=4003)
                 return
-                
+
             self.user = user
             self.profile = profile
-            
+            # Channel layer group is keyed by profile.id so existing senders unchanged
+            self.profile_group_name = f'profile_{self.profile.id}'
+
             # Join profile group
             await self.channel_layer.group_add(
                 self.profile_group_name,
@@ -120,6 +121,15 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             'data': event.get('data', {})
         }))
 
+    async def post_ready(self, event):
+        """Handle post ready messages sent to the group."""
+        await self.send(text_data=json.dumps({
+            'type': 'post_ready',
+            'post_id': event['post_id'],
+            'post_public_id': event.get('post_public_id'),
+            'message': event.get('message', 'Your post is ready'),
+        }))
+
     @database_sync_to_async
     def get_user_from_token(self):
         """Extract and validate user from JWT token."""
@@ -159,19 +169,15 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             return AnonymousUser()
 
     @database_sync_to_async
-    def get_profile(self, user, profile_id):
-        """Get profile and verify ownership."""
+    def get_profile_by_public_id(self, user, profile_public_id):
+        """Get profile by public_id (ULID) and verify the user owns it."""
         try:
-            # Convert profile_id to int if it's a string
-            if isinstance(profile_id, str):
-                profile_id = int(profile_id)
-            
-            return user.profiles.get(id=profile_id)
-        except (Profile.DoesNotExist, ValueError) as e:
-            logger.error(f"Profile {profile_id} not found or invalid for user {user.id}: {e}")
+            return user.profiles.get(public_id=profile_public_id)
+        except Profile.DoesNotExist as e:
+            logger.error(f"Profile {profile_public_id} not found or not owned by user {user.id}: {e}")
             return None
         except Exception as e:
-            logger.error(f"Unexpected error getting profile {profile_id} for user {user.id}: {e}")
+            logger.error(f"Unexpected error getting profile {profile_public_id} for user {user.id}: {e}")
             return None
 
     @database_sync_to_async

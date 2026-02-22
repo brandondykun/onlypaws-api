@@ -24,6 +24,7 @@ class Command(BaseCommand):
         models = [
             "user",
             "profile",
+            "authprovider",
             "regularprofile",
             "businessprofile",
             "address",
@@ -46,7 +47,9 @@ class Command(BaseCommand):
             "notification",
             "appconfiguration",
             "postimagetag",
-            "announcement"
+            "announcement",
+            "postimagescaled",
+            "profileimagescaled",
         ]
 
         # default fixture path

@@ -1,6 +1,6 @@
 from decimal import Decimal
 from rest_framework import serializers
-from apps.posts_app.models import Post, PostImage, SavedPost, PostImageTag
+from apps.posts_app.models import Post, PostImage, SavedPost, PostImageTag, PostImageScaled
 from django.db.models import Q
 from apps.profile_app.serializers import ProfileSerializer, SearchProfileSerializer
 from drf_spectacular.utils import extend_schema_field
@@ -15,16 +15,72 @@ from apps.interactions_app.serializers import (
 from apps.moderation_app.serializers import PostReportPreviewSerializer
 
 
+# ============================================================================
+# Presigned Upload Serializers
+# ============================================================================
+
+class PrepareUploadRequestSerializer(serializers.Serializer):
+    """Serializer for prepare-upload request."""
+    
+    image_count = serializers.IntegerField(min_value=1, max_value=10)
+
+
+class UploadUrlSerializer(serializers.Serializer):
+    """Serializer for individual upload URL details."""
+    
+    url = serializers.URLField()
+    key = serializers.CharField()
+    order = serializers.IntegerField()
+
+
+class PrepareUploadResponseSerializer(serializers.Serializer):
+    """Serializer for prepare-upload response."""
+
+    post_id = serializers.IntegerField()
+    post_public_id = serializers.CharField()
+    upload_urls = UploadUrlSerializer(many=True)
+
+
+class CompletePostSerializer(serializers.Serializer):
+    """Serializer for completing a post after images are uploaded."""
+    
+    caption = serializers.CharField(max_length=1000)
+    aspect_ratio = serializers.ChoiceField(choices=Post.AspectRatio.choices, default=Post.AspectRatio.SQUARE)
+    ai_generated = serializers.BooleanField(default=False)
+    tags = serializers.JSONField(required=False, allow_null=True)
+
+
+# ============================================================================
+# PostImageScaled Serializer
+# ============================================================================
+
+class PostImageScaledSerializer(serializers.ModelSerializer):
+    """Serializer for scaled image variants."""
+
+    public_id = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PostImageScaled
+        fields = ["id", "public_id", "scale", "image", "width", "height"]
+
+    def get_public_id(self, obj):
+        return str(obj.public_id) if obj.public_id else None
+
+
 class PostImageTagSerializer(serializers.ModelSerializer):
     """Serializer for Post Image Tags."""
-    
+
     tagged_profile = SearchProfileSerializer(read_only=True)
     tagged_by_profile = SearchProfileSerializer(read_only=True)
+    public_id = serializers.SerializerMethodField()
 
     class Meta:
         model = PostImageTag
-        fields = ["id", "tagged_profile", "tagged_by_profile", "x_position", "y_position", "created_at"]
+        fields = ["id", "public_id", "tagged_profile", "tagged_by_profile", "x_position", "y_position", "created_at"]
         read_only_fields = ["id", "created_at"]
+
+    def get_public_id(self, obj):
+        return str(obj.public_id) if obj.public_id else None
 
 
 class CreatePostImageTagSerializer(serializers.Serializer):
@@ -53,12 +109,17 @@ class CreatePostImageTagSerializer(serializers.Serializer):
 
 class PostImageSerializer(serializers.ModelSerializer):
     """Serializer for Post Images."""
-    
+
     tags = PostImageTagSerializer(many=True, read_only=True)
+    scaled_images = PostImageScaledSerializer(many=True, read_only=True)
+    public_id = serializers.SerializerMethodField()
 
     class Meta:
         model = PostImage
-        fields = ["id", "post", "image", "order", "tags"]
+        fields = ["id", "public_id", "post", "image", "order", "tags", "scaled_images"]
+
+    def get_public_id(self, obj):
+        return str(obj.public_id) if obj.public_id else None
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -67,11 +128,13 @@ class PostSerializer(serializers.ModelSerializer):
     images = PostImageSerializer(many=True, read_only=True)
     likes = LikeSerializer(many=True, read_only=True)
     comments = CommentSerializer(many=True, read_only=True)
+    public_id = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
         fields = [
             "id",
+            "public_id",
             "caption",
             "profile",
             "created_at",
@@ -83,6 +146,9 @@ class PostSerializer(serializers.ModelSerializer):
             "aspect_ratio",
         ]
         read_only_fields = ["id", "created_at", "updated_at", "likes", "comments"]
+
+    def get_public_id(self, obj):
+        return str(obj.public_id) if obj.public_id else None
 
 
 class PostUpdateSerializer(serializers.ModelSerializer):
@@ -106,11 +172,13 @@ class PostDetailedSerializer(serializers.ModelSerializer):
     is_hidden = serializers.SerializerMethodField()
     is_reported = serializers.SerializerMethodField()
     tagged_profiles = serializers.SerializerMethodField()
+    public_id = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
         fields = [
             "id",
+            "public_id",
             "caption",
             "profile",
             "created_at",
@@ -126,6 +194,7 @@ class PostDetailedSerializer(serializers.ModelSerializer):
             "contains_ai",
             "aspect_ratio",
             "tagged_profiles",
+            "status",
         ]
         read_only_fields = [
             "id",
@@ -140,7 +209,11 @@ class PostDetailedSerializer(serializers.ModelSerializer):
             "is_hidden",
             "is_reported",
             "tagged_profiles",
+            "status",
         ]
+
+    def get_public_id(self, obj):
+        return str(obj.public_id) if obj.public_id else None
 
     @extend_schema_field(serializers.ListField(child=serializers.DictField()))
     def get_images(self, obj):
@@ -155,16 +228,16 @@ class PostDetailedSerializer(serializers.ModelSerializer):
 
     def get_liked(self, obj) -> bool:
         # boolean - is requesting profile liked the post being fetched
-        auth_profile_id = self.context["request"].headers["auth-profile-id"]
-        if auth_profile_id:
-            return obj.likes.filter(profile=auth_profile_id).exists()
+        current_profile = getattr(self.context["request"], "current_profile", None)
+        if current_profile:
+            return obj.likes.filter(profile=current_profile).exists()
         return False
 
     def get_is_saved(self, obj) -> bool:
         # boolean - did requesting profile save the post being fetched
-        requesting_profile = self.context["request"].headers["auth-profile-id"]
-        if requesting_profile:
-            return obj.saved_by.filter(profile=requesting_profile).exists()
+        current_profile = getattr(self.context["request"], "current_profile", None)
+        if current_profile:
+            return obj.saved_by.filter(profile=current_profile).exists()
         return False
 
     @extend_schema_field(serializers.ListField(child=serializers.DictField()))
@@ -194,18 +267,24 @@ class PostDetailedSerializer(serializers.ModelSerializer):
                     tagged_profiles.append(tag.tagged_profile)
         
         # Get the current profile for the SearchProfileSerializer context
-        current_profile = self.context["request"].current_profile
-        
+        current_profile = getattr(self.context["request"], "current_profile", None)
+        profile_id = current_profile.id if current_profile else None
+
         return SearchProfileSerializer(
-            tagged_profiles, 
-            many=True, 
-            context={"profile_id": current_profile.id, "request": self.context["request"]}
+            tagged_profiles,
+            many=True,
+            context={"profile_id": profile_id, "request": self.context["request"]},
         ).data
 
 
 class CreateSavedPostSerializer(serializers.ModelSerializer):
     """Serializer for creating saved Posts."""
 
+    public_id = serializers.SerializerMethodField()
+
     class Meta:
         model = SavedPost
-        fields = ["id", "profile", "post"]
+        fields = ["id", "public_id", "profile", "post"]
+
+    def get_public_id(self, obj):
+        return str(obj.public_id) if obj.public_id else None

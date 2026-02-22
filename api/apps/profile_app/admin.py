@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Profile, RegularProfile, BusinessProfile, ProfileImage, PetType, Address
+from .models import Profile, RegularProfile, BusinessProfile, ProfileImage, ProfileImageScaled, PetType, Address
 
 
 @admin.register(PetType)
@@ -18,10 +18,10 @@ class AddressAdmin(admin.ModelAdmin):
 
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
-    list_display = ['id', 'username', 'user', 'is_active', 'get_profile_type', 'created_at']
+    list_display = ['id', 'username', 'user', 'is_active', 'is_private', 'get_profile_type', 'created_at', 'public_id']
     search_fields = ['username', 'user__email']
     list_filter = ['is_active', 'created_at']
-    readonly_fields = ['created_at', 'updated_at']
+    readonly_fields = ['public_id', 'created_at', 'updated_at']
     ordering = ['-created_at']
 
     def get_profile_type(self, obj):
@@ -31,7 +31,7 @@ class ProfileAdmin(admin.ModelAdmin):
 
 @admin.register(RegularProfile)
 class RegularProfileAdmin(admin.ModelAdmin):
-    list_display = ['id', 'username', 'name', 'pet_type', 'user_email', 'created_at']
+    list_display = ['id', 'public_id', 'username', 'name', 'pet_type', 'user_email', 'created_at']
     search_fields = ['profile_ptr__username', 'name', 'profile_ptr__user__email']
     list_filter = ['pet_type', 'profile_ptr__created_at']
     readonly_fields = ['created_at', 'updated_at']
@@ -39,6 +39,10 @@ class RegularProfileAdmin(admin.ModelAdmin):
 
     def username(self, obj):
         return obj.profile_ptr.username
+
+    def public_id(self, obj):
+        return obj.profile_ptr.public_id
+    public_id.short_description = 'Public ID'
 
     def user_email(self, obj):
         return obj.profile_ptr.user.email
@@ -53,7 +57,7 @@ class RegularProfileAdmin(admin.ModelAdmin):
 
 @admin.register(BusinessProfile)
 class BusinessProfileAdmin(admin.ModelAdmin):
-    list_display = ['id', 'username', 'business_name', 'business_category', 'verified', 'subscription_tier', 'user_email', 'created_at']
+    list_display = ['id', 'public_id', 'username', 'business_name', 'business_category', 'verified', 'subscription_tier', 'user_email', 'created_at']
     search_fields = ['profile_ptr__username', 'business_name', 'profile_ptr__user__email']
     list_filter = ['business_category', 'verified', 'subscription_tier', 'profile_ptr__created_at']
     readonly_fields = ['created_at', 'updated_at']
@@ -61,6 +65,10 @@ class BusinessProfileAdmin(admin.ModelAdmin):
 
     def username(self, obj):
         return obj.profile_ptr.username
+
+    def public_id(self, obj):
+        return obj.profile_ptr.public_id
+    public_id.short_description = 'Public ID'
 
     def user_email(self, obj):
         return obj.profile_ptr.user.email
@@ -75,8 +83,17 @@ class BusinessProfileAdmin(admin.ModelAdmin):
 
 @admin.register(ProfileImage)
 class ProfileImageAdmin(admin.ModelAdmin):
-    list_display = ['id', 'profile', 'image', 'created_at', 'updated_at']
+    list_display = ['id', 'profile', 'image', 'processing_status', 'created_at', 'updated_at']
     search_fields = ['profile__username']
+    list_filter = ['processing_status']
     readonly_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
+
+
+@admin.register(ProfileImageScaled)
+class ProfileImageScaledAdmin(admin.ModelAdmin):
+    list_display = ['id', 'image', 'profile_image__profile__username', 'scale', 'width', 'height', 'created_at']
+    list_filter = ['scale']
+    search_fields = ['image', 'profile_image__profile__username']
+    ordering = ['image', 'profile_image', 'scale']
 

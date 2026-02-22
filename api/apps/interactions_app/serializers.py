@@ -3,7 +3,7 @@ Serializers for the interactions app.
 """
 
 from rest_framework import serializers
-from apps.interactions_app.models import Like, Comment, CommentLike, Follow
+from apps.interactions_app.models import Like, Comment, CommentLike, Follow, FollowRequest
 from apps.profile_app.serializers import ProfileSerializer
 from apps.posts_app.models import Post
 from drf_spectacular.utils import extend_schema_field
@@ -89,9 +89,9 @@ class CommentDetailedSerializer(serializers.ModelSerializer):
 
     def get_liked(self, obj) -> bool:
         # boolean - has requesting profile liked the comment being fetched
-        auth_profile_id = self.context["request"].headers["auth-profile-id"]
-        if auth_profile_id:
-            return obj.likes.filter(profile=auth_profile_id).exists()
+        current_profile = getattr(self.context["request"], "current_profile", None)
+        if current_profile:
+            return obj.likes.filter(profile=current_profile).exists()
         return False
 
     def get_replies_count(self, obj) -> int:
@@ -204,7 +204,7 @@ class CommentChainSerializer(serializers.ModelSerializer):
             return self._chain_cache
 
         # Get the requesting profile once
-        auth_profile_id = self.context.get("request").headers.get("auth-profile-id")
+        current_profile = getattr(self.context.get("request"), "current_profile", None)
 
         # Build complete parent chain by traversing up the tree via reply_to_comment
         all_ancestors = []
@@ -220,8 +220,8 @@ class CommentChainSerializer(serializers.ModelSerializer):
             # Get likes count and liked status
             likes_count = current_comment.likes.count()
             liked = False
-            if auth_profile_id:
-                liked = current_comment.likes.filter(profile=auth_profile_id).exists()
+            if current_profile:
+                liked = current_comment.likes.filter(profile=current_profile).exists()
             
             # Get reply_to_comment_username if applicable
             reply_to_comment_username = None
@@ -293,13 +293,13 @@ class CommentChainSerializer(serializers.ModelSerializer):
         Returns the target comment (the comment that was requested).
         Includes all comment details plus likes_count, liked, and reply_to_comment_username.
         """
-        auth_profile_id = self.context.get("request").headers.get("auth-profile-id")
-        
+        current_profile = getattr(self.context.get("request"), "current_profile", None)
+
         # Get likes info
         likes_count = obj.likes.count()
         liked = False
-        if auth_profile_id:
-            liked = obj.likes.filter(profile=auth_profile_id).exists()
+        if current_profile:
+            liked = obj.likes.filter(profile=current_profile).exists()
         
         # Get reply_to_comment_username if applicable
         reply_to_comment_username = None
@@ -365,5 +365,36 @@ class FollowSerializer(serializers.ModelSerializer):
     class Meta:
         model = Follow
         fields = ["id", "followed", "followed_by", "created_at"]
+        read_only_fields = ["id", "created_at"]
+
+
+class FollowRequestSerializer(serializers.ModelSerializer):
+    """Serializer for FollowRequest - includes requester profile details (for received requests)."""
+
+    requester = ProfileSerializer(read_only=True)
+
+    class Meta:
+        model = FollowRequest
+        fields = ["id", "requester", "target", "created_at"]
+        read_only_fields = ["id", "created_at"]
+
+
+class SentFollowRequestSerializer(serializers.ModelSerializer):
+    """Serializer for sent FollowRequest - includes target profile details."""
+
+    target = ProfileSerializer(read_only=True)
+
+    class Meta:
+        model = FollowRequest
+        fields = ["id", "requester", "target", "created_at"]
+        read_only_fields = ["id", "created_at"]
+
+
+class FollowRequestCreateSerializer(serializers.ModelSerializer):
+    """Serializer for creating FollowRequest."""
+
+    class Meta:
+        model = FollowRequest
+        fields = ["id", "requester", "target", "created_at"]
         read_only_fields = ["id", "created_at"]
 

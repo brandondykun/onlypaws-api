@@ -12,6 +12,8 @@ class NotificationType(models.TextChoices):
     COMMENT = 'comment', _('Comment')
     COMMENT_REPLY = 'comment_reply', _('Comment Reply')
     FOLLOW = 'follow', _('Follow')
+    FOLLOW_REQUEST = 'follow_request', _('Follow Request')
+    FOLLOW_REQUEST_ACCEPTED = 'follow_request_accepted', _('Follow Request Accepted')
     MENTION = 'mention', _('Mention')
     TAGGED_POST = 'tagged_post', _('Tagged in Post')
     SYSTEM = 'system', _('System')
@@ -35,7 +37,7 @@ class Notification(models.Model):
         help_text=_('Profile that triggered the notification (can be null for system notifications)')
     )
     notification_type = models.CharField(
-        max_length=20,
+        max_length=30,
         choices=NotificationType.choices,
         help_text=_('Type of notification')
     )

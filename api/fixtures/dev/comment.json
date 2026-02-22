@@ -178,5 +178,293 @@
       "parent_comment": 3,
       "reply_to_comment": 3
     }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 18,
+    "fields": {
+      "text": "Linus always chewing on sticks, I love it!",
+      "profile": 15,
+      "post": 20,
+      "created_at": "2026-01-25T16:55:29.364Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 19,
+    "fields": {
+      "text": "Hey I just had a stick like that earlier at the dog park",
+      "profile": 16,
+      "post": 20,
+      "created_at": "2026-01-25T16:56:07.813Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 20,
+    "fields": {
+      "text": "Best stick I've ever seen in the history of sticks!",
+      "profile": 18,
+      "post": 20,
+      "created_at": "2026-01-25T16:56:42.502Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 21,
+    "fields": {
+      "text": "I like your haricut!",
+      "profile": 11,
+      "post": 20,
+      "created_at": "2026-01-25T16:57:02.763Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 22,
+    "fields": {
+      "text": "I could chew that stick in half in no time",
+      "profile": 4,
+      "post": 20,
+      "created_at": "2026-01-25T16:57:45.824Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 23,
+    "fields": {
+      "text": "Hey that's my brother! Where did you get that stick? I don't remember seeing that one. Was it over by the pool or did you get a trip to the dog park without me!?",
+      "profile": 26,
+      "post": 20,
+      "created_at": "2026-01-25T16:59:01.791Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 24,
+    "fields": {
+      "text": "Now that looks like a good day to me. There's nothing better than laying in the grass with a good stick.",
+      "profile": 21,
+      "post": 20,
+      "created_at": "2026-01-25T17:00:24.145Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 25,
+    "fields": {
+      "text": "I hope you stick around",
+      "profile": 14,
+      "post": 20,
+      "created_at": "2026-01-25T17:00:48.233Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 26,
+    "fields": {
+      "text": "We should hang out sometime and find some great sticks together",
+      "profile": 17,
+      "post": 20,
+      "created_at": "2026-01-25T17:02:40.832Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 27,
+    "fields": {
+      "text": "Oh I hate getting my teeth brushed too! They try to flavor it but it always tastes so bad!",
+      "profile": 20,
+      "post": 20,
+      "created_at": "2026-01-25T17:03:59.331Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 28,
+    "fields": {
+      "text": "Not fooling me with the tooth brush. No way! I eat sticks too sometimes. It's fun",
+      "profile": 2,
+      "post": 20,
+      "created_at": "2026-01-25T17:05:02.320Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 29,
+    "fields": {
+      "text": "One time I ate a rock and had to have it removed with surgery",
+      "profile": 2,
+      "post": 20,
+      "created_at": "2026-01-25T17:05:28.693Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 30,
+    "fields": {
+      "text": "Sticks are my jam",
+      "profile": 1,
+      "post": 20,
+      "created_at": "2026-01-25T20:28:04.472Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 31,
+    "fields": {
+      "text": "Wow I’m glad you’re okay!",
+      "profile": 1,
+      "post": 20,
+      "created_at": "2026-01-25T20:28:33.080Z",
+      "parent_comment": 29,
+      "reply_to_comment": 29
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 32,
+    "fields": {
+      "text": "Sticks are cool",
+      "profile": 1,
+      "post": 20,
+      "created_at": "2026-01-26T03:30:46.124Z",
+      "parent_comment": 14,
+      "reply_to_comment": 14
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 33,
+    "fields": {
+      "text": "What is your favorite kind of stick?",
+      "profile": 1,
+      "post": 20,
+      "created_at": "2026-01-26T03:31:01.786Z",
+      "parent_comment": 14,
+      "reply_to_comment": 14
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 34,
+    "fields": {
+      "text": "Do you like the crunchy sticks?",
+      "profile": 1,
+      "post": 20,
+      "created_at": "2026-01-26T03:31:27.706Z",
+      "parent_comment": 14,
+      "reply_to_comment": 14
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 35,
+    "fields": {
+      "text": "Some sticks taste terrible",
+      "profile": 1,
+      "post": 20,
+      "created_at": "2026-01-26T03:33:17.121Z",
+      "parent_comment": 14,
+      "reply_to_comment": 14
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 36,
+    "fields": {
+      "text": "Do your humans let you bring sticks inside?",
+      "profile": 1,
+      "post": 20,
+      "created_at": "2026-01-26T03:33:51.334Z",
+      "parent_comment": 14,
+      "reply_to_comment": 14
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 37,
+    "fields": {
+      "text": "I’ve always wanted to bring a stick inside",
+      "profile": 1,
+      "post": 20,
+      "created_at": "2026-01-26T03:34:05.262Z",
+      "parent_comment": 14,
+      "reply_to_comment": 14
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 38,
+    "fields": {
+      "text": "I have a fake stick toy, but it’s nothing like the real thing. Real sticks are wayyyy better than that fake thing",
+      "profile": 1,
+      "post": 20,
+      "created_at": "2026-01-26T03:34:57.913Z",
+      "parent_comment": 14,
+      "reply_to_comment": 14
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 39,
+    "fields": {
+      "text": "I like your vest!",
+      "profile": 1,
+      "post": 91,
+      "created_at": "2026-02-11T00:08:29.491Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 40,
+    "fields": {
+      "text": "That chair is the perfect size!",
+      "profile": 3,
+      "post": 93,
+      "created_at": "2026-02-15T18:53:44.226Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
+  },
+  {
+    "model": "interactions_app.comment",
+    "pk": 41,
+    "fields": {
+      "text": "I love that jacket! Where did you get it?",
+      "profile": 3,
+      "post": 92,
+      "created_at": "2026-02-15T19:12:40.064Z",
+      "parent_comment": null,
+      "reply_to_comment": null
+    }
   }
 ]

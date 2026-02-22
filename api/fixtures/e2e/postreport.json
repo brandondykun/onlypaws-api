@@ -1,75 +1,15 @@
 [
   {
     "model": "moderation_app.postreport",
-    "pk": 8,
+    "pk": 1,
     "fields": {
-      "post": 14,
-      "reporter": 7,
-      "reason": 3,
-      "details": "",
-      "status": "PENDING",
-      "created_at": "2025-01-11T21:27:38.256Z",
-      "updated_at": "2025-01-11T21:27:38.256Z",
-      "resolved_by": null,
-      "resolution_note": ""
-    }
-  },
-  {
-    "model": "moderation_app.postreport",
-    "pk": 6,
-    "fields": {
-      "post": 31,
-      "reporter": 1,
-      "reason": 1,
-      "details": "",
-      "status": "PENDING",
-      "created_at": "2025-01-11T19:04:52.611Z",
-      "updated_at": "2025-01-11T19:04:52.611Z",
-      "resolved_by": null,
-      "resolution_note": ""
-    }
-  },
-  {
-    "model": "moderation_app.postreport",
-    "pk": 4,
-    "fields": {
-      "post": 55,
-      "reporter": 5,
+      "post": 98,
+      "reporter": 4,
       "reason": 2,
-      "details": "",
+      "details": "There are no pets in these photos and they show a human vacation.",
       "status": "PENDING",
-      "created_at": "2025-01-11T02:41:14.617Z",
-      "updated_at": "2025-01-11T02:41:14.617Z",
-      "resolved_by": null,
-      "resolution_note": ""
-    }
-  },
-  {
-    "model": "moderation_app.postreport",
-    "pk": 3,
-    "fields": {
-      "post": 54,
-      "reporter": 2,
-      "reason": 3,
-      "details": "",
-      "status": "PENDING",
-      "created_at": "2025-01-10T05:02:10.831Z",
-      "updated_at": "2025-01-10T05:02:10.832Z",
-      "resolved_by": null,
-      "resolution_note": ""
-    }
-  },
-  {
-    "model": "moderation_app.postreport",
-    "pk": 2,
-    "fields": {
-      "post": 55,
-      "reporter": 2,
-      "reason": 3,
-      "details": "",
-      "status": "PENDING",
-      "created_at": "2025-01-10T05:00:44.661Z",
-      "updated_at": "2025-01-10T05:00:44.661Z",
+      "created_at": "2026-02-15T23:08:22.937Z",
+      "updated_at": "2026-02-15T23:08:22.937Z",
       "resolved_by": null,
       "resolution_note": ""
     }

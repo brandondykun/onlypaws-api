@@ -10,9 +10,10 @@ from apps.profile_app.models import (
     BusinessProfile,
     Address,
     ProfileImage,
+    ProfileImageScaled,
     PetType,
 )
-from apps.interactions_app.models import Follow
+from apps.interactions_app.models import FollowRequest
 from typing import Literal
 from django.db.models import Q
 
@@ -21,30 +22,91 @@ from django.db.models import Q
 # Supporting Model Serializers
 # ============================================================================
 
+class ProfileImageScaledSerializer(serializers.ModelSerializer):
+    """Serializer for scaled profile image variants."""
+
+    public_id = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ProfileImageScaled
+        fields = ["id", "public_id", "scale", "image", "width", "height"]
+
+    def get_public_id(self, obj):
+        return str(obj.public_id) if obj.public_id else None
+
+
 class ProfileImageSerializer(serializers.ModelSerializer):
-    """Serializer for profile image."""
+    """Serializer for profile image. Includes scaled variants when present."""
+
+    scaled_images = ProfileImageScaledSerializer(many=True, read_only=True)
+    public_id = serializers.SerializerMethodField()
 
     class Meta:
         model = ProfileImage
-        fields = ["id", "profile", "image", "created_at", "updated_at"]
-        read_only_fields = ["created_at", "updated_at"]
+        fields = [
+            "id",
+            "public_id",
+            "profile",
+            "image",
+            "processing_status",
+            "created_at",
+            "updated_at",
+            "scaled_images",
+        ]
+        read_only_fields = ["created_at", "updated_at", "processing_status"]
+
+    def get_public_id(self, obj):
+        return str(obj.public_id) if obj.public_id else None
+
+
+# ============================================================================
+# Presigned profile image upload serializers
+# ============================================================================
+
+class ProfileImageUploadUrlRequestSerializer(serializers.Serializer):
+    """Request body for requesting a presigned upload URL."""
+
+    profile_id = serializers.IntegerField(min_value=1)
+
+
+class ProfileImageUploadUrlResponseSerializer(serializers.Serializer):
+    """Response with presigned URL and key for frontend upload."""
+
+    upload_url = serializers.URLField()
+    key = serializers.CharField()
+    expires_in = serializers.IntegerField(required=False)
+
+
+class ConfirmProfileImageUploadRequestSerializer(serializers.Serializer):
+    """Request body for confirming upload after frontend PUT to presigned URL."""
+
+    profile_id = serializers.IntegerField(min_value=1)
+    key = serializers.CharField()
 
 
 class PetTypeSerializer(serializers.ModelSerializer):
     """Serializer for pet type."""
 
+    public_id = serializers.SerializerMethodField()
+
     class Meta:
         model = PetType
-        fields = ["id", "name"]
+        fields = ["id", "public_id", "name"]
+
+    def get_public_id(self, obj):
+        return str(obj.public_id) if obj.public_id else None
 
 
 class AddressSerializer(serializers.ModelSerializer):
     """Serializer for Address."""
 
+    public_id = serializers.SerializerMethodField()
+
     class Meta:
         model = Address
         fields = [
             "id",
+            "public_id",
             "street_address",
             "street_address_2",
             "city",
@@ -53,6 +115,9 @@ class AddressSerializer(serializers.ModelSerializer):
             "country",
             "full_address_text",
         ]
+
+    def get_public_id(self, obj):
+        return str(obj.public_id) if obj.public_id else None
 
 
 # ============================================================================
@@ -76,9 +141,11 @@ class RegularProfileSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
     pet_type = PetTypeSerializer(read_only=True)
     profile_type = serializers.SerializerMethodField()
+    public_id = serializers.SerializerMethodField()
     username = serializers.CharField(source='profile_ptr.username', read_only=True)
     user = serializers.PrimaryKeyRelatedField(source='profile_ptr.user', read_only=True)
     is_active = serializers.BooleanField(source='profile_ptr.is_active', read_only=True)
+    is_private = serializers.BooleanField(source='profile_ptr.is_private', read_only=True)
     created_at = serializers.DateTimeField(source='profile_ptr.created_at', read_only=True)
     updated_at = serializers.DateTimeField(source='profile_ptr.updated_at', read_only=True)
 
@@ -86,6 +153,7 @@ class RegularProfileSerializer(serializers.ModelSerializer):
         model = RegularProfile
         fields = [
             "id",
+            "public_id",
             "username",
             "user",
             "name",
@@ -94,14 +162,18 @@ class RegularProfileSerializer(serializers.ModelSerializer):
             "pet_type",
             "image",
             "is_active",
+            "is_private",
             "created_at",
             "updated_at",
             "profile_type",
         ]
-        read_only_fields = ["id", "username", "user", "image", "is_active", "created_at", "updated_at", "profile_type"]
+        read_only_fields = ["id", "username", "user", "image", "is_active", "is_private", "created_at", "updated_at", "profile_type"]
 
     def get_profile_type(self, obj) -> Literal["regular"]:
         return "regular"
+
+    def get_public_id(self, obj):
+        return str(obj.public_id) if obj.public_id else None
 
     def get_image(self, obj):
         """Get image from the parent Profile."""
@@ -124,8 +196,8 @@ class RegularProfileCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RegularProfile
-        fields = ["id", "username", "user", "name", "about", "breed", "pet_type"]
-        read_only_fields = ["id"]
+        fields = ["id", "public_id", "username", "user", "name", "about", "breed", "pet_type"]
+        read_only_fields = ["id", "public_id"]
 
     def create(self, validated_data):
         """Create RegularProfile (which also creates the base Profile)."""
@@ -154,19 +226,25 @@ class RegularProfileUpdateSerializer(serializers.ModelSerializer):
     name = serializers.CharField(required=False, allow_blank=True)
     about = serializers.CharField(required=False, allow_blank=True)
     breed = serializers.CharField(required=False, allow_blank=True)
+    is_private = serializers.BooleanField(required=False)
     pet_type = serializers.PrimaryKeyRelatedField(
         queryset=PetType.objects.all(), required=False, allow_null=True
     )
 
     class Meta:
         model = RegularProfile
-        fields = ["username", "name", "about", "breed", "pet_type"]
+        fields = ["username", "name", "about", "breed", "pet_type", "is_private"]
 
     def update(self, instance, validated_data):
         """Update RegularProfile and parent Profile fields."""
         # Update parent Profile fields if provided
         if 'username' in validated_data:
             instance.profile_ptr.username = validated_data.pop('username')
+        if 'is_private' in validated_data:
+            instance.profile_ptr.is_private = validated_data.pop('is_private')
+        
+        # Save parent if any parent fields were updated
+        if 'username' in self.initial_data or 'is_private' in self.initial_data:
             instance.profile_ptr.save()
             # Refresh to prevent child save from overwriting parent with cached values
             instance.refresh_from_db()
@@ -189,8 +267,13 @@ class RegularProfileDetailedSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
     pet_type = PetTypeSerializer(read_only=True)
     profile_type = serializers.SerializerMethodField()
+    public_id = serializers.SerializerMethodField()
     username = serializers.CharField(source='profile_ptr.username', read_only=True)
+    is_private = serializers.BooleanField(source='profile_ptr.is_private', read_only=True)
     is_following = serializers.SerializerMethodField()
+    follows_you = serializers.SerializerMethodField()
+    has_requested_follow = serializers.SerializerMethodField()
+    can_view_posts = serializers.SerializerMethodField()
     posts_count = serializers.SerializerMethodField()
     followers_count = serializers.SerializerMethodField()
     following_count = serializers.SerializerMethodField()
@@ -199,13 +282,18 @@ class RegularProfileDetailedSerializer(serializers.ModelSerializer):
         model = RegularProfile
         fields = [
             "id",
+            "public_id",
             "username",
             "name",
             "about",
             "breed",
             "pet_type",
             "image",
+            "is_private",
             "is_following",
+            "follows_you",
+            "has_requested_follow",
+            "can_view_posts",
             "posts_count",
             "followers_count",
             "following_count",
@@ -215,6 +303,9 @@ class RegularProfileDetailedSerializer(serializers.ModelSerializer):
     def get_profile_type(self, obj) -> Literal["regular"]:
         return "regular"
 
+    def get_public_id(self, obj):
+        return str(obj.public_id) if obj.public_id else None
+
     def get_image(self, obj):
         """Get image from the parent Profile."""
         if hasattr(obj.profile_ptr, 'image'):
@@ -223,18 +314,49 @@ class RegularProfileDetailedSerializer(serializers.ModelSerializer):
 
     def get_is_following(self, obj) -> bool:
         """Check if requesting profile is following this profile."""
-        requesting_profile = self.context["request"].headers.get("auth-profile-id")
-        if requesting_profile:
-            return obj.profile_ptr.following.filter(followed_by=requesting_profile).exists()
+        current_profile = getattr(self.context["request"], "current_profile", None)
+        if current_profile:
+            return obj.profile_ptr.following.filter(followed_by=current_profile).exists()
+        return False
+
+    def get_follows_you(self, obj) -> bool:
+        """Check if this profile is following the requesting profile."""
+        current_profile = getattr(self.context["request"], "current_profile", None)
+        if current_profile:
+            return obj.profile_ptr.followers.filter(followed=current_profile).exists()
+        return False
+
+    def get_has_requested_follow(self, obj) -> bool:
+        """Check if requesting profile has a pending follow request to this profile."""
+        current_profile = getattr(self.context["request"], "current_profile", None)
+        if current_profile:
+            return FollowRequest.objects.filter(
+                requester=current_profile,
+                target=obj.profile_ptr
+            ).exists()
+        return False
+
+    def get_can_view_posts(self, obj) -> bool:
+        """Check if requesting profile can view this profile's posts."""
+        current_profile = getattr(self.context["request"], "current_profile", None)
+        # Can always view own posts
+        if current_profile and obj.profile_ptr == current_profile:
+            return True
+        # Public profiles are visible to all
+        if not obj.profile_ptr.is_private:
+            return True
+        # Private profiles require following
+        if current_profile:
+            return obj.profile_ptr.following.filter(followed_by=current_profile).exists()
         return False
 
     def get_posts_count(self, obj) -> int:
         """Get count of posts for this profile."""
-        requesting_profile = self.context["request"].headers.get("auth-profile-id")
+        current_profile = getattr(self.context["request"], "current_profile", None)
         posts = obj.profile_ptr.posts.all()
 
         # if profile is fetching own posts, return all including reported inappropriate
-        if str(obj.profile_ptr.id) == str(requesting_profile):
+        if current_profile and obj.profile_ptr == current_profile:
             return posts.count()
         # filter posts that have been reported as inappropriate from count
         return posts.filter(~Q(reports__reason__id=1)).count()
@@ -258,9 +380,11 @@ class BusinessProfileSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
     address = AddressSerializer(read_only=True)
     profile_type = serializers.SerializerMethodField()
+    public_id = serializers.SerializerMethodField()
     username = serializers.CharField(source='profile_ptr.username', read_only=True)
     user = serializers.PrimaryKeyRelatedField(source='profile_ptr.user', read_only=True)
     is_active = serializers.BooleanField(source='profile_ptr.is_active', read_only=True)
+    is_private = serializers.BooleanField(source='profile_ptr.is_private', read_only=True)
     created_at = serializers.DateTimeField(source='profile_ptr.created_at', read_only=True)
     updated_at = serializers.DateTimeField(source='profile_ptr.updated_at', read_only=True)
 
@@ -268,6 +392,7 @@ class BusinessProfileSerializer(serializers.ModelSerializer):
         model = BusinessProfile
         fields = [
             "id",
+            "public_id",
             "username",
             "user",
             "business_name",
@@ -282,17 +407,21 @@ class BusinessProfileSerializer(serializers.ModelSerializer):
             "business_hours",
             "image",
             "is_active",
+            "is_private",
             "created_at",
             "updated_at",
             "profile_type",
         ]
         read_only_fields = [
             "id", "username", "user", "image", "verified", "subscription_tier",
-            "analytics_enabled", "is_active", "created_at", "updated_at", "profile_type"
+            "analytics_enabled", "is_active", "is_private", "created_at", "updated_at", "profile_type"
         ]
 
     def get_profile_type(self, obj) -> Literal["business"]:
         return "business"
+
+    def get_public_id(self, obj):
+        return str(obj.public_id) if obj.public_id else None
 
     def get_image(self, obj):
         """Get image from the parent Profile."""
@@ -317,6 +446,7 @@ class BusinessProfileCreateSerializer(serializers.ModelSerializer):
         model = BusinessProfile
         fields = [
             "id",
+            "public_id",
             "username",
             "user",
             "business_name",
@@ -326,7 +456,7 @@ class BusinessProfileCreateSerializer(serializers.ModelSerializer):
             "phone",
             "business_hours",
         ]
-        read_only_fields = ["id"]
+        read_only_fields = ["id", "public_id"]
 
     def create(self, validated_data):
         """Create BusinessProfile (which also creates the base Profile)."""
@@ -360,6 +490,7 @@ class BusinessProfileUpdateSerializer(serializers.ModelSerializer):
     website = serializers.URLField(required=False, allow_blank=True)
     phone = serializers.CharField(required=False, allow_blank=True)
     business_hours = serializers.JSONField(required=False)
+    is_private = serializers.BooleanField(required=False)
 
     class Meta:
         model = BusinessProfile
@@ -371,6 +502,7 @@ class BusinessProfileUpdateSerializer(serializers.ModelSerializer):
             "website",
             "phone",
             "business_hours",
+            "is_private",
         ]
 
     def update(self, instance, validated_data):
@@ -378,6 +510,11 @@ class BusinessProfileUpdateSerializer(serializers.ModelSerializer):
         # Update parent Profile fields if provided
         if 'username' in validated_data:
             instance.profile_ptr.username = validated_data.pop('username')
+        if 'is_private' in validated_data:
+            instance.profile_ptr.is_private = validated_data.pop('is_private')
+        
+        # Save parent if any parent fields were updated
+        if 'username' in self.initial_data or 'is_private' in self.initial_data:
             instance.profile_ptr.save()
             # Refresh to prevent child save from overwriting parent with cached values
             instance.refresh_from_db()
@@ -400,8 +537,13 @@ class BusinessProfileDetailedSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
     address = AddressSerializer(read_only=True)
     profile_type = serializers.SerializerMethodField()
+    public_id = serializers.SerializerMethodField()
     username = serializers.CharField(source='profile_ptr.username', read_only=True)
+    is_private = serializers.BooleanField(source='profile_ptr.is_private', read_only=True)
     is_following = serializers.SerializerMethodField()
+    follows_you = serializers.SerializerMethodField()
+    has_requested_follow = serializers.SerializerMethodField()
+    can_view_posts = serializers.SerializerMethodField()
     posts_count = serializers.SerializerMethodField()
     followers_count = serializers.SerializerMethodField()
     following_count = serializers.SerializerMethodField()
@@ -410,6 +552,7 @@ class BusinessProfileDetailedSerializer(serializers.ModelSerializer):
         model = BusinessProfile
         fields = [
             "id",
+            "public_id",
             "username",
             "business_name",
             "business_category",
@@ -422,7 +565,11 @@ class BusinessProfileDetailedSerializer(serializers.ModelSerializer):
             "analytics_enabled",
             "business_hours",
             "image",
+            "is_private",
             "is_following",
+            "follows_you",
+            "has_requested_follow",
+            "can_view_posts",
             "posts_count",
             "followers_count",
             "following_count",
@@ -432,6 +579,9 @@ class BusinessProfileDetailedSerializer(serializers.ModelSerializer):
     def get_profile_type(self, obj) -> Literal["business"]:
         return "business"
 
+    def get_public_id(self, obj):
+        return str(obj.public_id) if obj.public_id else None
+
     def get_image(self, obj):
         """Get image from the parent Profile."""
         if hasattr(obj.profile_ptr, 'image'):
@@ -440,18 +590,49 @@ class BusinessProfileDetailedSerializer(serializers.ModelSerializer):
 
     def get_is_following(self, obj) -> bool:
         """Check if requesting profile is following this profile."""
-        requesting_profile = self.context["request"].headers.get("auth-profile-id")
-        if requesting_profile:
-            return obj.profile_ptr.following.filter(followed_by=requesting_profile).exists()
+        current_profile = getattr(self.context["request"], "current_profile", None)
+        if current_profile:
+            return obj.profile_ptr.following.filter(followed_by=current_profile).exists()
+        return False
+
+    def get_follows_you(self, obj) -> bool:
+        """Check if this profile is following the requesting profile."""
+        current_profile = getattr(self.context["request"], "current_profile", None)
+        if current_profile:
+            return obj.profile_ptr.followers.filter(followed=current_profile).exists()
+        return False
+
+    def get_has_requested_follow(self, obj) -> bool:
+        """Check if requesting profile has a pending follow request to this profile."""
+        current_profile = getattr(self.context["request"], "current_profile", None)
+        if current_profile:
+            return FollowRequest.objects.filter(
+                requester=current_profile,
+                target=obj.profile_ptr
+            ).exists()
+        return False
+
+    def get_can_view_posts(self, obj) -> bool:
+        """Check if requesting profile can view this profile's posts."""
+        current_profile = getattr(self.context["request"], "current_profile", None)
+        # Can always view own posts
+        if current_profile and obj.profile_ptr == current_profile:
+            return True
+        # Public profiles are visible to all
+        if not obj.profile_ptr.is_private:
+            return True
+        # Private profiles require following
+        if current_profile:
+            return obj.profile_ptr.following.filter(followed_by=current_profile).exists()
         return False
 
     def get_posts_count(self, obj) -> int:
         """Get count of posts for this profile."""
-        requesting_profile = self.context["request"].headers.get("auth-profile-id")
+        current_profile = getattr(self.context["request"], "current_profile", None)
         posts = obj.profile_ptr.posts.all()
 
         # if profile is fetching own posts, return all including reported inappropriate
-        if str(obj.profile_ptr.id) == str(requesting_profile):
+        if current_profile and obj.profile_ptr == current_profile:
             return posts.count()
         # filter posts that have been reported as inappropriate from count
         return posts.filter(~Q(reports__reason__id=1)).count()
@@ -477,6 +658,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     image = ProfileImageSerializer(read_only=True)
     profile_type = serializers.SerializerMethodField()
+    public_id = serializers.SerializerMethodField()
     name = serializers.SerializerMethodField()
     about = serializers.SerializerMethodField()
     breed = serializers.SerializerMethodField()
@@ -484,8 +666,11 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ["id", "username", "name", "about", "image", "breed", "pet_type", "profile_type"]
-        read_only_fields = ["id", "image", "profile_type", "name", "about", "breed", "pet_type"]
+        fields = ["id", "public_id", "username", "name", "about", "image", "breed", "pet_type", "is_private", "profile_type"]
+        read_only_fields = ["id", "image", "profile_type", "name", "about", "breed", "pet_type", "is_private"]
+
+    def get_public_id(self, obj):
+        return str(obj.public_id) if obj.public_id else None
 
     def get_profile_type(self, obj) -> Literal["regular", "business"]:
         """Returns 'regular' or 'business'."""
@@ -528,12 +713,16 @@ class ProfileOptionSerializer(serializers.ModelSerializer):
 
     image = ProfileImageSerializer(read_only=True)
     profile_type = serializers.SerializerMethodField()
+    public_id = serializers.SerializerMethodField()
     name = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
-        fields = ["id", "username", "image", "name", "profile_type"]
+        fields = ["id", "public_id", "username", "image", "name", "profile_type"]
         read_only_fields = ["profile_type", "name"]
+
+    def get_public_id(self, obj):
+        return str(obj.public_id) if obj.public_id else None
 
     def get_profile_type(self, obj) -> Literal["regular", "business"]:
         """Returns 'regular' or 'business'."""
@@ -567,7 +756,7 @@ class ProfileCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ["id", "username", "name", "about", "user", "breed", "pet_type"]
+        fields = ["id", "public_id", "username", "name", "about", "user", "breed", "pet_type"]
 
     def create(self, validated_data):
         """Create RegularProfile (maintains backward compatibility)."""
@@ -593,6 +782,7 @@ class ProfileCreateSerializer(serializers.ModelSerializer):
         """Convert instance to representation."""
         ret = {
             'id': instance.id,
+            'public_id': str(instance.public_id) if instance.public_id else None,
             'username': instance.username,
             'user': instance.user_id,
             'name': '',
@@ -619,14 +809,19 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
     name = serializers.CharField(required=False, allow_blank=True)
     about = serializers.CharField(required=False, allow_blank=True)
     breed = serializers.CharField(required=False, allow_blank=True)
+    is_private = serializers.BooleanField(required=False)
+    public_id = serializers.SerializerMethodField()
     pet_type = serializers.PrimaryKeyRelatedField(
         queryset=PetType.objects.all(), required=False, allow_null=True
     )
 
     class Meta:
         model = Profile
-        fields = ["id", "username", "name", "about", "image", "breed", "pet_type"]
+        fields = ["id", "public_id", "username", "name", "about", "image", "breed", "pet_type", "is_private"]
         read_only_fields = ["id", "image"]
+
+    def get_public_id(self, obj):
+        return str(obj.public_id) if obj.public_id else None
 
     def update(self, instance, validated_data):
         """Update Profile and its child class fields."""        
@@ -636,7 +831,7 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
         breed = validated_data.pop('breed', None)
         pet_type = validated_data.pop('pet_type', None)
 
-        # Update the base Profile fields (username)
+        # Update the base Profile fields (username, is_private)
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
@@ -672,11 +867,15 @@ class ProfileDetailedSerializer(serializers.ModelSerializer):
 
     image = ProfileImageSerializer(read_only=True)
     is_following = serializers.SerializerMethodField()
+    follows_you = serializers.SerializerMethodField()
+    has_requested_follow = serializers.SerializerMethodField()
+    can_view_posts = serializers.SerializerMethodField()
     posts_count = serializers.SerializerMethodField()
     followers_count = serializers.SerializerMethodField()
     following_count = serializers.SerializerMethodField()
     pet_type = serializers.SerializerMethodField()
     profile_type = serializers.SerializerMethodField()
+    public_id = serializers.SerializerMethodField()
     name = serializers.SerializerMethodField()
     about = serializers.SerializerMethodField()
     breed = serializers.SerializerMethodField()
@@ -685,11 +884,16 @@ class ProfileDetailedSerializer(serializers.ModelSerializer):
         model = Profile
         fields = [
             "id",
+            "public_id",
             "username",
             "name",
             "about",
             "image",
+            "is_private",
             "is_following",
+            "follows_you",
+            "has_requested_follow",
+            "can_view_posts",
             "posts_count",
             "followers_count",
             "following_count",
@@ -701,6 +905,9 @@ class ProfileDetailedSerializer(serializers.ModelSerializer):
     def get_profile_type(self, obj) -> Literal["regular", "business"]:
         """Returns 'regular' or 'business'."""
         return obj.get_profile_type()
+
+    def get_public_id(self, obj):
+        return str(obj.public_id) if obj.public_id else None
 
     def get_name(self, obj):
         """Get name from the specific profile type."""
@@ -732,18 +939,49 @@ class ProfileDetailedSerializer(serializers.ModelSerializer):
 
     def get_is_following(self, obj) -> bool:
         # boolean - is requesting profile following the profile being fetched
-        requesting_profile = self.context["request"].headers.get("auth-profile-id")
+        current_profile = getattr(self.context["request"], "current_profile", None)
 
-        if requesting_profile:
-            return obj.following.filter(followed_by=requesting_profile).exists()
+        if current_profile:
+            return obj.following.filter(followed_by=current_profile).exists()
+        return False
+
+    def get_follows_you(self, obj) -> bool:
+        """Check if this profile is following the requesting profile."""
+        current_profile = getattr(self.context["request"], "current_profile", None)
+        if current_profile:
+            return obj.followers.filter(followed=current_profile).exists()
+        return False
+
+    def get_has_requested_follow(self, obj) -> bool:
+        """Check if requesting profile has a pending follow request to this profile."""
+        current_profile = getattr(self.context["request"], "current_profile", None)
+        if current_profile:
+            return FollowRequest.objects.filter(
+                requester=current_profile,
+                target=obj
+            ).exists()
+        return False
+
+    def get_can_view_posts(self, obj) -> bool:
+        """Check if requesting profile can view this profile's posts."""
+        current_profile = getattr(self.context["request"], "current_profile", None)
+        # Can always view own posts
+        if current_profile and obj == current_profile:
+            return True
+        # Public profiles are visible to all
+        if not obj.is_private:
+            return True
+        # Private profiles require following
+        if current_profile:
+            return obj.following.filter(followed_by=current_profile).exists()
         return False
 
     def get_posts_count(self, obj) -> int:
-        requesting_profile = self.context["request"].headers.get("auth-profile-id")
+        current_profile = getattr(self.context["request"], "current_profile", None)
         posts = obj.posts.all()
 
         # if profile is fetching own posts, return all including reported inappropriate
-        if str(obj.id) == str(requesting_profile):
+        if current_profile and obj == current_profile:
             return posts.count()
         # filter posts that have been reported as inappropriate from count
         return posts.filter(~Q(reports__reason__id=1)).count()
@@ -766,17 +1004,23 @@ class SearchProfileSerializer(serializers.ModelSerializer):
 
     image = ProfileImageSerializer(read_only=True)
     profile_type = serializers.SerializerMethodField()
+    public_id = serializers.SerializerMethodField()
     name = serializers.SerializerMethodField()
     is_following = serializers.SerializerMethodField()
+    follows_you = serializers.SerializerMethodField()
+    has_requested_follow = serializers.SerializerMethodField()
     about = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
-        fields = ["id", "username", "name", "image", "is_following", "profile_type", "about"]
+        fields = ["id", "public_id", "username", "name", "image", "is_private", "is_following", "follows_you", "has_requested_follow", "profile_type", "about"]
 
     def get_profile_type(self, obj) -> Literal["regular", "business"]:
         """Returns 'regular' or 'business'."""
         return obj.get_profile_type()
+
+    def get_public_id(self, obj):
+        return str(obj.public_id) if obj.public_id else None
 
     def get_name(self, obj):
         """Get name from the specific profile type."""
@@ -795,9 +1039,38 @@ class SearchProfileSerializer(serializers.ModelSerializer):
         return ""
 
     def get_is_following(self, obj) -> bool:
-        # boolean - is requesting profile following the profile being fetched
+        """Check if requesting profile is following this profile."""
+        # Use annotation if available (optimized for list views)
+        if hasattr(obj, '_is_following'):
+            return obj._is_following
+        # Fallback to query (for single object views)
         profile_id = self.context.get("profile_id")
         if profile_id:
             return obj.following.filter(followed_by=profile_id).exists()
+        return False
+
+    def get_follows_you(self, obj) -> bool:
+        """Check if this profile is following the requesting profile."""
+        # Use annotation if available (optimized for list views)
+        if hasattr(obj, '_follows_you'):
+            return obj._follows_you
+        # Fallback to query (for single object views)
+        profile_id = self.context.get("profile_id")
+        if profile_id:
+            return obj.followers.filter(followed=profile_id).exists()
+        return False
+
+    def get_has_requested_follow(self, obj) -> bool:
+        """Check if requesting profile has a pending follow request to this profile."""
+        # Use annotation if available (optimized for list views)
+        if hasattr(obj, '_has_requested_follow'):
+            return obj._has_requested_follow
+        # Fallback to query (for single object views)
+        profile_id = self.context.get("profile_id")
+        if profile_id:
+            return FollowRequest.objects.filter(
+                requester_id=profile_id,
+                target=obj
+            ).exists()
         return False
 

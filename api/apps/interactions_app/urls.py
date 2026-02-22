@@ -51,19 +51,51 @@ urlpatterns = [
         name="create_follow",
     ),
     path(
-        "follow/<int:profile_id>/",
+        "follow/<str:profile_public_id>/",
         views.DestroyFollowView.as_view(),
         name="destroy_follow",
     ),
     path(
-        "followers/<int:id>/",
+        "follower/<int:profile_id>/remove/",
+        views.RemoveFollowerView.as_view(),
+        name="remove_follower",
+    ),
+    path(
+        "followers/<str:public_id>/",
         views.ListFollowersView.as_view(),
         name="list_followers",
     ),
     path(
-        "following/<int:id>/",
+        "following/<str:public_id>/",
         views.ListFollowingView.as_view(),
         name="list_following",
+    ),
+    
+    # Follow Requests
+    path(
+        "follow-requests/",
+        views.ListFollowRequestsView.as_view(),
+        name="list_follow_requests",
+    ),
+    path(
+        "follow-requests/sent/",
+        views.ListSentFollowRequestsView.as_view(),
+        name="list_sent_follow_requests",
+    ),
+    path(
+        "follow-request/<int:pk>/accept/",
+        views.AcceptFollowRequestView.as_view(),
+        name="accept_follow_request",
+    ),
+    path(
+        "follow-request/<int:pk>/decline/",
+        views.DeclineFollowRequestView.as_view(),
+        name="decline_follow_request",
+    ),
+    path(
+        "follow-request/<str:public_id>/cancel/",
+        views.CancelFollowRequestView.as_view(),
+        name="cancel_follow_request",
     ),
 ]
 
