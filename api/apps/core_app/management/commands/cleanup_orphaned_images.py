@@ -13,7 +13,9 @@ from apps.core_app.storage_utils import (
 
 
 class Command(BaseCommand):
-    help = "Removes orphaned images from storage that are not referenced in fixture files."
+    help = (
+        "Removes orphaned images from storage that are not referenced in fixture files."
+    )
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -50,7 +52,9 @@ class Command(BaseCommand):
 
         if not valid_images:
             self.stdout.write(
-                self.style.WARNING("No valid images found in source. Aborting to prevent accidental deletion.")
+                self.style.WARNING(
+                    "No valid images found in source. Aborting to prevent accidental deletion."
+                )
             )
             return
 
@@ -130,7 +134,9 @@ class Command(BaseCommand):
         valid_images = set()
 
         # Get all PostImage paths
-        for post_image in PostImage.objects.exclude(image="").exclude(image__isnull=True):
+        for post_image in PostImage.objects.exclude(image="").exclude(
+            image__isnull=True
+        ):
             if post_image.image and post_image.image.name:
                 valid_images.add(post_image.image.name)
             # Also include original_key if it exists (shouldn't normally, but just in case)
@@ -141,7 +147,9 @@ class Command(BaseCommand):
 
         # Get all PostImageScaled paths
         post_scaled_count = 0
-        for scaled_image in PostImageScaled.objects.exclude(image="").exclude(image__isnull=True):
+        for scaled_image in PostImageScaled.objects.exclude(image="").exclude(
+            image__isnull=True
+        ):
             if scaled_image.image and scaled_image.image.name:
                 valid_images.add(scaled_image.image.name)
                 post_scaled_count += 1
@@ -150,7 +158,9 @@ class Command(BaseCommand):
 
         # Get all ProfileImage paths
         profile_count = 0
-        for profile_image in ProfileImage.objects.exclude(image="").exclude(image__isnull=True):
+        for profile_image in ProfileImage.objects.exclude(image="").exclude(
+            image__isnull=True
+        ):
             if profile_image.image and profile_image.image.name:
                 valid_images.add(profile_image.image.name)
                 profile_count += 1
@@ -159,12 +169,16 @@ class Command(BaseCommand):
 
         # Get all ProfileImageScaled paths
         profile_scaled_count = 0
-        for scaled_image in ProfileImageScaled.objects.exclude(image="").exclude(image__isnull=True):
+        for scaled_image in ProfileImageScaled.objects.exclude(image="").exclude(
+            image__isnull=True
+        ):
             if scaled_image.image and scaled_image.image.name:
                 valid_images.add(scaled_image.image.name)
                 profile_scaled_count += 1
 
-        self.stdout.write(f"Found {profile_scaled_count} profile scaled images in database.")
+        self.stdout.write(
+            f"Found {profile_scaled_count} profile scaled images in database."
+        )
         self.stdout.write(f"Total valid images: {len(valid_images)}")
 
         return valid_images
@@ -185,8 +199,13 @@ class Command(BaseCommand):
             )
             return
 
-        # List all objects in the images/{environment}/ prefix
-        prefix = f"images/{environment}/"
+        # List all objects in the images/{environment}/
+        if environment == "dev" or environment == "e2e":
+            prefix = f"images/{environment}/"
+        else:
+            # staging env does not have the 'staging' prefix
+            prefix = f"images/"
+
         storage_images = set()
 
         self.stdout.write(f"Listing objects in R2 bucket with prefix: {prefix}")
@@ -219,9 +238,7 @@ class Command(BaseCommand):
                     self.stdout.write(f"  Deleted: {orphan}")
                     deleted_count += 1
                 else:
-                    self.stdout.write(
-                        self.style.ERROR(f"  Failed to delete: {orphan}")
-                    )
+                    self.stdout.write(self.style.ERROR(f"  Failed to delete: {orphan}"))
 
         if dry_run:
             self.stdout.write(
@@ -235,4 +252,3 @@ class Command(BaseCommand):
                     f"\nSuccessfully deleted {deleted_count} orphaned images from R2."
                 )
             )
-
