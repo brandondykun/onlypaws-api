@@ -1,1 +1,17 @@
-[]
+[
+  {
+    "model": "moderation_app.postreport",
+    "pk": 1,
+    "fields": {
+      "post": 100,
+      "reporter": 4,
+      "reason": 2,
+      "details": "This post is about humans at the beach and is not pet related.",
+      "status": "PENDING",
+      "created_at": "2026-02-23T00:01:28.195Z",
+      "updated_at": "2026-02-23T00:01:28.195Z",
+      "resolved_by": null,
+      "resolution_note": ""
+    }
+  }
+]
