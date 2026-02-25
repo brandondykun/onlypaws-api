@@ -1,6 +1,7 @@
 """
 Moderation app models.
 """
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -60,4 +61,50 @@ class PostReport(models.Model):
 
     def __str__(self):
         return f"Report on {self.post} by {self.reporter}"
+
+
+class ProfanityLog(models.Model):
+    """
+    Log of profanity detections for monitoring and tuning the profanity service.
+    """
+
+    class ContentType(models.TextChoices):
+        CAPTION = "CAPTION", _("Caption")
+        COMMENT = "COMMENT", _("Comment")
+        USERNAME = "USERNAME", _("Username")
+        ABOUT = "ABOUT", _("About Text")
+        NAME = "NAME", _("Name")
+        BREED = "BREED", _("Breed")
+        PRE_UPLOAD_CHECK = "PRE_UPLOAD_CHECK", _("Pre-Upload Text Check")
+
+    class DetectionMethod(models.TextChoices):
+        ML = "ML", _("ML Probability")
+        WORD_MATCH = "WORD_MATCH", _("Exact Word Match")
+        SUBSTRING = "SUBSTRING", _("Substring Match")
+        SHORT_MATCH = "SHORT_MATCH", _("Start/End Match")
+        FUZZY = "FUZZY", _("Fuzzy Match")
+
+    original_text = models.TextField()
+    content_type = models.CharField(max_length=20, choices=ContentType.choices)
+    detection_method = models.CharField(max_length=20, choices=DetectionMethod.choices)
+    detection_details = models.JSONField(default=dict)
+    profile = models.ForeignKey(
+        "profile_app.Profile",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="profanity_logs",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["content_type"]),
+            models.Index(fields=["detection_method"]),
+            models.Index(fields=["created_at"]),
+        ]
+
+    def __str__(self):
+        return f"ProfanityLog #{self.id} [{self.content_type}] {self.detection_method}"
 

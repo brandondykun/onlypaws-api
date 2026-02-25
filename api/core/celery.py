@@ -36,6 +36,8 @@ app.conf.task_routes = {
     "apps.notifications_app.tasks.create_follow_notification_task": {"queue": "default"},
     "apps.notifications_app.tasks.send_system_message_task": {"queue": "default"},
     "apps.notifications_app.tasks.cleanup_old_notifications_task": {"queue": "maintenance"},
+    # Moderation tasks go to default queue
+    "apps.moderation_app.tasks.log_profanity_detection_task": {"queue": "default"},
 }
 
 # Configure worker settings for different task types
@@ -106,6 +108,12 @@ app.conf.task_annotations = {
         "rate_limit": "1/h",  # Run once per hour max
         "time_limit": 300,  # 5 minutes timeout
         "soft_time_limit": 270,
+    },
+    # Moderation task settings - best-effort logging
+    "apps.moderation_app.tasks.log_profanity_detection_task": {
+        "rate_limit": "200/m",
+        "time_limit": 30,
+        "soft_time_limit": 25,
     },
 }
 

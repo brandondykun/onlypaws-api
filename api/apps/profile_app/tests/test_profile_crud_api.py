@@ -2,6 +2,8 @@
 Tests for profile CRUD API operations.
 """
 
+from unittest.mock import patch
+
 from django.test import TestCase
 from rest_framework.test import APIClient
 from rest_framework import status
@@ -128,3 +130,43 @@ class PrivateProfileApiTests(TestCase):
 
         profile = RegularProfile.objects.get(id=self.profile.id)
         self.assertEqual(profile.username, updated_profile["username"])
+
+    @patch("apps.profile_app.serializers.check_and_log_username")
+    def test_update_profile_with_profane_username_returns_400(self, mock_check):
+        """Test that updating a profile with a profane username returns 400."""
+        mock_check.return_value = True
+        url = retrieve_update_profile_url(self.profile)
+        res = self.client.patch(url, {"username": "badword"})
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    @patch("apps.profile_app.serializers.check_and_log_username")
+    def test_update_profile_with_profane_name_returns_400(self, mock_check):
+        """Test that updating a profile with a profane name returns 400."""
+        mock_check.return_value = True
+        url = retrieve_update_profile_url(self.profile)
+        res = self.client.patch(url, {"name": "badname"})
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    @patch("apps.profile_app.serializers.check_and_log_text")
+    def test_update_profile_with_profane_about_returns_400(self, mock_check):
+        """Test that updating a profile with profane about text returns 400."""
+        mock_check.return_value = True
+        url = retrieve_update_profile_url(self.profile)
+        res = self.client.patch(url, {"about": "some bad about text"})
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    @patch("apps.profile_app.serializers.check_and_log_username")
+    def test_create_profile_with_profane_username_returns_400(self, mock_check):
+        """Test that creating a profile with a profane username returns 400."""
+        mock_check.return_value = True
+        new_profile = {
+            "username": "badusername",
+            "name": "Test Name",
+            "about": "Test about text.",
+        }
+        res = self.client.post(create_profile_url(), new_profile)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)

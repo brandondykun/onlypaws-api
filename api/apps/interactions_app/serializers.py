@@ -6,6 +6,7 @@ from rest_framework import serializers
 from apps.interactions_app.models import Like, Comment, CommentLike, Follow, FollowRequest
 from apps.profile_app.serializers import ProfileSerializer
 from apps.posts_app.models import Post
+from apps.core_app.profanity_service import check_and_log_text
 from drf_spectacular.utils import extend_schema_field
 
 
@@ -44,6 +45,15 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         fields = "__all__"
         read_only_fields = ["id", "created_at"]
+
+    def validate_text(self, value):
+        profile = getattr(self.context.get("request"), "current_profile", None)
+        profile_id = profile.id if profile else None
+        if check_and_log_text(value, "COMMENT", profile_id=profile_id):
+            raise serializers.ValidationError(
+                "That comment contains inappropriate language."
+            )
+        return value
 
 
 class CommentDetailedSerializer(serializers.ModelSerializer):

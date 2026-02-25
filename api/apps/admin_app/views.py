@@ -12,7 +12,7 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 from apps.profile_app.models import Profile
 from apps.feedback_app.models import Feedback
-from apps.moderation_app.models import PostReport, ReportReason
+from apps.moderation_app.models import PostReport, ReportReason, ProfanityLog
 from apps.announcements_app.models import Announcement
 from .serializers import (
     AdminUserSerializer,
@@ -23,6 +23,7 @@ from .serializers import (
     AdminAnnouncementDetailSerializer,
     AdminReportReasonSerializer,
     AdminReportReasonDetailSerializer,
+    AdminProfanityLogSerializer,
 )
 from .pagination import AdminPagination
 
@@ -306,4 +307,74 @@ class AdminReportReasonDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return ReportReason.objects.all()
+
+
+@extend_schema(
+    summary="List profanity detection logs",
+    description="Fetch a paginated list of profanity detection logs. Supports filtering by content_type and detection_method. Admin only.",
+    parameters=[
+        OpenApiParameter(
+            name="content_type",
+            description="Filter by content type (CAPTION, COMMENT, USERNAME, ABOUT, NAME, BREED, PRE_UPLOAD_CHECK)",
+            required=False,
+            type=str,
+        ),
+        OpenApiParameter(
+            name="detection_method",
+            description="Filter by detection method (ML, WORD_MATCH, SUBSTRING, SHORT_MATCH, FUZZY)",
+            required=False,
+            type=str,
+        ),
+        OpenApiParameter(
+            name="search",
+            description="Search by original text or profile username",
+            required=False,
+            type=str,
+        ),
+    ],
+)
+@extend_schema(
+    summary="Get or delete a profanity log",
+    description="Fetch or delete a specific profanity log by ID. Admin only.",
+)
+class AdminProfanityLogDetailView(generics.RetrieveDestroyAPIView):
+    """
+    API endpoint for retrieving or deleting a single profanity log.
+    """
+
+    permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
+    serializer_class = AdminProfanityLogSerializer
+
+    def get_queryset(self):
+        return ProfanityLog.objects.select_related("profile")
+
+
+class AdminProfanityLogListView(generics.ListAPIView):
+    """
+    API endpoint for listing profanity detection logs.
+
+    Supports:
+    - Pagination
+    - Search by original text or profile username
+    - Filtering by content_type and detection_method
+    - Ordering by id, created_at, content_type, detection_method
+    """
+
+    permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
+    serializer_class = AdminProfanityLogSerializer
+    pagination_class = AdminPagination
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ["original_text", "profile__username"]
+    ordering_fields = ["id", "created_at", "content_type", "detection_method"]
+    ordering = ["-created_at"]
+
+    def get_queryset(self):
+        qs = ProfanityLog.objects.select_related("profile")
+        content_type = self.request.query_params.get("content_type")
+        detection_method = self.request.query_params.get("detection_method")
+        if content_type:
+            qs = qs.filter(content_type=content_type)
+        if detection_method:
+            qs = qs.filter(detection_method=detection_method)
+        return qs
 

@@ -3,6 +3,7 @@ Views for the interactions API.
 """
 
 from rest_framework import generics, permissions, status
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
@@ -180,6 +181,8 @@ class CreateCommentView(generics.CreateAPIView):
             return Response(
                 res_serializer.data, status=status.HTTP_201_CREATED, headers=headers
             )
+        except ValidationError:
+            raise
         except Exception as e:
             logger.error(
                 f"Error creating comment on post {post_id}: {str(e)}",

@@ -3,6 +3,7 @@ from rest_framework import serializers
 from apps.posts_app.models import Post, PostImage, SavedPost, PostImageTag, PostImageScaled
 from django.db.models import Q
 from apps.profile_app.serializers import ProfileSerializer, SearchProfileSerializer
+from apps.core_app.profanity_service import check_and_log_text
 from drf_spectacular.utils import extend_schema_field
 
 # Import interaction serializers from interactions_app
@@ -43,11 +44,18 @@ class PrepareUploadResponseSerializer(serializers.Serializer):
 
 class CompletePostSerializer(serializers.Serializer):
     """Serializer for completing a post after images are uploaded."""
-    
+
     caption = serializers.CharField(max_length=1000)
     aspect_ratio = serializers.ChoiceField(choices=Post.AspectRatio.choices, default=Post.AspectRatio.SQUARE)
     ai_generated = serializers.BooleanField(default=False)
     tags = serializers.JSONField(required=False, allow_null=True)
+
+    def validate_caption(self, value):
+        profile = getattr(self.context.get("request"), "current_profile", None)
+        profile_id = profile.id if profile else None
+        if check_and_log_text(value, "CAPTION", profile_id=profile_id):
+            raise serializers.ValidationError("That caption contains inappropriate language.")
+        return value
 
 
 # ============================================================================
@@ -157,6 +165,13 @@ class PostUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = ["caption"]
+
+    def validate_caption(self, value):
+        profile = getattr(self.context.get("request"), "current_profile", None)
+        profile_id = profile.id if profile else None
+        if check_and_log_text(value, "CAPTION", profile_id=profile_id):
+            raise serializers.ValidationError("That caption contains inappropriate language.")
+        return value
 
 
 class PostDetailedSerializer(serializers.ModelSerializer):

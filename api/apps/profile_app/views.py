@@ -141,6 +141,9 @@ class RetrieveUpdateDestroyProfileView(generics.RetrieveAPIView, generics.Update
             instance_serializer = ProfileSerializer(instance)
             logger.info(f"Profile {public_id} updated successfully")
             return Response(instance_serializer.data)
+        except serializers.ValidationError as e:
+            logger.warning(f"Validation error updating profile {public_id}: {str(e)}")
+            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             logger.error(f"Error updating profile {public_id}: {str(e)}")
             return Response(

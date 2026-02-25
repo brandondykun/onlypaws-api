@@ -11,7 +11,7 @@ from apps.profile_app.models import Profile, RegularProfile, ProfileImage, PetTy
 from apps.posts_app.models import Post, PostImage
 from apps.interactions_app.models import Like, Follow, Comment, CommentLike
 from apps.feedback_app.models import Feedback
-from apps.moderation_app.models import PostReport, ReportReason
+from apps.moderation_app.models import PostReport, ReportReason, ProfanityLog
 from apps.announcements_app.models import Announcement
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
@@ -417,7 +417,7 @@ def create_announcement(
     """
     if start_date is None:
         start_date = timezone.now()
-    
+
     return Announcement.objects.create(
         title=title,
         message=message,
@@ -426,4 +426,35 @@ def create_announcement(
         priority=priority,
         is_active=is_active,
         announcement_type=announcement_type,
+    )
+
+
+def create_profanity_log(
+    original_text: str,
+    content_type: str = "COMMENT",
+    detection_method: str = "WORD_MATCH",
+    detection_details: dict = None,
+    profile=None,
+) -> ProfanityLog:
+    """Create and return new ProfanityLog.
+
+    Parameters
+    ----------
+    original_text : str
+        The text that was flagged.
+    content_type : str
+        The type of content (e.g., COMMENT, USERNAME, CAPTION).
+    detection_method : str
+        The method used for detection (e.g., WORD_MATCH, ML).
+    detection_details : dict, optional
+        Additional details about the detection.
+    profile : Profile, optional
+        The profile associated with the log entry.
+    """
+    return ProfanityLog.objects.create(
+        original_text=original_text,
+        content_type=content_type,
+        detection_method=detection_method,
+        detection_details=detection_details or {},
+        profile=profile,
     )

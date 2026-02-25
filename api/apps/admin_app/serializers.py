@@ -9,7 +9,7 @@ from typing import Literal
 from apps.profile_app.models import Profile
 from apps.profile_app.serializers import ProfileImageSerializer, PetTypeSerializer
 from apps.announcements_app.models import Announcement
-from apps.moderation_app.models import ReportReason
+from apps.moderation_app.models import ReportReason, ProfanityLog
 
 User = get_user_model()
 
@@ -259,4 +259,23 @@ class AdminReportReasonDetailSerializer(serializers.ModelSerializer):
             "created_at",
         ]
         read_only_fields = ["id", "created_at"]
+
+
+class AdminProfanityLogSerializer(serializers.ModelSerializer):
+    """Serializer for ProfanityLog objects in admin context."""
+
+    profile_username = serializers.CharField(source="profile.username", default=None)
+
+    class Meta:
+        model = ProfanityLog
+        fields = [
+            "id",
+            "original_text",
+            "content_type",
+            "detection_method",
+            "detection_details",
+            "profile",
+            "profile_username",
+            "created_at",
+        ]
 

@@ -5,7 +5,9 @@ from rest_framework import permissions, mixins, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.views import APIView
 from apps.moderation_app.models import ReportReason, PostReport
+from apps.core_app.profanity_service import check_and_log_text
 from .serializers import (
     ReportReasonSerializer,
     CreatePostReportSerializer,
@@ -220,3 +222,27 @@ class PostReportViewSet(
         # If pagination is disabled, serialize and return all results
         serializer = PostReportDetailSerializer(queryset, many=True)
         return Response(serializer.data)
+
+
+class CheckTextView(APIView):
+    """Check if text contains profanity. Used before uploads to avoid wasted bandwidth."""
+    permission_classes = [permissions.IsAuthenticated]
+
+    @extend_schema(
+        request={"application/json": {"type": "object", "properties": {"text": {"type": "string"}}}},
+        responses={200: {"type": "object", "properties": {"allowed": {"type": "boolean"}, "message": {"type": "string"}}}},
+    )
+    def post(self, request):
+        text = request.data.get("text", "")
+        if not text:
+            return Response({"allowed": True})
+
+        profile = getattr(request, "current_profile", None)
+        profile_id = profile.id if profile else None
+        is_profane = check_and_log_text(text, "PRE_UPLOAD_CHECK", profile_id=profile_id)
+        if is_profane:
+            return Response({
+                "allowed": False,
+                "message": "That text contains inappropriate language."
+            })
+        return Response({"allowed": True})

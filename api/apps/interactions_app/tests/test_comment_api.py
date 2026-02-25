@@ -2,6 +2,8 @@
 Tests for the comment api.
 """
 
+from unittest.mock import patch
+
 from rest_framework import status
 
 from .util import create_comment_url, list_post_comments_url
@@ -95,6 +97,42 @@ class PrivateCommentApiTests(BaseFixtureTestCase):
 
         db_comments = Comment.objects.all()
         self.assertEqual(len(db_comments), starting_comment_count)
+
+    @patch("apps.interactions_app.serializers.check_and_log_text")
+    def test_create_comment_with_profane_text_returns_400(self, mock_check):
+        """Test that creating a comment with profane text returns 400."""
+        mock_check.return_value = True
+        starting_comment_count = len(Comment.objects.all())
+
+        new_comment = {
+            "profileId": self.profile.id,
+            "text": "some text",
+            "parent_comment": "",
+            "reply_to_comment": "",
+        }
+
+        url = create_comment_url(self.post_1.id)
+        res = self.client.post(url, new_comment, HTTP_AUTH_PROFILE_ID=str(self.profile.public_id))
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(len(Comment.objects.all()), starting_comment_count)
+
+    @patch("apps.interactions_app.serializers.check_and_log_text")
+    def test_create_comment_with_clean_text_passes_profanity_check(self, mock_check):
+        """Test that creating a comment with clean text passes profanity check."""
+        mock_check.return_value = False
+
+        new_comment = {
+            "profileId": self.profile.id,
+            "text": "a perfectly clean comment",
+            "parent_comment": "",
+            "reply_to_comment": "",
+        }
+
+        url = create_comment_url(self.post_1.id)
+        res = self.client.post(url, new_comment, HTTP_AUTH_PROFILE_ID=str(self.profile.public_id))
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
 
 
 class PublicCommentApiTests(BaseFixtureTestCase):
