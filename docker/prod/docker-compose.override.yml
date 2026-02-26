@@ -13,6 +13,7 @@ services:
              python manage.py ensure_vector_extension &&
              python manage.py migrate &&
              python manage.py load_report_reasons &&
+             python manage.py load_profile_report_reasons &&
              python manage.py load_pet_types &&
              python manage.py collectstatic --noinput &&
              daphne -b 0.0.0.0 -p 8000 core.asgi:application"

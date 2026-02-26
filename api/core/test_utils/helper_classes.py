@@ -84,10 +84,10 @@ class BaseFixtureTestCase(TestCase):
         )
 
         self.report1 = PostReport.objects.create(
-            post=self.post_4, reporter=self.profile, reason=self.reason1
+            post=self.post_4, reporter=self.user, reason=self.reason1
         )
         self.report2 = PostReport.objects.create(
-            post=self.post_1, reporter=self.profile_2, reason=self.reason1
+            post=self.post_1, reporter=self.user_2, reason=self.reason1
         )
 
         # Add images to posts for testing similar posts functionality

@@ -6,12 +6,15 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from apps.moderation_app.models import ReportReason, PostReport
+from apps.moderation_app.models import ReportReason, PostReport, ProfileReportReason, ProfileReport
 from apps.core_app.profanity_service import check_and_log_text
 from .serializers import (
     ReportReasonSerializer,
     CreatePostReportSerializer,
     PostReportDetailSerializer,
+    ProfileReportReasonSerializer,
+    CreateProfileReportSerializer,
+    ProfileReportDetailSerializer,
 )
 from .pagination import ReportPostsPagination
 from drf_spectacular.utils import (
@@ -98,13 +101,13 @@ class PostReportViewSet(
     queryset = PostReport.objects.all()
 
     def get_queryset(self):
-        requesting_profile = self.request.current_profile
         if self.request.user.is_staff:
             queryset = PostReport.objects.all().order_by("created_at")
         else:
-            queryset = PostReport.objects.filter(reporter=requesting_profile).order_by(
+            queryset = PostReport.objects.filter(reporter=self.request.user).order_by(
                 "-created_at"
             )
+        queryset = queryset.select_related("post__profile", "reason", "reporter")
         return self._apply_status_filter(queryset)
 
     def _apply_status_filter(self, queryset):
@@ -133,7 +136,7 @@ class PostReportViewSet(
             response = super().create(request, *args, **kwargs)
             if response.status_code == 201:
                 logger.info(
-                    f"Post report created by profile {request.current_profile.id}: "
+                    f"Post report created by user {request.user.id}: "
                     f"post {request.data.get('post')}, reason {request.data.get('reason')}"
                 )
             return response
@@ -189,9 +192,7 @@ class PostReportViewSet(
         """
         Endpoint for users to view their own reports
         """
-        requesting_profile = request.current_profile
-
-        queryset = PostReport.objects.filter(reporter=requesting_profile)
+        queryset = PostReport.objects.filter(reporter=request.user)
         queryset = self._apply_status_filter(queryset)
         page = self.paginate_queryset(queryset)
 
@@ -222,6 +223,152 @@ class PostReportViewSet(
         # If pagination is disabled, serialize and return all results
         serializer = PostReportDetailSerializer(queryset, many=True)
         return Response(serializer.data)
+
+
+@extend_schema_view(
+    list=extend_schema(parameters=[auth_profile_param]),
+    retrieve=extend_schema(parameters=[auth_profile_param]),
+)
+class ProfileReportReasonViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet for listing active profile report reasons.
+    Only GET methods are allowed as reasons should be managed via admin.
+    """
+
+    queryset = ProfileReportReason.objects.filter(is_active=True)
+    serializer_class = ProfileReportReasonSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = None
+
+    def list(self, request, *args, **kwargs):
+        if not request.current_profile:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+@extend_schema_view(
+    list=extend_schema(parameters=[auth_profile_param, status_filter_param]),
+    retrieve=extend_schema(
+        parameters=[
+            auth_profile_param,
+            OpenApiParameter(
+                name="id",
+                description="Profile Report ID",
+                required=True,
+                type=int,
+                location=OpenApiParameter.PATH,
+            ),
+        ]
+    ),
+    create=extend_schema(parameters=[auth_profile_param]),
+)
+class ProfileReportViewSet(
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet,
+):
+    """
+    ViewSet for managing profile reports.
+    Users can create reports and view their own reports.
+    Staff can view and manage all reports.
+    """
+
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = ReportPostsPagination
+    queryset = ProfileReport.objects.all()
+
+    def get_queryset(self):
+        if self.request.user.is_staff:
+            queryset = ProfileReport.objects.all().order_by("created_at")
+        else:
+            queryset = ProfileReport.objects.filter(reporter=self.request.user).order_by(
+                "-created_at"
+            )
+        return self._apply_status_filter(queryset)
+
+    def _apply_status_filter(self, queryset):
+        """Apply status filter if provided in query params."""
+        status_param = self.request.query_params.get("status")
+        if status_param:
+            status_param = status_param.upper()
+            if status_param in dict(ProfileReport.ReportStatus.choices):
+                queryset = queryset.filter(status=status_param)
+        return queryset
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return CreateProfileReportSerializer
+        return ProfileReportDetailSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["request"] = self.request
+        return context
+
+    def create(self, request, *args, **kwargs):
+        """Override create to add logging for report creation."""
+        try:
+            response = super().create(request, *args, **kwargs)
+            if response.status_code == 201:
+                logger.info(
+                    f"Profile report created by user {request.user.id}: "
+                    f"profile {request.data.get('profile')}, reason {request.data.get('reason')}"
+                )
+            return response
+        except Exception as e:
+            logger.error(
+                f"Error creating profile report: {str(e)}",
+                exc_info=True
+            )
+            return Response(
+                {"error": "Failed to create report"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    @extend_schema(parameters=[auth_profile_param])
+    @action(
+        detail=True, methods=["patch"], permission_classes=[permissions.IsAdminUser]
+    )
+    def resolve(self, request, pk=None):
+        """
+        Endpoint for staff to resolve a profile report
+        """
+        resolving_profile = request.current_profile
+
+        report = self.get_object()
+        resolution_note = request.data.get("resolution_note", "")
+        request_status = request.data.get("status", ProfileReport.ReportStatus.RESOLVED)
+
+        if request_status not in dict(ProfileReport.ReportStatus.choices):
+            logger.warning(
+                f"Invalid status '{request_status}' provided for profile report {pk} "
+                f"by profile {resolving_profile.id}"
+            )
+            return Response(
+                {"error": "Invalid status"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        old_status = report.status
+        report.status = request_status
+        report.resolution_note = resolution_note
+        report.resolved_by = resolving_profile
+        report.save()
+
+        logger.info(
+            f"Profile report {pk} resolved: status changed from {old_status} to {request_status} "
+            f"by profile {resolving_profile.id}"
+        )
+
+        return Response(ProfileReportDetailSerializer(report).data)
 
 
 class CheckTextView(APIView):

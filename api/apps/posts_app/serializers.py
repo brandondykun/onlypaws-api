@@ -265,8 +265,8 @@ class PostDetailedSerializer(serializers.ModelSerializer):
         return obj.reports.filter(~Q(status="DISMISSED")).count() > 0
 
     def get_is_reported(self, obj) -> bool:
-        current_profile = self.context["request"].current_profile
-        return obj.reports.filter(reporter=current_profile).exists()
+        user = self.context["request"].user
+        return obj.reports.filter(reporter=user).exists()
 
     @extend_schema_field(serializers.ListField(child=serializers.DictField()))
     def get_tagged_profiles(self, obj):

@@ -69,7 +69,7 @@ class PrivatePostReportTests(BaseFixtureTestCase):
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(PostReport.objects.count(), 3)
-        self.assertEqual(PostReport.objects.first().reporter, self.profile)
+        self.assertEqual(PostReport.objects.first().reporter, self.user)
 
     def test_duplicate_report(self):
         """Test that a user cannot report the same post twice"""
@@ -97,7 +97,7 @@ class PrivatePostReportTests(BaseFixtureTestCase):
     def test_staff_resolve_report(self):
         """Test that staff can resolve reports"""
         report = PostReport.objects.create(
-            post=self.post_5, reporter=self.profile_4, reason=self.reason1
+            post=self.post_5, reporter=self.user_4, reason=self.reason1
         )
 
         url = report_resolve_url(report.id)
@@ -131,7 +131,7 @@ class PrivatePostReportTests(BaseFixtureTestCase):
     def test_invalid_report_status(self):
         """Test that invalid status values are rejected"""
         report = PostReport.objects.create(
-            post=self.post_3, reporter=self.profile, reason=self.reason1
+            post=self.post_3, reporter=self.user, reason=self.reason1
         )
 
         url = report_resolve_url(report.id)
@@ -151,7 +151,7 @@ class PrivateNonStaffPostReportTests(BaseFixtureTestCase):
     def test_non_staff_cannot_resolve_report(self):
         """Test that non-staff users cannot resolve reports"""
         report = PostReport.objects.create(
-            post=self.post_8, reporter=self.profile, reason=self.reason1
+            post=self.post_8, reporter=self.user, reason=self.reason1
         )
 
         url = report_resolve_url(report.id)

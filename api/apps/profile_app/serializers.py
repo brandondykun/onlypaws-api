@@ -1014,6 +1014,7 @@ class ProfileDetailedSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
     about = serializers.SerializerMethodField()
     breed = serializers.SerializerMethodField()
+    report_summary = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
@@ -1035,6 +1036,7 @@ class ProfileDetailedSerializer(serializers.ModelSerializer):
             "breed",
             "pet_type",
             "profile_type",
+            "report_summary",
         ]
 
     def get_profile_type(self, obj) -> Literal["regular", "business"]:
@@ -1127,6 +1129,27 @@ class ProfileDetailedSerializer(serializers.ModelSerializer):
     def get_following_count(self, obj) -> int:
         following = obj.followers.all()
         return following.count()
+
+    def get_report_summary(self, obj):
+        """Return anonymous report summary for own profile only."""
+        current_profile = getattr(self.context["request"], "current_profile", None)
+        if not current_profile or obj != current_profile:
+            return None
+        active_reports = obj.profile_reports.filter(
+            status__in=["PENDING", "UNDER_REVIEW"]
+        )
+        count = active_reports.count()
+        if count == 0:
+            return None
+        reasons = list(
+            active_reports.values_list("reason__name", flat=True).distinct()
+        )
+        reasons_str = ", ".join(reasons)
+        return {
+            "active_report_count": count,
+            "reasons": reasons,
+            "message": f"Your profile has been reported for: {reasons_str}.",
+        }
 
 
 # ============================================================================

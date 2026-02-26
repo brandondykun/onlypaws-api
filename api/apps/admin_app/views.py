@@ -12,7 +12,13 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 from apps.profile_app.models import Profile
 from apps.feedback_app.models import Feedback
-from apps.moderation_app.models import PostReport, ReportReason, ProfanityLog
+from apps.moderation_app.models import (
+    PostReport,
+    ReportReason,
+    ProfileReport,
+    ProfileReportReason,
+    ProfanityLog,
+)
 from apps.announcements_app.models import Announcement
 from .serializers import (
     AdminUserSerializer,
@@ -23,6 +29,10 @@ from .serializers import (
     AdminAnnouncementDetailSerializer,
     AdminReportReasonSerializer,
     AdminReportReasonDetailSerializer,
+    AdminProfileReportReasonSerializer,
+    AdminProfileReportReasonDetailSerializer,
+    AdminProfileReportSerializer,
+    AdminProfileReportDetailSerializer,
     AdminProfanityLogSerializer,
 )
 from .pagination import AdminPagination
@@ -66,6 +76,10 @@ class AdminDashboardStatsView(APIView):
                         "type": "integer",
                         "description": "Number of post reports with PENDING status",
                     },
+                    "pending_profile_reports_count": {
+                        "type": "integer",
+                        "description": "Number of profile reports with PENDING status",
+                    },
                 },
             },
         },
@@ -80,6 +94,9 @@ class AdminDashboardStatsView(APIView):
         pending_reports_count = PostReport.objects.filter(
             status=PostReport.ReportStatus.PENDING
         ).count()
+        pending_profile_reports_count = ProfileReport.objects.filter(
+            status=ProfileReport.ReportStatus.PENDING
+        ).count()
 
         return Response(
             {
@@ -87,6 +104,7 @@ class AdminDashboardStatsView(APIView):
                 "total_profiles_count": total_profiles_count,
                 "open_feedback_count": open_feedback_count,
                 "pending_reports_count": pending_reports_count,
+                "pending_profile_reports_count": pending_profile_reports_count,
             },
             status=status.HTTP_200_OK,
         )
@@ -378,3 +396,118 @@ class AdminProfanityLogListView(generics.ListAPIView):
             qs = qs.filter(detection_method=detection_method)
         return qs
 
+
+@extend_schema(
+    summary="List all profile report reasons",
+    description="Fetch a paginated list of all profile report reasons. Supports search by name. Admin only.",
+    parameters=[
+        OpenApiParameter(
+            name="search",
+            description="Search profile report reasons by name",
+            required=False,
+            type=str,
+        ),
+    ],
+)
+class AdminProfileReportReasonListView(generics.ListAPIView):
+    """
+    API endpoint for listing all profile report reasons.
+
+    Supports:
+    - Pagination
+    - Search by name
+    - Ordering by id, name, is_active, created_at
+    """
+
+    permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
+    serializer_class = AdminProfileReportReasonSerializer
+    pagination_class = AdminPagination
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ["name"]
+    ordering_fields = ["id", "name", "is_active", "created_at"]
+    ordering = ["id"]
+
+    def get_queryset(self):
+        return ProfileReportReason.objects.all()
+
+
+@extend_schema(
+    summary="Get, update, or delete a profile report reason",
+    description="Fetch, update, or delete a specific profile report reason by ID. Admin only.",
+)
+class AdminProfileReportReasonDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    API endpoint for retrieving, updating, or deleting a single profile report reason.
+    """
+
+    permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
+    serializer_class = AdminProfileReportReasonDetailSerializer
+
+    def get_queryset(self):
+        return ProfileReportReason.objects.all()
+
+
+@extend_schema(
+    summary="List all profile reports",
+    description="Fetch a paginated list of all profile reports. Supports search and status filtering. Admin only.",
+    parameters=[
+        OpenApiParameter(
+            name="search",
+            description="Search profile reports by profile username or reporter email",
+            required=False,
+            type=str,
+        ),
+        OpenApiParameter(
+            name="status",
+            description="Filter by status (PENDING, UNDER_REVIEW, RESOLVED, DISMISSED)",
+            required=False,
+            type=str,
+        ),
+    ],
+)
+class AdminProfileReportListView(generics.ListAPIView):
+    """
+    API endpoint for listing all profile reports.
+
+    Supports:
+    - Pagination
+    - Search by profile username or reporter email
+    - Filtering by status
+    - Ordering by id, created_at, status
+    """
+
+    permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
+    serializer_class = AdminProfileReportSerializer
+    pagination_class = AdminPagination
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ["profile__username", "reporter__email"]
+    ordering_fields = ["id", "created_at", "status"]
+    ordering = ["-created_at"]
+
+    def get_queryset(self):
+        qs = ProfileReport.objects.select_related("profile", "reporter", "reason")
+        status_param = self.request.query_params.get("status")
+        if status_param:
+            status_param = status_param.upper()
+            if status_param in dict(ProfileReport.ReportStatus.choices):
+                qs = qs.filter(status=status_param)
+        return qs
+
+
+@extend_schema(
+    summary="Get or update profile report details",
+    description="Fetch or update a specific profile report by ID. Only status and resolution_note can be updated. Admin only.",
+)
+class AdminProfileReportDetailView(generics.RetrieveUpdateAPIView):
+    """
+    API endpoint for retrieving or updating a single profile report's details.
+    Supports PATCH to update status and resolution_note.
+    """
+
+    permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
+    serializer_class = AdminProfileReportDetailSerializer
+
+    def get_queryset(self):
+        return ProfileReport.objects.select_related(
+            "profile", "reporter", "reason", "resolved_by"
+        )

@@ -9,7 +9,7 @@ from typing import Literal
 from apps.profile_app.models import Profile
 from apps.profile_app.serializers import ProfileImageSerializer, PetTypeSerializer
 from apps.announcements_app.models import Announcement
-from apps.moderation_app.models import ReportReason, ProfanityLog
+from apps.moderation_app.models import ReportReason, ProfileReportReason, ProfileReport, ProfanityLog
 
 User = get_user_model()
 
@@ -259,6 +259,101 @@ class AdminReportReasonDetailSerializer(serializers.ModelSerializer):
             "created_at",
         ]
         read_only_fields = ["id", "created_at"]
+
+
+class AdminProfileReportReasonSerializer(serializers.ModelSerializer):
+    """Serializer for ProfileReportReason objects in admin list context."""
+
+    class Meta:
+        model = ProfileReportReason
+        fields = [
+            "id",
+            "name",
+            "description",
+            "is_active",
+            "created_at",
+        ]
+
+
+class AdminProfileReportReasonDetailSerializer(serializers.ModelSerializer):
+    """
+    Detailed serializer for ProfileReportReason objects in admin context.
+    Used for retrieve, create, and update operations.
+    """
+
+    class Meta:
+        model = ProfileReportReason
+        fields = [
+            "id",
+            "name",
+            "description",
+            "is_active",
+            "created_at",
+        ]
+        read_only_fields = ["id", "created_at"]
+
+
+class AdminProfileReportSerializer(serializers.ModelSerializer):
+    """Serializer for ProfileReport objects in admin list context."""
+
+    from apps.moderation_app.serializers import ProfileReportReasonSerializer
+
+    profile_username = serializers.CharField(source="profile.username", read_only=True)
+    reporter = serializers.StringRelatedField()
+    reason = ProfileReportReasonSerializer()
+
+    class Meta:
+        model = ProfileReport
+        fields = [
+            "id",
+            "profile",
+            "profile_username",
+            "reporter",
+            "reason",
+            "details",
+            "status",
+            "created_at",
+            "updated_at",
+            "resolution_note",
+        ]
+
+
+class AdminProfileReportDetailSerializer(serializers.ModelSerializer):
+    """Detailed serializer for ProfileReport objects in admin context."""
+
+    from apps.moderation_app.serializers import ProfileReportReasonSerializer
+
+    profile_username = serializers.CharField(source="profile.username", read_only=True)
+    reporter = serializers.StringRelatedField()
+    reason = ProfileReportReasonSerializer(read_only=True)
+    resolved_by = serializers.StringRelatedField(read_only=True)
+
+    class Meta:
+        model = ProfileReport
+        fields = [
+            "id",
+            "profile",
+            "profile_username",
+            "reporter",
+            "reason",
+            "details",
+            "status",
+            "created_at",
+            "updated_at",
+            "resolution_note",
+            "resolved_by",
+        ]
+        read_only_fields = [
+            "id",
+            "profile",
+            "profile_username",
+            "reporter",
+            "reason",
+            "details",
+            "created_at",
+            "updated_at",
+            "resolved_by",
+        ]
 
 
 class AdminProfanityLogSerializer(serializers.ModelSerializer):

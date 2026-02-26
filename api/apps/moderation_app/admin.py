@@ -5,10 +5,12 @@ Admin configuration for moderation app.
 import json
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import ReportReason, PostReport, ProfanityLog
+from .models import ReportReason, PostReport, ProfileReportReason, ProfileReport, ProfanityLog
 
 admin.site.register(ReportReason)
 admin.site.register(PostReport)
+admin.site.register(ProfileReportReason)
+admin.site.register(ProfileReport)
 
 
 @admin.register(ProfanityLog)

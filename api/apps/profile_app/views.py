@@ -19,7 +19,7 @@ from .serializers import (
 from rest_framework.response import Response
 import logging
 from django.shortcuts import get_object_or_404
-from django.db.models import Q, Exists, OuterRef
+from django.db.models import Q, Exists, OuterRef, Count
 from apps.interactions_app.models import Follow, FollowRequest
 from django.db import transaction
 from apps.posts_app.pagination import SearchedProfilesPagination
@@ -495,6 +495,12 @@ class ListSearchedProfilesView(generics.ListAPIView):
                     requester=current_profile
                 )
             ),
+            _active_profile_report_count=Count(
+                "profile_reports",
+                filter=Q(profile_reports__status__in=["PENDING", "UNDER_REVIEW"]),
+            ),
+        ).exclude(
+            _active_profile_report_count__gte=5
         ).order_by("username")
         return profiles
 

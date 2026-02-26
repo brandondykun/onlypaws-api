@@ -20,7 +20,7 @@ from .serializers import (
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import get_object_or_404
-from django.db.models import Q, Case, When
+from django.db.models import Q, Case, When, Count
 from django.db import transaction
 from .pagination import (
     ListExplorePostsPagination,
@@ -467,10 +467,20 @@ class RetrieveFeedView(generics.ListAPIView):
     def get_queryset(self):
         current_profile = self.request.current_profile
 
+        from apps.profile_app.models import Profile
+        heavily_reported_ids = Profile.objects.annotate(
+            _arc=Count(
+                "profile_reports",
+                filter=Q(profile_reports__status__in=["PENDING", "UNDER_REVIEW"]),
+            )
+        ).filter(_arc__gte=5).values("id")
+
         posts = Post.objects.filter(
             Q(profile__following__followed_by=current_profile)
             & Q(status=Post.Status.READY)  # only show completed posts
             & ~Q(reports__reason__id=1)  # filter reported inappropriate content
+        ).exclude(
+            profile_id__in=heavily_reported_ids
         ).prefetch_related(
             'images__tags__tagged_profile__image',
             'images__tags__tagged_profile__regularprofile',
@@ -817,12 +827,22 @@ class ListExplorePostsView(generics.ListAPIView):
     def get_queryset(self):
         current_profile = self.request.current_profile
 
+        from apps.profile_app.models import Profile
+        heavily_reported_ids = Profile.objects.annotate(
+            _arc=Count(
+                "profile_reports",
+                filter=Q(profile_reports__status__in=["PENDING", "UNDER_REVIEW"]),
+            )
+        ).filter(_arc__gte=5).values("id")
+
         posts = Post.objects.filter(
             ~Q(profile__following__followed_by=current_profile)
             & ~Q(profile__user=self.request.user)
             & ~Q(reports__gt=0)  # filter all reported posts for explore screen
             & Q(profile__is_private=False)  # exclude posts from private profiles
             & Q(status=Post.Status.READY)  # only show completed posts
+        ).exclude(
+            profile_id__in=heavily_reported_ids
         ).prefetch_related(
             'images__tags__tagged_profile__image',
             'images__tags__tagged_profile__regularprofile',

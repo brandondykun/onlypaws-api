@@ -13,6 +13,10 @@ from .views import (
     AdminAnnouncementDetailView,
     AdminReportReasonListView,
     AdminReportReasonDetailView,
+    AdminProfileReportReasonListView,
+    AdminProfileReportReasonDetailView,
+    AdminProfileReportListView,
+    AdminProfileReportDetailView,
     AdminProfanityLogListView,
     AdminProfanityLogDetailView,
 )
@@ -27,6 +31,10 @@ urlpatterns = [
     path("announcements/<int:pk>/", AdminAnnouncementDetailView.as_view(), name="admin-announcement-detail"),
     path("report-reasons/", AdminReportReasonListView.as_view(), name="admin-report-reason-list"),
     path("report-reasons/<int:pk>/", AdminReportReasonDetailView.as_view(), name="admin-report-reason-detail"),
+    path("profile-report-reasons/", AdminProfileReportReasonListView.as_view(), name="admin-profile-report-reason-list"),
+    path("profile-report-reasons/<int:pk>/", AdminProfileReportReasonDetailView.as_view(), name="admin-profile-report-reason-detail"),
+    path("profile-reports/", AdminProfileReportListView.as_view(), name="admin-profile-report-list"),
+    path("profile-reports/<int:pk>/", AdminProfileReportDetailView.as_view(), name="admin-profile-report-detail"),
     path("profanity-logs/", AdminProfanityLogListView.as_view(), name="admin-profanity-log-list"),
     path("profanity-logs/<int:pk>/", AdminProfanityLogDetailView.as_view(), name="admin-profanity-log-detail"),
 ]
