@@ -33,10 +33,10 @@ class PrivateLikeApiTests(BaseFixtureTestCase):
         current_likes_count = self.get_likes_count()
         self.assertEqual(current_likes_count, starting_likes_count + 1)
 
-    def test_profile_like_own_post_throws_error(self):
+    def test_profile_like_own_post_successful(self):
         """
-        Test a profile liking own post returns a 403 error and does not
-        create a like object in the database.
+        Test a profile liking own post returns a 201 response and
+        creates a like object in the database.
         """
         starting_likes_count = self.get_likes_count()
         self.assertEqual(starting_likes_count, 0)
@@ -44,10 +44,10 @@ class PrivateLikeApiTests(BaseFixtureTestCase):
         new_like = {"profileId": self.profile.id}
         url = create_like_url(self.post_1.id)
         res = self.client.post(url, data=new_like)
-        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
 
         current_likes_count = self.get_likes_count()
-        self.assertEqual(current_likes_count, starting_likes_count)
+        self.assertEqual(current_likes_count, starting_likes_count + 1)
 
     def test_unlike_post_successful(self):
         """

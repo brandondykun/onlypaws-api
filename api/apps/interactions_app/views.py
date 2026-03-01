@@ -64,10 +64,7 @@ class CreateDestroyLikeView(generics.GenericAPIView):
             logger.error(f"Profile {profile_id} does not belong to current authenticated user {current_profile.id}")
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        # prevent profile from liking own post
         post = get_object_or_404(Post, pk=post_id)
-        if post.profile.id == current_profile.id:
-            return Response(status=status.HTTP_403_FORBIDDEN)
 
         # Check if user can interact with this post (private profile check)
         if not post.can_profile_interact(current_profile):
