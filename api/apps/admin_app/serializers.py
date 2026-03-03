@@ -359,7 +359,10 @@ class AdminProfileReportDetailSerializer(serializers.ModelSerializer):
 class AdminProfanityLogSerializer(serializers.ModelSerializer):
     """Serializer for ProfanityLog objects in admin context."""
 
-    profile_username = serializers.CharField(source="profile.username", default=None)
+    profile_username = serializers.SerializerMethodField()
+
+    def get_profile_username(self, obj):
+        return obj.profile.username if obj.profile else None
 
     class Meta:
         model = ProfanityLog

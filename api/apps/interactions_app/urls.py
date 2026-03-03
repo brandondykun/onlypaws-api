@@ -14,7 +14,6 @@ urlpatterns = [
         views.CreateDestroyLikeView.as_view(),
         name="like_post",
     ),
-    
     # Comments
     path(
         "comment/post/<int:id>/",
@@ -36,14 +35,17 @@ urlpatterns = [
         views.CommentChainRetrieveView.as_view(),
         name="comment_chain_retrieve",
     ),
-    
+    path(
+        "comment/<int:pk>/",
+        views.DestroyCommentView.as_view(),
+        name="destroy_comment",
+    ),
     # Comment Likes
     path(
         "like/comment/<int:pk>/",
         views.CreateDestroyCommentLikeView.as_view(),
         name="like_comment",
     ),
-    
     # Follows
     path(
         "follow/",
@@ -70,7 +72,6 @@ urlpatterns = [
         views.ListFollowingView.as_view(),
         name="list_following",
     ),
-    
     # Follow Requests
     path(
         "follow-requests/",
@@ -98,4 +99,3 @@ urlpatterns = [
         name="cancel_follow_request",
     ),
 ]
-

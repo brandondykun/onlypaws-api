@@ -60,6 +60,17 @@ def comment_chain_url(comment_id: int):
     return reverse("interactions_app:comment_chain_retrieve", args=[comment_id])
 
 
+def destroy_comment_url(comment_id: int):
+    """Create and return a destroy comment url.
+
+    Parameters
+    ----------
+    comment_id : int
+        The id of the Comment to delete.
+    """
+    return reverse("interactions_app:destroy_comment", args=[comment_id])
+
+
 def comment_like_url(comment_id: int):
     """Create and return a comment like url.
 

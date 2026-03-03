@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 from rest_framework import status
 
-from .util import create_comment_url, list_post_comments_url
+from .util import create_comment_url, destroy_comment_url, list_post_comments_url
 from apps.interactions_app.models import Comment
 from core.test_utils.helper_classes import BaseFixtureTestCase
 
@@ -134,6 +134,80 @@ class PrivateCommentApiTests(BaseFixtureTestCase):
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
 
+    def test_post_owner_can_delete_comment(self):
+        """Test that a post owner can delete a comment on their post."""
+        # self.comment_1 is on self.post_1 which is owned by self.profile
+        url = destroy_comment_url(self.comment_1.id)
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertFalse(Comment.objects.filter(pk=self.comment_1.id).exists())
+
+    def test_post_owner_can_delete_reply_comment(self):
+        """Test that a post owner can delete a reply comment on their post."""
+        # Create a reply to comment_1
+        reply = Comment.objects.create(
+            text="A reply comment",
+            profile=self.profile_2,
+            post=self.post_1,
+            parent_comment=self.comment_1,
+            reply_to_comment=self.comment_1,
+        )
+
+        url = destroy_comment_url(reply.id)
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertFalse(Comment.objects.filter(pk=reply.id).exists())
+        # Parent comment should still exist
+        self.assertTrue(Comment.objects.filter(pk=self.comment_1.id).exists())
+
+    def test_delete_comment_cascades_replies(self):
+        """Test that deleting a top-level comment cascades to its replies."""
+        # Create replies to comment_1
+        reply_1 = Comment.objects.create(
+            text="Reply one",
+            profile=self.profile_2,
+            post=self.post_1,
+            parent_comment=self.comment_1,
+            reply_to_comment=self.comment_1,
+        )
+        reply_2 = Comment.objects.create(
+            text="Reply two",
+            profile=self.profile_2,
+            post=self.post_1,
+            parent_comment=self.comment_1,
+            reply_to_comment=reply_1,
+        )
+
+        url = destroy_comment_url(self.comment_1.id)
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertGreater(res.data["deleted_count"], 1)
+        self.assertFalse(Comment.objects.filter(pk=self.comment_1.id).exists())
+        self.assertFalse(Comment.objects.filter(pk=reply_1.id).exists())
+        self.assertFalse(Comment.objects.filter(pk=reply_2.id).exists())
+
+    def test_non_post_owner_cannot_delete_comment(self):
+        """Test that a non-post-owner cannot delete a comment."""
+        # Authenticate as profile_2 who does NOT own post_1
+        self.client.force_authenticate(user=self.user_2)
+        self.client.credentials(HTTP_AUTH_PROFILE_ID=str(self.profile_2.public_id))
+
+        url = destroy_comment_url(self.comment_1.id)
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertTrue(Comment.objects.filter(pk=self.comment_1.id).exists())
+
+    def test_delete_nonexistent_comment_returns_404(self):
+        """Test that deleting a nonexistent comment returns 404."""
+        url = destroy_comment_url(99999)
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+
 
 class PublicCommentApiTests(BaseFixtureTestCase):
     """Test the public features of the Comment API."""
@@ -164,6 +238,14 @@ class PublicCommentApiTests(BaseFixtureTestCase):
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
         comments = Comment.objects.all()
         self.assertEqual(len(comments), starting_comment_count)
+
+    def test_delete_comment_without_auth_returns_401(self):
+        """Test that deleting a comment without authentication returns 401."""
+        url = destroy_comment_url(self.comment_1.id)
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertTrue(Comment.objects.filter(pk=self.comment_1.id).exists())
 
     def test_listing_post_comments_without_authentication_returns_error(self):
         """

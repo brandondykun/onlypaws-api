@@ -802,7 +802,7 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         from apps.moderation_app.models import PostReport
         report = PostReport.objects.create(
             post=reported_post,
-            reporter=self.profile,
+            reporter=self.profile.user,
             reason=self.reason1  # Inappropriate Content (should have id=1 from fixture)
         )
         

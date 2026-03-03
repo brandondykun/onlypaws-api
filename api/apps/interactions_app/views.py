@@ -333,6 +333,49 @@ class CommentChainRetrieveView(generics.GenericAPIView):
     post=extend_schema(parameters=[auth_profile_param]),
     delete=extend_schema(parameters=[auth_profile_param]),
 )
+@extend_schema_view(
+    delete=extend_schema(
+        parameters=[auth_profile_param],
+        summary="Delete a comment on a post you own",
+        description="Post owners can delete any comment (top-level or reply) on their posts. "
+                    "Cascades to delete all replies and comment likes."),
+)
+class DestroyCommentView(generics.DestroyAPIView):
+    """Delete a comment on a post the current profile owns."""
+
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Comment.objects.all()
+
+    def destroy(self, request, *args, **kwargs):
+        comment_id = self.kwargs.get("pk")
+        current_profile = request.current_profile
+
+        comment = get_object_or_404(
+            Comment.objects.select_related("post"),
+            pk=comment_id,
+        )
+
+        if comment.post.profile_id != current_profile.id:
+            logger.warning(
+                f"Profile {current_profile.id} attempted to delete comment {comment_id} "
+                f"on post {comment.post.id} owned by profile {comment.post.profile_id}"
+            )
+            return Response(
+                {"error": "You can only delete comments on your own posts."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        deleted_count, _ = comment.delete()
+        logger.info(
+            f"Comment {comment_id} deleted from post {comment.post.id} "
+            f"by post owner {current_profile.id} (deleted_count={deleted_count})"
+        )
+        return Response(
+            {"deleted_count": deleted_count},
+            status=status.HTTP_200_OK,
+        )
+
+
 class CreateDestroyCommentLikeView(generics.GenericAPIView):
     """Create or delete a Comment Like."""
 

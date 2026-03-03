@@ -358,7 +358,7 @@ def create_report_reason(
 
 def create_post_report(
     post: Post,
-    reporter: Profile,
+    reporter: Profile | User,
     reason: ReportReason,
     status: str = PostReport.ReportStatus.PENDING,
     details: str = "",
@@ -369,8 +369,8 @@ def create_post_report(
     ----------
     post : Post
         The Post being reported.
-    reporter : Profile
-        The Profile reporting the post.
+    reporter : Profile or User
+        The Profile or User reporting the post. Stored as User on PostReport.
     reason : ReportReason
         The reason for the report.
     status : str
@@ -378,9 +378,10 @@ def create_post_report(
     details : str
         Additional details about the report.
     """
+    reporter_user = getattr(reporter, "user", reporter)
     return PostReport.objects.create(
         post=post,
-        reporter=reporter,
+        reporter=reporter_user,
         reason=reason,
         status=status,
         details=details,

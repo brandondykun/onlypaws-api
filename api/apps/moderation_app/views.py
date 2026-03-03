@@ -130,6 +130,11 @@ class PostReportViewSet(
         context["request"] = self.request
         return context
 
+    def list(self, request, *args, **kwargs):
+        if not request.current_profile:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        return super().list(request, *args, **kwargs)
+
     def create(self, request, *args, **kwargs):
         """Override create to add logging for report creation."""
         try:
