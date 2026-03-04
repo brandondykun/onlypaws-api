@@ -262,7 +262,10 @@ class PostDetailedSerializer(serializers.ModelSerializer):
         return serializer.data
 
     def get_is_hidden(self, obj) -> bool:
-        return obj.reports.filter(~Q(status="DISMISSED")).count() > 0
+        user = self.context["request"].user
+        has_non_dismissed_report = obj.reports.filter(~Q(status="DISMISSED")).exists()
+        user_reported = obj.reports.filter(reporter=user).exists()
+        return has_non_dismissed_report or user_reported
 
     def get_is_reported(self, obj) -> bool:
         user = self.context["request"].user
