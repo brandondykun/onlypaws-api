@@ -14,6 +14,8 @@ from apps.interactions_app.serializers import (
 
 # Import moderation serializers
 from apps.moderation_app.serializers import PostReportPreviewSerializer
+# Import moderation block utils
+from apps.moderation_app.block_utils import get_blocked_profile_ids
 
 
 # ============================================================================
@@ -118,7 +120,7 @@ class CreatePostImageTagSerializer(serializers.Serializer):
 class PostImageSerializer(serializers.ModelSerializer):
     """Serializer for Post Images."""
 
-    tags = PostImageTagSerializer(many=True, read_only=True)
+    tags = serializers.SerializerMethodField()
     scaled_images = PostImageScaledSerializer(many=True, read_only=True)
     public_id = serializers.SerializerMethodField()
 
@@ -128,6 +130,17 @@ class PostImageSerializer(serializers.ModelSerializer):
 
     def get_public_id(self, obj):
         return str(obj.public_id) if obj.public_id else None
+
+    def get_tags(self, obj):
+        """Return tags, filtering out blocked profiles."""
+        request = self.context.get("request")
+        current_profile = getattr(request, "current_profile", None) if request else None
+        tags = obj.tags.all()
+        if current_profile:
+            blocked_ids = get_blocked_profile_ids(current_profile)
+            if blocked_ids:
+                tags = [t for t in tags if t.tagged_profile_id not in blocked_ids]
+        return PostImageTagSerializer(tags, many=True).data
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -275,18 +288,21 @@ class PostDetailedSerializer(serializers.ModelSerializer):
     def get_tagged_profiles(self, obj):
         """Return unique list of all profiles tagged across all post images."""
         # Collect all unique tagged profiles
-        seen_profile_ids = set()
-        tagged_profiles = []
-        
-        for image in obj.images.all():
-            for tag in image.tags.all():
-                if tag.tagged_profile_id not in seen_profile_ids:
-                    seen_profile_ids.add(tag.tagged_profile_id)
-                    tagged_profiles.append(tag.tagged_profile)
-        
-        # Get the current profile for the SearchProfileSerializer context
         current_profile = getattr(self.context["request"], "current_profile", None)
         profile_id = current_profile.id if current_profile else None
+
+        # Get blocked profile IDs to filter tags
+        from apps.moderation_app.block_utils import get_blocked_profile_ids
+        blocked_ids = get_blocked_profile_ids(current_profile) if current_profile else set()
+
+        seen_profile_ids = set()
+        tagged_profiles = []
+
+        for image in obj.images.all():
+            for tag in image.tags.all():
+                if tag.tagged_profile_id not in seen_profile_ids and tag.tagged_profile_id not in blocked_ids:
+                    seen_profile_ids.add(tag.tagged_profile_id)
+                    tagged_profiles.append(tag.tagged_profile)
 
         return SearchProfileSerializer(
             tagged_profiles,

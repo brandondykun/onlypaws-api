@@ -1,13 +1,25 @@
 """
 Views for the moderation app.
 """
+
+from django.db.models import Q
 from rest_framework import permissions, mixins, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from apps.moderation_app.models import ReportReason, PostReport, ProfileReportReason, ProfileReport
+from apps.moderation_app.models import (
+    ReportReason,
+    PostReport,
+    ProfileReportReason,
+    ProfileReport,
+    Block,
+)
+from apps.interactions_app.models import Follow, FollowRequest
+from apps.notifications_app.models import Notification
+from apps.profile_app.models import Profile
 from apps.core_app.profanity_service import check_and_log_text
+from rest_framework import generics
 from .serializers import (
     ReportReasonSerializer,
     CreatePostReportSerializer,
@@ -15,6 +27,9 @@ from .serializers import (
     ProfileReportReasonSerializer,
     CreateProfileReportSerializer,
     ProfileReportDetailSerializer,
+    CreateBlockSerializer,
+    BlockSerializer,
+    BlockedProfileSerializer,
 )
 from .pagination import ReportPostsPagination
 from drf_spectacular.utils import (
@@ -146,13 +161,9 @@ class PostReportViewSet(
                 )
             return response
         except Exception as e:
-            logger.error(
-                f"Error creating post report: {str(e)}",
-                exc_info=True
-            )
+            logger.error(f"Error creating post report: {str(e)}", exc_info=True)
             return Response(
-                {"error": "Failed to create report"},
-                status=status.HTTP_400_BAD_REQUEST
+                {"error": "Failed to create report"}, status=status.HTTP_400_BAD_REQUEST
             )
 
     @extend_schema(parameters=[auth_profile_param])
@@ -295,9 +306,9 @@ class ProfileReportViewSet(
         if self.request.user.is_staff:
             queryset = ProfileReport.objects.all().order_by("created_at")
         else:
-            queryset = ProfileReport.objects.filter(reporter=self.request.user).order_by(
-                "-created_at"
-            )
+            queryset = ProfileReport.objects.filter(
+                reporter=self.request.user
+            ).order_by("-created_at")
         return self._apply_status_filter(queryset)
 
     def _apply_status_filter(self, queryset):
@@ -330,13 +341,9 @@ class ProfileReportViewSet(
                 )
             return response
         except Exception as e:
-            logger.error(
-                f"Error creating profile report: {str(e)}",
-                exc_info=True
-            )
+            logger.error(f"Error creating profile report: {str(e)}", exc_info=True)
             return Response(
-                {"error": "Failed to create report"},
-                status=status.HTTP_400_BAD_REQUEST
+                {"error": "Failed to create report"}, status=status.HTTP_400_BAD_REQUEST
             )
 
     @extend_schema(parameters=[auth_profile_param])
@@ -378,11 +385,25 @@ class ProfileReportViewSet(
 
 class CheckTextView(APIView):
     """Check if text contains profanity. Used before uploads to avoid wasted bandwidth."""
+
     permission_classes = [permissions.IsAuthenticated]
 
     @extend_schema(
-        request={"application/json": {"type": "object", "properties": {"text": {"type": "string"}}}},
-        responses={200: {"type": "object", "properties": {"allowed": {"type": "boolean"}, "message": {"type": "string"}}}},
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {"text": {"type": "string"}},
+            }
+        },
+        responses={
+            200: {
+                "type": "object",
+                "properties": {
+                    "allowed": {"type": "boolean"},
+                    "message": {"type": "string"},
+                },
+            }
+        },
     )
     def post(self, request):
         text = request.data.get("text", "")
@@ -393,8 +414,115 @@ class CheckTextView(APIView):
         profile_id = profile.id if profile else None
         is_profane = check_and_log_text(text, "PRE_UPLOAD_CHECK", profile_id=profile_id)
         if is_profane:
-            return Response({
-                "allowed": False,
-                "message": "That text contains inappropriate language."
-            })
+            return Response(
+                {
+                    "allowed": False,
+                    "message": "That text contains inappropriate language.",
+                }
+            )
         return Response({"allowed": True})
+
+
+@extend_schema_view(post=extend_schema(parameters=[auth_profile_param]))
+class BlockProfileView(APIView):
+    """Block a profile. Removes follow relationships in both directions."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    @extend_schema(request=CreateBlockSerializer, responses={201: BlockSerializer})
+    def post(self, request):
+        current_profile = request.current_profile
+        if not current_profile:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+        serializer = CreateBlockSerializer(
+            data=request.data, context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+
+        target_profile = serializer.validated_data["profile_id"]
+
+        # Create the block
+        block = Block.objects.create(blocker=current_profile, blocked=target_profile)
+
+        # Remove follow relationships in both directions
+        Follow.objects.filter(
+            followed=target_profile, followed_by=current_profile
+        ).delete()
+        Follow.objects.filter(
+            followed=current_profile, followed_by=target_profile
+        ).delete()
+        FollowRequest.objects.filter(
+            requester=current_profile, target=target_profile
+        ).delete()
+        FollowRequest.objects.filter(
+            requester=target_profile, target=current_profile
+        ).delete()
+
+        # Delete notifications between the two profiles (both directions)
+        deleted_notifs = Notification.objects.filter(
+            Q(recipient=current_profile, sender=target_profile)
+            | Q(recipient=target_profile, sender=current_profile)
+        ).delete()[0]
+        if deleted_notifs:
+            logger.info(
+                f"Deleted {deleted_notifs} notifications between "
+                f"profiles {current_profile.id} and {target_profile.id}"
+            )
+
+        logger.info(f"Profile {current_profile.id} blocked profile {target_profile.id}")
+
+        return Response(BlockSerializer(block).data, status=status.HTTP_201_CREATED)
+
+
+@extend_schema_view(delete=extend_schema(parameters=[auth_profile_param]))
+class UnblockProfileView(APIView):
+    """Unblock a profile by their public_id."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, public_id):
+        current_profile = request.current_profile
+        if not current_profile:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+        try:
+            target_profile = Profile.objects.get(public_id=public_id)
+        except Profile.DoesNotExist:
+            return Response(
+                {"error": "Profile not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        deleted_count, _ = Block.objects.filter(
+            blocker=current_profile, blocked=target_profile
+        ).delete()
+
+        if deleted_count == 0:
+            return Response(
+                {"error": "Block not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        logger.info(
+            f"Profile {current_profile.id} unblocked profile {target_profile.id}"
+        )
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@extend_schema_view(get=extend_schema(parameters=[auth_profile_param]))
+class ListBlockedProfilesView(generics.ListAPIView):
+    """List all profiles that the authenticated profile has blocked."""
+
+    serializer_class = BlockedProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = ReportPostsPagination
+
+    def get_queryset(self):
+        current_profile = self.request.current_profile
+        return Block.objects.filter(
+            blocker=current_profile
+        ).select_related(
+            "blocked__image",
+            "blocked__regularprofile",
+            "blocked__businessprofile",
+        ).order_by("-created_at")

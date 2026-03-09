@@ -5,12 +5,44 @@ Admin configuration for moderation app.
 import json
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import ReportReason, PostReport, ProfileReportReason, ProfileReport, ProfanityLog
+from .models import ReportReason, PostReport, ProfileReportReason, ProfileReport, ProfanityLog, Block
 
 admin.site.register(ReportReason)
 admin.site.register(PostReport)
 admin.site.register(ProfileReportReason)
 admin.site.register(ProfileReport)
+@admin.register(Block)
+class BlockAdmin(admin.ModelAdmin):
+    list_display = ["id", "blocker_username", "blocked_username", "created_at"]
+    list_filter = ["created_at"]
+    search_fields = ["blocker__username", "blocked__username"]
+    readonly_fields = ["blocker", "blocked", "created_at"]
+    list_per_page = 50
+    ordering = ["-created_at"]
+    date_hierarchy = "created_at"
+    list_select_related = ["blocker", "blocked"]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def blocker_username(self, obj):
+        return format_html(
+            '<a href="/admin/profile_app/profile/{}/change/">{}</a>',
+            obj.blocker.id,
+            obj.blocker.username,
+        )
+    blocker_username.short_description = "Blocker"
+
+    def blocked_username(self, obj):
+        return format_html(
+            '<a href="/admin/profile_app/profile/{}/change/">{}</a>',
+            obj.blocked.id,
+            obj.blocked.username,
+        )
+    blocked_username.short_description = "Blocked"
 
 
 @admin.register(ProfanityLog)

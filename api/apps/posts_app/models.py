@@ -158,21 +158,26 @@ class Post(models.Model):
     def can_profile_interact(self, profile) -> bool:
         """
         Check if a profile can interact with this post (like, comment, etc.).
-        
+
         Returns True if:
+        - No block exists between the profiles, AND
         - The post's profile is public, OR
         - The profile owns the post, OR
         - The profile follows the post's profile
-        
+
         Args:
             profile: The Profile instance attempting to interact
-            
+
         Returns:
             bool: True if the profile can interact, False otherwise
         """
         # Import here to avoid circular imports
         from apps.interactions_app.models import Follow
-        
+        from apps.moderation_app.block_utils import are_profiles_blocking
+
+        # Block check
+        if are_profiles_blocking(self.profile, profile):
+            return False
         # Public profiles allow all interactions
         if not self.profile.is_private:
             return True

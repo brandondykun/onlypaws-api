@@ -1015,6 +1015,7 @@ class ProfileDetailedSerializer(serializers.ModelSerializer):
     about = serializers.SerializerMethodField()
     breed = serializers.SerializerMethodField()
     report_summary = serializers.SerializerMethodField()
+    is_blocked = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
@@ -1037,6 +1038,7 @@ class ProfileDetailedSerializer(serializers.ModelSerializer):
             "pet_type",
             "profile_type",
             "report_summary",
+            "is_blocked",
         ]
 
     def get_profile_type(self, obj) -> Literal["regular", "business"]:
@@ -1074,8 +1076,23 @@ class ProfileDetailedSerializer(serializers.ModelSerializer):
             return PetTypeSerializer(obj.regularprofile.pet_type).data
         return None
 
+    def _get_is_blocked(self, obj) -> bool:
+        """Check if a block exists between requesting profile and this profile."""
+        return self.context.get("is_blocked", False)
+
+    def get_is_blocked(self, obj) -> bool:
+        """Returns True if current profile has blocked this profile."""
+        if self._get_is_blocked(obj):
+            from apps.moderation_app.models import Block
+            current_profile = getattr(self.context["request"], "current_profile", None)
+            if current_profile:
+                return Block.objects.filter(blocker=current_profile, blocked=obj).exists()
+        return False
+
     def get_is_following(self, obj) -> bool:
         # boolean - is requesting profile following the profile being fetched
+        if self._get_is_blocked(obj):
+            return False
         current_profile = getattr(self.context["request"], "current_profile", None)
 
         if current_profile:
@@ -1084,6 +1101,8 @@ class ProfileDetailedSerializer(serializers.ModelSerializer):
 
     def get_follows_you(self, obj) -> bool:
         """Check if this profile is following the requesting profile."""
+        if self._get_is_blocked(obj):
+            return False
         current_profile = getattr(self.context["request"], "current_profile", None)
         if current_profile:
             return obj.followers.filter(followed=current_profile).exists()
@@ -1091,6 +1110,8 @@ class ProfileDetailedSerializer(serializers.ModelSerializer):
 
     def get_has_requested_follow(self, obj) -> bool:
         """Check if requesting profile has a pending follow request to this profile."""
+        if self._get_is_blocked(obj):
+            return False
         current_profile = getattr(self.context["request"], "current_profile", None)
         if current_profile:
             return FollowRequest.objects.filter(
@@ -1100,6 +1121,8 @@ class ProfileDetailedSerializer(serializers.ModelSerializer):
 
     def get_can_view_posts(self, obj) -> bool:
         """Check if requesting profile can view this profile's posts."""
+        if self._get_is_blocked(obj):
+            return False
         current_profile = getattr(self.context["request"], "current_profile", None)
         # Can always view own posts
         if current_profile and obj == current_profile:

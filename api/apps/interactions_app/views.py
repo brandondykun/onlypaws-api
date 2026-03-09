@@ -37,6 +37,8 @@ from core.schema_params import auth_profile_param
 
 logger = logging.getLogger(__name__)
 
+from apps.moderation_app.block_utils import get_blocked_profile_ids, are_profiles_blocking
+
 
 # ============================================================================
 # Like Views
@@ -201,8 +203,12 @@ class ListPostCommentsView(generics.ListAPIView):
 
     def get_queryset(self):
         post_id = self.kwargs.get("pk")
+        current_profile = self.request.current_profile
+        blocked_ids = get_blocked_profile_ids(current_profile)
         comments = self.queryset.filter(
             Q(post=post_id) & Q(parent_comment=None)
+        ).exclude(
+            profile_id__in=blocked_ids
         ).order_by("-created_at")
         return comments
 
@@ -220,7 +226,11 @@ class ListCommentRepliesView(generics.ListAPIView):
 
     def get_queryset(self):
         comment_id = self.kwargs.get("pk")
-        replies = Comment.objects.filter(Q(parent_comment=comment_id)).order_by(
+        current_profile = self.request.current_profile
+        blocked_ids = get_blocked_profile_ids(current_profile)
+        replies = Comment.objects.filter(Q(parent_comment=comment_id)).exclude(
+            profile_id__in=blocked_ids
+        ).order_by(
             "created_at"
         )
         return replies
@@ -480,7 +490,14 @@ class CreateFollowView(generics.CreateAPIView):
         current_profile = request.current_profile
         profile_to_follow_id = request.data.get("profileId")
         profile_to_follow = get_object_or_404(Profile, public_id=profile_to_follow_id)
-        
+
+        # Check if profiles are blocking each other
+        if are_profiles_blocking(current_profile, profile_to_follow):
+            return Response(
+                {"error": "Cannot follow this profile."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         # profile cannot follow itself
         if profile_to_follow.id == current_profile.id:
             logger.warning(f"Profile {current_profile.id} attempted to follow itself")
@@ -654,10 +671,14 @@ class ListFollowersView(generics.ListAPIView):
     def get_queryset(self):
         profile_public_id = self.kwargs.get("public_id", None)
         username = self.request.query_params.get("username", None)
+        current_profile = self.request.current_profile
+        blocked_ids = get_blocked_profile_ids(current_profile)
 
         try:
             profile = Profile.objects.get(public_id=profile_public_id)
-            followers_objs = profile.following.all()
+            followers_objs = profile.following.exclude(
+                followed_by_id__in=blocked_ids
+            )
             if username:
                 followers_objs = followers_objs.filter(
                     Q(followed_by__username__icontains=username)
@@ -684,10 +705,14 @@ class ListFollowingView(generics.ListAPIView):
     def get_queryset(self):
         profile_public_id = self.kwargs.get("public_id", None)
         username = self.request.query_params.get("username", None)
+        current_profile = self.request.current_profile
+        blocked_ids = get_blocked_profile_ids(current_profile)
 
         try:
             profile = Profile.objects.get(public_id=profile_public_id)
-            following_objs = profile.followers.all()
+            following_objs = profile.followers.exclude(
+                followed_id__in=blocked_ids
+            )
             if username:
                 following_objs = following_objs.filter(
                     Q(followed__username__icontains=username)
@@ -717,8 +742,11 @@ class ListFollowRequestsView(generics.ListAPIView):
 
     def get_queryset(self):
         current_profile = self.request.current_profile
+        blocked_ids = get_blocked_profile_ids(current_profile)
         return FollowRequest.objects.filter(
             target=current_profile
+        ).exclude(
+            requester_id__in=blocked_ids
         ).select_related(
             'requester__image',
             'requester__regularprofile',
@@ -740,8 +768,11 @@ class ListSentFollowRequestsView(generics.ListAPIView):
 
     def get_queryset(self):
         current_profile = self.request.current_profile
+        blocked_ids = get_blocked_profile_ids(current_profile)
         return FollowRequest.objects.filter(
             requester=current_profile
+        ).exclude(
+            target_id__in=blocked_ids
         ).select_related(
             'target__image',
             'target__regularprofile',

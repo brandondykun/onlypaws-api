@@ -8,18 +8,23 @@ from core.schema_params import auth_profile_param
 from .models import Notification
 from .serializers import NotificationSerializer, NotificationUpdateSerializer
 from .pagination import NotificationsPagination
+from apps.moderation_app.block_utils import get_blocked_profile_ids
 
 
 class BaseNotificationView(generics.ListAPIView):
     """Base view for notification endpoints with common functionality."""
-    
+
     serializer_class = NotificationSerializer
     permission_classes = [permissions.IsAuthenticated]
-    
+
     def get_queryset(self):
         """Return base queryset with security filtering."""
+        current_profile = self.request.current_profile
+        blocked_ids = get_blocked_profile_ids(current_profile)
         return Notification.objects.filter(
-            recipient=self.request.current_profile
+            recipient=current_profile
+        ).exclude(
+            sender_id__in=blocked_ids
         ).select_related('sender', 'post')
 
 

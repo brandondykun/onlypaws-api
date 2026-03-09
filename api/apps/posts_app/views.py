@@ -4,6 +4,7 @@ Views for the posts api.
 
 from rest_framework import generics, permissions, status
 from apps.posts_app.models import Post, PostImage, SavedPost, PostImageTag
+from apps.profile_app.models import Profile as ProfileModel
 from apps.interactions_app.models import Follow
 from .serializers import (
     PostSerializer,
@@ -38,6 +39,7 @@ import json
 
 from core.schema_params import auth_profile_param
 from apps.core_app.storage_utils import generate_presigned_upload_url, generate_original_image_key
+from apps.moderation_app.block_utils import get_blocked_profile_ids, are_profiles_blocking
 
 logger = logging.getLogger(__name__)
 
@@ -319,10 +321,9 @@ class CreatePostView(generics.CreateAPIView):
                                     )
                                 
                                 # Validate profile exists
-                                from apps.profile_app.models import Profile
                                 try:
-                                    tagged_profile = Profile.objects.get(id=tag_data["taggedProfileId"])
-                                except Profile.DoesNotExist:
+                                    tagged_profile = ProfileModel.objects.get(id=tag_data["taggedProfileId"])
+                                except ProfileModel.DoesNotExist:
                                     raise ValueError(
                                         f"Profile {tag_data['taggedProfileId']} does not exist."
                                     )
@@ -406,11 +407,17 @@ class ListProfilePostsView(generics.ListAPIView):
 
     def list(self, request, *args, **kwargs):
         """Override list to check profile access before queryset evaluation."""
-        from apps.profile_app.models import Profile
 
         public_id = self.kwargs.get("public_id", None)
         current_profile = request.current_profile
-        target_profile = get_object_or_404(Profile, public_id=public_id)
+        target_profile = get_object_or_404(ProfileModel, public_id=public_id)
+
+        # Check if profiles are blocking each other
+        if are_profiles_blocking(current_profile, target_profile):
+            return Response(
+                {"detail": "Not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
         if target_profile.is_private:
             is_own_profile = target_profile.id == current_profile.id
@@ -467,13 +474,14 @@ class RetrieveFeedView(generics.ListAPIView):
     def get_queryset(self):
         current_profile = self.request.current_profile
 
-        from apps.profile_app.models import Profile
-        heavily_reported_ids = Profile.objects.annotate(
+        heavily_reported_ids = ProfileModel.objects.annotate(
             _arc=Count(
                 "profile_reports",
                 filter=Q(profile_reports__status__in=["PENDING", "UNDER_REVIEW"]),
             )
         ).filter(_arc__gte=5).values("id")
+
+        blocked_ids = get_blocked_profile_ids(current_profile)
 
         posts = Post.objects.filter(
             Q(profile__following__followed_by=current_profile)
@@ -481,6 +489,8 @@ class RetrieveFeedView(generics.ListAPIView):
             & ~Q(reports__reason__id=1)  # filter reported inappropriate content
         ).exclude(
             profile_id__in=heavily_reported_ids
+        ).exclude(
+            profile_id__in=blocked_ids
         ).prefetch_related(
             'images__tags__tagged_profile__image',
             'images__tags__tagged_profile__regularprofile',
@@ -525,6 +535,12 @@ class RetrieveUpdateDestroyPostView(generics.RetrieveUpdateDestroyAPIView):
         public_id = self.kwargs.get("public_id")
         try:
             post = self.queryset.get(public_id=public_id)
+
+            # Check if post author is blocked
+            current_profile = request.current_profile
+            if current_profile and are_profiles_blocking(current_profile, post.profile):
+                return Response({"error": "Post not found"}, status=status.HTTP_404_NOT_FOUND)
+
             logger.debug(f"Post {public_id} retrieved by user {request.user.id}")
             serializer = self.serializer_class(post, context={"request": request})
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -716,7 +732,6 @@ class RetrieveUpdateDestroyPostView(generics.RetrieveUpdateDestroyAPIView):
 
     def _process_tags(self, tags_data, post_images, current_profile, aspect_ratio):
         """Process and create PostImageTag objects for the post images."""
-        from apps.profile_app.models import Profile
         
         for post_image in post_images:
             img_idx_str = str(post_image.order)
@@ -737,8 +752,8 @@ class RetrieveUpdateDestroyPostView(generics.RetrieveUpdateDestroyAPIView):
                 
                 # Validate profile exists
                 try:
-                    tagged_profile = Profile.objects.get(id=tag_data["taggedProfileId"])
-                except Profile.DoesNotExist:
+                    tagged_profile = ProfileModel.objects.get(id=tag_data["taggedProfileId"])
+                except ProfileModel.DoesNotExist:
                     raise ValueError(
                         f"Profile {tag_data['taggedProfileId']} does not exist."
                     )
@@ -827,13 +842,14 @@ class ListExplorePostsView(generics.ListAPIView):
     def get_queryset(self):
         current_profile = self.request.current_profile
 
-        from apps.profile_app.models import Profile
-        heavily_reported_ids = Profile.objects.annotate(
+        heavily_reported_ids = ProfileModel.objects.annotate(
             _arc=Count(
                 "profile_reports",
                 filter=Q(profile_reports__status__in=["PENDING", "UNDER_REVIEW"]),
             )
         ).filter(_arc__gte=5).values("id")
+
+        blocked_ids = get_blocked_profile_ids(current_profile)
 
         posts = Post.objects.filter(
             ~Q(profile__following__followed_by=current_profile)
@@ -843,6 +859,8 @@ class ListExplorePostsView(generics.ListAPIView):
             & Q(status=Post.Status.READY)  # only show completed posts
         ).exclude(
             profile_id__in=heavily_reported_ids
+        ).exclude(
+            profile_id__in=blocked_ids
         ).prefetch_related(
             'images__tags__tagged_profile__image',
             'images__tags__tagged_profile__regularprofile',
@@ -891,6 +909,7 @@ class ListSimilarPostsView(generics.ListAPIView):
         public_id = self.kwargs.get("public_id")
         min_similarity = float(self.request.query_params.get("min_similarity", 0.3))
         current_profile = self.request.current_profile
+        blocked_ids = get_blocked_profile_ids(current_profile)
 
         try:
             # Get the post
@@ -917,6 +936,7 @@ class ListSimilarPostsView(generics.ListAPIView):
                     )
                     .filter(private_profile_filter)
                     .exclude(reports__reason__id=1)
+                    .exclude(profile_id__in=blocked_ids)
                     .prefetch_related(
                         'images__tags__tagged_profile__image',
                         'images__tags__tagged_profile__regularprofile',
@@ -942,6 +962,7 @@ class ListSimilarPostsView(generics.ListAPIView):
                 .filter(private_profile_filter)
                 .filter(status=Post.Status.READY)  # only show completed posts
                 .exclude(reports__reason__id=1)
+                .exclude(profile_id__in=blocked_ids)
                 .distinct()
             )
 
@@ -1023,13 +1044,16 @@ class ListCreateSavedPostView(generics.ListCreateAPIView):
         saved_posts = current_profile.saved_posts.all().order_by("-saved_at")
         # Extract post IDs to maintain order
         post_ids = [obj.post_id for obj in saved_posts]
-        
+        blocked_ids = get_blocked_profile_ids(current_profile)
+
         # Build queryset with prefetching and preserve order
         preserved_order = Case(
             *[When(pk=pk, then=pos) for pos, pk in enumerate(post_ids)]
         )
-        
-        return Post.objects.filter(id__in=post_ids).prefetch_related(
+
+        return Post.objects.filter(id__in=post_ids).exclude(
+            profile_id__in=blocked_ids
+        ).prefetch_related(
             'images__tags__tagged_profile__image',
             'images__tags__tagged_profile__regularprofile',
             'images__tags__tagged_profile__businessprofile',
@@ -1209,8 +1233,7 @@ class CreatePostImageTagView(generics.CreateAPIView):
                 )
 
             # Get the tagged profile
-            from apps.profile_app.models import Profile
-            tagged_profile = Profile.objects.get(id=tagged_profile_id)
+            tagged_profile = ProfileModel.objects.get(id=tagged_profile_id)
 
             # Check if tag already exists
             existing_tag = PostImageTag.objects.filter(
@@ -1284,6 +1307,15 @@ class ListTaggedPostsView(generics.ListAPIView):
     def get_queryset(self):
         public_id = self.kwargs.get("public_id", None)
         current_profile = self.request.current_profile
+        blocked_ids = get_blocked_profile_ids(current_profile)
+
+        # Check if the target profile is blocked
+        try:
+            target_profile = ProfileModel.objects.get(public_id=public_id)
+            if target_profile.id in blocked_ids:
+                return Post.objects.none()
+        except ProfileModel.DoesNotExist:
+            return Post.objects.none()
 
         # Build filter for private profiles:
         # Include posts from:
@@ -1301,6 +1333,8 @@ class ListTaggedPostsView(generics.ListAPIView):
             images__tags__tagged_profile__public_id=public_id
         ).filter(
             private_profile_filter
+        ).exclude(
+            profile_id__in=blocked_ids
         ).prefetch_related(
             'images__tags__tagged_profile__image',
             'images__tags__tagged_profile__regularprofile',

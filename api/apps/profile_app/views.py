@@ -32,6 +32,7 @@ from apps.core_app.storage_utils import (
     check_s3_object_exists,
 )
 from apps.core_app.tasks import process_profile_image_task
+from apps.moderation_app.block_utils import get_blocked_profile_ids, are_profiles_blocking
 
 logger = logging.getLogger(__name__)
 
@@ -110,7 +111,13 @@ class RetrieveUpdateDestroyProfileView(generics.RetrieveAPIView, generics.Update
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
-        serializer = self.get_serializer(instance, context={"request": request})
+        current_profile = getattr(request, "current_profile", None)
+        is_blocked = False
+        if current_profile and current_profile.id != instance.id:
+            is_blocked = are_profiles_blocking(current_profile, instance)
+        serializer = self.get_serializer(
+            instance, context={"request": request, "is_blocked": is_blocked}
+        )
         return Response(serializer.data)
 
     def update(self, request, *args, **kwargs):
@@ -474,8 +481,11 @@ class ListSearchedProfilesView(generics.ListAPIView):
     def get_queryset(self):
         current_profile = self.request.current_profile
         username = self.request.query_params.get("username", None)
+        blocked_ids = get_blocked_profile_ids(current_profile)
         profiles = Profile.objects.filter(
             Q(username__icontains=username) & ~Q(id=current_profile.id)
+        ).exclude(
+            id__in=blocked_ids
         ).annotate(
             _is_following=Exists(
                 Follow.objects.filter(

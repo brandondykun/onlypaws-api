@@ -7,6 +7,35 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
+class Block(models.Model):
+    """
+    Model to store profile blocks. When a block exists, neither profile
+    should see the other's content anywhere in the app.
+    """
+
+    blocker = models.ForeignKey(
+        "profile_app.Profile",
+        on_delete=models.CASCADE,
+        related_name="blocks_given",
+    )
+    blocked = models.ForeignKey(
+        "profile_app.Profile",
+        on_delete=models.CASCADE,
+        related_name="blocks_received",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = (("blocker", "blocked"),)
+        indexes = [
+            models.Index(fields=["blocker"]),
+            models.Index(fields=["blocked"]),
+        ]
+
+    def __str__(self):
+        return f"{self.blocker} blocked {self.blocked}"
+
+
 class ReportReason(models.Model):
     """
     Model to store predefined reasons for reporting posts
@@ -35,9 +64,14 @@ class PostReport(models.Model):
         RESOLVED = "RESOLVED", _("Resolved")
         DISMISSED = "DISMISSED", _("Dismissed")
 
-    post = models.ForeignKey("posts_app.Post", on_delete=models.CASCADE, related_name="reports")
+    post = models.ForeignKey(
+        "posts_app.Post", on_delete=models.CASCADE, related_name="reports"
+    )
     reporter = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="reported_posts"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="reported_posts",
     )
     reason = models.ForeignKey("moderation_app.ReportReason", on_delete=models.PROTECT)
     details = models.TextField(blank=True, default="")
@@ -97,9 +131,14 @@ class ProfileReport(models.Model):
         "profile_app.Profile", on_delete=models.CASCADE, related_name="profile_reports"
     )
     reporter = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="reported_profiles"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="reported_profiles",
     )
-    reason = models.ForeignKey("moderation_app.ProfileReportReason", on_delete=models.PROTECT)
+    reason = models.ForeignKey(
+        "moderation_app.ProfileReportReason", on_delete=models.PROTECT
+    )
     details = models.TextField(blank=True, default="")
     status = models.CharField(
         max_length=20, choices=ReportStatus.choices, default=ReportStatus.PENDING
@@ -167,4 +206,3 @@ class ProfanityLog(models.Model):
 
     def __str__(self):
         return f"ProfanityLog #{self.id} [{self.content_type}] {self.detection_method}"
-
