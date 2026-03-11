@@ -1,36 +1,36 @@
-asgiref==3.8.1
-Django==5.1.1
-djangorestframework==3.15.2
-djangorestframework-simplejwt==5.3.1
+asgiref==3.9.1
+Django==5.2.12
+djangorestframework==3.16.1
+djangorestframework-simplejwt==5.5.1
 PyJWT==2.9.0
 sqlparse==0.5.1
-pillow
-pillow-heif>=1.1.0,<2.0.0
+pillow==12.1.1
+pillow-heif==1.1.1
 django-environ==0.11.2
-psycopg2>=2.9.9,<=2.10
+psycopg2==2.9.11
 pgvector==0.4.1
-drf-spectacular
+drf-spectacular==0.27.2
 coverage==7.6.4
-django-storages>=1.14.4,<=1.15
-boto3>=1.35.81,<=1.36
-django-cors-headers>=4.6.0,<=4.7.0
-gunicorn==20.1.0
+django-storages==1.14.4
+boto3==1.35.81
+django-cors-headers==4.7.0
+gunicorn==23.0.0
 # Local embedding generation  
-sentence-transformers>=2.7.0,<3.0.0
+sentence-transformers==2.7.0
 # Celery and Redis for background tasks
-celery>=5.3.0,<6.0.0
-redis>=5.0.0,<6.0.0
+celery==5.5.3
+redis==5.3.1
 # Django Channels for WebSocket support
-channels>=4.0.0,<5.0.0
-channels-redis>=4.2.0,<5.0.0
+channels==4.3.1
+channels-redis==4.3.0
 # ASGI server for WebSocket support
-daphne>=4.0.0,<5.0.0
+daphne==4.2.1
 # ULID for unique public IDs
-django-ulid>=0.0.4,<0.1.0
+django-ulid==0.0.4
 # Google ID token verification (production)
-google-auth>=2.0.0,<3.0.0
+google-auth==2.48.0
 # Profanity detection for username validation
-better-profanity>=0.7.0,<1.0.0
-rapidfuzz>=3.0.0,<4.0.0
+better-profanity==0.7.0
+rapidfuzz==3.14.3
 # ML-based profanity detection for longer-form text (captions, about text)
-alt-profanity-check>=1.4.0,<2.0.0
+alt-profanity-check==1.8.0

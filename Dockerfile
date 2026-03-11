@@ -3,7 +3,9 @@
 # ============================
 # Builder stage
 # ============================
-FROM python:3.12.2-slim AS builder
+FROM python:3.12.12-slim-bookworm AS builder
+
+RUN apt-get update && apt-get upgrade -y --no-install-recommends && apt-get clean
 
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -33,7 +35,9 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 # ============================
 # Final stage
 # ============================
-FROM python:3.12.2-slim
+FROM python:3.12.12-slim-bookworm
+
+RUN apt-get update && apt-get upgrade -y --no-install-recommends && apt-get clean
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
