@@ -30,6 +30,10 @@ REST_FRAMEWORK = {
     ),
     "EXCEPTION_HANDLER": "apps.core_app.exceptions.exceptions.custom_exception_handler",
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_THROTTLE_RATES": {
+        "auth": "30/minute",
+        "auth_sensitive": "5/minute",
+    },
 }
 
 STORAGES = {
