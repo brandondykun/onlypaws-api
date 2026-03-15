@@ -50,6 +50,8 @@ class Command(BaseCommand):
             "announcement",
             "postimagescaled",
             "profileimagescaled",
+            "termsofservice",
+            "termsacceptance",
         ]
 
         # default fixture path

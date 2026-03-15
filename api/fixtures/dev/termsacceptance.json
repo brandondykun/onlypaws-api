@@ -1,0 +1,212 @@
+[
+  {
+    "model": "legal_app.termsacceptance",
+    "pk": 1,
+    "fields": {
+      "user": 1,
+      "terms": 1,
+      "accepted_at": "2026-03-12T23:54:37.313Z",
+      "ip_address": "172.21.0.1"
+    }
+  },
+  {
+    "model": "legal_app.termsacceptance",
+    "pk": 2,
+    "fields": {
+      "user": 2,
+      "terms": 1,
+      "accepted_at": "2026-03-12T23:54:37.313Z",
+      "ip_address": "172.21.0.1"
+    }
+  },
+  {
+    "model": "legal_app.termsacceptance",
+    "pk": 3,
+    "fields": {
+      "user": 3,
+      "terms": 1,
+      "accepted_at": "2026-03-12T23:54:37.313Z",
+      "ip_address": "172.21.0.1"
+    }
+  },
+  {
+    "model": "legal_app.termsacceptance",
+    "pk": 4,
+    "fields": {
+      "user": 4,
+      "terms": 1,
+      "accepted_at": "2026-03-12T23:54:37.313Z",
+      "ip_address": "172.21.0.1"
+    }
+  },
+  {
+    "model": "legal_app.termsacceptance",
+    "pk": 5,
+    "fields": {
+      "user": 5,
+      "terms": 1,
+      "accepted_at": "2026-03-12T23:54:37.313Z",
+      "ip_address": "172.21.0.1"
+    }
+  },
+  {
+    "model": "legal_app.termsacceptance",
+    "pk": 6,
+    "fields": {
+      "user": 6,
+      "terms": 1,
+      "accepted_at": "2026-03-12T23:54:37.313Z",
+      "ip_address": "172.21.0.1"
+    }
+  },
+  {
+    "model": "legal_app.termsacceptance",
+    "pk": 7,
+    "fields": {
+      "user": 7,
+      "terms": 1,
+      "accepted_at": "2026-03-12T23:54:37.313Z",
+      "ip_address": "172.21.0.1"
+    }
+  },
+  {
+    "model": "legal_app.termsacceptance",
+    "pk": 8,
+    "fields": {
+      "user": 10,
+      "terms": 1,
+      "accepted_at": "2026-03-12T23:54:37.313Z",
+      "ip_address": "172.21.0.1"
+    }
+  },
+  {
+    "model": "legal_app.termsacceptance",
+    "pk": 9,
+    "fields": {
+      "user": 11,
+      "terms": 1,
+      "accepted_at": "2026-03-12T23:54:37.313Z",
+      "ip_address": "172.21.0.1"
+    }
+  },
+  {
+    "model": "legal_app.termsacceptance",
+    "pk": 10,
+    "fields": {
+      "user": 12,
+      "terms": 1,
+      "accepted_at": "2026-03-12T23:54:37.313Z",
+      "ip_address": "172.21.0.1"
+    }
+  },
+  {
+    "model": "legal_app.termsacceptance",
+    "pk": 11,
+    "fields": {
+      "user": 13,
+      "terms": 1,
+      "accepted_at": "2026-03-12T23:54:37.313Z",
+      "ip_address": "172.21.0.1"
+    }
+  },
+  {
+    "model": "legal_app.termsacceptance",
+    "pk": 12,
+    "fields": {
+      "user": 14,
+      "terms": 1,
+      "accepted_at": "2026-03-12T23:54:37.313Z",
+      "ip_address": "172.21.0.1"
+    }
+  },
+  {
+    "model": "legal_app.termsacceptance",
+    "pk": 13,
+    "fields": {
+      "user": 15,
+      "terms": 1,
+      "accepted_at": "2026-03-12T23:54:37.313Z",
+      "ip_address": "172.21.0.1"
+    }
+  },
+  {
+    "model": "legal_app.termsacceptance",
+    "pk": 14,
+    "fields": {
+      "user": 16,
+      "terms": 1,
+      "accepted_at": "2026-03-12T23:54:37.313Z",
+      "ip_address": "172.21.0.1"
+    }
+  },
+  {
+    "model": "legal_app.termsacceptance",
+    "pk": 15,
+    "fields": {
+      "user": 17,
+      "terms": 1,
+      "accepted_at": "2026-03-12T23:54:37.313Z",
+      "ip_address": "172.21.0.1"
+    }
+  },
+  {
+    "model": "legal_app.termsacceptance",
+    "pk": 16,
+    "fields": {
+      "user": 18,
+      "terms": 1,
+      "accepted_at": "2026-03-12T23:54:37.313Z",
+      "ip_address": "172.21.0.1"
+    }
+  },
+  {
+    "model": "legal_app.termsacceptance",
+    "pk": 17,
+    "fields": {
+      "user": 19,
+      "terms": 1,
+      "accepted_at": "2026-03-12T23:54:37.313Z",
+      "ip_address": "172.21.0.1"
+    }
+  },
+  {
+    "model": "legal_app.termsacceptance",
+    "pk": 18,
+    "fields": {
+      "user": 20,
+      "terms": 1,
+      "accepted_at": "2026-03-12T23:54:37.313Z",
+      "ip_address": "172.21.0.1"
+    }
+  },
+  {
+    "model": "legal_app.termsacceptance",
+    "pk": 19,
+    "fields": {
+      "user": 21,
+      "terms": 1,
+      "accepted_at": "2026-03-12T23:54:37.313Z",
+      "ip_address": "172.21.0.1"
+    }
+  },
+  {
+    "model": "legal_app.termsacceptance",
+    "pk": 20,
+    "fields": {
+      "user": 22,
+      "terms": 1,
+      "accepted_at": "2026-03-12T23:54:37.313Z",
+      "ip_address": "172.21.0.1"
+    }
+  },
+  {
+    "model": "legal_app.termsacceptance",
+    "pk": 21,
+    "fields": {
+      "user": 23,
+      "terms": 1,
+      "accepted_at": "2026-03-12T23:54:37.313Z",
+      "ip_address": "172.21.0.1"
+    }
+  }
+]

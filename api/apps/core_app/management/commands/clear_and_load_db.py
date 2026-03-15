@@ -57,6 +57,8 @@ class Command(BaseCommand):
             "announcement.json",
             "postimagescaled.json",
             "profileimagescaled.json",
+            "termsofservice.json",
+            "termsacceptance.json",
         ]
 
         path_prefix = "fixtures/e2e"

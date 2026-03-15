@@ -94,6 +94,7 @@ INSTALLED_APPS = [
     "apps.config_app",
     "apps.announcements_app",
     "apps.admin_app",
+    "apps.legal_app",
     "storages",
     "corsheaders",
     "rest_framework_simplejwt.token_blacklist",  # Required for token blacklisting/rotation
@@ -249,7 +250,7 @@ SPECTACULAR_SETTINGS = {
         "PostReportStatusEnum": "apps.moderation_app.models.PostReport.ReportStatus",
         "FeedbackStatusEnum": "apps.feedback_app.models.Feedback.FeedbackStatus",
     },
-    'SCHEMA_PATH_PREFIX': r'/api/v[0-9]',
+    "SCHEMA_PATH_PREFIX": r"/api/v[0-9]",
 }
 
 
@@ -267,9 +268,7 @@ DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
 
 # Celery Configuration
 CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://redis:6379/0")
-CELERY_RESULT_BACKEND = os.environ.get(
-    "CELERY_RESULT_BACKEND", "redis://redis:6379/0"
-)
+CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", "redis://redis:6379/0")
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
@@ -301,15 +300,15 @@ CELERY_BEAT_SCHEDULE_FILENAME = "/tmp/celerybeat-schedule"
 
 # Celery Beat scheduled tasks
 CELERY_BEAT_SCHEDULE = {
-    'cleanup-old-notifications': {
-        'task': 'apps.notifications_app.tasks.cleanup_old_notifications_task',
-        'schedule': crontab(hour=3, minute=0),  # Run daily at 3:00 AM UTC
-        'args': (30,),  # Delete notifications older than 30 days
+    "cleanup-old-notifications": {
+        "task": "apps.notifications_app.tasks.cleanup_old_notifications_task",
+        "schedule": crontab(hour=3, minute=0),  # Run daily at 3:00 AM UTC
+        "args": (30,),  # Delete notifications older than 30 days
     },
-    'flush-expired-jwt-tokens': {
-        'task': 'apps.core_app.tasks.flush_expired_tokens_task',
-        'schedule': crontab(hour=4, minute=0),  # Run daily at 4:00 AM UTC
-        'options': {'expires': 3600},  # Task expires after 1 hour if not picked up
+    "flush-expired-jwt-tokens": {
+        "task": "apps.core_app.tasks.flush_expired_tokens_task",
+        "schedule": crontab(hour=4, minute=0),  # Run daily at 4:00 AM UTC
+        "options": {"expires": 3600},  # Task expires after 1 hour if not picked up
     },
 }
 
@@ -326,29 +325,36 @@ CHANNEL_LAYERS = {
 }
 
 # Get the current environment
-environment: Literal["test", "e2e", "dev", "staging", "prod"] = os.environ.get("DJANGO_ENV")
+environment: Literal["test", "e2e", "dev", "staging", "prod"] = os.environ.get(
+    "DJANGO_ENV"
+)
 
 # Load the correct settings file based on the environment
 if environment == "test":
     from core.settings_test import *
+
     print_environment_banner(environment)
 elif environment == "e2e":
     from core.settings_e2e import *
+
     print_environment_banner(environment)
 elif environment == "dev":
     from core.settings_dev import *
+
     print_environment_banner(environment)
 elif environment == "staging":
     from core.settings_staging import *
+
     print_environment_banner(environment)
 elif environment == "prod":
     from core.settings_prod import *
+
     print_environment_banner(environment)
 
 # Configure logging after environment-specific settings are loaded
 if environment:
     from core.logging_config import get_logging_config
     import logging.config
-    
+
     LOGGING = get_logging_config(environment, log_dir="/vol/log")
     logging.config.dictConfig(LOGGING)
