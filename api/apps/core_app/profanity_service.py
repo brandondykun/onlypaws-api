@@ -17,7 +17,9 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ProfanityCheckResult:
     is_profane: bool
-    detection_method: Optional[str] = None  # "ML", "WORD_MATCH", "SUBSTRING", "SHORT_MATCH", "FUZZY"
+    detection_method: Optional[str] = (
+        None  # "ML", "WORD_MATCH", "SUBSTRING", "SHORT_MATCH", "FUZZY"
+    )
     detection_details: dict = field(default_factory=dict)
 
 
@@ -61,6 +63,18 @@ class ProfanityService:
         username = re.sub(r"[^a-z]", "", username)
         return username
 
+    def _get_custom_banned_words(self) -> set[str]:
+        """Fetch custom banned words from cache/DB."""
+        from apps.moderation_app.cache import get_custom_banned_words
+
+        return get_custom_banned_words()
+
+    def _get_whitelisted_words(self) -> set[str]:
+        """Fetch whitelisted words from cache/DB."""
+        from apps.moderation_app.cache import get_whitelisted_words
+
+        return get_whitelisted_words()
+
     def _contains_long_profanity(self, normalized: str) -> bool:
         """Check for substring matches of profane words >= 4 chars."""
         for word in self._long_bad:
@@ -68,9 +82,11 @@ class ProfanityService:
                 return True
         return False
 
-    def _find_long_profanity(self, normalized: str) -> Optional[str]:
+    def _find_long_profanity(
+        self, normalized: str, word_set: Optional[set] = None
+    ) -> Optional[str]:
         """Find first substring match of profane words >= 4 chars."""
-        for word in self._long_bad:
+        for word in word_set if word_set is not None else self._long_bad:
             if word in normalized:
                 return word
         return None
@@ -82,9 +98,11 @@ class ProfanityService:
                 return True
         return False
 
-    def _find_short_profanity(self, normalized: str) -> Optional[tuple]:
+    def _find_short_profanity(
+        self, normalized: str, word_set: Optional[set] = None
+    ) -> Optional[tuple]:
         """Find first start/end match of 3-char profane words. Returns (word, position) or None."""
-        for word in self._short_bad:
+        for word in word_set if word_set is not None else self._short_bad:
             if normalized.startswith(word):
                 return (word, "start")
             if normalized.endswith(word):
@@ -101,9 +119,11 @@ class ProfanityService:
                     return True
         return False
 
-    def _find_fuzzy_profanity(self, normalized: str, threshold: int = 88) -> Optional[dict]:
+    def _find_fuzzy_profanity(
+        self, normalized: str, threshold: int = 88, word_set: Optional[set] = None
+    ) -> Optional[dict]:
         """Find first fuzzy match. Returns details dict or None."""
-        for word in self._long_bad:
+        for word in word_set if word_set is not None else self._long_bad:
             window_size = len(word)
             for i in range(len(normalized) - window_size + 1):
                 window = normalized[i : i + window_size]
@@ -128,7 +148,7 @@ class ProfanityService:
 
     def _split_sentences(self, text: str) -> list[str]:
         """Split text into sentences for ML analysis."""
-        sentences = re.split(r'[.!?]+', text)
+        sentences = re.split(r"[.!?]+", text)
         return [s.strip() for s in sentences if s.strip()]
 
     def check_text(self, text: str) -> ProfanityCheckResult:
@@ -153,7 +173,9 @@ class ProfanityService:
                         detection_method="ML",
                         detection_details={
                             "sentences": sentences,
-                            "probabilities": [round(float(prob), 4) for prob in probabilities],
+                            "probabilities": [
+                                round(float(prob), 4) for prob in probabilities
+                            ],
                             "threshold": threshold,
                             "flagged_sentence": sentences[i],
                             "flagged_sentence_index": i,
@@ -162,10 +184,18 @@ class ProfanityService:
                     )
 
         # Word-level exact match with leet-speak normalization
-        words = re.split(r'\s+', text.strip())
+        custom_banned = self._get_custom_banned_words()
+        whitelist = self._get_whitelisted_words()
+        all_bad_words = self._bad_words | custom_banned
+
+        words = re.split(r"\s+", text.strip())
         for word in words:
             normalized = self._normalize_word(word)
-            if normalized and normalized in self._bad_words:
+            if (
+                normalized
+                and normalized in all_bad_words
+                and normalized not in whitelist
+            ):
                 return ProfanityCheckResult(
                     is_profane=True,
                     detection_method="WORD_MATCH",
@@ -173,7 +203,9 @@ class ProfanityService:
                         "matched_word": normalized,
                         "original_word": word,
                         "normalized_text": " ".join(
-                            self._normalize_word(w) for w in words if self._normalize_word(w)
+                            self._normalize_word(w)
+                            for w in words
+                            if self._normalize_word(w)
                         ),
                     },
                 )
@@ -192,18 +224,26 @@ class ProfanityService:
         if not normalized:
             return ProfanityCheckResult(is_profane=False)
 
+        custom_banned = self._get_custom_banned_words()
+        whitelist = self._get_whitelisted_words()
+        all_long = self._long_bad | {w for w in custom_banned if len(w) >= 4}
+        all_short = self._short_bad | {w for w in custom_banned if len(w) == 3}
+
         # Substring match (long words)
-        matched = self._find_long_profanity(normalized)
-        if matched:
+        matched = self._find_long_profanity(normalized, word_set=all_long)
+        if matched and matched not in whitelist:
             return ProfanityCheckResult(
                 is_profane=True,
                 detection_method="SUBSTRING",
-                detection_details={"matched_word": matched, "normalized_text": normalized},
+                detection_details={
+                    "matched_word": matched,
+                    "normalized_text": normalized,
+                },
             )
 
         # Short word start/end match
-        short_match = self._find_short_profanity(normalized)
-        if short_match:
+        short_match = self._find_short_profanity(normalized, word_set=all_short)
+        if short_match and short_match[0] not in whitelist:
             return ProfanityCheckResult(
                 is_profane=True,
                 detection_method="SHORT_MATCH",
@@ -215,8 +255,8 @@ class ProfanityService:
             )
 
         # Fuzzy match
-        fuzzy_match = self._find_fuzzy_profanity(normalized)
-        if fuzzy_match:
+        fuzzy_match = self._find_fuzzy_profanity(normalized, word_set=all_long)
+        if fuzzy_match and fuzzy_match["matched_word"] not in whitelist:
             return ProfanityCheckResult(
                 is_profane=True,
                 detection_method="FUZZY",
@@ -260,6 +300,7 @@ def check_and_log_text(text, content_type, profile_id=None):
     result = get_profanity_service().check_text(text)
     if result.is_profane:
         from apps.moderation_app.tasks import log_profanity_detection_task
+
         log_profanity_detection_task.delay(
             original_text=text,
             content_type=content_type,
@@ -275,6 +316,7 @@ def check_and_log_username(text, content_type, profile_id=None):
     result = get_profanity_service().check_username(text)
     if result.is_profane:
         from apps.moderation_app.tasks import log_profanity_detection_task
+
         log_profanity_detection_task.delay(
             original_text=text,
             content_type=content_type,

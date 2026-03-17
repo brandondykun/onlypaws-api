@@ -59,6 +59,8 @@ class Command(BaseCommand):
             "profileimagescaled.json",
             "termsofservice.json",
             "termsacceptance.json",
+            "custombannedword.json",
+            "whitelistedword.json",
         ]
 
         path_prefix = "fixtures/e2e"

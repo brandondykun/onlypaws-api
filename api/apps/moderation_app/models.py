@@ -206,3 +206,43 @@ class ProfanityLog(models.Model):
 
     def __str__(self):
         return f"ProfanityLog #{self.id} [{self.content_type}] {self.detection_method}"
+
+
+class CustomBannedWord(models.Model):
+    """
+    Words to add to the profanity filter beyond the default word list.
+    """
+
+    word = models.CharField(max_length=100, unique=True)
+    notes = models.TextField(blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["word"]
+
+    def save(self, *args, **kwargs):
+        self.word = self.word.strip().lower()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.word
+
+
+class WhitelistedWord(models.Model):
+    """
+    Words that should NOT trigger the profanity filter (false positive overrides).
+    """
+
+    word = models.CharField(max_length=100, unique=True)
+    notes = models.TextField(blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["word"]
+
+    def save(self, *args, **kwargs):
+        self.word = self.word.strip().lower()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.word

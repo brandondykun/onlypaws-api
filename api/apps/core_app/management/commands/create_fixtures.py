@@ -52,6 +52,8 @@ class Command(BaseCommand):
             "profileimagescaled",
             "termsofservice",
             "termsacceptance",
+            "custombannedword",
+            "whitelistedword",
         ]
 
         # default fixture path

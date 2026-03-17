@@ -34,6 +34,8 @@ admin_url = (
     else "hidden/admin/"
 )
 
+admin.site.site_header = "OnlyPaws Admin"
+
 urlpatterns = [
     path(admin_url, admin.site.urls),
     path("api/v1/", include("apps.posts_app.urls")),
