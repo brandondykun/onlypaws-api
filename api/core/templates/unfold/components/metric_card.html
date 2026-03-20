@@ -1,0 +1,10 @@
+<div class="bg-primary-50 dark:bg-primary-950 flex flex-col grow overflow-hidden p-6 relative rounded-default shadow-xs border border-primary-200 dark:border-primary-500{% if class %} {{ class }}{% endif %}">
+
+<div class="grow relative{% if icon %} pl-8{% endif %}">
+    {{ children }}
+
+    {% if icon %}
+        <span class="material-symbols-outlined absolute -left-6 text-primary-200 top-1/2 -translate-x-1/3 -translate-y-1/2 text-6xl! dark:text-primary-700 {{ icon_class }}">{{ icon }}</span>
+    {% endif %}
+</div>
+</div>

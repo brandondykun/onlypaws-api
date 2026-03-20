@@ -34,3 +34,5 @@ better-profanity==0.7.0
 rapidfuzz==3.14.3
 # ML-based profanity detection for longer-form text (captions, about text)
 alt-profanity-check==1.8.0
+# Django Unfold for admin theme
+django-unfold==0.85.0

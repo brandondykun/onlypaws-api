@@ -15,6 +15,7 @@ from datetime import timedelta
 import os
 from typing import Literal
 from celery.schedules import crontab
+from . import unfold_settings
 from .utils import print_environment_banner
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -74,6 +75,7 @@ CSRF_EXEMPT_PATHS = [
 # Application definition
 
 INSTALLED_APPS = [
+    "unfold",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -119,7 +121,7 @@ ROOT_URLCONF = "core.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "core" / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -252,6 +254,8 @@ SPECTACULAR_SETTINGS = {
     },
     "SCHEMA_PATH_PREFIX": r"/api/v[0-9]",
 }
+
+UNFOLD = unfold_settings.UNFOLD
 
 
 # Test Fixtures

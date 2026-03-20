@@ -1,0 +1,53 @@
+{% extends 'admin/base.html' %}
+
+{% load i18n unfold %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block branding %}
+    {% include "unfold/helpers/site_branding.html" %}
+{% endblock %}
+
+{% block content %}
+    {% if kpi_metrics %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+            {% for card in kpi_metrics %}
+                {% component "unfold/components/metric_card.html" with icon=card.icon %}
+                    {% component "unfold/components/text.html" %}
+                        {{ card.title }}
+                    {% endcomponent %}
+                    {% component "unfold/components/title.html" %}
+                        {{ card.metric }}
+                    {% endcomponent %}
+                {% endcomponent %}
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if kpi_links %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+            {% for card in kpi_links %}
+                {% component "unfold/components/card.html" with icon=card.icon href=card.link class="border-l-4 border-l-primary-500" footer=card.footer %}
+                    {% component "unfold/components/text.html" %}
+                        {{ card.title }}
+                    {% endcomponent %}
+                    {% component "unfold/components/title.html" %}
+                        {{ card.metric }}
+                    {% endcomponent %}
+                    <div class="mt-2 flex items-center gap-1 text-xs font-medium text-primary-600 dark:text-primary-400">
+                        View all
+                        <span class="material-symbols-outlined text-sm!">arrow_forward</span>
+                    </div>
+                {% endcomponent %}
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="flex flex-col lg:flex-row lg:gap-8">
+        <div class="grow">
+            {% include "unfold/helpers/app_list_default.html" %}
+        </div>
+
+        {% include "unfold/helpers/history.html" %}
+    </div>
+{% endblock %}

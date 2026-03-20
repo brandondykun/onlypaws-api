@@ -1,9 +1,22 @@
 from django.contrib import admin
 from .models import Feedback, FeedbackComment
+from unfold.admin import ModelAdmin
+
+
+class FeedbackCommentInline(admin.TabularInline):
+    model = FeedbackComment
+    extra = 1
+    readonly_fields = ("created_at",)
+    fields = ("author", "content", "is_internal", "created_at")
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "author":
+            kwargs["queryset"] = db_field.related_model.objects.filter(is_staff=True)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 @admin.register(Feedback)
-class FeedbackAdmin(admin.ModelAdmin):
+class FeedbackAdmin(ModelAdmin):
     list_display = (
         "id",
         "title",
@@ -18,6 +31,7 @@ class FeedbackAdmin(admin.ModelAdmin):
     search_fields = ("title", "description", "reporter__email")
     readonly_fields = ("created_at", "updated_at")
     list_editable = ("status", "priority", "assignee")
+    inlines = [FeedbackCommentInline]
     ordering = ("-created_at",)
 
     fieldsets = (
@@ -36,7 +50,7 @@ class FeedbackAdmin(admin.ModelAdmin):
 
 
 @admin.register(FeedbackComment)
-class FeedbackCommentAdmin(admin.ModelAdmin):
+class FeedbackCommentAdmin(ModelAdmin):
     list_display = ("id", "ticket", "author", "is_internal", "created_at")
     list_filter = ("is_internal", "created_at")
     search_fields = ("content", "ticket__title", "author__email")
