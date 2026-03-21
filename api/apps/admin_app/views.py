@@ -9,6 +9,7 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
+from apps.posts_app.models import Post
 from django.db.models import Count
 from django.db.models.functions import TruncMonth
 from django.utils import timezone
@@ -178,4 +179,46 @@ class AdminUserGrowthView(AdminTimeSeriesView):
     """Monthly user registration counts for the admin dashboard chart."""
 
     model = User
+    date_field = "created_at"
+
+
+@extend_schema(
+    summary="Get post growth data by month",
+    description="Returns monthly post creation counts for charting. Admin only.",
+    parameters=[
+        OpenApiParameter(
+            name="start",
+            description="Start month (YYYY-MM). Defaults to earliest post.",
+            required=False,
+            type=str,
+        ),
+        OpenApiParameter(
+            name="end",
+            description="End month (YYYY-MM). Defaults to current month.",
+            required=False,
+            type=str,
+        ),
+    ],
+    responses={
+        200: {
+            "type": "object",
+            "properties": {
+                "labels": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Month labels (e.g. 'Jan 2025')",
+                },
+                "counts": {
+                    "type": "array",
+                    "items": {"type": "integer"},
+                    "description": "Post count per month",
+                },
+            },
+        },
+    },
+)
+class AdminPostGrowthView(AdminTimeSeriesView):
+    """Monthly post creation counts for the admin dashboard chart."""
+
+    model = Post
     date_field = "created_at"
