@@ -24,6 +24,8 @@ class AddressAdmin(ModelAdmin):
     list_display = ["id", "street_address", "city", "state", "country"]
     search_fields = ["street_address", "city", "state", "country"]
     list_filter = ["country", "state"]
+    readonly_fields = ["created_at"]
+    ordering = ["-created_at"]
 
 
 @admin.register(Profile)

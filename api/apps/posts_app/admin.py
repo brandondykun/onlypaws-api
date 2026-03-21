@@ -63,9 +63,9 @@ class PostAdmin(ModelAdmin):
 @admin.register(PostImage)
 class PostImageAdmin(ModelAdmin):
     list_display = ["id", "post", "order", "image"]
-    list_filter = ["order"]
+    list_filter = ["order", "created_at"]
     search_fields = ["post__id", "post__caption"]
-    readonly_fields = ["image_preview", "post_aspect_ratio"]
+    readonly_fields = ["image_preview", "post_aspect_ratio", "created_at"]
     inlines = [PostImageTagInline, PostImageScaledInline]
 
     def image_preview(self, obj):

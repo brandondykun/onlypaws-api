@@ -25,6 +25,7 @@ class AuthProviderAdmin(ModelAdmin):
 @admin.register(User)
 class UserAdmin(ModelAdmin):
     list_display = (
+        "id",
         "email",
         "is_active",
         "is_staff",
@@ -43,7 +44,7 @@ class UserAdmin(ModelAdmin):
     )
     search_fields = ("email",)
     ordering = ("-id",)
-    readonly_fields = ("last_login",)
+    readonly_fields = ("last_login", "created_at")
 
 
 @admin.register(VerifyEmailToken)

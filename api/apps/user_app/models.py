@@ -55,6 +55,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         help_text="Whether the user has completed onboarding for BusinessProfile type"
     )
 
+    created_at = models.DateTimeField(auto_now_add=True)
+
     objects = UserManager()
 
     USERNAME_FIELD = "email"

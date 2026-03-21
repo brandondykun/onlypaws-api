@@ -17,6 +17,7 @@ class PetType(models.Model):
 
     public_id = ULIDField(editable=False, unique=True, default=ulid.new)
     name = models.CharField(max_length=64, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name
@@ -33,6 +34,8 @@ class Address(models.Model):
     postal_code = models.CharField(max_length=20, blank=True, default="")
     country = models.CharField(max_length=100, blank=True, default="")
     
+    created_at = models.DateTimeField(auto_now_add=True)
+
     # For international or non-standard addresses
     full_address_text = models.TextField(
         blank=True,

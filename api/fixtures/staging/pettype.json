@@ -2,69 +2,118 @@
   {
     "model": "profile_app.pettype",
     "pk": 1,
-    "fields": { "public_id": "01KJ312K9Z8RTECCRV7T273KVS", "name": "Dog" }
+    "fields": {
+      "public_id": "01KJ312K9Z8RTECCRV7T273KVS",
+      "name": "Dog",
+      "created_at": "2025-01-01T00:00:00Z"
+    }
   },
   {
     "model": "profile_app.pettype",
     "pk": 2,
-    "fields": { "public_id": "01KJ312KA0FVRMXRQB4FK216CY", "name": "Cat" }
+    "fields": {
+      "public_id": "01KJ312KA0FVRMXRQB4FK216CY",
+      "name": "Cat",
+      "created_at": "2025-01-01T00:00:00Z"
+    }
   },
   {
     "model": "profile_app.pettype",
     "pk": 3,
-    "fields": { "public_id": "01KJ312KA0B8ABR10148HWHK97", "name": "Fish" }
+    "fields": {
+      "public_id": "01KJ312KA0B8ABR10148HWHK97",
+      "name": "Fish",
+      "created_at": "2025-01-01T00:00:00Z"
+    }
   },
   {
     "model": "profile_app.pettype",
     "pk": 4,
-    "fields": { "public_id": "01KJ312KA1JZNWW7J5Q388MHES", "name": "Bird" }
+    "fields": {
+      "public_id": "01KJ312KA1JZNWW7J5Q388MHES",
+      "name": "Bird",
+      "created_at": "2025-01-01T00:00:00Z"
+    }
   },
   {
     "model": "profile_app.pettype",
     "pk": 5,
-    "fields": { "public_id": "01KJ312KA1R24WF86XJ6EZBXTQ", "name": "Rabbit" }
+    "fields": {
+      "public_id": "01KJ312KA1R24WF86XJ6EZBXTQ",
+      "name": "Rabbit",
+      "created_at": "2025-01-01T00:00:00Z"
+    }
   },
   {
     "model": "profile_app.pettype",
     "pk": 6,
-    "fields": { "public_id": "01KJ312KA2TBVQ0QYKFJXKP041", "name": "Hamster" }
+    "fields": {
+      "public_id": "01KJ312KA2TBVQ0QYKFJXKP041",
+      "name": "Hamster",
+      "created_at": "2025-01-01T00:00:00Z"
+    }
   },
   {
     "model": "profile_app.pettype",
     "pk": 7,
     "fields": {
       "public_id": "01KJ312KA20EJXJZS1PS3FMFFR",
-      "name": "Guinea Pig"
+      "name": "Guinea Pig",
+      "created_at": "2025-01-01T00:00:00Z"
     }
   },
   {
     "model": "profile_app.pettype",
     "pk": 8,
-    "fields": { "public_id": "01KJ312KA2PT0ZX5ZFMN0RF6TY", "name": "Turtle" }
+    "fields": {
+      "public_id": "01KJ312KA2PT0ZX5ZFMN0RF6TY",
+      "name": "Turtle",
+      "created_at": "2025-01-01T00:00:00Z"
+    }
   },
   {
     "model": "profile_app.pettype",
     "pk": 9,
-    "fields": { "public_id": "01KJ312KA3KDMAV99TN3N1M4YV", "name": "Ferret" }
+    "fields": {
+      "public_id": "01KJ312KA3KDMAV99TN3N1M4YV",
+      "name": "Ferret",
+      "created_at": "2025-01-01T00:00:00Z"
+    }
   },
   {
     "model": "profile_app.pettype",
     "pk": 10,
-    "fields": { "public_id": "01KJ312KA3WB34WG5T7SB8P3ZK", "name": "Duck" }
+    "fields": {
+      "public_id": "01KJ312KA3WB34WG5T7SB8P3ZK",
+      "name": "Duck",
+      "created_at": "2025-01-01T00:00:00Z"
+    }
   },
   {
     "model": "profile_app.pettype",
     "pk": 11,
-    "fields": { "public_id": "01KJ312KA4SG838WC254KM934K", "name": "Pig" }
+    "fields": {
+      "public_id": "01KJ312KA4SG838WC254KM934K",
+      "name": "Pig",
+      "created_at": "2025-01-01T00:00:00Z"
+    }
   },
   {
     "model": "profile_app.pettype",
     "pk": 12,
-    "fields": { "public_id": "01KJ312KA463WZFDK6K3CGTGYW", "name": "Chicken" }
+    "fields": {
+      "public_id": "01KJ312KA463WZFDK6K3CGTGYW",
+      "name": "Chicken",
+      "created_at": "2025-01-01T00:00:00Z"
+    }
   },
   {
     "model": "profile_app.pettype",
     "pk": 13,
-    "fields": { "public_id": "01KJ312KA401DA1BNHSAVPR3TZ", "name": "Other" }
+    "fields": {
+      "public_id": "01KJ312KA401DA1BNHSAVPR3TZ",
+      "name": "Other",
+      "created_at": "2025-01-01T00:00:00Z"
+    }
   }
 ]

@@ -234,6 +234,8 @@ class PostImage(models.Model):
         help_text="S3 key for the original uploaded image (before processing)"
     )
 
+    created_at = models.DateTimeField(auto_now_add=True)
+
     # Embedding fields for similarity search
     embedding = VectorField(
         dimensions=512,  # 512-dimensional embedding

@@ -23,7 +23,7 @@ def dashboard_callback(request, context):
         },
         {
             "title": "New Users (30 days)",
-            "metric": User.objects.filter(profiles__created_at__gte=thirty_days_ago)
+            "metric": User.objects.filter(created_at__gte=thirty_days_ago)
             .distinct()
             .count(),
             "icon": "person_add",
