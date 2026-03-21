@@ -3,39 +3,10 @@ URL configuration for admin dashboard app.
 """
 
 from django.urls import path
-from .views import (
-    AdminDashboardStatsView,
-    AdminUserListView,
-    AdminUserDetailView,
-    AdminProfileListView,
-    AdminProfileDetailView,
-    AdminAnnouncementListView,
-    AdminAnnouncementDetailView,
-    AdminReportReasonListView,
-    AdminReportReasonDetailView,
-    AdminProfileReportReasonListView,
-    AdminProfileReportReasonDetailView,
-    AdminProfileReportListView,
-    AdminProfileReportDetailView,
-    AdminProfanityLogListView,
-    AdminProfanityLogDetailView,
-)
+from .views import AdminUserGrowthView
 
 urlpatterns = [
-    path("stats/", AdminDashboardStatsView.as_view(), name="admin-dashboard-stats"),
-    path("users/", AdminUserListView.as_view(), name="admin-user-list"),
-    path("users/<int:pk>/", AdminUserDetailView.as_view(), name="admin-user-detail"),
-    path("profiles/", AdminProfileListView.as_view(), name="admin-profile-list"),
-    path("profiles/<int:pk>/", AdminProfileDetailView.as_view(), name="admin-profile-detail"),
-    path("announcements/", AdminAnnouncementListView.as_view(), name="admin-announcement-list"),
-    path("announcements/<int:pk>/", AdminAnnouncementDetailView.as_view(), name="admin-announcement-detail"),
-    path("report-reasons/", AdminReportReasonListView.as_view(), name="admin-report-reason-list"),
-    path("report-reasons/<int:pk>/", AdminReportReasonDetailView.as_view(), name="admin-report-reason-detail"),
-    path("profile-report-reasons/", AdminProfileReportReasonListView.as_view(), name="admin-profile-report-reason-list"),
-    path("profile-report-reasons/<int:pk>/", AdminProfileReportReasonDetailView.as_view(), name="admin-profile-report-reason-detail"),
-    path("profile-reports/", AdminProfileReportListView.as_view(), name="admin-profile-report-list"),
-    path("profile-reports/<int:pk>/", AdminProfileReportDetailView.as_view(), name="admin-profile-report-detail"),
-    path("profanity-logs/", AdminProfanityLogListView.as_view(), name="admin-profanity-log-list"),
-    path("profanity-logs/<int:pk>/", AdminProfanityLogDetailView.as_view(), name="admin-profanity-log-detail"),
+    path(
+        "charts/user-growth/", AdminUserGrowthView.as_view(), name="admin-user-growth"
+    ),
 ]
-
