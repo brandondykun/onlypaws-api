@@ -36,3 +36,12 @@ rapidfuzz==3.14.3
 alt-profanity-check==1.8.0
 # Django Unfold for admin theme
 django-unfold==0.85.0
+# OpenTelemetry (SigNoz observability)
+opentelemetry-api==1.40.0
+opentelemetry-sdk==1.40.0
+opentelemetry-exporter-otlp-proto-grpc==1.40.0
+opentelemetry-instrumentation-django==0.61b0
+opentelemetry-instrumentation-psycopg2==0.61b0
+opentelemetry-instrumentation-redis==0.61b0
+opentelemetry-instrumentation-celery==0.61b0
+opentelemetry-instrumentation-logging==0.61b0

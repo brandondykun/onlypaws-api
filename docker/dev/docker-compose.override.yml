@@ -46,6 +46,9 @@ services:
     working_dir: /api
     command: python -m celery -A core worker -Q default -l info --concurrency=4
     restart: unless-stopped
+    networks:
+      - default
+      - observability
 
   # Celery worker for embedding tasks (CPU intensive)
   celery-worker-embeddings:
@@ -67,6 +70,9 @@ services:
     working_dir: /api
     command: python -m celery -A core worker -Q embeddings -l info --concurrency=1
     restart: unless-stopped
+    networks:
+      - default
+      - observability
 
   # Celery beat for periodic tasks (optional)
   celery-beat:
@@ -88,6 +94,9 @@ services:
     working_dir: /api
     command: python -m celery -A core beat -l info
     restart: unless-stopped
+    networks:
+      - default
+      - observability
 
 volumes:
   only-paws-db-data-dev:

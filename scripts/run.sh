@@ -29,6 +29,9 @@ if [ "$current_dir" = "scripts" ]; then
     cd .. || exit 1
 fi
 
+# Ensure the observability network exists (for SigNoz integration)
+docker network create observability 2>/dev/null || true
+
 # Change directory to docker folder
 cd docker || exit 1
 

@@ -19,6 +19,13 @@ app.config_from_object("django.conf:settings", namespace="CELERY")
 # Load task modules from all registered Django apps.
 app.autodiscover_tasks()
 
+
+@app.on_after_finalize.connect
+def _init_telemetry_on_ready(**kwargs):
+    """Init telemetry after Celery has finalized (Django fully loaded, dictConfig applied)."""
+    from core.telemetry import init_telemetry
+    init_telemetry()
+
 # Optional: Configure task routes for different queues
 app.conf.task_routes = {
     "apps.core_app.tasks.generate_image_embedding_task": {"queue": "embeddings"},

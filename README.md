@@ -32,6 +32,7 @@ _The unapologetically pet friendly social media app._
 19. [Commits](#commits)
 20. [Environment Variables](#environment-variables)
 21. [Dev and E2E Images](#dev-and-e2e-images)
+22. [Observability (SigNoz)](#observability-signoz)
 
 ---
 
@@ -62,6 +63,10 @@ Several scripts are available to help with the development process.
 [run.sh](#running-the-api) - Starts the docker containers and runs the API in the given environment.
 
 [stop.sh](#shutting-down-the-api) - Removes the docker containers and shuts down the API.
+
+[start-signoz.sh](#observability-signoz) - Starts the SigNoz observability stack.
+
+[stop-signoz.sh](#observability-signoz) - Stops the SigNoz observability stack.
 
 [test.sh](#tests) - Runs automated test suite.
 
@@ -843,3 +848,25 @@ api/
     images/
       e2e/
 ```
+
+
+## Observability (SigNoz)
+
+The API includes optional observability via a self-hosted [SigNoz](https://signoz.io/) stack that provides traces, logs, and APM metrics. SigNoz runs as a separate Docker Compose project and communicates with the app over a shared `observability` network.
+
+```bash
+# Start SigNoz (do this before starting the app)
+docker/signoz/start-signoz.sh
+
+# Stop SigNoz (preserves data)
+docker/signoz/stop-signoz.sh
+
+# Stop SigNoz and wipe all data
+docker/signoz/stop-signoz.sh -v
+```
+
+**SigNoz UI:** http://localhost:3301
+
+Telemetry is opt-in, controlled by `OTEL_EXPORTER_OTLP_ENDPOINT` in the env file. When unset, the app runs with zero observability overhead.
+
+For detailed setup, configuration, and debugging, see **[docker/signoz/README.md](docker/signoz/README.md)**.

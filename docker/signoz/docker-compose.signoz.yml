@@ -1,0 +1,147 @@
+# SigNoz observability stack (self-hosted)
+# Run separately from the main app stack.
+# Shares the 'observability' external network with the app.
+#
+# Versions pinned to the official SigNoz release (2025-06):
+#   signoz/signoz:v0.116.1 — unified query-service + frontend
+#   signoz/signoz-otel-collector:v0.144.2 — collector + migrator
+#   clickhouse/clickhouse-server:25.5.6
+
+name: signoz
+
+services:
+  zookeeper:
+    container_name: signoz_zookeeper
+    image: signoz/zookeeper:3.7.1
+    restart: unless-stopped
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+      - ZOO_4LW_COMMANDS_WHITELIST=ruok
+    volumes:
+      - zookeeper_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "echo ruok | nc localhost 2181 | grep imok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - signoz-internal
+
+  clickhouse:
+    container_name: signoz_clickhouse
+    image: clickhouse/clickhouse-server:25.5.6
+    restart: unless-stopped
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - ./clickhouse-cluster.xml:/etc/clickhouse-server/config.d/cluster.xml:ro
+      - ./clickhouse-users.xml:/etc/clickhouse-server/users.d/default.xml:ro
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "localhost:8123/ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - signoz-internal
+
+  telemetrystore-migrator:
+    container_name: signoz_telemetrystore_migrator
+    image: signoz/signoz-otel-collector:v0.144.2
+    environment:
+      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_DSN=tcp://clickhouse:9000
+      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_CLUSTER=cluster
+      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_REPLICATION=true
+      - SIGNOZ_OTEL_COLLECTOR_TIMEOUT=10m
+    entrypoint: ["/bin/sh"]
+    command:
+      - -c
+      - |
+        /signoz-otel-collector migrate bootstrap &&
+        /signoz-otel-collector migrate sync up &&
+        /signoz-otel-collector migrate async up
+    restart: on-failure
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+    networks:
+      - signoz-internal
+
+  signoz-otel-collector:
+    container_name: signoz_otel_collector
+    image: signoz/signoz-otel-collector:v0.144.2
+    restart: unless-stopped
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    environment:
+      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_DSN=tcp://clickhouse:9000
+      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_CLUSTER=cluster
+      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_REPLICATION=true
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+      telemetrystore-migrator:
+        condition: service_completed_successfully
+    ports:
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+    networks:
+      - signoz-internal
+      - observability
+
+  signoz:
+    container_name: signoz_app
+    image: signoz/signoz:v0.116.1
+    restart: unless-stopped
+    environment:
+      - SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_DSN=tcp://clickhouse:9000
+      - SIGNOZ_SQLSTORE_SQLITE_PATH=/var/lib/signoz/signoz.db
+    volumes:
+      - signoz_data:/var/lib/signoz
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+      telemetrystore-migrator:
+        condition: service_completed_successfully
+    ports:
+      - "127.0.0.1:3301:8080"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "localhost:8080/api/v1/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - signoz-internal
+
+  docker-collection-agent:
+    container_name: signoz_docker_collector
+    image: otel/opentelemetry-collector-contrib:0.139.0
+    restart: unless-stopped
+    user: "0:0"
+    network_mode: host
+    environment:
+      - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=dev
+    volumes:
+      - ./docker-collection-config.yaml:/etc/otelcol-contrib/config.yaml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /:/hostfs:ro
+    depends_on:
+      signoz-otel-collector:
+        condition: service_started
+
+volumes:
+  zookeeper_data:
+  clickhouse_data:
+  signoz_data:
+
+networks:
+  signoz-internal:
+    driver: bridge
+  observability:
+    external: true

@@ -67,6 +67,9 @@ services:
     working_dir: /api
     command: python -m celery -A core worker -Q default -l info --concurrency=4
     restart: unless-stopped
+    networks:
+      - default
+      - observability
     deploy:
       resources:
         limits:
@@ -94,6 +97,9 @@ services:
     working_dir: /api
     command: python -m celery -A core worker -Q embeddings -l info --concurrency=2
     restart: unless-stopped
+    networks:
+      - default
+      - observability
     deploy:
       resources:
         limits:

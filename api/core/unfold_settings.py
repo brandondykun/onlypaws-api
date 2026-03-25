@@ -1,4 +1,5 @@
 from django.urls import reverse_lazy
+from django.templatetags.static import static
 
 
 UNFOLD = {
@@ -344,4 +345,12 @@ UNFOLD = {
             },
         ],
     },
+    "SITE_FAVICONS": [
+        {
+            "rel": "icon",
+            "sizes": "32x32",
+            "type": "image/png",
+            "href": lambda request: static("favicon.png"),
+        },
+    ],
 }

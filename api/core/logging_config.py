@@ -118,6 +118,12 @@ class JSONFormatter(logging.Formatter):
             'line': record.lineno,
             'message': record.getMessage(),
         }
+
+        # Add OTel trace correlation fields when available
+        if hasattr(record, 'otelTraceID') and record.otelTraceID != '0':
+            log_data['trace_id'] = record.otelTraceID
+        if hasattr(record, 'otelSpanID') and record.otelSpanID != '0':
+            log_data['span_id'] = record.otelSpanID
         
         # Add exception info if present
         if record.exc_info:
