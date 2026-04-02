@@ -1,6 +1,8 @@
 #!/bin/bash
 
-# This script stops the docker compose file for the given environment
+# This script stops the docker compose file for the given environment.
+# Uses 'stop + rm' instead of 'down' to preserve the shared 'observability'
+# network, allowing SigNoz and the app to be restarted independently.
 
 # Check if argument is provided
 if [ $# -ne 1 ]; then
@@ -32,5 +34,6 @@ fi
 # Change directory to docker folder
 cd docker || exit 1
 
-# Run the appropriate docker compose command based on environment
-docker compose -f docker-compose.yml -f "$environment/docker-compose.override.yml" down 
+# Stop and remove containers without tearing down networks
+docker compose -f docker-compose.yml -f "$environment/docker-compose.override.yml" stop
+docker compose -f docker-compose.yml -f "$environment/docker-compose.override.yml" rm -f

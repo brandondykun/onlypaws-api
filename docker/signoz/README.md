@@ -55,7 +55,7 @@ open http://localhost:3301
 | `signoz_zookeeper` | `signoz/zookeeper:3.7.1` | Coordination for ClickHouse Replicated tables |
 | `signoz_clickhouse` | `clickhouse/clickhouse-server:25.5.6` | Time-series database for all telemetry data |
 | `signoz_telemetrystore_migrator` | `signoz/signoz-otel-collector:v0.144.2` | Runs ClickHouse schema migrations on startup, then exits |
-| `signoz_otel_collector` | `signoz/signoz-otel-collector:v0.144.2` | Receives OTLP data from app, writes to ClickHouse |
+| `signoz-otel-collector` | `signoz/signoz-otel-collector:v0.144.2` | Receives OTLP data from app, writes to ClickHouse |
 | `signoz_app` | `signoz/signoz:v0.116.1` | SigNoz UI and query API |
 | `signoz_docker_collector` | `otel/opentelemetry-collector-contrib:0.139.0` | Collects host machine and Docker container metrics |
 
@@ -132,7 +132,7 @@ Expected: ZooKeeper and ClickHouse `healthy`, migrator `Exited (0)`, collector a
 ### Collector not starting
 
 ```bash
-docker logs signoz_otel_collector 2>&1 | tail -20
+docker logs signoz-otel-collector 2>&1 | tail -20
 ```
 
 Common causes:
@@ -157,7 +157,7 @@ docker/signoz/start-signoz.sh
 docker network inspect observability --format '{{range .Containers}}{{.Name}}{{"\n"}}{{end}}' | grep signoz
 
 # If missing, manually connect it
-docker network connect observability signoz_otel_collector
+docker network connect observability signoz-otel-collector
 
 # Then recreate app containers
 cd docker && docker compose -f docker-compose.yml -f dev/docker-compose.override.yml up -d --force-recreate

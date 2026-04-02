@@ -30,6 +30,11 @@ services:
     command: redis-server --appendonly yes --bind 0.0.0.0 --protected-mode no
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep -q PONG && touch /data/.healthcheck && rm /data/.healthcheck"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
 volumes:
   static_volume:

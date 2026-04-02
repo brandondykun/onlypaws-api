@@ -32,8 +32,15 @@ fi
 # Ensure the observability network exists (for SigNoz integration)
 docker network create observability 2>/dev/null || true
 
+# If the SigNoz collector is already running, reconnect it to the observability
+# network. This handles the case where the network was recreated.
+if docker ps --format '{{.Names}}' | grep -q signoz-otel-collector; then
+    docker network disconnect observability signoz-otel-collector 2>/dev/null || true
+    docker network connect observability signoz-otel-collector 2>/dev/null || true
+fi
+
 # Change directory to docker folder
 cd docker || exit 1
 
 # Run the appropriate docker compose command based on environment
-docker compose -f docker-compose.yml -f "$environment/docker-compose.override.yml" up 
+docker compose -f docker-compose.yml -f "$environment/docker-compose.override.yml" up
