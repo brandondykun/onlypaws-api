@@ -7,6 +7,7 @@ from rest_framework import serializers
 from apps.user_app.models import (
     VerifyEmailToken,
     ResetPasswordToken,
+    PendingAccountDeletion,
 )
 from apps.profile_app.serializers import ProfileOptionSerializer
 from django.contrib.auth.password_validation import validate_password
@@ -49,6 +50,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     """Serializer for user and their profiles."""
 
     profiles = ProfileOptionSerializer(many=True, read_only=True)
+    pending_deletion = serializers.SerializerMethodField()
 
     class Meta:
         model = get_user_model()
@@ -59,12 +61,23 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "is_email_verified",
             "regular_profile_onboarding_completed",
             "business_profile_onboarding_completed",
+            "pending_deletion",
         ]
         read_only_fields = [
             "is_email_verified",
             "regular_profile_onboarding_completed",
             "business_profile_onboarding_completed",
         ]
+
+    def get_pending_deletion(self, obj):
+        try:
+            pending = obj.pending_account_deletion
+            return {
+                "scheduled_deletion_at": pending.scheduled_deletion_at,
+                "days_remaining": pending.days_remaining,
+            }
+        except PendingAccountDeletion.DoesNotExist:
+            return None
 
 
 # ============================================================================

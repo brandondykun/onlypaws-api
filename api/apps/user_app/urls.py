@@ -65,4 +65,14 @@ urlpatterns = [
         views.CompleteOnboardingView.as_view(),
         name="complete-onboarding",
     ),
+    path(
+        "request-account-deletion/",
+        views.RequestAccountDeletionView.as_view(),
+        name="request_account_deletion",
+    ),
+    path(
+        "cancel-account-deletion/",
+        views.CancelAccountDeletionView.as_view(),
+        name="cancel_account_deletion",
+    ),
 ]

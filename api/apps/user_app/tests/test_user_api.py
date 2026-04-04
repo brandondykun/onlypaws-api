@@ -115,6 +115,7 @@ class PrivateUserApiTests(TestCase):
             "is_email_verified": False,
             "regular_profile_onboarding_completed": False,
             "business_profile_onboarding_completed": False,
+            "pending_deletion": None,
         }
         self.assertEqual(res.data, expected_info)
 

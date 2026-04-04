@@ -83,6 +83,13 @@ UNFOLD = {
                             "admin:user_app_pendingemailchange_changelist"
                         ),
                     },
+                    {
+                        "title": "Pending Account Deletions",
+                        "icon": "person_remove",
+                        "link": reverse_lazy(
+                            "admin:user_app_pendingaccountdeletion_changelist"
+                        ),
+                    },
                 ],
             },
             {

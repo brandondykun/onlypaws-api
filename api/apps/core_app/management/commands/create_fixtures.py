@@ -54,6 +54,7 @@ class Command(BaseCommand):
             "termsacceptance",
             "custombannedword",
             "whitelistedword",
+            "pendingaccountdeletion",
         ]
 
         # default fixture path

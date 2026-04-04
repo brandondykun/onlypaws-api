@@ -3,11 +3,13 @@ Celery tasks for the user_app.
 """
 
 import logging
+from datetime import timedelta
 from celery import shared_task
 from django.core.mail import send_mail
 from django.conf import settings
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -166,7 +168,43 @@ def send_email_change_confirmation_task(self, old_email: str, new_email: str):
         
     except Exception as exc:
         logger.error(f"Error sending email change confirmation: {str(exc)}")
-        
+
         # Retry with exponential backoff
         retry_delay = 30 * (2 ** self.request.retries)  # 30s, 60s, 120s
+        raise self.retry(exc=exc, countdown=retry_delay)
+
+
+@shared_task(bind=True, max_retries=3)
+def delete_expired_accounts_task(self):
+    """
+    Delete user accounts whose pending deletion grace period has expired.
+    Runs daily via Celery Beat.
+    """
+    from apps.user_app.models import PendingAccountDeletion
+
+    try:
+        cutoff = timezone.now() - timedelta(days=PendingAccountDeletion.GRACE_PERIOD_DAYS)
+        due_deletions = PendingAccountDeletion.objects.filter(
+            created_at__lte=cutoff
+        ).select_related("user")
+
+        count = 0
+        for pending in due_deletions:
+            user_email = pending.user.email
+            user_id = pending.user.id
+            try:
+                pending.user.delete()  # CASCADE handles all related data
+                count += 1
+                logger.info(f"Deleted account for user {user_email} (id={user_id})")
+            except Exception as e:
+                logger.error(
+                    f"Error deleting account for user {user_email} (id={user_id}): {str(e)}"
+                )
+
+        logger.info(f"Expired account deletion complete: {count} accounts deleted")
+        return {"success": True, "deleted_count": count}
+
+    except Exception as exc:
+        logger.error(f"Error in delete_expired_accounts_task: {str(exc)}")
+        retry_delay = 30 * (2 ** self.request.retries)
         raise self.retry(exc=exc, countdown=retry_delay)

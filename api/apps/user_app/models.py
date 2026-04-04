@@ -164,3 +164,32 @@ class PendingEmailChange(models.Model):
     def is_expired(self):
         return timezone.now() > (self.created_at + timedelta(hours=12))
 
+
+class PendingAccountDeletion(models.Model):
+    """Tracks pending account deletion requests with a 7-day grace period."""
+
+    GRACE_PERIOD_DAYS = 7
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="pending_account_deletion",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def scheduled_deletion_at(self):
+        return self.created_at + timedelta(days=self.GRACE_PERIOD_DAYS)
+
+    @property
+    def days_remaining(self):
+        remaining = (self.scheduled_deletion_at - timezone.now()).days
+        return max(remaining, 0)
+
+    @property
+    def is_due(self):
+        return timezone.now() >= self.scheduled_deletion_at
+
+    def __str__(self):
+        return f"{self.user.email} - scheduled for {self.scheduled_deletion_at}"
+

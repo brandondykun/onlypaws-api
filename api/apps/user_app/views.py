@@ -10,6 +10,7 @@ from apps.user_app.models import (
     VerifyEmailToken,
     ResetPasswordToken,
     PendingEmailChange,
+    PendingAccountDeletion,
 )
 from apps.core_app.utils import generate_verification_code
 from .tasks import (
@@ -687,4 +688,78 @@ class CompleteOnboardingView(generics.GenericAPIView):
             return Response(
                 {"error": "Failed to complete onboarding. Please try again."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+@extend_schema_view(post=extend_schema(parameters=[auth_profile_param]))
+class RequestAccountDeletionView(generics.GenericAPIView):
+    """
+    Request account deletion with a 7-day grace period.
+    Creates a PendingAccountDeletion record for the authenticated user.
+    """
+
+    permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "auth_sensitive"
+
+    def post(self, request):
+        user = request.user
+
+        try:
+            with transaction.atomic():
+                # Delete any existing pending deletion and create a fresh one
+                PendingAccountDeletion.objects.filter(user=user).delete()
+                pending = PendingAccountDeletion.objects.create(user=user)
+
+            logger.info(
+                f"Account deletion requested for user {user.email}, "
+                f"scheduled for {pending.scheduled_deletion_at}"
+            )
+
+            return Response(
+                {
+                    "message": "Account deletion scheduled.",
+                    "scheduled_deletion_at": pending.scheduled_deletion_at,
+                    "days_remaining": pending.days_remaining,
+                },
+                status=status.HTTP_201_CREATED,
+            )
+
+        except Exception as e:
+            logger.error(
+                f"Error requesting account deletion for user {user.email}: {str(e)}"
+            )
+            return Response(
+                {"error": "Failed to schedule account deletion. Please try again."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+@extend_schema_view(delete=extend_schema(parameters=[auth_profile_param]))
+class CancelAccountDeletionView(generics.GenericAPIView):
+    """
+    Cancel a pending account deletion.
+    Deletes the PendingAccountDeletion record for the authenticated user.
+    """
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request):
+        user = request.user
+
+        try:
+            pending = PendingAccountDeletion.objects.get(user=user)
+            pending.delete()
+
+            logger.info(f"Account deletion cancelled for user {user.email}")
+
+            return Response(
+                {"message": "Account deletion cancelled."},
+                status=status.HTTP_200_OK,
+            )
+
+        except PendingAccountDeletion.DoesNotExist:
+            return Response(
+                {"error": "No pending account deletion found."},
+                status=status.HTTP_404_NOT_FOUND,
             )

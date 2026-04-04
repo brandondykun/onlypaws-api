@@ -10,6 +10,7 @@ from .models import (
     VerifyEmailToken,
     ResetPasswordToken,
     PendingEmailChange,
+    PendingAccountDeletion,
 )
 
 
@@ -72,3 +73,24 @@ class PendingEmailChangeAdmin(ModelAdmin):
     readonly_fields = ("created_at",)
     raw_id_fields = ("user",)
     ordering = ("-created_at",)
+
+
+@admin.register(PendingAccountDeletion)
+class PendingAccountDeletionAdmin(ModelAdmin):
+    list_display = ("user", "created_at", "scheduled_deletion_at", "days_remaining", "is_due")
+    search_fields = ("user__email",)
+    readonly_fields = ("created_at", "scheduled_deletion_at", "days_remaining", "is_due")
+    raw_id_fields = ("user",)
+    ordering = ("-created_at",)
+
+    @admin.display(description="Scheduled Deletion At")
+    def scheduled_deletion_at(self, obj):
+        return obj.scheduled_deletion_at
+
+    @admin.display(description="Days Remaining")
+    def days_remaining(self, obj):
+        return obj.days_remaining
+
+    @admin.display(description="Is Due", boolean=True)
+    def is_due(self, obj):
+        return obj.is_due

@@ -324,6 +324,11 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": crontab(hour=4, minute=0),  # Run daily at 4:00 AM UTC
         "options": {"expires": 3600},  # Task expires after 1 hour if not picked up
     },
+    "delete-expired-accounts": {
+        "task": "apps.user_app.tasks.delete_expired_accounts_task",
+        "schedule": crontab(hour=5, minute=0),  # Run daily at 5:00 AM UTC
+        "options": {"expires": 3600},
+    },
 }
 
 # Django Channels configuration
