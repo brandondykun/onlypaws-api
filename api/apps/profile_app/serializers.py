@@ -191,6 +191,13 @@ class RegularProfileSerializer(serializers.ModelSerializer):
             "about",
             "breed",
             "pet_type",
+            "sex",
+            "birthdate",
+            "weight",
+            "is_spayed_neutered",
+            "is_service_animal",
+            "energy_level",
+            "anxiety_level",
             "image",
             "is_active",
             "is_private",
@@ -222,6 +229,16 @@ class RegularProfileSerializer(serializers.ModelSerializer):
             return ProfileImageSerializer(obj.profile_ptr.image).data
         return None
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if data.get("sex"):
+            data["sex"] = data["sex"].capitalize()
+        if data.get("energy_level"):
+            data["energy_level"] = data["energy_level"].capitalize()
+        if data.get("anxiety_level"):
+            data["anxiety_level"] = data["anxiety_level"].capitalize()
+        return data
+
 
 class RegularProfileCreateSerializer(serializers.ModelSerializer):
     """Serializer for creating Regular (Pet) Profiles."""
@@ -233,6 +250,19 @@ class RegularProfileCreateSerializer(serializers.ModelSerializer):
     breed = serializers.CharField(required=False, allow_blank=True, default="")
     pet_type = serializers.PrimaryKeyRelatedField(
         queryset=PetType.objects.all(), required=False, allow_null=True
+    )
+    sex = serializers.ChoiceField(
+        choices=RegularProfile.Sex.choices, required=False, allow_blank=True, default=""
+    )
+    birthdate = serializers.DateField(required=False, allow_null=True, default=None)
+    weight = serializers.IntegerField(required=False, allow_null=True, default=None, min_value=0, max_value=2500)
+    is_spayed_neutered = serializers.BooleanField(required=False, allow_null=True, default=None)
+    is_service_animal = serializers.BooleanField(required=False, allow_null=True, default=None)
+    energy_level = serializers.ChoiceField(
+        choices=RegularProfile.Level.choices, required=False, allow_blank=True, default=""
+    )
+    anxiety_level = serializers.ChoiceField(
+        choices=RegularProfile.Level.choices, required=False, allow_blank=True, default=""
     )
 
     class Meta:
@@ -246,6 +276,13 @@ class RegularProfileCreateSerializer(serializers.ModelSerializer):
             "about",
             "breed",
             "pet_type",
+            "sex",
+            "birthdate",
+            "weight",
+            "is_spayed_neutered",
+            "is_service_animal",
+            "energy_level",
+            "anxiety_level",
         ]
         read_only_fields = ["id", "public_id"]
 
@@ -278,10 +315,27 @@ class RegularProfileUpdateSerializer(serializers.ModelSerializer):
     pet_type = serializers.PrimaryKeyRelatedField(
         queryset=PetType.objects.all(), required=False, allow_null=True
     )
+    sex = serializers.ChoiceField(
+        choices=RegularProfile.Sex.choices, required=False, allow_blank=True
+    )
+    birthdate = serializers.DateField(required=False, allow_null=True)
+    weight = serializers.IntegerField(required=False, allow_null=True, min_value=0, max_value=2500)
+    is_spayed_neutered = serializers.BooleanField(required=False, allow_null=True)
+    is_service_animal = serializers.BooleanField(required=False, allow_null=True)
+    energy_level = serializers.ChoiceField(
+        choices=RegularProfile.Level.choices, required=False, allow_blank=True
+    )
+    anxiety_level = serializers.ChoiceField(
+        choices=RegularProfile.Level.choices, required=False, allow_blank=True
+    )
 
     class Meta:
         model = RegularProfile
-        fields = ["username", "name", "about", "breed", "pet_type", "is_private"]
+        fields = [
+            "username", "name", "about", "breed", "pet_type", "is_private",
+            "sex", "birthdate", "weight", "is_spayed_neutered",
+            "is_service_animal", "energy_level", "anxiety_level",
+        ]
 
     def update(self, instance, validated_data):
         """Update RegularProfile and parent Profile fields."""
@@ -338,6 +392,13 @@ class RegularProfileDetailedSerializer(serializers.ModelSerializer):
             "about",
             "breed",
             "pet_type",
+            "sex",
+            "birthdate",
+            "weight",
+            "is_spayed_neutered",
+            "is_service_animal",
+            "energy_level",
+            "anxiety_level",
             "image",
             "is_private",
             "is_following",
@@ -421,6 +482,16 @@ class RegularProfileDetailedSerializer(serializers.ModelSerializer):
     def get_following_count(self, obj) -> int:
         """Get count of profiles this profile is following."""
         return obj.profile_ptr.followers.count()
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if data.get("sex"):
+            data["sex"] = data["sex"].capitalize()
+        if data.get("energy_level"):
+            data["energy_level"] = data["energy_level"].capitalize()
+        if data.get("anxiety_level"):
+            data["anxiety_level"] = data["anxiety_level"].capitalize()
+        return data
 
 
 # ============================================================================
@@ -739,6 +810,13 @@ class ProfileSerializer(serializers.ModelSerializer):
     about = serializers.SerializerMethodField()
     breed = serializers.SerializerMethodField()
     pet_type = serializers.SerializerMethodField()
+    sex = serializers.SerializerMethodField()
+    birthdate = serializers.SerializerMethodField()
+    weight = serializers.SerializerMethodField()
+    is_spayed_neutered = serializers.SerializerMethodField()
+    is_service_animal = serializers.SerializerMethodField()
+    energy_level = serializers.SerializerMethodField()
+    anxiety_level = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
@@ -751,6 +829,13 @@ class ProfileSerializer(serializers.ModelSerializer):
             "image",
             "breed",
             "pet_type",
+            "sex",
+            "birthdate",
+            "weight",
+            "is_spayed_neutered",
+            "is_service_animal",
+            "energy_level",
+            "anxiety_level",
             "is_private",
             "profile_type",
         ]
@@ -762,6 +847,13 @@ class ProfileSerializer(serializers.ModelSerializer):
             "about",
             "breed",
             "pet_type",
+            "sex",
+            "birthdate",
+            "weight",
+            "is_spayed_neutered",
+            "is_service_animal",
+            "energy_level",
+            "anxiety_level",
             "is_private",
         ]
 
@@ -799,6 +891,41 @@ class ProfileSerializer(serializers.ModelSerializer):
         if hasattr(obj, "regularprofile") and obj.regularprofile.pet_type:
             return PetTypeSerializer(obj.regularprofile.pet_type).data
         return None
+
+    def get_sex(self, obj):
+        if hasattr(obj, "regularprofile") and obj.regularprofile.sex:
+            return obj.regularprofile.sex.capitalize()
+        return ""
+
+    def get_birthdate(self, obj):
+        if hasattr(obj, "regularprofile"):
+            return obj.regularprofile.birthdate
+        return None
+
+    def get_weight(self, obj):
+        if hasattr(obj, "regularprofile"):
+            return obj.regularprofile.weight
+        return None
+
+    def get_is_spayed_neutered(self, obj):
+        if hasattr(obj, "regularprofile"):
+            return obj.regularprofile.is_spayed_neutered
+        return None
+
+    def get_is_service_animal(self, obj):
+        if hasattr(obj, "regularprofile"):
+            return obj.regularprofile.is_service_animal
+        return None
+
+    def get_energy_level(self, obj):
+        if hasattr(obj, "regularprofile") and obj.regularprofile.energy_level:
+            return obj.regularprofile.energy_level.capitalize()
+        return ""
+
+    def get_anxiety_level(self, obj):
+        if hasattr(obj, "regularprofile") and obj.regularprofile.anxiety_level:
+            return obj.regularprofile.anxiety_level.capitalize()
+        return ""
 
 
 class ProfileOptionSerializer(serializers.ModelSerializer):
@@ -850,6 +977,19 @@ class ProfileCreateSerializer(serializers.ModelSerializer):
     pet_type = serializers.PrimaryKeyRelatedField(
         queryset=PetType.objects.all(), required=False, allow_null=True
     )
+    sex = serializers.ChoiceField(
+        choices=RegularProfile.Sex.choices, required=False, allow_blank=True, default=""
+    )
+    birthdate = serializers.DateField(required=False, allow_null=True, default=None)
+    weight = serializers.IntegerField(required=False, allow_null=True, default=None, min_value=0, max_value=2500)
+    is_spayed_neutered = serializers.BooleanField(required=False, allow_null=True, default=None)
+    is_service_animal = serializers.BooleanField(required=False, allow_null=True, default=None)
+    energy_level = serializers.ChoiceField(
+        choices=RegularProfile.Level.choices, required=False, allow_blank=True, default=""
+    )
+    anxiety_level = serializers.ChoiceField(
+        choices=RegularProfile.Level.choices, required=False, allow_blank=True, default=""
+    )
 
     class Meta:
         model = Profile
@@ -862,6 +1002,13 @@ class ProfileCreateSerializer(serializers.ModelSerializer):
             "user",
             "breed",
             "pet_type",
+            "sex",
+            "birthdate",
+            "weight",
+            "is_spayed_neutered",
+            "is_service_animal",
+            "energy_level",
+            "anxiety_level",
         ]
 
     def validate_username(self, value):
@@ -876,10 +1023,21 @@ class ProfileCreateSerializer(serializers.ModelSerializer):
         about = validated_data.pop("about", "")
         breed = validated_data.pop("breed", "")
         pet_type = validated_data.pop("pet_type", None)
+        sex = validated_data.pop("sex", "")
+        birthdate = validated_data.pop("birthdate", None)
+        weight = validated_data.pop("weight", None)
+        is_spayed_neutered = validated_data.pop("is_spayed_neutered", None)
+        is_service_animal = validated_data.pop("is_service_animal", None)
+        energy_level = validated_data.pop("energy_level", "")
+        anxiety_level = validated_data.pop("anxiety_level", "")
 
         # Create RegularProfile
         regular_profile = RegularProfile.objects.create(
-            name=name, about=about, breed=breed, pet_type=pet_type, **validated_data
+            name=name, about=about, breed=breed, pet_type=pet_type,
+            sex=sex, birthdate=birthdate, weight=weight,
+            is_spayed_neutered=is_spayed_neutered, is_service_animal=is_service_animal,
+            energy_level=energy_level, anxiety_level=anxiety_level,
+            **validated_data
         )
 
         # Return the Profile instance with regularprofile loaded
@@ -923,6 +1081,19 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
     pet_type = serializers.PrimaryKeyRelatedField(
         queryset=PetType.objects.all(), required=False, allow_null=True
     )
+    sex = serializers.ChoiceField(
+        choices=RegularProfile.Sex.choices, required=False, allow_blank=True
+    )
+    birthdate = serializers.DateField(required=False, allow_null=True)
+    weight = serializers.IntegerField(required=False, allow_null=True, min_value=0, max_value=2500)
+    is_spayed_neutered = serializers.BooleanField(required=False, allow_null=True)
+    is_service_animal = serializers.BooleanField(required=False, allow_null=True)
+    energy_level = serializers.ChoiceField(
+        choices=RegularProfile.Level.choices, required=False, allow_blank=True
+    )
+    anxiety_level = serializers.ChoiceField(
+        choices=RegularProfile.Level.choices, required=False, allow_blank=True
+    )
 
     class Meta:
         model = Profile
@@ -935,6 +1106,13 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
             "image",
             "breed",
             "pet_type",
+            "sex",
+            "birthdate",
+            "weight",
+            "is_spayed_neutered",
+            "is_service_animal",
+            "energy_level",
+            "anxiety_level",
             "is_private",
         ]
         read_only_fields = ["id", "image"]
@@ -958,13 +1136,21 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
     def validate_about(self, value):
         return _validate_text_profanity(value, "about text", "ABOUT", profile_id=self._get_profile_id())
 
+    # Fields that live on RegularProfile (child model)
+    _REGULAR_PROFILE_FIELDS = [
+        "name", "about", "breed", "pet_type",
+        "sex", "birthdate", "weight", "is_spayed_neutered",
+        "is_service_animal", "energy_level", "anxiety_level",
+    ]
+
     def update(self, instance, validated_data):
         """Update Profile and its child class fields."""
         # Extract child-specific fields
-        name = validated_data.pop("name", None)
-        about = validated_data.pop("about", None)
-        breed = validated_data.pop("breed", None)
-        pet_type = validated_data.pop("pet_type", None)
+        regular_fields = {
+            field: validated_data.pop(field)
+            for field in self._REGULAR_PROFILE_FIELDS
+            if field in validated_data
+        }
 
         # Update the base Profile fields (username, is_private)
         for attr, value in validated_data.items():
@@ -974,22 +1160,17 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
         instance.refresh_from_db()
 
         # Update child class fields
-        if hasattr(instance, "regularprofile"):
+        if hasattr(instance, "regularprofile") and regular_fields:
             regular_profile = instance.regularprofile
-            if name is not None:
-                regular_profile.name = name
-            if about is not None:
-                regular_profile.about = about
-            if breed is not None:
-                regular_profile.breed = breed
-            if pet_type is not None:
-                regular_profile.pet_type = pet_type
+            for field, value in regular_fields.items():
+                setattr(regular_profile, field, value)
             regular_profile.save()
         elif hasattr(instance, "businessprofile"):
-            business_profile = instance.businessprofile
+            about = regular_fields.get("about")
             if about is not None:
+                business_profile = instance.businessprofile
                 business_profile.about = about
-            business_profile.save()
+                business_profile.save()
 
         return instance
 
@@ -1014,6 +1195,13 @@ class ProfileDetailedSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
     about = serializers.SerializerMethodField()
     breed = serializers.SerializerMethodField()
+    sex = serializers.SerializerMethodField()
+    birthdate = serializers.SerializerMethodField()
+    weight = serializers.SerializerMethodField()
+    is_spayed_neutered = serializers.SerializerMethodField()
+    is_service_animal = serializers.SerializerMethodField()
+    energy_level = serializers.SerializerMethodField()
+    anxiety_level = serializers.SerializerMethodField()
     report_summary = serializers.SerializerMethodField()
     is_blocked = serializers.SerializerMethodField()
 
@@ -1036,6 +1224,13 @@ class ProfileDetailedSerializer(serializers.ModelSerializer):
             "following_count",
             "breed",
             "pet_type",
+            "sex",
+            "birthdate",
+            "weight",
+            "is_spayed_neutered",
+            "is_service_animal",
+            "energy_level",
+            "anxiety_level",
             "profile_type",
             "report_summary",
             "is_blocked",
@@ -1075,6 +1270,41 @@ class ProfileDetailedSerializer(serializers.ModelSerializer):
         if hasattr(obj, "regularprofile") and obj.regularprofile.pet_type:
             return PetTypeSerializer(obj.regularprofile.pet_type).data
         return None
+
+    def get_sex(self, obj):
+        if hasattr(obj, "regularprofile") and obj.regularprofile.sex:
+            return obj.regularprofile.sex.capitalize()
+        return ""
+
+    def get_birthdate(self, obj):
+        if hasattr(obj, "regularprofile"):
+            return obj.regularprofile.birthdate
+        return None
+
+    def get_weight(self, obj):
+        if hasattr(obj, "regularprofile"):
+            return obj.regularprofile.weight
+        return None
+
+    def get_is_spayed_neutered(self, obj):
+        if hasattr(obj, "regularprofile"):
+            return obj.regularprofile.is_spayed_neutered
+        return None
+
+    def get_is_service_animal(self, obj):
+        if hasattr(obj, "regularprofile"):
+            return obj.regularprofile.is_service_animal
+        return None
+
+    def get_energy_level(self, obj):
+        if hasattr(obj, "regularprofile") and obj.regularprofile.energy_level:
+            return obj.regularprofile.energy_level.capitalize()
+        return ""
+
+    def get_anxiety_level(self, obj):
+        if hasattr(obj, "regularprofile") and obj.regularprofile.anxiety_level:
+            return obj.regularprofile.anxiety_level.capitalize()
+        return ""
 
     def _get_is_blocked(self, obj) -> bool:
         """Check if a block exists between requesting profile and this profile."""

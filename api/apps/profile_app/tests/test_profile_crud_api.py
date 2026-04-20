@@ -170,3 +170,63 @@ class PrivateProfileApiTests(TestCase):
         res = self.client.post(create_profile_url(), new_profile)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_profile_returns_title_case_pet_attributes(self):
+        """Test that creating a profile returns sex, energy_level, and anxiety_level in title case."""
+        new_user = create_user(email="titlecase@example.com", password="testpass123")
+        client = APIClient()
+        client.force_authenticate(user=new_user)
+        new_profile = {
+            "username": "tc_pet_attrs",
+            "name": "Test Name",
+            "sex": "MALE",
+            "energy_level": "HIGH",
+            "anxiety_level": "LOW",
+        }
+        res = client.post(create_profile_url(), new_profile)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED, res.data)
+        # Verify DB stores uppercase
+        profile = RegularProfile.objects.get(profile_ptr__username="tc_pet_attrs")
+        self.assertEqual(profile.sex, "MALE")
+        self.assertEqual(profile.energy_level, "HIGH")
+        self.assertEqual(profile.anxiety_level, "LOW")
+
+    def test_update_profile_returns_title_case_pet_attributes(self):
+        """Test that updating a profile returns sex, energy_level, and anxiety_level in title case."""
+        url = retrieve_update_profile_url(self.profile)
+        res = self.client.patch(url, {
+            "sex": "FEMALE",
+            "energy_level": "MEDIUM",
+            "anxiety_level": "HIGH",
+        })
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data["sex"], "Female")
+        self.assertEqual(res.data["energy_level"], "Medium")
+        self.assertEqual(res.data["anxiety_level"], "High")
+
+        # Verify DB still stores uppercase
+        regular_profile = RegularProfile.objects.get(id=self.profile.id)
+        self.assertEqual(regular_profile.sex, "FEMALE")
+        self.assertEqual(regular_profile.energy_level, "MEDIUM")
+        self.assertEqual(regular_profile.anxiety_level, "HIGH")
+
+    def test_update_profile_clears_pet_attributes(self):
+        """Test that clearing sex, energy_level, and anxiety_level returns empty strings."""
+        # First set values
+        url = retrieve_update_profile_url(self.profile)
+        self.client.patch(url, {
+            "sex": "MALE",
+            "energy_level": "LOW",
+            "anxiety_level": "MEDIUM",
+        })
+
+        # Then clear them
+        res = self.client.patch(url, {
+            "sex": "",
+            "energy_level": "",
+            "anxiety_level": "",
+        })
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data["sex"], "")
+        self.assertEqual(res.data["energy_level"], "")
+        self.assertEqual(res.data["anxiety_level"], "")

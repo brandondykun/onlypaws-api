@@ -3,10 +3,17 @@
     "model": "profile_app.regularprofile",
     "pk": 1,
     "fields": {
-      "about": "I am the admin dog. I basically run this app. I try to share pictures every day of my fun dog activities! Follow to keep up with what I’m doing!",
+      "about": "I am the admin dog. I basically run this app. I try to share pictures every day of my fun dog activities! Follow to keep up with what I'm doing!",
       "name": "Linus",
       "pet_type": 1,
-      "breed": "Cavalier King Charles Spaniel"
+      "breed": "Cavalier King Charles Spaniel",
+      "sex": "MALE",
+      "birthdate": "2022-03-15",
+      "weight": 16,
+      "is_spayed_neutered": true,
+      "is_service_animal": false,
+      "energy_level": "MEDIUM",
+      "anxiety_level": "LOW"
     }
   },
   {
@@ -16,27 +23,48 @@
       "about": "I pull like a freight train on a leash. But I can smell a rabbit from half a mile.",
       "name": "Ivy",
       "pet_type": 1,
-      "breed": "Treeing Walker Coon hound"
+      "breed": "Treeing Walker Coon hound",
+      "sex": "FEMALE",
+      "birthdate": "2021-06-20",
+      "weight": 55,
+      "is_spayed_neutered": true,
+      "is_service_animal": false,
+      "energy_level": "HIGH",
+      "anxiety_level": "MEDIUM"
     }
   },
   {
     "model": "profile_app.regularprofile",
     "pk": 3,
     "fields": {
-      "about": "I’m Linus’s cousin!",
+      "about": "I'm Linus's cousin!",
       "name": "Chewy",
       "pet_type": 1,
-      "breed": "Cavi poo"
+      "breed": "Cavi poo",
+      "sex": "MALE",
+      "birthdate": "2023-01-10",
+      "weight": 14,
+      "is_spayed_neutered": true,
+      "is_service_animal": false,
+      "energy_level": "MEDIUM",
+      "anxiety_level": "LOW"
     }
   },
   {
     "model": "profile_app.regularprofile",
     "pk": 4,
     "fields": {
-      "about": "People think my breed is mean but I don’t have a mean bone in my body!",
+      "about": "People think my breed is mean but I don't have a mean bone in my body!",
       "name": "Jemma",
       "pet_type": 1,
-      "breed": "Pitbull"
+      "breed": "Pitbull",
+      "sex": "FEMALE",
+      "birthdate": "2020-09-05",
+      "weight": 50,
+      "is_spayed_neutered": true,
+      "is_service_animal": false,
+      "energy_level": "MEDIUM",
+      "anxiety_level": "LOW"
     }
   },
   {
@@ -53,7 +81,7 @@
     "model": "profile_app.regularprofile",
     "pk": 6,
     "fields": {
-      "about": "All the best of AI cats. \n\nIf you want to see your favorite cat breed as AI, let me know. I take requests.\n\nNote: none of the pictures are real. They’re all created using AI.\n\n🐈🐈‍⬛❤️",
+      "about": "All the best of AI cats. \n\nIf you want to see your favorite cat breed as AI, let me know. I take requests.\n\nNote: none of the pictures are real. They're all created using AI.\n\n🐈🐈‍⬛❤️",
       "name": "The AI Cat",
       "pet_type": 2,
       "breed": "Artificial Intelligence"
@@ -73,7 +101,7 @@
     "model": "profile_app.regularprofile",
     "pk": 10,
     "fields": {
-      "about": "Wild about dogs and enjoy posting any and all content related to man’s best friend.",
+      "about": "Wild about dogs and enjoy posting any and all content related to man's best friend.",
       "name": "Dogmania",
       "pet_type": 1,
       "breed": "Mutt"
@@ -86,7 +114,14 @@
       "about": "I have a thick coat and I prefer the cold.",
       "name": "Cooper",
       "pet_type": 1,
-      "breed": "Husky"
+      "breed": "Husky",
+      "sex": "MALE",
+      "birthdate": "2022-11-30",
+      "weight": 52,
+      "is_spayed_neutered": true,
+      "is_service_animal": false,
+      "energy_level": "HIGH",
+      "anxiety_level": "LOW"
     }
   },
   {
@@ -106,7 +141,14 @@
       "about": "Typical black lab but more photogenic.",
       "name": "Frank",
       "pet_type": 1,
-      "breed": "Black Lab"
+      "breed": "Black Lab",
+      "sex": "MALE",
+      "birthdate": "2021-04-18",
+      "weight": 72,
+      "is_spayed_neutered": true,
+      "is_service_animal": false,
+      "energy_level": "MEDIUM",
+      "anxiety_level": "LOW"
     }
   },
   {
@@ -123,70 +165,119 @@
     "model": "profile_app.regularprofile",
     "pk": 15,
     "fields": {
-      "about": "I’m just a cheerful lab excited about life. I enjoy a good stick that i have no business picking up. Swimming is my favorite hobby.",
+      "about": "I'm just a cheerful lab excited about life. I enjoy a good stick that i have no business picking up. Swimming is my favorite hobby.",
       "name": "Sunny",
       "pet_type": 1,
-      "breed": "Yellow Lab"
+      "breed": "Yellow Lab",
+      "sex": "MALE",
+      "birthdate": "2023-05-22",
+      "weight": 65,
+      "is_spayed_neutered": true,
+      "is_service_animal": false,
+      "energy_level": "HIGH",
+      "anxiety_level": "LOW"
     }
   },
   {
     "model": "profile_app.regularprofile",
     "pk": 16,
     "fields": {
-      "about": "Big and goofy. I take up the whole bed and I don’t feel bad about it. I’m big but nimble. Loud drinker. Living life to the fullest.\n\nWhy be a good boy when you can be Great",
+      "about": "Big and goofy. I take up the whole bed and I don't feel bad about it. I'm big but nimble. Loud drinker. Living life to the fullest.\n\nWhy be a good boy when you can be Great",
       "name": "Duke",
       "pet_type": 1,
-      "breed": "Great Dane"
+      "breed": "Great Dane",
+      "sex": "MALE",
+      "birthdate": "2022-08-10",
+      "weight": 145,
+      "is_spayed_neutered": true,
+      "is_service_animal": false,
+      "energy_level": "MEDIUM",
+      "anxiety_level": "LOW"
     }
   },
   {
     "model": "profile_app.regularprofile",
     "pk": 17,
     "fields": {
-      "about": "A sweet and gentle Cavalier King Charles Spaniel with a heart as gold as my name. I love cuddles, long naps in sunny spots, and greeting everyone with a wagging tail. Elegant yet playful, l’m happiest when I’m with my hoomans—whether on a cozy couch or a cheerful walk around the block.",
+      "about": "A sweet and gentle Cavalier King Charles Spaniel with a heart as gold as my name. I love cuddles, long naps in sunny spots, and greeting everyone with a wagging tail. Elegant yet playful, l'm happiest when I'm with my hoomans—whether on a cozy couch or a cheerful walk around the block.",
       "name": "Goldie",
       "pet_type": 1,
-      "breed": "Cavalier King Charles Spaniel"
+      "breed": "Cavalier King Charles Spaniel",
+      "sex": "FEMALE",
+      "birthdate": "2021-12-25",
+      "weight": 14,
+      "is_spayed_neutered": true,
+      "is_service_animal": false,
+      "energy_level": "MEDIUM",
+      "anxiety_level": "LOW"
     }
   },
   {
     "model": "profile_app.regularprofile",
     "pk": 18,
     "fields": {
-      "about": "I’m a happy Chocolate Lab who loves wagging my tail, chasing tennis balls, and sneaking in extra treats when no one’s looking. My favorite hobbies include belly rubs, splashing in puddles, and following my humans everywhere they go. Life’s sweeter with me around—I promise!",
+      "about": "I'm a happy Chocolate Lab who loves wagging my tail, chasing tennis balls, and sneaking in extra treats when no one's looking. My favorite hobbies include belly rubs, splashing in puddles, and following my humans everywhere they go. Life's sweeter with me around—I promise!",
       "name": "Hershey",
       "pet_type": 1,
-      "breed": "Chocolate Lab"
+      "breed": "Chocolate Lab",
+      "sex": "MALE",
+      "birthdate": "2023-03-14",
+      "weight": 68,
+      "is_spayed_neutered": true,
+      "is_service_animal": false,
+      "energy_level": "HIGH",
+      "anxiety_level": "LOW"
     }
   },
   {
     "model": "profile_app.regularprofile",
     "pk": 19,
     "fields": {
-      "about": "Hi, I’m Pickles 🐶✨ I’m a squishy-faced pug with a talent for snoring louder than a human and stealing hearts (and snacks) wherever I go. My hobbies include dramatic sighs, warm laps, and strutting around like I own the place. Follow me for snorts, wiggles, and a whole lot of cuteness! 🐾💛",
+      "about": "Hi, I'm Pickles 🐶✨ I'm a squishy-faced pug with a talent for snoring louder than a human and stealing hearts (and snacks) wherever I go. My hobbies include dramatic sighs, warm laps, and strutting around like I own the place. Follow me for snorts, wiggles, and a whole lot of cuteness! 🐾💛",
       "name": "Pickles",
       "pet_type": 1,
-      "breed": "Pug"
+      "breed": "Pug",
+      "sex": "MALE",
+      "birthdate": "2022-07-04",
+      "weight": 18,
+      "is_spayed_neutered": true,
+      "is_service_animal": false,
+      "energy_level": "LOW",
+      "anxiety_level": "LOW"
     }
   },
   {
     "model": "profile_app.regularprofile",
     "pk": 20,
     "fields": {
-      "about": "Hi, I’m Maple! 🐾✨ A goofy golden retriever who loves long walks, squeaky toys, and giving the best “welcome home” hugs. I live for sunshine, snacks, and making humans smile—life’s always golden when you’re with me! 💛🐶",
+      "about": "Hi, I'm Maple! 🐾✨ A goofy golden retriever who loves long walks, squeaky toys, and giving the best \u201cwelcome home\u201d hugs. I live for sunshine, snacks, and making humans smile—life's always golden when you're with me! 💛🐶",
       "name": "Maple",
       "pet_type": 1,
-      "breed": "Golden Retriever"
+      "breed": "Golden Retriever",
+      "sex": "FEMALE",
+      "birthdate": "2023-09-01",
+      "weight": 58,
+      "is_spayed_neutered": true,
+      "is_service_animal": false,
+      "energy_level": "HIGH",
+      "anxiety_level": "LOW"
     }
   },
   {
     "model": "profile_app.regularprofile",
     "pk": 21,
     "fields": {
-      "about": "I’m Titan 🐺💪—your loyal German Shepherd and protector of snacks, squeaky toys, and my favorite humans. Smart, brave, and always ready for an adventure, I take my guard dog duties seriously… except when it’s time for belly rubs. Then, I’m all fluff and wiggles. 🐾❤️",
+      "about": "I'm Titan 🐺💪—your loyal German Shepherd and protector of snacks, squeaky toys, and my favorite humans. Smart, brave, and always ready for an adventure, I take my guard dog duties seriously… except when it's time for belly rubs. Then, I'm all fluff and wiggles. 🐾❤️",
       "name": "Titan",
       "pet_type": 1,
-      "breed": "German Shepherd"
+      "breed": "German Shepherd",
+      "sex": "MALE",
+      "birthdate": "2021-10-15",
+      "weight": 82,
+      "is_spayed_neutered": true,
+      "is_service_animal": true,
+      "energy_level": "HIGH",
+      "anxiety_level": "MEDIUM"
     }
   },
   {
@@ -203,20 +294,34 @@
     "model": "profile_app.regularprofile",
     "pk": 23,
     "fields": {
-      "about": "Bonjour, I’m Midnight 🖤🐩—a black poodle with curls as classy as Paris and a personality as bright as the moon. I love long walks, fancy treats, and showing off my stylish strut. Life is better with a little sparkle (and a lot of fluff). ✨🐾",
+      "about": "Bonjour, I'm Midnight 🖤🐩—a black poodle with curls as classy as Paris and a personality as bright as the moon. I love long walks, fancy treats, and showing off my stylish strut. Life is better with a little sparkle (and a lot of fluff). ✨🐾",
       "name": "Midnight",
       "pet_type": 1,
-      "breed": "Poodle"
+      "breed": "Poodle",
+      "sex": "FEMALE",
+      "birthdate": "2022-05-18",
+      "weight": 42,
+      "is_spayed_neutered": true,
+      "is_service_animal": false,
+      "energy_level": "MEDIUM",
+      "anxiety_level": "LOW"
     }
   },
   {
     "model": "profile_app.regularprofile",
     "pk": 26,
     "fields": {
-      "about": "I am Lucy! Linus is my brother! I’m just a little pup that’s learning how to be a good dog!",
+      "about": "I am Lucy! Linus is my brother! I'm just a little pup that's learning how to be a good dog!",
       "name": "Lucy",
       "pet_type": 1,
-      "breed": "Pitbull"
+      "breed": "Pitbull",
+      "sex": "FEMALE",
+      "birthdate": "2025-01-20",
+      "weight": 28,
+      "is_spayed_neutered": false,
+      "is_service_animal": false,
+      "energy_level": "HIGH",
+      "anxiety_level": "MEDIUM"
     }
   }
 ]

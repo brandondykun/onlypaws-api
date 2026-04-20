@@ -3,6 +3,7 @@ Profile app models.
 """
 import os
 import ulid
+from django.core.validators import MaxValueValidator
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
@@ -113,11 +114,20 @@ class Profile(models.Model):
 
 class RegularProfile(Profile):
     """Regular profile for pets (personal accounts).
-    
+
     Inherits from Profile using multi-table inheritance.
     This creates a separate table with a OneToOne link to Profile.
     """
-    
+
+    class Sex(models.TextChoices):
+        MALE = "MALE", _("Male")
+        FEMALE = "FEMALE", _("Female")
+
+    class Level(models.TextChoices):
+        LOW = "LOW", _("Low")
+        MEDIUM = "MEDIUM", _("Medium")
+        HIGH = "HIGH", _("High")
+
     # Profile description
     about = models.CharField(
         max_length=1000,
@@ -125,11 +135,11 @@ class RegularProfile(Profile):
         default="",
         help_text="About this pet profile"
     )
-    
+
     # Pet-specific fields
     name = models.CharField(
-        max_length=64, 
-        default="", 
+        max_length=64,
+        default="",
         blank=True,
         help_text="Name of the pet"
     )
@@ -146,6 +156,48 @@ class RegularProfile(Profile):
         default="",
         blank=True,
         help_text="Breed of the pet"
+    )
+    sex = models.CharField(
+        max_length=6,
+        choices=Sex.choices,
+        blank=True,
+        default="",
+        help_text="Sex of the pet"
+    )
+    birthdate = models.DateField(
+        null=True,
+        blank=True,
+        help_text="Birthdate of the pet"
+    )
+    weight = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        help_text="Weight of the pet in pounds",
+        validators=[MaxValueValidator(2500)],
+    )
+    is_spayed_neutered = models.BooleanField(
+        null=True,
+        blank=True,
+        help_text="Whether the pet has been spayed or neutered"
+    )
+    is_service_animal = models.BooleanField(
+        null=True,
+        blank=True,
+        help_text="Whether the pet is a service animal"
+    )
+    energy_level = models.CharField(
+        max_length=6,
+        choices=Level.choices,
+        blank=True,
+        default="",
+        help_text="Energy level of the pet"
+    )
+    anxiety_level = models.CharField(
+        max_length=6,
+        choices=Level.choices,
+        blank=True,
+        default="",
+        help_text="Anxiety level of the pet"
     )
     
     class Meta:

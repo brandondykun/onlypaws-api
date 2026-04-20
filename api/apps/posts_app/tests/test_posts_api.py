@@ -64,6 +64,13 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
             "image": None,
             "breed": "",
             "pet_type": None,
+            "sex": "",
+            "birthdate": None,
+            "weight": None,
+            "is_spayed_neutered": None,
+            "is_service_animal": None,
+            "energy_level": "",
+            "anxiety_level": "",
             "profile_type": "regular",
             "is_private": False,
         }

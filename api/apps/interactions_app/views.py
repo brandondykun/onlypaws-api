@@ -676,7 +676,11 @@ class ListFollowersView(generics.ListAPIView):
 
         try:
             profile = Profile.objects.get(public_id=profile_public_id)
-            followers_objs = profile.following.exclude(
+            followers_objs = profile.following.select_related(
+                "followed_by__image",
+                "followed_by__regularprofile__pet_type",
+                "followed_by__businessprofile",
+            ).exclude(
                 followed_by_id__in=blocked_ids
             )
             if username:
@@ -710,7 +714,11 @@ class ListFollowingView(generics.ListAPIView):
 
         try:
             profile = Profile.objects.get(public_id=profile_public_id)
-            following_objs = profile.followers.exclude(
+            following_objs = profile.followers.select_related(
+                "followed__image",
+                "followed__regularprofile__pet_type",
+                "followed__businessprofile",
+            ).exclude(
                 followed_id__in=blocked_ids
             )
             if username:
