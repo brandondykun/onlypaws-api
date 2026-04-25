@@ -6,7 +6,7 @@
     <meta name="x-apple-disable-message-reformatting" />
     <meta name="color-scheme" content="light dark" />
     <meta name="supported-color-schemes" content="light dark" />
-    <title>Email Successfully Updated - OnlyPaws</title>
+    <title>Update Your OnlyPaws Email</title>
     <style>
       @media screen and (max-width: 600px) {
         .email-header {
@@ -18,38 +18,55 @@
         .email-header {
           background-color: #0284c7 !important;
         }
+
         body,
         .email-bg {
           background-color: #0b0f14 !important;
         }
+
         .email-card {
           background-color: #1a222d !important;
           border-color: #2f3d4f !important;
         }
+
         .email-body-copy,
-        .email-meta-copy,
         .email-notice-copy {
           color: #e5edf7 !important;
         }
-        .email-panel {
+
+        .email-code-wrap {
           background-color: #1e2938 !important;
           border-color: #34465c !important;
         }
-        .email-label {
+
+        .email-code-label {
           color: #a9b9cd !important;
         }
-        .email-accent {
+
+        .email-code-box {
+          background-color: #111927 !important;
+          border-color: #0ea5e9 !important;
+        }
+
+        .email-code-text {
           color: #0ea5e9 !important;
         }
+
         .email-notice {
           background-color: #1a2433 !important;
           border-color: #335679 !important;
           border-left-color: #0ea5e9 !important;
         }
+
+        .email-notice-strong {
+          color: #0ea5e9 !important;
+        }
+
         .email-footer {
           background-color: #131b25 !important;
           border-top-color: #2f3d4f !important;
         }
+
         .email-footer-copy {
           color: #96a8bc !important;
         }
@@ -111,7 +128,7 @@
                       Roboto, Arial;
                   "
                 >
-                  Email Updated
+                  Update Your Email
                 </h1>
                 <p
                   style="
@@ -124,7 +141,7 @@
                       Roboto, Arial;
                   "
                 >
-                  Successfully Changed
+                  Confirm Your New Address
                 </p>
               </td>
             </tr>
@@ -140,62 +157,79 @@
                 <p
                   class="email-body-copy"
                   style="
-                    margin: 0 0 18px;
+                    margin: 0 0 20px;
                     color: #1f2937;
                     font-size: 16px;
                     line-height: 1.6;
                   "
                 >
-                  Great news! Your OnlyPaws account email has been successfully
-                  updated.
+                  We received a request to update your OnlyPaws account email
+                  address to
+                  <strong style="color: #0284c7">{{ new_email }}</strong>.
+                  Please use the code below to confirm this change.
                 </p>
-
                 <table
                   width="100%"
                   cellpadding="0"
                   cellspacing="0"
                   border="0"
                   role="presentation"
-                  class="email-panel"
+                  class="email-code-wrap"
                   style="
                     background-color: #eef5ff;
                     border: 1px solid #c7defa;
                     border-radius: 10px;
-                    margin-bottom: 18px;
+                    margin-bottom: 20px;
                   "
                 >
                   <tr>
-                    <td style="padding: 16px">
+                    <td align="center" style="padding: 20px 12px">
                       <p
-                        class="email-label"
+                        class="email-code-label"
                         style="
-                          margin: 0 0 6px;
+                          margin: 0 0 10px;
                           font-size: 12px;
                           color: #334155;
                           text-transform: uppercase;
-                          letter-spacing: 1px;
+                          letter-spacing: 1.2px;
                           font-weight: 600;
                         "
                       >
-                        New Email Address
+                        Your Email Update Code Is:
                       </p>
-                      <p
-                        class="email-accent"
+                      <table
+                        cellpadding="0"
+                        cellspacing="0"
+                        border="0"
+                        role="presentation"
+                        class="email-code-box"
                         style="
-                          margin: 0;
-                          color: #0284c7;
-                          font-size: 16px;
-                          line-height: 1.5;
-                          font-weight: 600;
-                          word-break: break-all;
+                          background-color: #ffffff;
+                          border: 2px solid #0284c7;
+                          border-radius: 8px;
                         "
                       >
-                        {{ new_email }}
-                      </p>
+                        <tr>
+                          <td align="center" style="padding: 14px 22px">
+                            <span
+                              class="email-code-text"
+                              style="
+                                font-size: 34px;
+                                line-height: 1;
+                                font-weight: 700;
+                                color: #0284c7;
+                                letter-spacing: 5px;
+                                font-family: &quot;Courier New&quot;, monospace;
+                              "
+                            >
+                              {{ code }}
+                            </span>
+                          </td>
+                        </tr>
+                      </table>
                     </td>
                   </tr>
                 </table>
-
                 <table
                   width="100%"
                   cellpadding="0"
@@ -208,7 +242,6 @@
                     border: 1px solid #bfdbfe;
                     border-left: 4px solid #0284c7;
                     border-radius: 8px;
-                    margin-bottom: 16px;
                   "
                 >
                   <tr>
@@ -222,28 +255,17 @@
                           line-height: 1.6;
                         "
                       >
-                        <strong class="email-accent" style="color: #0284c7"
-                          >Security note:</strong
+                        <strong
+                          class="email-notice-strong"
+                          style="color: #0284c7"
+                          >Important:</strong
                         >
-                        If you didn't make this change, contact support
-                        immediately to secure your account.
+                        This code will expire in 15 minutes. If you didn't
+                        request an email change, please ignore this email.
                       </p>
                     </td>
                   </tr>
                 </table>
-
-                <p
-                  class="email-meta-copy"
-                  style="
-                    margin: 0;
-                    color: #475569;
-                    font-size: 14px;
-                    line-height: 1.6;
-                  "
-                >
-                  You can now use this email to sign in and receive account
-                  notifications.
-                </p>
               </td>
             </tr>
             <tr>

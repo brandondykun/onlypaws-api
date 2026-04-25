@@ -1,312 +1,355 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="x-apple-disable-message-reformatting" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="supported-color-schemes" content="light dark" />
     <title>Email Address Changed - OnlyPaws</title>
     <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          "Helvetica Neue", Arial, sans-serif;
-        background-color: #18181b;
-        padding: 48px 16px;
-        line-height: 1.5;
-      }
-
-      .container {
-        max-width: 600px;
-        margin: 0 auto;
-        background-color: #27272a;
-        border-radius: 16px;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-        overflow: hidden;
-      }
-
-      .header {
-        background: linear-gradient(to right, #0ea5e9, #0284c7);
-        padding: 24px 32px;
-        text-align: center;
-      }
-
-      .icon-wrapper {
-        display: inline-block;
-        background-color: #ffffff;
-        border-radius: 50%;
-        padding: 16px;
-        margin-bottom: 16px;
-      }
-
-      .icon {
-        width: 64px;
-        height: 64px;
-        color: #0ea5e9;
-      }
-
-      .header h1 {
-        font-size: 36px;
-        font-weight: bold;
-        color: #ffffff;
-        margin-bottom: 8px;
-      }
-
-      .header p {
-        color: #e0f2fe;
-        font-size: 18px;
-      }
-
-      .content {
-        padding: 40px 32px;
-      }
-
-      .intro-text {
-        color: #d4d4d8;
-        font-size: 18px;
-        margin-bottom: 24px;
-      }
-
-      .alert-section {
-        background-color: #18181b;
-        border: 2px solid #3f3f46;
-        border-radius: 12px;
-        padding: 32px;
-        margin-bottom: 32px;
-        text-align: center;
-      }
-
-      .alert-icon {
-        width: 60px;
-        height: 60px;
-        margin: 0 auto 16px;
-        background: linear-gradient(to right, #0ea5e9, #0284c7);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 38px;
-        color: #ffffff;
-      }
-
-      .alert-icon-inner {
-        margin-top: -3px;
-      }
-
-      .alert-title {
-        color: #38bdf8;
-        font-size: 24px;
-        font-weight: 600;
-        margin-bottom: 12px;
-      }
-
-      .alert-message {
-        color: #a1a1aa;
-        font-size: 16px;
-      }
-
-      .email-change-box {
-        background-color: #18181b;
-        border: 2px solid #3f3f46;
-        border-radius: 12px;
-        padding: 24px;
-        margin-bottom: 24px;
-      }
-
-      .email-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 16px;
-      }
-
-      .email-row:last-child {
-        margin-bottom: 0;
-      }
-
-      .email-label {
-        color: #a1a1aa;
-        font-size: 14px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        flex-shrink: 0;
-        margin-right: 16px;
-      }
-
-      .email-value {
-        color: #d4d4d8;
-        font-size: 16px;
-        font-weight: 500;
-        text-align: right;
-        word-break: break-all;
-      }
-
-      .email-value.new {
-        color: #38bdf8;
-      }
-
-      .arrow {
-        color: #38bdf8;
-        font-size: 24px;
-        text-align: center;
-        margin: 8px 0;
-      }
-
-      .warning {
-        background-color: #0c4a6e;
-        border-left: 4px solid #0ea5e9;
-        padding: 16px;
-        margin-bottom: 24px;
-      }
-
-      .warning p {
-        color: #e0f2fe;
-        font-size: 14px;
-      }
-
-      .warning-title {
-        font-weight: 600;
-        color: #7dd3fc;
-        font-size: 16px;
-        margin-bottom: 8px;
-      }
-
-      .action-box {
-        background-color: #0c4a6e;
-        border: 2px solid #0ea5e9;
-        border-radius: 8px;
-        padding: 16px;
-        margin-bottom: 24px;
-      }
-
-      .action-box p {
-        color: #e0f2fe;
-        font-size: 14px;
-        font-weight: 600;
-      }
-
-      .footer-text {
-        color: #a1a1aa;
-        font-size: 14px;
-      }
-
-      .footer {
-        background-color: #18181b;
-        padding: 24px 32px;
-        border-top: 1px solid #3f3f46;
-        text-align: center;
-      }
-
-      .footer p {
-        color: #71717a;
-        font-size: 12px;
-        line-height: 1.6;
-      }
-
-      @media only screen and (max-width: 600px) {
-        body {
-          padding: 24px 8px;
+      @media screen and (max-width: 600px) {
+        .email-header {
+          background-color: #0ea5e9 !important;
         }
+      }
 
-        .header {
-          padding: 32px 24px;
+      @media (prefers-color-scheme: dark) {
+        .email-header {
+          background-color: #0284c7 !important;
         }
-
-        .header h1 {
-          font-size: 28px;
+        body,
+        .email-bg {
+          background-color: #0b0f14 !important;
         }
-
-        .content {
-          padding: 32px 24px;
+        .email-card {
+          background-color: #1a222d !important;
+          border-color: #2f3d4f !important;
         }
-
-        .alert-title {
-          font-size: 20px;
+        .email-body-copy,
+        .email-meta-copy,
+        .email-notice-copy,
+        .email-warning-copy {
+          color: #e5edf7 !important;
         }
-
-        .email-row {
-          flex-direction: column;
-          align-items: flex-start;
+        .email-panel {
+          background-color: #1e2938 !important;
+          border-color: #34465c !important;
         }
-
         .email-label {
-          margin-bottom: 4px;
+          color: #a9b9cd !important;
         }
-
-        .email-value {
-          text-align: left;
+        .email-accent {
+          color: #0ea5e9 !important;
+        }
+        .email-notice {
+          background-color: #1a2433 !important;
+          border-color: #335679 !important;
+          border-left-color: #0ea5e9 !important;
+        }
+        .email-footer {
+          background-color: #131b25 !important;
+          border-top-color: #2f3d4f !important;
+        }
+        .email-footer-copy {
+          color: #96a8bc !important;
         }
       }
     </style>
   </head>
-  <body>
-    <div class="container">
-      <!-- Header -->
-      <div class="header">
-        <h1>Email Changed</h1>
-        <p>Security Notification 🔔</p>
-      </div>
+  <body
+    class="email-bg"
+    style="
+      margin: 0;
+      padding: 0;
+      background-color: #f3f6fb;
+      color: #111827;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    "
+  >
+    <table
+      width="100%"
+      cellpadding="0"
+      cellspacing="0"
+      border="0"
+      role="presentation"
+      class="email-bg"
+      style="background-color: #f3f6fb"
+    >
+      <tr>
+        <td align="center" style="padding: 24px 12px">
+          <table
+            width="100%"
+            cellpadding="0"
+            cellspacing="0"
+            border="0"
+            role="presentation"
+            class="email-card"
+            style="
+              max-width: 600px;
+              background-color: #ffffff;
+              border: 1px solid #dbe3ee;
+              border-radius: 12px;
+              overflow: hidden;
+            "
+          >
+            <tr>
+              <td
+                align="center"
+                class="email-header"
+                style="background-color: #0284c7; padding: 24px 20px"
+              >
+                <h1
+                  style="
+                    margin: 0;
+                    font-size: 30px;
+                    line-height: 1.2;
+                    font-weight: 700;
+                    color: #ffffff;
+                    font-family:
+                      -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;,
+                      Roboto, Arial;
+                  "
+                >
+                  Email Changed
+                </h1>
+                <p
+                  style="
+                    margin: 8px 0 0;
+                    color: #dbeafe;
+                    font-size: 18px;
+                    line-height: 1.4;
+                    font-family:
+                      -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;,
+                      Roboto, Arial;
+                  "
+                >
+                  Security Notification
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td
+                style="
+                  padding: 28px 20px;
+                  font-family:
+                    -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;,
+                    Roboto, Arial;
+                "
+              >
+                <p
+                  class="email-body-copy"
+                  style="
+                    margin: 0 0 18px;
+                    color: #1f2937;
+                    font-size: 16px;
+                    line-height: 1.6;
+                  "
+                >
+                  This is a security notification to inform you that the email
+                  address associated with your OnlyPaws account has been
+                  changed.
+                </p>
 
-      <!-- Content -->
-      <div class="content">
-        <p class="intro-text">
-          This is a security notification to inform you that the email address
-          associated with your OnlyPaws account has been changed.
-        </p>
+                <table
+                  width="100%"
+                  cellpadding="0"
+                  cellspacing="0"
+                  border="0"
+                  role="presentation"
+                  class="email-panel"
+                  style="
+                    background-color: #eef5ff;
+                    border: 1px solid #c7defa;
+                    border-radius: 10px;
+                    margin-bottom: 18px;
+                  "
+                >
+                  <tr>
+                    <td style="padding: 16px">
+                      <p
+                        class="email-label"
+                        style="
+                          margin: 0 0 6px;
+                          font-size: 12px;
+                          color: #334155;
+                          text-transform: uppercase;
+                          letter-spacing: 1px;
+                          font-weight: 600;
+                        "
+                      >
+                        Previous Email
+                      </p>
+                      <p
+                        class="email-meta-copy"
+                        style="
+                          margin: 0 0 8px;
+                          color: #1f2937;
+                          font-size: 16px;
+                          line-height: 1.5;
+                          word-break: break-all;
+                        "
+                      >
+                        {{ old_email }}
+                      </p>
+                      <p
+                        class="email-accent"
+                        style="
+                          margin: 0 0 8px;
+                          color: #0284c7;
+                          font-size: 18px;
+                          line-height: 1;
+                          font-weight: 700;
+                        "
+                      >
+                        ↓
+                      </p>
+                      <p
+                        class="email-label"
+                        style="
+                          margin: 0 0 6px;
+                          font-size: 12px;
+                          color: #334155;
+                          text-transform: uppercase;
+                          letter-spacing: 1px;
+                          font-weight: 600;
+                        "
+                      >
+                        New Email
+                      </p>
+                      <p
+                        class="email-accent"
+                        style="
+                          margin: 0;
+                          color: #0284c7;
+                          font-size: 16px;
+                          line-height: 1.5;
+                          font-weight: 600;
+                          word-break: break-all;
+                        "
+                      >
+                        {{ new_email }}
+                      </p>
+                    </td>
+                  </tr>
+                </table>
 
-        <div class="alert-section">
-          <div class="alert-icon"><div class="alert-icon-inner">⚠</div></div>
-          <h2 class="alert-title">Email Address Updated</h2>
-          <p class="alert-message">
-            Your account email has been successfully changed to a new address.
-          </p>
-        </div>
+                <table
+                  width="100%"
+                  cellpadding="0"
+                  cellspacing="0"
+                  border="0"
+                  role="presentation"
+                  class="email-notice"
+                  style="
+                    background-color: #eff6ff;
+                    border: 1px solid #bfdbfe;
+                    border-left: 4px solid #0284c7;
+                    border-radius: 8px;
+                    margin-bottom: 16px;
+                  "
+                >
+                  <tr>
+                    <td style="padding: 16px">
+                      <p
+                        class="email-notice-copy"
+                        style="
+                          margin: 0;
+                          font-size: 14px;
+                          color: #1f2937;
+                          line-height: 1.6;
+                        "
+                      >
+                        <strong class="email-accent" style="color: #0284c7"
+                          >Did you make this change?</strong
+                        >
+                        If you authorized this update, no further action is
+                        needed.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
 
-        <div class="email-change-box">
-          <div class="email-row">
-            <span class="email-label">Previous Email:</span>
-            <span class="email-value">{{ old_email }}</span>
-          </div>
-          <div class="arrow">↓</div>
-          <div class="email-row">
-            <span class="email-label">New Email:</span>
-            <span class="email-value new">{{ new_email }}</span>
-          </div>
-        </div>
+                <table
+                  width="100%"
+                  cellpadding="0"
+                  cellspacing="0"
+                  border="0"
+                  role="presentation"
+                  class="email-panel"
+                  style="
+                    background-color: #eef5ff;
+                    border: 1px solid #c7defa;
+                    border-radius: 10px;
+                    margin-bottom: 16px;
+                  "
+                >
+                  <tr>
+                    <td style="padding: 16px">
+                      <p
+                        class="email-warning-copy"
+                        style="
+                          margin: 0;
+                          font-size: 14px;
+                          color: #1f2937;
+                          line-height: 1.6;
+                        "
+                      >
+                        <strong class="email-accent" style="color: #0284c7"
+                          >If this wasn't you:</strong
+                        >
+                        Contact support immediately to secure your account.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
 
-        <div class="warning">
-          <p class="warning-title">⚠️ Did You Make This Change?</p>
-          <p>
-            If you authorized this email change, no further action is needed.
-            You can safely disregard this notification.
-          </p>
-        </div>
-
-        <div class="action-box">
-          <p>
-            ⛔ If you did NOT make this change, your account may be compromised.
-            Contact our support team immediately!
-          </p>
-        </div>
-
-        <p class="footer-text">
-          This notification was sent to your old email address for security
-          purposes. Future communications will be sent to your new email
-          address.
-        </p>
-      </div>
-
-      <!-- Footer -->
-      <div class="footer">
-        <p>
-          © 2024 OnlyPaws. All rights reserved.<br />
-          This is an automated message, please do not reply to this email.
-        </p>
-      </div>
-    </div>
+                <p
+                  class="email-meta-copy"
+                  style="
+                    margin: 0;
+                    color: #475569;
+                    font-size: 14px;
+                    line-height: 1.6;
+                  "
+                >
+                  This notification was sent to your old email address for
+                  security purposes.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td
+                align="center"
+                class="email-footer"
+                style="
+                  padding: 24px;
+                  background-color: #f8fbff;
+                  border-top: 1px solid #dbe3ee;
+                "
+              >
+                <p
+                  class="email-footer-copy"
+                  style="
+                    margin: 0;
+                    font-size: 12px;
+                    color: #64748b;
+                    line-height: 1.6;
+                    font-family:
+                      -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;,
+                      Roboto, Arial;
+                  "
+                >
+                  © {% now "Y" %} OnlyPaws. All rights reserved.<br />
+                  This is an automated message, please do not reply to this
+                  email.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
   </body>
 </html>

@@ -137,7 +137,7 @@ class EmailVerificationApiTests(TestCase):
 
         # get token and modify created_at to be expired
         verify_email_token = VerifyEmailToken.objects.get(user=new_user)
-        verify_email_token.created_at = timezone.now() - timedelta(minutes=11)
+        verify_email_token.created_at = timezone.now() - timedelta(minutes=16)
         verify_email_token.save()
 
         # verify with expired token

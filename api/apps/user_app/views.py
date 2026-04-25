@@ -234,7 +234,7 @@ class VerifyEmailView(generics.CreateAPIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        if timezone.now() - user_token.created_at > timedelta(minutes=10):
+        if timezone.now() - user_token.created_at > timedelta(minutes=15):
             return Response(
                 {"error": "Verification code has expired"},
                 status=status.HTTP_400_BAD_REQUEST,

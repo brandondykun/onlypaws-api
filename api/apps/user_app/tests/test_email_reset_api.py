@@ -134,7 +134,7 @@ class PrivateEmailChangeAPITests(TestCase):
             verification_token=token,
         )
         # Manually set created_at to make token expired
-        change.created_at = timezone.now() - timedelta(hours=13)
+        change.created_at = timezone.now() - timedelta(minutes=16)
         change.save()
 
         res = self.client.post(self.verify_url, {"token": token})

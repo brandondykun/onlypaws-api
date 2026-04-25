@@ -1,6 +1,7 @@
 """
 User app models.
 """
+
 from django.db import models
 from django.contrib.auth.models import (
     AbstractBaseUser,
@@ -48,11 +49,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_email_verified = models.BooleanField(default=False)
     regular_profile_onboarding_completed = models.BooleanField(
         default=False,
-        help_text="Whether the user has completed onboarding for RegularProfile type"
+        help_text="Whether the user has completed onboarding for RegularProfile type",
     )
     business_profile_onboarding_completed = models.BooleanField(
         default=False,
-        help_text="Whether the user has completed onboarding for BusinessProfile type"
+        help_text="Whether the user has completed onboarding for BusinessProfile type",
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -162,7 +163,7 @@ class PendingEmailChange(models.Model):
 
     @property
     def is_expired(self):
-        return timezone.now() > (self.created_at + timedelta(hours=12))
+        return timezone.now() > (self.created_at + timedelta(minutes=15))
 
 
 class PendingAccountDeletion(models.Model):
@@ -192,4 +193,3 @@ class PendingAccountDeletion(models.Model):
 
     def __str__(self):
         return f"{self.user.email} - scheduled for {self.scheduled_deletion_at}"
-
