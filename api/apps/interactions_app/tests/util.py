@@ -119,3 +119,14 @@ def list_following_url(profile_public_id: str):
     """
     return reverse("interactions_app:list_following", args=[profile_public_id])
 
+
+def create_post_interaction_url(post_id: int):
+    """Create and return a create post interaction url.
+
+    Parameters
+    ----------
+    post_id : int
+        The id of the Post the interaction is being recorded for.
+    """
+    return reverse("interactions_app:create_post_interaction", args=[post_id])
+

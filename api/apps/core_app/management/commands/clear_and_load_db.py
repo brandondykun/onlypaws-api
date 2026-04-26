@@ -62,6 +62,7 @@ class Command(BaseCommand):
             "custombannedword.json",
             "whitelistedword.json",
             "pendingaccountdeletion.json",
+            "postinteraction.json",
         ]
 
         path_prefix = "fixtures/e2e"

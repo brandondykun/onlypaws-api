@@ -13,7 +13,7 @@ from drf_spectacular.utils import (
 )
 import logging
 
-from apps.interactions_app.models import Like, Comment, CommentLike, Follow, FollowRequest
+from apps.interactions_app.models import Like, Comment, CommentLike, Follow, FollowRequest, PostInteraction
 from apps.posts_app.models import Post
 from apps.profile_app.models import Profile
 from .serializers import (
@@ -26,6 +26,7 @@ from .serializers import (
     CreateFollowSerializer,
     FollowRequestSerializer,
     SentFollowRequestSerializer,
+    PostInteractionSerializer,
 )
 from .pagination import (
     FollowListPagination,
@@ -939,3 +940,57 @@ class CancelFollowRequestView(generics.DestroyAPIView):
                 {"error": "Failed to cancel follow request"},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+
+# ============================================================================
+# Post Interaction Views
+# ============================================================================
+
+@extend_schema_view(
+    post=extend_schema(parameters=[auth_profile_param]),
+)
+class CreatePostInteractionView(generics.CreateAPIView):
+    """
+    Record an interaction event (preview_click, view, like, save, comment) for a post.
+
+    This is an append-only event log. The same (profile, post, interaction_type)
+    tuple may be recorded many times — repeat events are signal for the
+    short-term preference embedding.
+    """
+
+    serializer_class = PostInteractionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = PostInteraction.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        post_id = self.kwargs.get("pk")
+        current_profile = request.current_profile
+
+        post = get_object_or_404(Post, pk=post_id)
+
+        # Block / private-profile gating, identical to other interaction endpoints.
+        if not post.can_profile_interact(current_profile):
+            logger.warning(
+                f"Profile {current_profile.id} attempted to record an interaction "
+                f"with post {post_id} they cannot interact with."
+            )
+            return Response(
+                {"error": "Cannot interact with this post."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        data = {
+            "post": post.id,
+            "profile": current_profile.id,
+            "interaction_type": request.data.get("interaction_type"),
+            "dwell_time_ms": request.data.get("dwell_time_ms"),
+        }
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        logger.info(
+            f"PostInteraction recorded: profile {current_profile.id} "
+            f"{data['interaction_type']} post {post.id}"
+        )
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

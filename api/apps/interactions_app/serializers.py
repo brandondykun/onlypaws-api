@@ -3,7 +3,7 @@ Serializers for the interactions app.
 """
 
 from rest_framework import serializers
-from apps.interactions_app.models import Like, Comment, CommentLike, Follow, FollowRequest
+from apps.interactions_app.models import Like, Comment, CommentLike, Follow, FollowRequest, PostInteraction
 from apps.profile_app.serializers import ProfileSerializer
 from apps.posts_app.models import Post
 from apps.core_app.profanity_service import check_and_log_text
@@ -36,6 +36,34 @@ class CommentLikeSerializer(serializers.ModelSerializer):
             "liked_at",
         ]
         read_only_fields = ["id", "liked_at"]
+
+
+class PostInteractionSerializer(serializers.ModelSerializer):
+    """Serializer for PostInteraction (append-only event log of profile<>post interactions)."""
+
+    public_id = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = PostInteraction
+        fields = [
+            "id",
+            "public_id",
+            "post",
+            "profile",
+            "interaction_type",
+            "dwell_time_ms",
+            "created_at",
+        ]
+        read_only_fields = ["id", "public_id", "created_at"]
+
+    def validate(self, attrs):
+        interaction_type = attrs.get("interaction_type")
+        dwell = attrs.get("dwell_time_ms")
+        if dwell is not None and interaction_type != PostInteraction.InteractionType.VIEW:
+            raise serializers.ValidationError({
+                "dwell_time_ms": "dwell_time_ms is only valid for 'view' interactions."
+            })
+        return attrs
 
 
 class CommentSerializer(serializers.ModelSerializer):

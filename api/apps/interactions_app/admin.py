@@ -4,7 +4,7 @@ Admin configuration for interactions app.
 
 from django.contrib import admin
 from django.contrib.admin import widgets
-from .models import Like, Comment, CommentLike, Follow, FollowRequest
+from .models import Like, Comment, CommentLike, Follow, FollowRequest, PostInteraction
 from unfold.admin import ModelAdmin
 
 
@@ -57,3 +57,26 @@ class CommentAdmin(ModelAdmin):
                 attrs={"style": "width: 86%;"}
             )
         return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+
+@admin.register(PostInteraction)
+class PostInteractionAdmin(ModelAdmin):
+    list_display = [
+        "id",
+        "profile",
+        "post",
+        "interaction_type",
+        "dwell_time_ms",
+        "created_at",
+    ]
+    list_filter = ["interaction_type", "created_at"]
+    search_fields = [
+        "profile__username",
+        "post__caption",
+        "public_id",
+    ]
+    readonly_fields = ["public_id", "created_at"]
+    ordering = ["-created_at"]
+    date_hierarchy = "created_at"
+    list_select_related = ("profile", "post")
+    autocomplete_fields = ("profile", "post")

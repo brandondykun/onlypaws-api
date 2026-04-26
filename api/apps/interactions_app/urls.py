@@ -98,4 +98,10 @@ urlpatterns = [
         views.CancelFollowRequestView.as_view(),
         name="cancel_follow_request",
     ),
+    # Post Interactions
+    path(
+        "interaction/post/<int:pk>/",
+        views.CreatePostInteractionView.as_view(),
+        name="create_post_interaction",
+    ),
 ]

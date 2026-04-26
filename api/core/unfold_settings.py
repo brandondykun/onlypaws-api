@@ -211,6 +211,13 @@ UNFOLD = {
                             "admin:interactions_app_followrequest_changelist"
                         ),
                     },
+                    {
+                        "title": "Post Interactions",
+                        "icon": "touch_app",
+                        "link": reverse_lazy(
+                            "admin:interactions_app_postinteraction_changelist"
+                        ),
+                    },
                 ],
             },
             {
