@@ -47,6 +47,14 @@ app.conf.task_routes = {
     "apps.user_app.tasks.delete_expired_accounts_task": {"queue": "maintenance"},
     # Moderation tasks go to default queue
     "apps.moderation_app.tasks.log_profanity_detection_task": {"queue": "default"},
+    # Recommendation tasks (preference embeddings, popularity refresh) go to recommendations queue
+    "apps.recommendations_app.tasks.update_profile_preference_embedding_task": {"queue": "recommendations"},
+    "apps.recommendations_app.tasks.update_stale_preference_embeddings_task": {"queue": "recommendations"},
+    "apps.recommendations_app.tasks.nightly_preference_embedding_refresh_task": {"queue": "recommendations"},
+    "apps.recommendations_app.tasks.refresh_popularity_cache_task": {"queue": "recommendations"},
+    "apps.recommendations_app.tasks.refresh_heavily_reported_profiles_task": {"queue": "recommendations"},
+    # Retention task goes to maintenance queue
+    "apps.interactions_app.tasks.cleanup_old_post_interactions_task": {"queue": "maintenance"},
 }
 
 # Configure worker settings for different task types
@@ -128,6 +136,37 @@ app.conf.task_annotations = {
         "rate_limit": "200/m",
         "time_limit": 30,
         "soft_time_limit": 25,
+    },
+    # Recommendation task settings
+    "apps.recommendations_app.tasks.update_profile_preference_embedding_task": {
+        "rate_limit": "120/m",  # comfortably above the steady-state recompute load
+        "time_limit": 60,  # weighted-average over <=500 events should be sub-second
+        "soft_time_limit": 50,
+    },
+    "apps.recommendations_app.tasks.update_stale_preference_embeddings_task": {
+        "rate_limit": "1/h",  # only one sweep can run at a time even on overlap
+        "time_limit": 600,
+        "soft_time_limit": 540,
+    },
+    "apps.recommendations_app.tasks.nightly_preference_embedding_refresh_task": {
+        "rate_limit": "1/h",
+        "time_limit": 1800,
+        "soft_time_limit": 1500,
+    },
+    "apps.recommendations_app.tasks.refresh_popularity_cache_task": {
+        "rate_limit": "4/h",  # comfortably above the every-30-min cadence
+        "time_limit": 300,
+        "soft_time_limit": 270,
+    },
+    "apps.recommendations_app.tasks.refresh_heavily_reported_profiles_task": {
+        "rate_limit": "20/h",  # comfortably above the every-5-min cadence
+        "time_limit": 60,
+        "soft_time_limit": 50,
+    },
+    "apps.interactions_app.tasks.cleanup_old_post_interactions_task": {
+        "rate_limit": "1/h",
+        "time_limit": 1800,  # 30 min hard ceiling; chunked deletes shouldn't approach this
+        "soft_time_limit": 1500,
     },
 }
 

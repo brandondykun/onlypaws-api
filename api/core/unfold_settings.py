@@ -325,6 +325,19 @@ UNFOLD = {
                 ],
             },
             {
+                "title": "Recommendations",
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": "Profile Pref. Embeddings",
+                        "icon": "recommend",
+                        "link": reverse_lazy(
+                            "admin:recommendations_app_profilepreferenceembedding_changelist"
+                        ),
+                    },
+                ],
+            },
+            {
                 "title": "Config",
                 "collapsible": True,
                 "items": [

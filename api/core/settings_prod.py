@@ -33,6 +33,7 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "auth": "30/minute",
         "auth_sensitive": "5/minute",
+        "explore_feed": "60/minute",
     },
 }
 

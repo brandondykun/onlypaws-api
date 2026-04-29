@@ -26,7 +26,8 @@ class PrivateFeedApiTests(BaseFixtureTestCase):
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
-        self.assertEqual(len(res.data["results"]), 2)
+        returned_ids = {post["id"] for post in res.data["results"]}
+        self.assertEqual(returned_ids, {self.post_3.id})
 
 
 class PublicFeedApiTests(BaseFixtureTestCase):

@@ -43,6 +43,8 @@ volumes:
   redis_data:
 
 networks:
+  default:
+    name: only-paws_default
   observability:
     external: true
 

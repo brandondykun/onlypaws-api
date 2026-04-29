@@ -36,6 +36,12 @@ class Block(models.Model):
         return f"{self.blocker} blocked {self.blocked}"
 
 
+# Stable identifier for the "Inappropriate Content" report reason. Filtering by
+# id is unsafe because PKs depend on seed insertion order; the unique `name`
+# field is the durable handle. Update both this constant and the seeder together.
+INAPPROPRIATE_REPORT_REASON_NAME = "Inappropriate Content"
+
+
 class ReportReason(models.Model):
     """
     Model to store predefined reasons for reporting posts
@@ -157,6 +163,11 @@ class ProfileReport(models.Model):
     class Meta:
         ordering = ["-created_at"]
         unique_together = (("profile", "reporter"),)
+        indexes = [
+            # Supports the heavily-reported-profile aggregation in
+            # recommendations_app: count open reports per profile.
+            models.Index(fields=["status", "profile"]),
+        ]
 
     def __str__(self):
         return f"Profile report on {self.profile} by {self.reporter}"

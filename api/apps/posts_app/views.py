@@ -20,6 +20,7 @@ from .serializers import (
 )
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.throttling import ScopedRateThrottle
 from django.shortcuts import get_object_or_404
 from django.db.models import Q, Case, When, Count
 from django.db import transaction
@@ -40,6 +41,8 @@ import json
 from core.schema_params import auth_profile_param
 from apps.core_app.storage_utils import generate_presigned_upload_url, generate_original_image_key
 from apps.moderation_app.block_utils import get_blocked_profile_ids, are_profiles_blocking
+from apps.moderation_app.models import INAPPROPRIATE_REPORT_REASON_NAME
+from apps.recommendations_app.pagination import ExploreCursorPagination
 
 logger = logging.getLogger(__name__)
 
@@ -457,7 +460,7 @@ class ListProfilePostsView(generics.ListAPIView):
 
         # For other profiles, only show READY posts and filter reported inappropriate content
         return profile_posts.filter(
-            Q(status=Post.Status.READY) & ~Q(reports__reason__id=1)
+            Q(status=Post.Status.READY) & ~Q(reports__reason__name=INAPPROPRIATE_REPORT_REASON_NAME)
         ).order_by("-created_at")
 
 
@@ -486,7 +489,7 @@ class RetrieveFeedView(generics.ListAPIView):
         posts = Post.objects.filter(
             Q(profile__following__followed_by=current_profile)
             & Q(status=Post.Status.READY)  # only show completed posts
-            & ~Q(reports__reason__id=1)  # filter reported inappropriate content
+            & ~Q(reports__reason__name=INAPPROPRIATE_REPORT_REASON_NAME)  # filter reported inappropriate content
         ).exclude(
             profile_id__in=heavily_reported_ids
         ).exclude(
@@ -829,51 +832,67 @@ class RetrieveUpdateDestroyPostView(generics.RetrieveUpdateDestroyAPIView):
 
 
 @extend_schema_view(
-    get=extend_schema(parameters=[auth_profile_param]),
+    get=extend_schema(
+        parameters=[
+            auth_profile_param,
+            OpenApiParameter(
+                "cursor",
+                OpenApiTypes.STR,
+                description=(
+                    "Opaque cursor returned in the previous response's `next` link. "
+                    "Omit on the first request."
+                ),
+            ),
+        ]
+    ),
 )
 class ListExplorePostsView(generics.ListAPIView):
-    """List explore posts from profiles that the authenticated profile does not follow."""
+    """
+    Personalized explore feed.
+
+    Returns posts ranked by similarity to the requesting profile's preference
+    embedding (long-term taste blended with short-term intent), filtered to
+    public, READY posts the user does not already follow / own / block. Cold-
+    start users (no usable signal) get a popularity-ranked fallback.
+
+    Pagination is cursor-based; the `next` link in each response advances
+    through a materialized batch of recommendations.
+    """
 
     serializer_class = PostDetailedSerializer
     permission_classes = [permissions.IsAuthenticated]
-    queryset = Post.objects.all()
-    pagination_class = ListExplorePostsPagination
+    pagination_class = ExploreCursorPagination
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "explore_feed"
+    queryset = Post.objects.none()
 
-    def get_queryset(self):
-        current_profile = self.request.current_profile
+    def list(self, request, *args, **kwargs):
+        paginator = self.paginator
+        post_ids = paginator.paginate_for_profile(request.current_profile, request)
 
-        heavily_reported_ids = ProfileModel.objects.annotate(
-            _arc=Count(
-                "profile_reports",
-                filter=Q(profile_reports__status__in=["PENDING", "UNDER_REVIEW"]),
+        if not post_ids:
+            return paginator.get_paginated_response([])
+
+        preserved_order = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(post_ids)])
+        qs = (
+            Post.objects
+            .filter(id__in=post_ids)
+            .prefetch_related(
+                'images__tags__tagged_profile__image',
+                'images__tags__tagged_profile__regularprofile',
+                'images__tags__tagged_profile__businessprofile',
+                'images__tags__tagged_by_profile__image',
+                'images__tags__tagged_by_profile__regularprofile',
+                'images__tags__tagged_by_profile__businessprofile',
+                'profile__image',
+                'profile__regularprofile',
+                'profile__businessprofile',
+                'reports',
             )
-        ).filter(_arc__gte=5).values("id")
-
-        blocked_ids = get_blocked_profile_ids(current_profile)
-
-        posts = Post.objects.filter(
-            ~Q(profile__following__followed_by=current_profile)
-            & ~Q(profile__user=self.request.user)
-            & ~Q(reports__gt=0)  # filter all reported posts for explore screen
-            & Q(profile__is_private=False)  # exclude posts from private profiles
-            & Q(status=Post.Status.READY)  # only show completed posts
-        ).exclude(
-            profile_id__in=heavily_reported_ids
-        ).exclude(
-            profile_id__in=blocked_ids
-        ).prefetch_related(
-            'images__tags__tagged_profile__image',
-            'images__tags__tagged_profile__regularprofile',
-            'images__tags__tagged_profile__businessprofile',
-            'images__tags__tagged_by_profile__image',
-            'images__tags__tagged_by_profile__regularprofile',
-            'images__tags__tagged_by_profile__businessprofile',
-            'profile__image',
-            'profile__regularprofile',
-            'profile__businessprofile',
-            'reports',
-        ).order_by("-created_at")
-        return posts
+            .order_by(preserved_order)
+        )
+        serializer = self.get_serializer(qs, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
 
 @extend_schema_view(
@@ -935,7 +954,7 @@ class ListSimilarPostsView(generics.ListAPIView):
                         status=Post.Status.READY,  # only show completed posts
                     )
                     .filter(private_profile_filter)
-                    .exclude(reports__reason__id=1)
+                    .exclude(reports__reason__name=INAPPROPRIATE_REPORT_REASON_NAME)
                     .exclude(profile_id__in=blocked_ids)
                     .prefetch_related(
                         'images__tags__tagged_profile__image',
@@ -961,7 +980,7 @@ class ListSimilarPostsView(generics.ListAPIView):
                 .filter(~Q(profile__user=self.request.user))
                 .filter(private_profile_filter)
                 .filter(status=Post.Status.READY)  # only show completed posts
-                .exclude(reports__reason__id=1)
+                .exclude(reports__reason__name=INAPPROPRIATE_REPORT_REASON_NAME)
                 .exclude(profile_id__in=blocked_ids)
                 .distinct()
             )

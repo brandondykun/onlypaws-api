@@ -12,6 +12,7 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "auth": "1000/minute",
         "auth_sensitive": "1000/minute",
+        "explore_feed": "1000/minute",
     },
 }
 
@@ -30,8 +31,8 @@ DATABASES = {
 # Run tasks synchronously during testing to avoid Redis dependency
 CELERY_TASK_ALWAYS_EAGER = True
 CELERY_TASK_EAGER_PROPAGATES = True
-CELERY_BROKER_URL = 'memory://'
-CELERY_RESULT_BACKEND = 'cache+memory://'
+CELERY_BROKER_URL = "memory://"
+CELERY_RESULT_BACKEND = "cache+memory://"
 
 # File Storage Configuration for Tests
 # Use in-memory storage to prevent writing files to the file system during tests

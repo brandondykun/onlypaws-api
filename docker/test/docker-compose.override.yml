@@ -44,7 +44,7 @@ services:
       - DJANGO_SETTINGS_MODULE=core.settings
       - PYTHONPATH=/api
     working_dir: /api
-    command: python -m celery -A core worker -Q default -l info --concurrency=2
+    command: python -m celery -A core worker -Q default,recommendations,maintenance -l info --concurrency=2
     restart: unless-stopped
 
   # Celery worker for embedding tasks - Test environment

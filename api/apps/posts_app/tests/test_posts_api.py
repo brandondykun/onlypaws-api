@@ -804,15 +804,15 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         reported_embedding = create_mock_embedding(base_value=0.51, variation=0.01, seed=101)
         create_post_image(reported_post, create_test_image('reported.jpg'), embedding=reported_embedding)
         
-        # Report the post with reason 1 (Inappropriate Content)
-        # The view filters by reason__id=1, so we need to use reason1 which should have id=1
+        # Report the post with the "Inappropriate Content" reason — the view
+        # filters reports by reason name, so this is the one that gets excluded.
         from apps.moderation_app.models import PostReport
         report = PostReport.objects.create(
             post=reported_post,
             reporter=self.profile.user,
-            reason=self.reason1  # Inappropriate Content (should have id=1 from fixture)
+            reason=self.reason1  # "Inappropriate Content"
         )
-        
+
         # Verify the report was created with the expected reason
         self.assertEqual(report.reason.id, self.reason1.id)
         
@@ -826,11 +826,13 @@ class PrivatePostsApiTests(BaseFixtureTestCase):
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         
-        # The reported post should not appear in results (if reason1 has id=1)
+        # The reported post should not appear in results
         result_ids = [post['id'] for post in res.data['results']]
-        if self.reason1.id == 1:
-            self.assertNotIn(reported_post.id, result_ids, 
-                           f"Reported post {reported_post.id} should not be in results. Reason ID: {self.reason1.id}")
+        self.assertNotIn(
+            reported_post.id,
+            result_ids,
+            f"Reported post {reported_post.id} should not be in results.",
+        )
         
         # The clean post should appear
         self.assertIn(clean_post.id, result_ids)

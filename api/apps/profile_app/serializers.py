@@ -15,6 +15,7 @@ from apps.profile_app.models import (
 )
 from apps.interactions_app.models import FollowRequest
 from apps.core_app.profanity_service import check_and_log_username, check_and_log_text
+from apps.moderation_app.models import INAPPROPRIATE_REPORT_REASON_NAME
 from typing import Literal
 from django.db.models import Q
 
@@ -473,7 +474,7 @@ class RegularProfileDetailedSerializer(serializers.ModelSerializer):
         if current_profile and obj.profile_ptr == current_profile:
             return posts.count()
         # filter posts that have been reported as inappropriate from count
-        return posts.filter(~Q(reports__reason__id=1)).count()
+        return posts.filter(~Q(reports__reason__name=INAPPROPRIATE_REPORT_REASON_NAME)).count()
 
     def get_followers_count(self, obj) -> int:
         """Get count of followers."""
@@ -781,7 +782,7 @@ class BusinessProfileDetailedSerializer(serializers.ModelSerializer):
         if current_profile and obj.profile_ptr == current_profile:
             return posts.count()
         # filter posts that have been reported as inappropriate from count
-        return posts.filter(~Q(reports__reason__id=1)).count()
+        return posts.filter(~Q(reports__reason__name=INAPPROPRIATE_REPORT_REASON_NAME)).count()
 
     def get_followers_count(self, obj) -> int:
         """Get count of followers."""
@@ -1373,7 +1374,7 @@ class ProfileDetailedSerializer(serializers.ModelSerializer):
         if current_profile and obj == current_profile:
             return posts.count()
         # filter posts that have been reported as inappropriate from count
-        return posts.filter(~Q(reports__reason__id=1)).count()
+        return posts.filter(~Q(reports__reason__name=INAPPROPRIATE_REPORT_REASON_NAME)).count()
 
     def get_followers_count(self, obj) -> int:
         followers = obj.following.all()

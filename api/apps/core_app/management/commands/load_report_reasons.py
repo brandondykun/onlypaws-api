@@ -1,6 +1,9 @@
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from apps.moderation_app.models import ReportReason
+from apps.moderation_app.models import (
+    INAPPROPRIATE_REPORT_REASON_NAME,
+    ReportReason,
+)
 
 
 class Command(BaseCommand):
@@ -10,7 +13,7 @@ class Command(BaseCommand):
         # Define your preset report reasons
         report_reasons = [
             {
-                "name": "Inappropriate Content",
+                "name": INAPPROPRIATE_REPORT_REASON_NAME,
                 "description": "Content contains inappropriate, offensive, or explicit material",
             },
             {

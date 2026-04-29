@@ -97,6 +97,7 @@ INSTALLED_APPS = [
     "apps.announcements_app",
     "apps.admin_app",
     "apps.legal_app",
+    "apps.recommendations_app",
     "storages",
     "corsheaders",
     "rest_framework_simplejwt.token_blacklist",  # Required for token blacklisting/rotation
@@ -212,6 +213,7 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "auth": "30/minute",
         "auth_sensitive": "5/minute",
+        "explore_feed": "60/minute",
     },
 }
 
@@ -330,6 +332,32 @@ CELERY_BEAT_SCHEDULE = {
     "delete-expired-accounts": {
         "task": "apps.user_app.tasks.delete_expired_accounts_task",
         "schedule": crontab(hour=5, minute=0),  # Run daily at 5:00 AM UTC
+        "options": {"expires": 3600},
+    },
+    "update-stale-preference-embeddings": {
+        "task": "apps.recommendations_app.tasks.update_stale_preference_embeddings_task",
+        "schedule": crontab(minute=0, hour="*/6"),  # Every 6 hours
+        "options": {"expires": 3600},
+    },
+    "nightly-preference-embedding-refresh": {
+        "task": "apps.recommendations_app.tasks.nightly_preference_embedding_refresh_task",
+        "schedule": crontab(hour=2, minute=0),  # Daily at 2:00 AM UTC
+        "options": {"expires": 3600},
+    },
+    "refresh-popularity-cache": {
+        "task": "apps.recommendations_app.tasks.refresh_popularity_cache_task",
+        "schedule": crontab(minute="*/30"),  # Every 30 minutes
+        "options": {"expires": 1500},
+    },
+    "refresh-heavily-reported-profiles": {
+        "task": "apps.recommendations_app.tasks.refresh_heavily_reported_profiles_task",
+        "schedule": crontab(minute="*/5"),  # Every 5 minutes
+        "options": {"expires": 240},
+    },
+    "cleanup-old-post-interactions": {
+        "task": "apps.interactions_app.tasks.cleanup_old_post_interactions_task",
+        "schedule": crontab(hour=4, minute=30),  # Daily at 4:30 AM UTC
+        "args": (30,),  # Retention window in days; bump to 60 here when ready.
         "options": {"expires": 3600},
     },
 }
