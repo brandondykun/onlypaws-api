@@ -4,7 +4,7 @@
     "pk": 1,
     "fields": {
       "title": "Welcome to OnlyPaws!",
-      "message": "Thank you for joining the OnlyPaws family! We want you to help us shape the future of the app! If you want to see a change or a new feature in the app, leave us feedback by:\n\n  1. Navigating to the Profile tab\n  2. Selecting the menu button in the top right\n  3. Tap the 'App Feedback' button\n\nWe rely on community feedback to decide which features to add, so if you have ideas, please let us know!",
+      "message": "Thank you for joining the OnlyPaws family! We want you to help us shape the future of the app! If you want to see a change or a new feature in the app, leave us feedback by:\r\n\r\n  1. Navigating to the Profile tab\r\n  2. Selecting the menu button in the top right\r\n  3. Tap on 'Account Options'\r\n  4. Scroll down and tap on 'Give Feedback'\r\n\r\nWe rely on community feedback to decide which features to add, so if you have ideas, please let us know!",
       "priority": "normal",
       "is_active": true,
       "start_date": "2025-01-01T00:00:00Z",
