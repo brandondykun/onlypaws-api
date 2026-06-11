@@ -7,7 +7,6 @@ from apps.posts_app.models import Post, PostImage, SavedPost, PostImageTag
 from apps.profile_app.models import Profile as ProfileModel
 from apps.interactions_app.models import Follow
 from .serializers import (
-    PostSerializer,
     PostUpdateSerializer,
     PostImageSerializer,
     PostDetailedSerializer,
@@ -19,7 +18,6 @@ from .serializers import (
     CompletePostSerializer,
 )
 from rest_framework.response import Response
-from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.throttling import ScopedRateThrottle
 from django.shortcuts import get_object_or_404
 from django.db.models import Q, Case, When, Count
@@ -220,184 +218,6 @@ class PrepareUploadView(generics.CreateAPIView):
             return Response(
                 {"error": "Failed to prepare upload."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
-
-@extend_schema_view(
-    post=extend_schema(parameters=[auth_profile_param]),
-)
-class CreatePostView(generics.CreateAPIView):
-    """Create a new Post (legacy endpoint for direct image upload)."""
-
-    serializer_class = PostSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    parser_classes = [MultiPartParser, FormParser]
-
-    def post(self, request, *args, **kwargs):
-        profile_id = request.data.get("profileId", None)
-        caption = request.data.get("caption", None)
-        contains_ai = request.data.get("aiGenerated", False)
-        aspect_ratio = request.data.get("aspectRatio", Post.AspectRatio.SQUARE)
-        images = request.FILES.getlist("images")
-        orders = request.POST.getlist("order")
-        tags_json = request.data.get("tags", None)
-
-        # ensure that the profile sent belongs to the current authenticated user
-        current_profile = request.current_profile
-        if str(profile_id) != str(current_profile.id) or not caption:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
-        # Validate aspect ratio
-        if aspect_ratio not in VALID_ASPECT_RATIOS:
-            logger.error(f"Invalid aspect ratio: {aspect_ratio}")
-            return Response(
-                {"error": f"Invalid aspect ratio. Must be one of: {', '.join(VALID_ASPECT_RATIOS)}"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # Validate that images and orders match in length
-        if len(images) != len(orders):
-            logger.error("Number of images and order values must match.")
-            return Response(
-                {"error": "Number of images and order values must match."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # Parse tags if provided
-        tags_data = {}
-        if tags_json:
-            try:
-                tags_data = json.loads(tags_json) if isinstance(tags_json, str) else tags_json
-                if not isinstance(tags_data, dict):
-                    logger.error("Tags must be a JSON object/dictionary.")
-                    return Response(
-                        {"error": "Tags must be a JSON object with image indices as keys."},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-            except json.JSONDecodeError as e:
-                logger.error(f"Invalid JSON in tags parameter: {str(e)}")
-                return Response(
-                    {"error": "Invalid JSON format in tags parameter."},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-        try:
-            with transaction.atomic():
-                # create post
-                data = {
-                    "caption": caption,
-                    "profile": current_profile.id,
-                    "contains_ai": contains_ai,
-                    "aspect_ratio": aspect_ratio,
-                }
-                serializer = self.serializer_class(data=data)
-                serializer.is_valid(raise_exception=True)
-                self.perform_create(serializer)
-
-                new_post = Post.objects.get(id=serializer.data["id"])
-
-                # Create PostImage objects with order and store them for tag creation
-                post_images = []
-                for idx, (image, order) in enumerate(zip(images, orders)):
-                    post_image = PostImage.objects.create(
-                        image=image,
-                        post=new_post,
-                        order=int(order)
-                    )
-                    post_images.append((idx, post_image))
-                
-                # Create PostImageTag objects if tags were provided
-                if tags_data:
-                    for img_idx, post_image in post_images:
-                        img_idx_str = str(img_idx)
-                        if img_idx_str in tags_data:
-                            image_tags = tags_data[img_idx_str]
-                            if not isinstance(image_tags, list):
-                                raise ValueError(f"Tags for image {img_idx} must be a list.")
-                            
-                            for tag_data in image_tags:
-                                # Validate tag data structure
-                                required_fields = ["taggedProfileId", "xPosition", "yPosition", "originalWidth", "originalHeight"]
-                                if not all(field in tag_data for field in required_fields):
-                                    raise ValueError(
-                                        f"Each tag must include: {', '.join(required_fields)}"
-                                    )
-                                
-                                # Validate profile exists
-                                try:
-                                    tagged_profile = ProfileModel.objects.get(id=tag_data["taggedProfileId"])
-                                except ProfileModel.DoesNotExist:
-                                    raise ValueError(
-                                        f"Profile {tag_data['taggedProfileId']} does not exist."
-                                    )
-                                
-                                # Adjust tag position to account for cropping
-                                original_width = tag_data["originalWidth"]
-                                original_height = tag_data["originalHeight"]
-                                x_position = tag_data["xPosition"]
-                                y_position = tag_data["yPosition"]
-                                
-                                adjusted_x, adjusted_y = adjust_tag_position_for_center_crop(
-                                    x_position,
-                                    y_position,
-                                    original_width,
-                                    original_height,
-                                    target_aspect_ratio=aspect_ratio
-                                )
-                                
-                                # Create the tag with adjusted positions
-                                PostImageTag.objects.create(
-                                    post_image=post_image,
-                                    tagged_profile=tagged_profile,
-                                    tagged_by_profile=current_profile,
-                                    x_position=adjusted_x,
-                                    y_position=adjusted_y
-                                )
-                                logger.info(
-                                    f"Created tag for profile {tagged_profile.id} "
-                                    f"in image {post_image.id} at original ({x_position}, {y_position}), "
-                                    f"adjusted to ({adjusted_x:.2f}, {adjusted_y:.2f}) for {original_width}x{original_height} crop"
-                                )
-                
-                # Queue combined embedding task once after all images are created
-                # Use countdown to give image embeddings time to be generated
-                transaction.on_commit(
-                    lambda: new_post.queue_combined_embedding_generation(countdown=10)
-                )
-                
-                new_post = Post.objects.prefetch_related(
-                    'images__tags__tagged_profile__image',
-                    'images__tags__tagged_profile__regularprofile',
-                    'images__tags__tagged_profile__businessprofile',
-                    'images__tags__tagged_by_profile__image',
-                    'images__tags__tagged_by_profile__regularprofile',
-                    'images__tags__tagged_by_profile__businessprofile',
-                    'profile__image',
-                    'profile__regularprofile',
-                    'profile__businessprofile',
-                    'reports',
-                ).get(id=serializer.data["id"])
-                serializer = PostDetailedSerializer(
-                    new_post, context={"request": request}
-                )
-                headers = self.get_success_headers(serializer.data)
-                return Response(
-                    serializer.data, status=status.HTTP_201_CREATED, headers=headers
-                )
-        except ValueError as e:
-            # Handle validation errors specifically
-            logger.error(f"Validation error creating post: {str(e)}")
-            return Response(
-                {"error": str(e)},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        except Exception as e:
-            # If an exception occurs, the transaction will be rolled back
-            # and the main object will be deleted.
-            logger.error(f"Error creating post: {str(e)}")
-            return Response(
-                {"message": "Error creating that post."},
-                status=status.HTTP_400_BAD_REQUEST,
             )
 
 

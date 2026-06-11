@@ -5,9 +5,6 @@ Test utilities for posts app.
 from django.urls import reverse
 
 
-CREATE_POST_URL = reverse("posts_app:create_post")
-
-
 def get_explore_posts_url():
     """
     Create and return a get explore posts url.
