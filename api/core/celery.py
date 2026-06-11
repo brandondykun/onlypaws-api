@@ -55,6 +55,8 @@ app.conf.task_routes = {
     "apps.recommendations_app.tasks.refresh_heavily_reported_profiles_task": {"queue": "recommendations"},
     # Retention task goes to maintenance queue
     "apps.interactions_app.tasks.cleanup_old_post_interactions_task": {"queue": "maintenance"},
+    # Blurhash backfill safety net goes to maintenance queue
+    "apps.posts_app.tasks.backfill_missing_blurhashes_task": {"queue": "maintenance"},
 }
 
 # Configure worker settings for different task types
@@ -167,6 +169,11 @@ app.conf.task_annotations = {
         "rate_limit": "1/h",
         "time_limit": 1800,  # 30 min hard ceiling; chunked deletes shouldn't approach this
         "soft_time_limit": 1500,
+    },
+    "apps.posts_app.tasks.backfill_missing_blurhashes_task": {
+        "rate_limit": "10/h",  # comfortably above the every-10-min cadence
+        "time_limit": 600,  # 10 min ceiling; each post is a storage download + encode
+        "soft_time_limit": 540,
     },
 }
 

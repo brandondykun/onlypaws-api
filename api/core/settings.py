@@ -360,6 +360,11 @@ CELERY_BEAT_SCHEDULE = {
         "args": (30,),  # Retention window in days; bump to 60 here when ready.
         "options": {"expires": 3600},
     },
+    "backfill-missing-blurhashes": {
+        "task": "apps.posts_app.tasks.backfill_missing_blurhashes_task",
+        "schedule": crontab(minute="*/10"),  # Every 10 minutes
+        "options": {"expires": 540},  # Skip if not picked up before the next run
+    },
 }
 
 # Django Channels configuration

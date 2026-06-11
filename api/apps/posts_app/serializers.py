@@ -126,7 +126,8 @@ class PostImageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PostImage
-        fields = ["id", "public_id", "post", "image", "order", "tags", "scaled_images"]
+        fields = ["id", "public_id", "post", "image", "order", "blurhash", "tags", "scaled_images"]
+        read_only_fields = ["blurhash"]
 
     def get_public_id(self, obj):
         return str(obj.public_id) if obj.public_id else None

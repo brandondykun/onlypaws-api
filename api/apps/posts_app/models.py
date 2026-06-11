@@ -57,7 +57,6 @@ class Post(models.Model):
         default=Status.READY,  # Backwards compatible with existing posts
         help_text="Post lifecycle status"
     )
-
     # Combined embedding fields for multimodal similarity search
     combined_embedding = VectorField(
         dimensions=512,
@@ -221,6 +220,12 @@ class PostImage(models.Model):
     post = models.ForeignKey("posts_app.Post", on_delete=models.CASCADE, related_name="images")
     image = models.ImageField(upload_to=post_image_path, blank=True, null=True)
     order = models.IntegerField(default=0, help_text="Display order of the image in the post")
+    blurhash = models.CharField(
+        max_length=128,
+        blank=True,
+        default="",
+        help_text="BlurHash placeholder generated from this image",
+    )
     processing_status = models.CharField(
         max_length=20,
         choices=ProcessingStatus.choices,

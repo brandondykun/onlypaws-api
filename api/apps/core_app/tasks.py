@@ -437,6 +437,7 @@ def process_post_images_task(self, post_id: int):
     from PIL import ImageOps
     
     from apps.posts_app.models import Post, PostImage, PostImageScaled
+    from apps.core_app.image_placeholders import generate_blurhash_from_image
     from apps.core_app.storage_utils import download_file, delete_file
     from .services import get_embedding_service
     
@@ -484,7 +485,7 @@ def process_post_images_task(self, post_id: int):
         
         processed_count = 0
         failed_count = 0
-        
+
         for post_image in post_images:
             try:
                 # Update status to PROCESSING
@@ -546,6 +547,18 @@ def process_post_images_task(self, post_id: int):
                 small_buffer = BytesIO()
                 small_image.save(small_buffer, "webp", optimize=True, quality=70)
                 small_buffer.seek(0)
+
+                # Generate the blurhash for this image from the in-memory SMALL
+                # variant (already cropped to the post's aspect ratio), so there's
+                # no extra download. Leave it as "" on failure; the backfill task
+                # and management command will retry later.
+                try:
+                    post_image.blurhash = generate_blurhash_from_image(small_image)
+                except Exception as e:
+                    logger.warning(
+                        f"Failed to generate blurhash for PostImage {post_image.id} "
+                        f"on Post {post_id}: {str(e)}"
+                    )
                 
                 # All variants processed successfully, now save them
                 
@@ -591,7 +604,7 @@ def process_post_images_task(self, post_id: int):
                 
                 # Update PostImage status and save
                 post_image.processing_status = PostImage.ProcessingStatus.READY
-                post_image.save(update_fields=["image", "processing_status"])
+                post_image.save(update_fields=["image", "blurhash", "processing_status"])
                 
                 # All 3 variants created successfully, now safe to delete original
                 if delete_file(post_image.original_key):
